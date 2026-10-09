@@ -527,6 +527,29 @@
   .txn-cat{font-size:0.74rem; padding:2px 8px; border-radius:999px; background:var(--surface-2); color:var(--text);}
   .txn-cat.none{background:rgba(196,56,42,0.12); color:var(--coral);}
   .txn-pick{grid-column:1 / -1; display:flex; gap:8px; flex-wrap:wrap; padding-top:6px;}
+
+  /* ---------- Money v2 ---------- */
+  .mo-card{background:var(--surface); border-radius:20px; padding:18px 18px 16px; margin:4px 0 6px;}
+  .mo-top{display:flex; justify-content:space-between; align-items:baseline; gap:10px;}
+  .mo-label{font-size:0.9rem; color:var(--text-faint);}
+  .mo-big{font-family:var(--display); font-size:2.3rem; font-weight:700; letter-spacing:-0.03em; line-height:1.1; margin-top:4px;}
+  .mo-big.neg{color:var(--coral);}
+  .mo-sub{font-size:0.88rem; color:var(--text-faint); margin-top:2px;}
+  .mo-bar{height:8px; border-radius:4px; background:var(--surface-2); overflow:hidden; margin-top:14px;}
+  .mo-bar > div{height:100%; border-radius:4px; background:var(--accent); transition:width 0.4s;}
+  .mo-bar > div.over{background:var(--coral);}
+  .mo-pace{font-size:0.82rem; color:var(--text-faint); margin-top:8px;}
+  .bill-pill{font-size:0.74rem; font-weight:600; padding:3px 9px; border-radius:999px; white-space:nowrap;}
+  .bill-pill.paid{background:var(--accent-soft); color:var(--accent-text);}
+  .bill-pill.due{background:var(--surface-2); color:var(--text);}
+  .bill-pill.overdue{background:rgba(196,56,42,0.12); color:var(--coral);}
+  .bill-pill.untracked{background:transparent; color:var(--text-faint); border:1px dashed var(--border);}
+  .bill-amt{font-variant-numeric:tabular-nums; font-size:0.95rem; min-width:4.5rem; text-align:right;}
+  .bill-edit{display:flex; gap:8px; padding:0 18px 12px; flex-wrap:wrap; align-items:center;}
+  .bill-edit input{flex:1; min-width:150px; background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:8px 10px; color:var(--text); font:inherit;}
+  .bill-edit .hint{width:100%; font-size:0.78rem; color:var(--text-faint);}
+  .rule-toggle{display:flex; align-items:center; gap:8px; width:100%; font-size:0.85rem; color:var(--text-muted); padding:4px 0 2px;}
+  .rule-toggle input{width:18px; height:18px; accent-color:var(--accent);}
 </style>
 </head>
 <body>
@@ -600,10 +623,13 @@
 
     <div class="tab-panel" id="panelAccounts">
       <div id="accountsErrorBanner"></div>
+      <div id="moneyOverview"></div>
       <div id="netWorthReadout"></div>
       <div class="health-section-label">Bank connections</div>
       <div id="bankCard" class="budget-cat" style="padding:0;"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
       <div id="creditSummary"></div>
+      <div class="health-section-label">Bills this month</div>
+      <div id="billsCard" class="budget-cat" style="padding:0;"><div class="bank-row"><div class="bank-name"><div class="s">Loading…</div></div></div></div>
       <div class="health-section-label">Accounts</div>
       <div id="accountsList"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
@@ -612,7 +638,7 @@
       <div id="budgetErrorBanner"></div>
       <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
         <button class="refresh-btn" id="addTxnBtn" type="button">+ Log transaction</button>
-        <button class="refresh-btn" id="dupWeekBtn" type="button">Duplicate last week →</button>
+        <button class="refresh-btn" id="dupWeekBtn" type="button" hidden>Duplicate last week →</button>
       </div>
       <span class="save-status" id="dupWeekStatus"></span>
       <form id="txnForm" class="txn-form" style="display:none;">
@@ -697,7 +723,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-09.07';
+const APP_BUILD = '2026-10-09.08';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1990,6 +2016,7 @@ function renderHomeKpis(){
 
   el.innerHTML = netWorthHtml + remainingHtml + billHtml + overdueHtml + paycheckHtml + workoutHtml;
   renderBriefing();
+  renderMoneyOverview();
 }
 
 function renderOverdueBadge(todos){
@@ -2445,6 +2472,131 @@ setTimeout(()=>{
   checkForUpdate();
 }, 900);
 
+
+// ================= MONEY v2: overview, bills, rules, OAuth return =================
+let billStatus = [], billEditId = null, alwaysRule = false;
+
+function renderMoneyOverview(){
+  const el = document.getElementById('moneyOverview'); if(!el) return;
+  const s = lastBudgetData && lastBudgetData.summary;
+  if(!s){ el.innerHTML = ''; return; }
+  const planned = Number(s.planned_cents)||0, spent = Number(s.spent_cents)||0;
+  const savingsRow = (lastBudgetData.categories||[]).find(c=>c.category_type==='savings');
+  const savePlanned = savingsRow ? Number(savingsRow.planned_cents)||0 : 0;
+  const spendPlanned = planned - savePlanned, left = spendPlanned - spent;
+  const pct = spendPlanned > 0 ? Math.min(100, Math.round(100 * spent / spendPlanned)) : 0;
+  const end = new Date(s.week_end + 'T12:00:00'), today = new Date(); today.setHours(12,0,0,0);
+  const daysLeft = Math.max(0, Math.round((end - today) / 86400000) + 1);
+  const start = new Date(s.week_start + 'T12:00:00');
+  const elapsed = Math.min(7, Math.max(1, Math.round((today - start) / 86400000) + 1));
+  const expected = Math.round(spendPlanned * elapsed / 7);
+  const pace = spent === 0 ? 'Nothing spent yet this week.' :
+    spent > expected ? `${money(spent - expected)} ahead of pace for day ${elapsed} of 7.` : `${money(expected - spent)} under pace for day ${elapsed} of 7.`;
+  el.innerHTML = `<div class="mo-card">
+    <div class="mo-top"><span class="mo-label">Left to spend this week</span><span class="mo-label">${daysLeft} day${daysLeft===1?'':'s'} left</span></div>
+    <div class="mo-big ${left<0?'neg':''}">${money(left)}</div>
+    <div class="mo-sub">${money(spent)} spent of ${money(spendPlanned)}${savePlanned ? `, plus ${money(savePlanned)} to savings` : ''}</div>
+    <div class="mo-bar" aria-hidden="true"><div class="${left<0?'over':''}" style="width:${pct}%"></div></div>
+    <div class="mo-pace">${pace}</div>
+  </div>`;
+}
+
+async function fetchBills(){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/v_bill_status?select=*&order=due_this_month.asc.nullslast,name.asc`, { headers: authHeaders() });
+  if(!r.ok) throw new Error(`Supabase returned ${r.status}`);
+  billStatus = await r.json();
+}
+function renderBills(){
+  const el = document.getElementById('billsCard'); if(!el) return;
+  if(!billStatus.length){ el.innerHTML = '<div class="bank-row"><div class="bank-name"><div class="s">No bills set up.</div></div></div>'; return; }
+  const pill = b => {
+    if(b.status === 'paid') return `<span class="bill-pill paid">Paid ${shortDate(b.paid_on)}</span>`;
+    if(b.status === 'overdue') return `<span class="bill-pill overdue">Not seen yet</span>`;
+    if(b.status === 'due') return `<span class="bill-pill due">Due ${shortDate(b.due_this_month)}</span>`;
+    if(b.status === 'watching') return `<span class="bill-pill due">Watching</span>`;
+    return `<span class="bill-pill untracked">Set up</span>`;
+  };
+  el.innerHTML = billStatus.map(b=>`
+    <div class="bank-row" data-bill="${b.id}" style="cursor:pointer">
+      <div class="bank-name"><div class="t">${esc(b.name)}</div><div class="s">${b.autopay ? 'Autopay' : 'Manual'}${b.due_day ? `, day ${b.due_day}` : ''}</div></div>
+      <span class="bill-amt">${b.amount_cents ? money(b.amount_cents) : '<span style="color:var(--coral)">$?</span>'}</span>
+      ${pill(b)}
+    </div>
+    ${billEditId === b.id ? `<div class="bill-edit">
+      <input id="billMatch" type="text" placeholder="e.g. planet fitness" value="${esc(b.match_text || '')}" aria-label="Text on the bank transaction">
+      <input id="billAmt" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Amount" value="${b.amount_cents ? (b.amount_cents/100).toFixed(2) : ''}" aria-label="Bill amount" style="max-width:7rem; flex:0 1 7rem;">
+      <button class="save-btn" type="button" data-savebill="${b.id}">Save</button>
+      <span class="hint">Type a word that appears on this bill's bank charge. When a charge matching it shows up, Otto marks the bill paid.</span>
+    </div>` : ''}`).join('');
+}
+async function refreshBills(){ try{ await fetchBills(); renderBills(); } catch(err){ /* bills are optional; leave last render */ } }
+
+document.getElementById('billsCard').addEventListener('click', async e=>{
+  const save = e.target.closest('[data-savebill]');
+  if(save){
+    const id = Number(save.dataset.savebill);
+    const match = document.getElementById('billMatch').value.trim().toLowerCase();
+    const amtRaw = document.getElementById('billAmt').value.trim();
+    const body = { match_text: match || null };
+    if(amtRaw !== ''){ const c = Math.round(parseFloat(amtRaw) * 100); if(isFinite(c) && c >= 0) body.amount_cents = c; }
+    save.disabled = true;
+    try{ await patchRow('recurring_bills', id, body); billEditId = null; await refreshBills(); await refreshBudget(); hapticPulse(); }
+    catch(err){ save.disabled = false; document.getElementById('accountsErrorBanner').innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
+    return;
+  }
+  if(e.target.closest('.bill-edit')) return;
+  const row = e.target.closest('[data-bill]');
+  if(row){ const id = Number(row.dataset.bill); billEditId = billEditId === id ? null : id; renderBills(); }
+});
+
+// "Always categorize this merchant" rule
+async function saveRule(t, body){
+  const match = (t.merchant || t.description || '').trim().toLowerCase();
+  if(!match) return 0;
+  await ensureValidSession();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/category_rules?on_conflict=match_text`, {
+    method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'resolution=merge-duplicates,return=representation' }),
+    body: JSON.stringify({ match_text: match, category_id: body.category_id, exclude_from_budget: body.exclude_from_budget, created_from_transaction_id: t.id })
+  });
+  if(!r.ok) throw new Error(`Couldn't save rule (${r.status})`);
+  const [rule] = await r.json();
+  const a = await fetch(`${SUPABASE_URL}/rest/v1/rpc/apply_category_rule`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify({ rule_id: rule.id }) });
+  if(!a.ok) throw new Error(`Rule saved, but applying it failed (${a.status})`);
+  return a.json();
+}
+
+// OAuth return: banks like Discover send you back to Otto with ?oauth_state_id=...
+const PLAID_PENDING_KEY = 'otto_plaid_pending_v1';
+function rememberPlaidLink(token, itemId){ try{ localStorage.setItem(PLAID_PENDING_KEY, JSON.stringify({ token, itemId, at: Date.now() })); } catch(e){} }
+async function resumePlaidOAuth(){
+  if(!/[?&]oauth_state_id=/.test(location.search)) return;
+  let pending = null; try{ pending = JSON.parse(localStorage.getItem(PLAID_PENDING_KEY) || 'null'); } catch(e){}
+  const returnedUrl = location.href;
+  history.replaceState(null, '', location.pathname);
+  if(typeof Plaid === 'undefined'){ showNotice("Plaid didn't load. Check your connection, then tap Connect a bank again."); return; }
+  if(!pending || Date.now() - pending.at > 30 * 60 * 1000){ showNotice("Bank sign-in expired. Tap Connect a bank again."); return; }
+  openSheet('money');
+  const status = document.getElementById('bankStatus');
+  const handler = Plaid.create({
+    token: pending.token, receivedRedirectUri: returnedUrl,
+    onSuccess: (pt, meta)=> finishPlaidLink(pt, meta, pending.itemId),
+    onExit: (err)=>{ if(status){ status.textContent = err ? (err.display_message || err.error_message || 'Plaid closed') : ''; status.className = err ? 'save-status err' : 'save-status'; } }
+  });
+  handler.open();
+}
+async function finishPlaidLink(public_token, meta, itemId){
+  const status = document.getElementById('bankStatus');
+  if(status){ status.textContent = 'Connecting…'; status.className = 'save-status'; }
+  try{
+    const r = itemId ? await callFn('plaid-sync', {}) : await callFn('plaid-exchange', { public_token, institution_id: meta.institution && meta.institution.institution_id, institution_name: meta.institution && meta.institution.name });
+    try{ localStorage.removeItem(PLAID_PENDING_KEY); } catch(e){}
+    const msg = itemId ? 'Reconnected' : `Connected. ${r.sync ? r.sync.added + ' transactions pulled in.' : ''}`;
+    if(status){ status.textContent = msg; status.className = 'save-status ok'; }
+    showNotice(msg); hapticPulse();
+    await refreshAccounts(); await refreshBudget(); await refreshBank(); await refreshBills();
+  } catch(err){ if(status){ status.textContent = err.message; status.className = 'save-status err'; } else showNotice(err.message); }
+}
+
 // ================= BANK SYNC (Plaid) =================
 async function callFn(name, body){
   await ensureValidSession();
@@ -2488,7 +2640,7 @@ function renderTxns(){
         <div class="txn-name">${esc(t.merchant || t.description || '')}</div>
         <div class="txn-amt ${inflow?'in':''}">${inflow ? '+' : ''}${money(t.amount_cents)}</div>
         <div class="txn-meta"><span>${shortDate(t.transaction_date)}${t.pending ? ', pending' : ''}</span><span>${esc(t.account ? t.account.name.replace(/\s*\(.*\)$/,'') : '')}</span><span class="txn-cat ${label?'':'none'}">${esc(label || 'Needs category')}</span></div>
-        ${open ? `<div class="txn-pick">${cats.filter(c=>c.category_type!=='income' || inflow).map(c=>`<button class="chip ${c.id===t.category_id?'active':''}" type="button" data-setcat="${c.id}">${esc(c.name)}</button>`).join('')}<button class="chip ${t.exclude_from_budget?'active':''}" type="button" data-setcat="transfer">Transfer (not spending)</button></div>` : ''}
+        ${open ? `<div class="txn-pick">${(t.merchant || t.description) ? `<label class="rule-toggle"><input type="checkbox" id="alwaysRule" ${alwaysRule?'checked':''}> Always for “${esc(t.merchant || t.description)}”</label>` : ''}${cats.filter(c=>c.category_type!=='income' || inflow).map(c=>`<button class="chip ${c.id===t.category_id?'active':''}" type="button" data-setcat="${c.id}">${esc(c.name)}</button>`).join('')}<button class="chip ${t.exclude_from_budget?'active':''}" type="button" data-setcat="transfer">Transfer (not spending)</button></div>` : ''}
       </div>`;
     }).join('');
 }
@@ -2501,16 +2653,10 @@ async function connectBank(itemId){
   try{
     if(typeof Plaid === 'undefined') throw new Error("Plaid didn't load. Check your connection and try again.");
     const { link_token } = await callFn('plaid-link-token', itemId ? { item_id: itemId } : {});
+    rememberPlaidLink(link_token, itemId);
     const handler = Plaid.create({
       token: link_token,
-      onSuccess: async (public_token, meta)=>{
-        status.textContent = 'Connecting…';
-        try{
-          const r = itemId ? await callFn('plaid-sync', {}) : await callFn('plaid-exchange', { public_token, institution_id: meta.institution && meta.institution.institution_id, institution_name: meta.institution && meta.institution.name });
-          status.textContent = itemId ? 'Reconnected' : `Connected. ${r.sync ? r.sync.added + ' transactions pulled in.' : ''}`; status.className = 'save-status ok'; hapticPulse();
-          await refreshAccounts(); await refreshBudget(); await refreshBank();
-        } catch(err){ status.textContent = err.message; status.className = 'save-status err'; }
-      },
+      onSuccess: (public_token, meta)=> finishPlaidLink(public_token, meta, itemId),
       onExit: (err)=>{ status.textContent = err ? (err.display_message || err.error_message || 'Plaid closed') : ''; status.className = err ? 'save-status err' : 'save-status'; }
     });
     status.textContent = ''; handler.open();
@@ -2523,7 +2669,7 @@ async function syncNow(){
     const r = await callFn('plaid-sync', {});
     const added = (r.results||[]).reduce((a,x)=>a+(x.added||0),0), bad = (r.results||[]).filter(x=>!x.ok);
     status.textContent = bad.length ? bad[0].error : `${added} new transaction${added===1?'':'s'}`; status.className = bad.length ? 'save-status err' : 'save-status ok';
-    await refreshAccounts(); await refreshBudget(); await refreshBank();
+    await refreshAccounts(); await refreshBudget(); await refreshBank(); await refreshBills();
   } catch(err){ status.textContent = err.message; status.className = 'save-status err'; btn.disabled = false; }
 }
 document.getElementById('bankCard').addEventListener('click', e=>{
@@ -2538,13 +2684,21 @@ document.getElementById('txnList').addEventListener('click', async e=>{
     const row = e.target.closest('[data-txn]'), id = Number(row.dataset.txn), t = allTxns.find(x=>x.id===id);
     const body = pick.dataset.setcat === 'transfer' ? { category_id: null, exclude_from_budget: true } : { category_id: Number(pick.dataset.setcat), exclude_from_budget: false };
     const prev = { category_id: t.category_id, exclude_from_budget: t.exclude_from_budget };
+    const makeRule = alwaysRule; alwaysRule = false;
     Object.assign(t, body); expandedTxnId = null; renderTxns(); hapticPulse();
-    try{ await patchRow('transactions', id, body); await refreshBudget(); }
+    try{
+      await patchRow('transactions', id, body);
+      if(makeRule){ const n = await saveRule(t, body); showNotice(`Rule saved. ${n} transaction${n===1?'':'s'} updated.`); await fetchBank(); renderTxns(); }
+      await refreshBudget();
+    }
     catch(err){ Object.assign(t, prev); renderTxns(); document.getElementById('accountsErrorBanner').innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
     return;
   }
+  const tog = e.target.closest('#alwaysRule');
+  if(tog){ e.stopPropagation(); alwaysRule = tog.checked; return; }
+  if(e.target.closest('.rule-toggle')) return;
   const row = e.target.closest('[data-txn]');
-  if(row){ const id = Number(row.dataset.txn); expandedTxnId = expandedTxnId === id ? null : id; renderTxns(); }
+  if(row){ const id = Number(row.dataset.txn); alwaysRule = false; expandedTxnId = expandedTxnId === id ? null : id; renderTxns(); }
 });
 
 async function bootApp(){
@@ -2563,6 +2717,8 @@ async function bootApp(){
   await refreshHealth();
   await refreshFood();
   await refreshBank();
+  await refreshBills();
+  resumePlaidOAuth();
 }
 
 function showApp(){
@@ -2610,6 +2766,7 @@ async function refreshEverything(){
   await refreshHealth();
   await refreshFood();
   await refreshBank();
+  await refreshBills();
 }
 
 (function setupPullToRefresh(){
