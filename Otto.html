@@ -550,6 +550,42 @@
   .bill-edit .hint{width:100%; font-size:0.78rem; color:var(--text-faint);}
   .rule-toggle{display:flex; align-items:center; gap:8px; width:100%; font-size:0.85rem; color:var(--text-muted); padding:4px 0 2px;}
   .rule-toggle input{width:18px; height:18px; accent-color:var(--accent);}
+
+  /* ---------- Build .09: polish ---------- */
+  .day-label{display:flex; justify-content:space-between; align-items:baseline; margin:1.3rem 6px 0.5rem; font-size:0.82rem; color:var(--text-faint);}
+  .day-label .today{color:var(--accent-text); font-weight:600;}
+  .meal-row{align-items:flex-start; padding:11px 18px; border-bottom:none; border-top:1px solid var(--border);}
+  .meal-row:first-child{border-top:none;}
+  .meal-type{font-family:var(--sans); font-size:0.78rem; font-weight:600; min-width:4.6rem; padding-top:2px; text-transform:capitalize;}
+  .meal-name{font-size:0.95rem;}
+  .meal-row.leftover .meal-name, .meal-row.out .meal-name{color:var(--text-muted);}
+  .meal-note{font-family:var(--sans); font-size:0.8rem; margin-top:2px;}
+  .budget-cat.day-card{padding:0;}
+  .grocery-section{padding:0 0 0 16px;}
+  .grocery-row{padding:11px 16px 11px 0; border-bottom:none; border-top:1px solid var(--border); grid-template-columns:auto minmax(0,1fr) auto;}
+  .grocery-row:first-child{border-top:none;}
+  .grocery-box{width:22px; height:22px; border-radius:11px;}
+  .grocery-meta{font-size:0.8rem; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .grocery-for{font-size:0.78rem; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .grocery-price{font-family:var(--sans);}
+  .grocery-row.have{opacity:0.6;}
+  .grocery-row.have .grocery-box{border-style:dashed;}
+  .grocery-edit{padding:4px 0 2px 34px; flex-wrap:wrap;}
+  .grocery-edit input{font-family:var(--sans); border-radius:10px;}
+  .link-btn{border:none; background:none; color:var(--accent-text); font:inherit; font-size:0.88rem; font-weight:600; padding:6px 2px; cursor:pointer;}
+  .todo-card{grid-template-columns:auto 1fr; padding:14px 16px;}
+  .todo-code{display:none;}
+  .tag{font-family:var(--sans); font-size:0.74rem; border:none; border-radius:999px; padding:2px 8px; text-transform:capitalize;}
+  .tag.priority-high, .tag.overdue{background:rgba(196,56,42,0.12); color:var(--coral);}
+  .tag.priority-medium{background:var(--accent-soft); color:var(--accent-text);}
+  .todo-meta{font-family:var(--sans);}
+  .project-group-title{color:var(--text); font-family:var(--display);}
+  .project-group-meta{text-transform:none; letter-spacing:0; font-family:var(--sans); font-size:0.78rem;}
+  .project-group-header{border-bottom:none; margin:1.3rem 6px 0.5rem;}
+  .workout-type{text-transform:capitalize;}
+  .workout-date, .stale-note, .sync-note, .empty{font-family:var(--sans);}
+  .workout-card, .stale-note{border-radius:var(--radius); border-color:transparent;}
+  .steps-chart text{font-family:var(--sans);}
 </style>
 </head>
 <body>
@@ -723,7 +759,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-09.08';
+const APP_BUILD = '2026-10-09.09';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1132,7 +1168,7 @@ function renderBudget(data){
   const el = document.getElementById('budgetContent');
   if(!data.summary){ el.innerHTML = '<div class="empty">No budget period set up yet.</div>'; return; }
   const s = data.summary;
-  let html = `<div class="budget-period">${s.week_start} – ${s.week_end} · ${s.status}</div>
+  let html = `<div class="budget-period" style="padding:0 6px">Week of ${dateRange(s.week_start, s.week_end)}</div>
     <div class="readouts">
       <div class="readout"><div class="label">Income</div><div class="value">${formatCents(s.expected_income_cents)}</div></div>
       <div class="readout"><div class="label">Planned</div><div class="value">${formatCents(s.planned_cents)}</div></div>
@@ -1653,8 +1689,8 @@ function buildStepsChart(daily){
     const y = h - barH - 14;
     return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" rx="1"></rect>`;
   }).join('');
-  const firstLabel = chronological[0].activity_date;
-  const lastLabel = chronological[chronological.length-1].activity_date;
+  const firstLabel = shortDate(chronological[0].activity_date);
+  const lastLabel = shortDate(chronological[chronological.length-1].activity_date);
   return `<svg class="steps-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
     ${bars}
     <text x="0" y="${h-2}">${firstLabel}</text>
@@ -1675,7 +1711,7 @@ function renderHealth(data){
 
   let html = '';
   if(mostRecent){
-    html += `<div class="stale-note">Last recorded activity: ${mostRecent} — this reflects your last Apple Health import, not a live feed.</div>`;
+    html += `<div class="stale-note">Last activity recorded ${shortDate(mostRecent)}. This shows your last Apple Health import, not a live feed.</div>`;
   }
   html += `<div class="health-stats">
     <div class="health-stat"><div class="label">Avg steps/day</div><div class="value">${avgSteps.toLocaleString()}</div></div>
@@ -1691,7 +1727,7 @@ function renderHealth(data){
   } else {
     html += workouts.map((w,i)=>{
       const isExpanded = expandedWorkoutIndex === i;
-      const dateStr = new Date(w.start_time).toLocaleDateString();
+      const dateStr = new Date(w.start_time).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
       const minutes = Math.round((parseFloat(w.duration_seconds)||0)/60);
       let detail = '';
       if(isExpanded){
@@ -1705,7 +1741,7 @@ function renderHealth(data){
       return `<div class="workout-card ${isExpanded?'expanded':''}" data-idx="${i}">
         <div class="workout-top">
           <span class="workout-type">${(w.activity_type||'').replace(/_/g,' ')}</span>
-          <span class="workout-date">${dateStr} · ${minutes} min</span>
+          <span class="workout-date">${dateStr}, ${minutes} min</span>
         </div>
         ${detail}
       </div>`;
@@ -1803,8 +1839,8 @@ function todoCardHtml(t, isExpanded, today){
   const isOverdue = t.status==='open' && t.due_date && t.due_date < today;
   const parts = [];
   if(t.priority) parts.push(`<span class="tag priority-${t.priority}">${t.priority}</span>`);
-  if(t.project && t.project.title) parts.push(`<span class="tag">${t.project.title}</span>`);
-  if(t.due_date) parts.push(`<span class="tag${isOverdue ? ' overdue' : ''}">${isOverdue ? 'overdue · ' : 'due '}${t.due_date}</span>`);
+  if(t.project && t.project.title) parts.push(`<span class="tag">${esc(t.project.title)}</span>`);
+  if(t.due_date) parts.push(`<span class="tag${isOverdue ? ' overdue' : ''}">${isOverdue ? 'Overdue, ' : 'Due '}${shortDate(t.due_date)}</span>`);
   if(t.domain_tag) parts.push(`<span class="tag">${t.domain_tag}</span>`);
 
   let detailHtml = '';
@@ -1812,13 +1848,14 @@ function todoCardHtml(t, isExpanded, today){
     const rows2 = [];
     rows2.push(`<div class="detail-row"><span class="detail-label">Status</span><span class="detail-value">${t.status}</span></div>`);
     if(t.priority) rows2.push(`<div class="detail-row"><span class="detail-label">Priority</span><span class="detail-value">${t.priority}</span></div>`);
-    if(t.due_date) rows2.push(`<div class="detail-row"><span class="detail-label">Due date</span><span class="detail-value">${t.due_date}</span></div>`);
+    if(t.due_date) rows2.push(`<div class="detail-row"><span class="detail-label">Due date</span><span class="detail-value">${dayLong(t.due_date)}</span></div>`);
+    rows2.push(`<div class="detail-row"><span class="detail-label">Code</span><span class="detail-value">${esc(t.code)}</span></div>`);
     if(t.domain_tag) rows2.push(`<div class="detail-row"><span class="detail-label">Domain</span><span class="detail-value">${t.domain_tag}</span></div>`);
     if(t.project && t.project.title) rows2.push(`<div class="detail-row"><span class="detail-label">Project</span><span class="detail-value">${t.project.title}${t.project.code ? ' ('+t.project.code+')' : ''}</span></div>`);
     if(t.asset && t.asset.item) rows2.push(`<div class="detail-row"><span class="detail-label">Asset</span><span class="detail-value">${t.asset.item}${t.asset.code ? ' ('+t.asset.code+')' : ''}</span></div>`);
     if(t.created_at) rows2.push(`<div class="detail-row"><span class="detail-label">Created</span><span class="detail-value">${new Date(t.created_at).toLocaleString()}</span></div>`);
     if(t.completed_at) rows2.push(`<div class="detail-row"><span class="detail-label">Completed</span><span class="detail-value">${new Date(t.completed_at).toLocaleString()}</span></div>`);
-    rows2.push(`<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value notes-block">${t.notes ? t.notes : 'No notes.'}</span></div>`);
+    rows2.push(`<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value notes-block">${t.notes ? esc(t.notes) : 'No notes.'}</span></div>`);
     detailHtml = `<div class="todo-detail">${rows2.join('')}</div>`;
   }
 
@@ -1829,7 +1866,7 @@ function todoCardHtml(t, isExpanded, today){
   return `<div class="todo-card ${t.status==='done'?'done':''} ${isExpanded ? 'expanded' : ''}" data-code="${t.code}">
     ${dotHtml}
     <div class="todo-main">
-      <div class="title">${t.title}</div>
+      <div class="title">${esc(t.title)}</div>
       <div class="todo-meta">${parts.join('')}</div>
       ${detailHtml}
     </div>
@@ -1847,10 +1884,10 @@ function buildTodoListHtml(rows, expandedCodeForThisList){
     if(key !== '__none__'){
       const proj = groupRows[0].project;
       const metaParts = [proj.status];
-      if(proj.target_date) metaParts.push('target ' + proj.target_date);
+      if(proj.target_date) metaParts.push('target ' + shortDate(proj.target_date));
       headerHtml = `<div class="project-group-header">
-        <span class="project-group-title">${proj.title}</span>
-        <span class="project-group-meta">${metaParts.join(' · ')}</span>
+        <span class="project-group-title">${esc(proj.title)}</span>
+        <span class="project-group-meta">${esc(metaParts.join(', '))}</span>
       </div>`;
     }
     return headerHtml + groupRows.map(t=>todoCardHtml(t, expandedCodeForThisList===t.code, today)).join('');
@@ -2115,7 +2152,12 @@ async function fetchFood(){
   const recSel = encodeURIComponent('*,recipe_ingredients(quantity,unit,prep_note,is_optional,food:food_items(name))');
   const recRes = await fetch(`${SUPABASE_URL}/rest/v1/recipes?select=${recSel}&status=neq.retired&order=rating.desc.nullslast,name.asc`, { headers: authHeaders() });
   if(!recRes.ok) throw new Error(`Supabase returned ${recRes.status}`);
-  return { plan: plans[0] || null, recipes: await recRes.json() };
+  const plan = plans[0] || null;
+  if(plan){
+    const vRes = await fetch(`${SUPABASE_URL}/rest/v1/v_grocery_list?select=id,for_recipes&meal_plan_id=eq.${plan.id}`, { headers: authHeaders() });
+    if(vRes.ok){ const byId = {}; (await vRes.json()).forEach(v=>byId[v.id]=v.for_recipes); (plan.grocery_list_items||[]).forEach(i=>{ i.for_recipes = byId[i.id] || null; }); }
+  }
+  return { plan, recipes: await recRes.json() };
 }
 
 async function patchRow(table, id, body){
@@ -2132,60 +2174,90 @@ function starsHtml(r){
   return h + `</span>`;
 }
 
-function renderFoodList(plan){
-  const items = (plan.grocery_list_items || []).slice();
-  const est = items.reduce((a,i)=>a+(i.est_price_cents||0),0);
-  const act = items.reduce((a,i)=>a+(i.actual_price_cents||0),0);
-  const anyActual = items.some(i=>i.actual_price_cents != null);
-  const done = items.filter(i=>i.checked).length;
+function groceryTotals(plan){
+  const items = plan.grocery_list_items || [];
+  const buy = items.filter(i=>!i.on_hand);
+  const projected = buy.reduce((a,i)=>a+(i.actual_price_cents != null ? i.actual_price_cents : (i.est_price_cents||0)),0);
+  const paid = buy.reduce((a,i)=>a+(i.actual_price_cents||0),0);
   const budget = plan.budget_cents || 0;
-  const projected = items.reduce((a,i)=>a+(i.actual_price_cents != null ? i.actual_price_cents : (i.est_price_cents||0)),0);
-  let html = `<div class="budget-period">Week of ${esc(plan.week_start)} · ${esc(plan.status)} · ${done}/${items.length} in cart</div>
-    <div class="readouts">
-      <div class="readout"><div class="label">Budget</div><div class="value">${formatCents(budget)}</div></div>
-      <div class="readout"><div class="label">Estimated</div><div class="value">${formatCents(est)}</div></div>
-      <div class="readout accent"><div class="label">Actual</div><div class="value">${anyActual ? formatCents(act) : '—'}</div></div>
-      <div class="readout ${budget - projected < 0 ? 'warn' : ''}"><div class="label">Projected left</div><div class="value">${formatCents(budget - projected)}</div></div>
-    </div>`;
+  return { items, buy, have: items.filter(i=>i.on_hand), projected, paid, anyPaid: buy.some(i=>i.actual_price_cents != null), budget, left: budget - projected, inCart: buy.filter(i=>i.checked).length };
+}
+
+function groceryRowHtml(i){
+  const name = i.food ? i.food.name : i.label;
+  const unit = i.food ? i.food.purchase_unit : '';
+  const open = expandedGroceryId === i.id;
+  const buyLine = `${fmtQty(i.purchase_qty)} × ${esc(unit)}${i.needed && i.needed !== `${fmtQty(i.purchase_qty)} ${unit}` ? `, need ${esc(i.needed)}` : ''}`;
+  const forLine = i.on_hand ? 'Already at home' : (i.for_recipes ? `For ${esc(i.for_recipes)}` : (i.food && i.food.is_pantry_staple ? 'Pantry staple' : ''));
+  const price = i.on_hand ? '' : (i.actual_price_cents != null
+    ? `<div class="act">${money(i.actual_price_cents)}</div>${i.est_price_cents != null ? `<div class="est">est ${money(i.est_price_cents)}</div>` : ''}`
+    : `<div class="est">${i.est_price_cents != null ? money(i.est_price_cents) : ''}</div>`);
+  return `<div class="grocery-row ${i.checked?'checked':''} ${i.on_hand?'have':''}" data-gid="${i.id}">
+    <button class="grocery-box" data-check="${i.id}" type="button" aria-label="${i.checked?'Uncheck':'Check'} ${esc(name)}" ${i.on_hand?'disabled':''}>${i.checked?'✓':''}</button>
+    <div style="min-width:0"><div class="grocery-name">${esc(name)}</div><div class="grocery-meta">${buyLine}</div>${forLine ? `<div class="grocery-for">${forLine}</div>` : ''}</div>
+    <div class="grocery-price">${price}</div>
+    ${open ? `<div class="grocery-edit">
+      ${i.on_hand ? '' : `<input type="number" step="0.01" min="0" inputmode="decimal" placeholder="Paid $" id="actual-${i.id}" value="${i.actual_price_cents != null ? (i.actual_price_cents/100).toFixed(2) : ''}" aria-label="Actual price paid">
+      <button class="save-btn" data-save-actual="${i.id}" type="button">Save price</button>`}
+      <button class="link-btn" data-onhand="${i.id}" type="button">${i.on_hand ? 'Need to buy' : 'Already have it'}</button>
+      <span class="save-status" id="actual-status-${i.id}"></span>
+    </div>` : ''}
+  </div>`;
+}
+
+function renderFoodList(plan){
+  const T = groceryTotals(plan);
+  const pct = T.budget ? Math.min(100, Math.round(100 * T.projected / T.budget)) : 0;
+  let html = `<div class="mo-card">
+    <div class="mo-top"><span class="mo-label">To buy, week of ${esc(shortDate(plan.week_start))}</span><span class="mo-label">${T.inCart} of ${T.buy.length} in cart</span></div>
+    <div class="mo-big">${money(T.projected)}</div>
+    <div class="mo-sub">${T.left >= 0 ? `${money(T.left)} under` : `${money(-T.left)} over`} the ${money(T.budget)} budget</div>
+    <div class="mo-bar"><div class="${T.left < 0 ? 'over' : ''}" style="width:${pct}%"></div></div>
+    <div class="mo-pace">${T.anyPaid ? `${money(T.paid)} paid so far. Unpaid items count at their estimate.` : 'Estimated prices. Tap an item to log what you paid.'}</div>
+  </div>`;
   const groups = {};
-  items.forEach(i=>{ const k = (i.food && i.food.store_section) || 'Other'; (groups[k] = groups[k] || []).push(i); });
+  T.buy.forEach(i=>{ const k = (i.food && i.food.store_section) || 'Other'; (groups[k] = groups[k] || []).push(i); });
   const AISLE = ['Produce','Meat','Dairy','Bakery','Grains','Canned','Condiments','Spices','Frozen'];
   const aisleIdx = k => { const i = AISLE.indexOf(k); return i < 0 ? 99 : i; };
+  const byName = (a,b)=>(a.food?.name||a.label||'').localeCompare(b.food?.name||b.label||'');
   Object.keys(groups).sort((a,b)=>aisleIdx(a)-aisleIdx(b) || a.localeCompare(b)).forEach(sec=>{
-    html += `<div class="health-section-label">${esc(sec)}</div><div class="budget-cat grocery-section">`;
-    html += groups[sec].sort((a,b)=>(a.food?.name||a.label||'').localeCompare(b.food?.name||b.label||'')).map(i=>{
-      const name = i.food ? i.food.name : i.label;
-      const unit = i.food ? i.food.purchase_unit : '';
-      const open = expandedGroceryId === i.id;
-      return `<div class="grocery-row ${i.checked?'checked':''}" data-gid="${i.id}">
-        <button class="grocery-box" data-check="${i.id}" type="button" aria-label="${i.checked?'Uncheck':'Check'} ${esc(name)}">${i.checked?'✓':''}</button>
-        <div><div class="grocery-name">${esc(name)}</div><div class="grocery-meta">${fmtQty(i.purchase_qty)} × ${esc(unit)}${i.food && i.food.is_pantry_staple ? ' · lasts weeks' : ''}</div></div>
-        <div class="grocery-price">${i.actual_price_cents != null ? `<div class="act">${formatCents(i.actual_price_cents)}</div>` : ''}<div class="est">${i.est_price_cents != null ? 'est ' + formatCents(i.est_price_cents) : ''}</div></div>
-        ${open ? `<div class="grocery-edit">
-          <input type="number" step="0.01" min="0" inputmode="decimal" placeholder="Paid $" id="actual-${i.id}" value="${i.actual_price_cents != null ? (i.actual_price_cents/100).toFixed(2) : ''}" aria-label="Actual price paid">
-          <button class="save-btn" data-save-actual="${i.id}" type="button">Save price</button>
-          <span class="save-status" id="actual-status-${i.id}"></span>
-        </div>` : ''}
-      </div>`;
-    }).join('');
-    html += `</div>`;
+    const g = groups[sec].sort(byName);
+    html += `<div class="day-label"><span>${esc(sec)}</span><span>${g.filter(i=>i.checked).length}/${g.length}</span></div><div class="budget-cat grocery-section">${g.map(groceryRowHtml).join('')}</div>`;
   });
-  html += `<p class="food-note">Tap an item to log what you actually paid. Estimates are placeholders until real prices come in.</p>`;
+  if(T.have.length){
+    html += `<div class="day-label"><span>Already have</span><span>not counted</span></div><div class="budget-cat grocery-section">${T.have.sort(byName).map(groceryRowHtml).join('')}</div>`;
+  }
   return html;
 }
 
 function renderFoodMeals(plan){
   const items = plan.meal_plan_items || [];
-  if(!items.length) return '<div class="empty">No meals planned this week.</div>';
+  if(!items.length) return '<div class="empty">No meals planned this week. Ask Otto to plan one.</div>';
   const order = {breakfast:0,lunch:1,dinner:2,snack:3};
-  const sorted = items.slice().sort((a,b)=>(order[a.meal_type]??9)-(order[b.meal_type]??9));
-  const servings = items.reduce((a,i)=>a+(i.planned_servings||0),0);
-  return `<div class="budget-period">Week of ${esc(plan.week_start)} · ${servings} planned servings</div>
-    <div class="budget-cat">${sorted.map(i=>`<div class="meal-row">
-      <span class="meal-type">${esc(i.meal_type || '')}</span>
-      <span class="meal-name">${esc(i.recipe ? i.recipe.name : i.title)} <span class="recipe-tags">×${i.planned_servings}</span>${i.notes ? `<span class="meal-note">${esc(i.notes)}</span>` : ''}</span>
-    </div>`).join('')}</div>
-    ${plan.notes ? `<p class="food-note">${esc(plan.notes)}</p>` : ''}`;
+  const days = {};
+  items.forEach(i=>{ const k = i.planned_date || 'none'; (days[k] = days[k] || []).push(i); });
+  const cooked = items.filter(i=>i.recipe && !i.leftover_of && i.meal_type !== 'breakfast').length;
+  const leftovers = items.filter(i=>i.leftover_of).length;
+  const out = items.filter(i=>!i.recipe && !i.leftover_of).length;
+  const breakfasts = items.filter(i=>i.meal_type==='breakfast').length;
+  const today = localToday();
+  let html = `<div class="mo-card">
+    <div class="mo-label">Week of ${esc(shortDate(plan.week_start))}</div>
+    <div class="mo-big" style="font-size:1.6rem">${cooked} to cook, ${leftovers} from leftovers</div>
+    <div class="mo-sub">${[out ? `${out} meal${out===1?'':'s'} out` : '', breakfasts ? `${breakfasts} breakfast${breakfasts===1?'':'s'} planned` : ''].filter(Boolean).join(', ')}</div>
+  </div>`;
+  Object.keys(days).sort((a,b)=> a==='none' ? 1 : b==='none' ? -1 : a.localeCompare(b)).forEach(k=>{
+    const rows = days[k].sort((a,b)=>(order[a.meal_type]??9)-(order[b.meal_type]??9));
+    html += `<div class="day-label"><span${k===today?' class="today"':''}>${k==='none' ? 'Not scheduled' : esc(dayLong(k))}</span>${k===today?'<span class="today">Today</span>':''}</div>
+      <div class="budget-cat day-card">${rows.map(i=>{
+        const kind = i.leftover_of ? 'leftover' : (!i.recipe ? 'out' : '');
+        const note = i.leftover_of ? 'Leftovers' : (i.notes || '');
+        return `<div class="meal-row ${kind}"><span class="meal-type">${esc(i.meal_type || '')}</span>
+          <span class="meal-name">${esc(i.recipe ? i.recipe.name : i.title)}${note ? `<span class="meal-note">${esc(note)}</span>` : ''}</span></div>`;
+      }).join('')}</div>`;
+  });
+  if(plan.notes) html += `<p class="food-note" style="padding:0 6px;">${esc(plan.notes)}</p>`;
+  return html;
 }
 
 function renderFoodRecipes(recipes){
@@ -2279,6 +2351,17 @@ document.getElementById('foodContent').addEventListener('click', async (e)=>{
     } catch(err){ status.textContent = err.message; status.className = 'save-status err'; saveBtn.disabled = false; }
     return;
   }
+  const haveBtn = t.closest('[data-onhand]');
+  if(haveBtn){
+    e.stopPropagation();
+    const id = Number(haveBtn.dataset.onhand);
+    const it = foodData.plan.grocery_list_items.find(x=>x.id===id);
+    it.on_hand = !it.on_hand; if(it.on_hand) it.checked = false;
+    expandedGroceryId = null; renderFood(); renderBriefing(); hapticPulse();
+    try{ await patchRow('grocery_list_items', id, it.on_hand ? { on_hand: true, checked: false } : { on_hand: false }); }
+    catch(err){ it.on_hand = !it.on_hand; renderFood(); renderBriefing(); banner.innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
+    return;
+  }
   if(t.closest('.grocery-edit')) return;
   // expand grocery row
   const row = t.closest('.grocery-row');
@@ -2302,6 +2385,9 @@ const AREAS = {
 function svgIcon(name){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${OTTO_ICONS[name]||''}</svg>`; }
 const CHEV = '<svg class="chev" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 2l6 6-6 6"/></svg>';
 function shortDate(iso){ const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('en-US', { month:'short', day:'numeric' }); }
+function dayLong(iso){ const [y,m,d] = iso.split('-').map(Number); return new Date(y, m-1, d).toLocaleDateString('en-US', { weekday:'long', month:'short', day:'numeric' }); }
+function dateRange(a, b){ const [ya,ma] = a.split('-').map(Number), [yb,mb,db] = b.split('-').map(Number); return ma===mb && ya===yb ? `${shortDate(a)} – ${db}` : `${shortDate(a)} – ${shortDate(b)}`; }
+function localToday(){ const n = new Date(); return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`; }
 function money(c){ if(c == null) return '—'; const a = Math.abs(c); const t = '$' + (a % 100 ? (a/100).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2}) : (a/100).toLocaleString()); return c < 0 ? '−' + t : t; }
 
 function renderGreeting(){
@@ -2320,11 +2406,11 @@ function renderBriefing(){
   const rows = [];
   // Food
   if(foodData && foodData.plan){
-    const items = foodData.plan.grocery_list_items || [];
-    const projected = items.reduce((a,i)=>a+(i.actual_price_cents != null ? i.actual_price_cents : (i.est_price_cents||0)),0);
-    const budget = foodData.plan.budget_cents || 0, left = budget - projected;
-    const inCart = items.filter(i=>i.checked).length;
-    rows.push(briefRow('food','food', `Groceries, ${money(left)} left`, `${money(projected)} of ${money(budget)}, ${inCart} of ${items.length} in cart`, left < 0));
+    const T = groceryTotals(foodData.plan);
+    const today = localToday();
+    const tonight = (foodData.plan.meal_plan_items||[]).find(i=>i.planned_date===today && i.meal_type==='dinner');
+    rows.push(briefRow('food','food', T.left >= 0 ? `Groceries, ${money(T.left)} under budget` : `Groceries, ${money(-T.left)} over budget`,
+      `${tonight ? `Tonight: ${tonight.recipe ? tonight.recipe.name : tonight.title}. ` : ''}${money(T.projected)} to buy, ${T.inCart} of ${T.buy.length} in cart`, T.left < 0));
   }
   // Todos
   if(allTodos && allTodos.length){
