@@ -16,6 +16,7 @@
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <style>
   :root{
     --bg:#10140f;
@@ -494,6 +495,38 @@
   .otto-notice.show{transform:translate(-50%, 0);}
   .otto-notice .dot{width:8px; height:8px; border-radius:4px; background:var(--accent); flex-shrink:0;}
   @media (prefers-reduced-motion: reduce){ .otto-notice{transition:none;} }
+
+  /* ---------- Area dock (slides out of the grid button) ---------- */
+  .dock-wrap{display:flex; align-items:center; gap:8px; min-width:0;}
+  .area-dock{display:flex; gap:8px; max-width:0; opacity:0; overflow:hidden; transition:max-width 0.36s cubic-bezier(.2,.8,.2,1), opacity 0.22s;}
+  .area-dock.open{max-width:280px; opacity:1;}
+  .area-dock .icon-btn{flex-shrink:0; transform:translateX(-12px); opacity:0; transition:transform 0.3s cubic-bezier(.2,.8,.2,1), opacity 0.2s;}
+  .area-dock.open .icon-btn{transform:none; opacity:1;}
+  .area-dock.open .icon-btn:nth-child(1){transition-delay:0.03s} .area-dock.open .icon-btn:nth-child(2){transition-delay:0.06s} .area-dock.open .icon-btn:nth-child(3){transition-delay:0.09s} .area-dock.open .icon-btn:nth-child(4){transition-delay:0.12s} .area-dock.open .icon-btn:nth-child(5){transition-delay:0.15s}
+  .area-dock .icon-btn{color:var(--accent-text);}
+  #areasBtn svg{transition:transform 0.3s;}
+  #areasBtn[aria-expanded="true"]{background:var(--accent); color:var(--on-accent);}
+  #areasBtn[aria-expanded="true"] svg{transform:rotate(45deg);}
+  @media (prefers-reduced-motion: reduce){ .area-dock, .area-dock .icon-btn, #areasBtn svg{transition:none;} }
+
+  /* ---------- Bank sync + transactions ---------- */
+  .bank-row{display:flex; align-items:center; gap:12px; padding:12px 18px;}
+  .bank-row + .bank-row{border-top:1px solid var(--border);}
+  .bank-name{flex:1; min-width:0;}
+  .bank-name .t{font-weight:600;}
+  .bank-name .s{font-size:0.8rem; color:var(--text-faint);}
+  .bank-name .s.err{color:var(--coral);}
+  .bank-actions{display:flex; gap:8px; padding:12px 18px; border-top:1px solid var(--border); flex-wrap:wrap; align-items:center;}
+  .txn-row{display:grid; grid-template-columns:1fr auto; gap:2px 12px; padding:11px 18px; border-top:1px solid var(--border); cursor:pointer;}
+  .txn-row:first-child{border-top:none;}
+  .txn-row.pending{opacity:0.65;}
+  .txn-name{font-size:0.95rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .txn-amt{font-size:0.95rem; font-variant-numeric:tabular-nums; text-align:right;}
+  .txn-amt.in{color:var(--accent-text);}
+  .txn-meta{font-size:0.78rem; color:var(--text-faint); grid-column:1 / -1; display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .txn-cat{font-size:0.74rem; padding:2px 8px; border-radius:999px; background:var(--surface-2); color:var(--text);}
+  .txn-cat.none{background:rgba(196,56,42,0.12); color:var(--coral);}
+  .txn-pick{grid-column:1 / -1; display:flex; gap:8px; flex-wrap:wrap; padding-top:6px;}
 </style>
 </head>
 <body>
@@ -513,7 +546,10 @@
 </div>
 <div class="wrap" id="appWrap" style="display:none;">
   <div class="otto-top">
-    <button class="icon-btn" id="areasBtn" type="button" aria-label="All areas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg></button>
+    <div class="dock-wrap">
+    <button class="icon-btn" id="areasBtn" type="button" aria-label="Show areas" aria-expanded="false" aria-controls="areaDock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg></button>
+    <div class="area-dock" id="areaDock" role="group" aria-label="Areas"></div>
+    </div>
     <button class="icon-btn" id="accountBtn" type="button" aria-label="Account and sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.2 7-5.2s5.8 1.6 7 5.2"/></svg></button>
   </div>
   <div class="otto-greet">
@@ -565,7 +601,10 @@
     <div class="tab-panel" id="panelAccounts">
       <div id="accountsErrorBanner"></div>
       <div id="netWorthReadout"></div>
+      <div class="health-section-label">Bank connections</div>
+      <div id="bankCard" class="budget-cat" style="padding:0;"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
       <div id="creditSummary"></div>
+      <div class="health-section-label">Accounts</div>
       <div id="accountsList"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
 
@@ -588,6 +627,8 @@
           <span class="save-status" id="txnStatus"></span>
         </div>
       </form>
+      <div class="health-section-label">Recent transactions</div>
+      <div id="txnList" class="budget-cat" style="padding:0;"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
       <div id="budgetContent"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
 
@@ -656,7 +697,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-09.05';
+const APP_BUILD = '2026-10-09.07';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2339,7 +2380,21 @@ function closeSheet(){
 document.getElementById('sheetDone').addEventListener('click', closeSheet);
 document.getElementById('sheetBackdrop').addEventListener('click', closeSheet);
 document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && sheetArea) closeSheet(); });
-document.getElementById('areasBtn').addEventListener('click', ()=>openSheet('areas'));
+// ----- area dock -----
+(function buildDock(){
+  const dock = document.getElementById('areaDock');
+  dock.innerHTML = ['todos','money','food','health','assets'].map(k=>`<button class="icon-btn" type="button" data-area="${k}" aria-label="${AREAS[k].title}" title="${AREAS[k].title}">${svgIcon(AREAS[k].icon)}</button>`).join('');
+  dock.addEventListener('click', e=>{ const b = e.target.closest('[data-area]'); if(b){ setDock(false); openSheet(b.dataset.area); } });
+})();
+function setDock(open){
+  const btn = document.getElementById('areasBtn'), dock = document.getElementById('areaDock');
+  dock.classList.toggle('open', open);
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  btn.setAttribute('aria-label', open ? 'Hide areas' : 'Show areas');
+  if(open) hapticPulse();
+}
+document.getElementById('areasBtn').addEventListener('click', ()=> setDock(!document.getElementById('areaDock').classList.contains('open')));
+document.addEventListener('click', e=>{ if(!e.target.closest('.dock-wrap')) setDock(false); });
 document.getElementById('accountBtn').addEventListener('click', ()=>openSheet('account'));
 document.getElementById('briefRows').addEventListener('click', e=>{ const b = e.target.closest('[data-area]'); if(b) openSheet(b.dataset.area); });
 document.getElementById('sheetBody').addEventListener('click', e=>{ const b = e.target.closest('.area-list [data-area]'); if(b) openSheet(b.dataset.area); });
@@ -2389,6 +2444,109 @@ setTimeout(()=>{
   if(window.__ottoNotice) showNotice(window.__ottoNotice.text, window.__ottoNotice.reload ? hardReload : null, !!window.__ottoNotice.reload);
   checkForUpdate();
 }, 900);
+
+// ================= BANK SYNC (Plaid) =================
+async function callFn(name, body){
+  await ensureValidSession();
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify(body || {}) });
+  const data = await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data.error || `Function ${name} returned ${res.status}`);
+  return data;
+}
+let bankConnections = [], allTxns = [], expandedTxnId = null;
+
+async function fetchBank(){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/v_bank_connections?select=*&order=created_at.asc`, { headers: authHeaders() });
+  if(!r.ok) throw new Error(`Supabase returned ${r.status}`);
+  bankConnections = await r.json();
+  const t = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,description,merchant,amount_cents,pending,source,category_id,exclude_from_budget,plaid_category_primary,account:accounts(name)&removed_at=is.null&order=transaction_date.desc,id.desc&limit=60`, { headers: authHeaders() });
+  if(!t.ok) throw new Error(`Supabase returned ${t.status}`);
+  allTxns = await t.json();
+}
+function renderBank(){
+  const card = document.getElementById('bankCard'); if(!card) return;
+  const rows = bankConnections.map(c=>{
+    const when = c.last_synced_at ? 'Synced ' + timeAgo(c.last_synced_at) : 'Not synced yet';
+    const bad = c.status !== 'good';
+    return `<div class="bank-row"><div class="bank-name"><div class="t">${esc(c.institution_name || 'Bank')}</div><div class="s ${bad?'err':''}">${bad ? esc(c.status === 'login_required' ? 'Needs to be reconnected' : (c.last_error || c.status)) : when}</div></div>
+      ${bad ? `<button class="chip" type="button" data-relink="${esc(c.item_id)}">Reconnect</button>` : ''}</div>`;
+  }).join('');
+  card.innerHTML = (rows || `<div class="bank-row"><div class="bank-name"><div class="s">No bank connected yet. Transactions will flow in automatically once you connect one.</div></div></div>`) +
+    `<div class="bank-actions"><button class="save-btn" id="connectBankBtn" type="button">Connect a bank</button>${bankConnections.length ? '<button class="chip" id="syncNowBtn" type="button">Sync now</button>' : ''}<span class="save-status" id="bankStatus"></span></div>`;
+}
+function renderTxns(){
+  const el = document.getElementById('txnList'); if(!el) return;
+  if(!allTxns.length){ el.innerHTML = '<div class="bank-row"><div class="bank-name"><div class="s">No transactions yet.</div></div></div>'; return; }
+  const cats = allCategories || [];
+  const catName = id => (cats.find(c=>c.id===id) || {}).name;
+  const needs = allTxns.filter(t=>t.category_id == null && !t.exclude_from_budget).length;
+  el.innerHTML = (needs ? `<div class="bank-row"><div class="bank-name"><div class="s" style="color:var(--coral)">${needs} need a category. Tap one to assign it.</div></div></div>` : '') +
+    allTxns.map(t=>{
+      const open = expandedTxnId === t.id, inflow = t.amount_cents > 0;
+      const label = t.exclude_from_budget ? 'Transfer' : (catName(t.category_id) || null);
+      return `<div class="txn-row ${t.pending?'pending':''}" data-txn="${t.id}">
+        <div class="txn-name">${esc(t.merchant || t.description || '')}</div>
+        <div class="txn-amt ${inflow?'in':''}">${inflow ? '+' : ''}${money(t.amount_cents)}</div>
+        <div class="txn-meta"><span>${shortDate(t.transaction_date)}${t.pending ? ', pending' : ''}</span><span>${esc(t.account ? t.account.name.replace(/\s*\(.*\)$/,'') : '')}</span><span class="txn-cat ${label?'':'none'}">${esc(label || 'Needs category')}</span></div>
+        ${open ? `<div class="txn-pick">${cats.filter(c=>c.category_type!=='income' || inflow).map(c=>`<button class="chip ${c.id===t.category_id?'active':''}" type="button" data-setcat="${c.id}">${esc(c.name)}</button>`).join('')}<button class="chip ${t.exclude_from_budget?'active':''}" type="button" data-setcat="transfer">Transfer (not spending)</button></div>` : ''}
+      </div>`;
+    }).join('');
+}
+async function refreshBank(){
+  try{ await fetchBank(); renderBank(); renderTxns(); }
+  catch(err){ const b = document.getElementById('accountsErrorBanner'); if(b) b.innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
+}
+async function connectBank(itemId){
+  const status = document.getElementById('bankStatus'); status.textContent = 'Opening…'; status.className = 'save-status';
+  try{
+    if(typeof Plaid === 'undefined') throw new Error("Plaid didn't load. Check your connection and try again.");
+    const { link_token } = await callFn('plaid-link-token', itemId ? { item_id: itemId } : {});
+    const handler = Plaid.create({
+      token: link_token,
+      onSuccess: async (public_token, meta)=>{
+        status.textContent = 'Connecting…';
+        try{
+          const r = itemId ? await callFn('plaid-sync', {}) : await callFn('plaid-exchange', { public_token, institution_id: meta.institution && meta.institution.institution_id, institution_name: meta.institution && meta.institution.name });
+          status.textContent = itemId ? 'Reconnected' : `Connected. ${r.sync ? r.sync.added + ' transactions pulled in.' : ''}`; status.className = 'save-status ok'; hapticPulse();
+          await refreshAccounts(); await refreshBudget(); await refreshBank();
+        } catch(err){ status.textContent = err.message; status.className = 'save-status err'; }
+      },
+      onExit: (err)=>{ status.textContent = err ? (err.display_message || err.error_message || 'Plaid closed') : ''; status.className = err ? 'save-status err' : 'save-status'; }
+    });
+    status.textContent = ''; handler.open();
+  } catch(err){ status.textContent = err.message; status.className = 'save-status err'; }
+}
+async function syncNow(){
+  const status = document.getElementById('bankStatus'), btn = document.getElementById('syncNowBtn');
+  btn.disabled = true; status.textContent = 'Syncing…'; status.className = 'save-status';
+  try{
+    const r = await callFn('plaid-sync', {});
+    const added = (r.results||[]).reduce((a,x)=>a+(x.added||0),0), bad = (r.results||[]).filter(x=>!x.ok);
+    status.textContent = bad.length ? bad[0].error : `${added} new transaction${added===1?'':'s'}`; status.className = bad.length ? 'save-status err' : 'save-status ok';
+    await refreshAccounts(); await refreshBudget(); await refreshBank();
+  } catch(err){ status.textContent = err.message; status.className = 'save-status err'; btn.disabled = false; }
+}
+document.getElementById('bankCard').addEventListener('click', e=>{
+  if(e.target.closest('#connectBankBtn')) connectBank(null);
+  else if(e.target.closest('#syncNowBtn')) syncNow();
+  else { const r = e.target.closest('[data-relink]'); if(r) connectBank(r.dataset.relink); }
+});
+document.getElementById('txnList').addEventListener('click', async e=>{
+  const pick = e.target.closest('[data-setcat]');
+  if(pick){
+    e.stopPropagation();
+    const row = e.target.closest('[data-txn]'), id = Number(row.dataset.txn), t = allTxns.find(x=>x.id===id);
+    const body = pick.dataset.setcat === 'transfer' ? { category_id: null, exclude_from_budget: true } : { category_id: Number(pick.dataset.setcat), exclude_from_budget: false };
+    const prev = { category_id: t.category_id, exclude_from_budget: t.exclude_from_budget };
+    Object.assign(t, body); expandedTxnId = null; renderTxns(); hapticPulse();
+    try{ await patchRow('transactions', id, body); await refreshBudget(); }
+    catch(err){ Object.assign(t, prev); renderTxns(); document.getElementById('accountsErrorBanner').innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
+    return;
+  }
+  const row = e.target.closest('[data-txn]');
+  if(row){ const id = Number(row.dataset.txn); expandedTxnId = expandedTxnId === id ? null : id; renderTxns(); }
+});
+
 async function bootApp(){
   const cached = await loadCache();
   if(cached && cached.data && cached.data.length){
@@ -2404,6 +2562,7 @@ async function bootApp(){
   await refreshAssets();
   await refreshHealth();
   await refreshFood();
+  await refreshBank();
 }
 
 function showApp(){
@@ -2450,6 +2609,7 @@ async function refreshEverything(){
   await refreshAssets();
   await refreshHealth();
   await refreshFood();
+  await refreshBank();
 }
 
 (function setupPullToRefresh(){
