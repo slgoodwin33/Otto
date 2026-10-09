@@ -486,6 +486,14 @@
   button, a, .brief-row, .grocery-row, .recipe-card, .chip, .tab-btn, .sheet-head, .otto-top, .otto-greet, label{-webkit-user-select:none; user-select:none; -webkit-touch-callout:none;}
   input, select, textarea{font-size:16px !important;}
   .sheet-body{overscroll-behavior:contain;}
+
+  /* ---------- Version notices ---------- */
+  .otto-notice{position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 10px); transform:translate(-50%, -140%); z-index:60; width:max-content; max-width:calc(100vw - 32px);
+    background:var(--surface); color:var(--text); border:none; border-radius:999px; padding:10px 16px; font:inherit; font-size:0.9rem; font-weight:600;
+    box-shadow:0 6px 24px rgba(0,0,0,0.16); display:flex; align-items:center; gap:8px; transition:transform 0.35s cubic-bezier(.2,.8,.2,1); cursor:pointer;}
+  .otto-notice.show{transform:translate(-50%, 0);}
+  .otto-notice .dot{width:8px; height:8px; border-radius:4px; background:var(--accent); flex-shrink:0;}
+  @media (prefers-reduced-motion: reduce){ .otto-notice{transition:none;} }
 </style>
 </head>
 <body>
@@ -627,9 +635,10 @@
       <div class="budget-cat" style="padding:0;">
         <div class="account-row"><span id="syncNote" class="sync-note">Loading…</span>
           <button class="refresh-btn" id="refreshBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> Refresh</button></div>
+        <div class="account-row"><span>Version</span><span id="buildTag" class="build-tag" style="font-family:var(--sans); color:var(--text-faint);"></span></div>
         <div class="account-row"><span>Signed in</span><button class="sign-out-link" id="signOutBtn" type="button">Sign out</button></div>
       </div>
-      <p class="food-note" style="padding:0 6px;">Writes go straight to Supabase. <span id="buildTag" class="build-tag"></span></p>
+      <p class="food-note" style="padding:0 6px;">Changes save straight to your database.</p>
     </div>
   </section>
 </div>
@@ -647,20 +656,21 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-09.04';
+const APP_BUILD = '2026-10-09.05';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
-  if(tag) tag.textContent = `Build ${APP_BUILD}`;
+  if(tag) tag.textContent = APP_BUILD;
   try{
     const lastSeen = localStorage.getItem(BUILD_SEEN_KEY);
     if(lastSeen && lastSeen > APP_BUILD){
-      // this file is OLDER than a build this browser saw before — the push didn't take
-      if(tag) tag.innerHTML = `Build ${APP_BUILD} <strong style="color:var(--coral)">— outdated, newer build (${lastSeen}) was seen before. Re-upload the latest file.</strong>`;
+      if(tag) tag.innerHTML = `${APP_BUILD} <strong style="color:var(--coral)">(older than ${lastSeen})</strong>`;
+      window.__ottoNotice = { text: `This is an older version (${APP_BUILD}). Tap to load the latest.`, reload: true };
     } else {
+      if(lastSeen && lastSeen < APP_BUILD) window.__ottoNotice = { text: `Updated to ${APP_BUILD}` };
       localStorage.setItem(BUILD_SEEN_KEY, APP_BUILD);
     }
-  } catch(e){ /* storage unavailable, skip the staleness check */ }
+  } catch(e){ /* storage unavailable */ }
 }
 checkBuildFreshness();
 
@@ -2352,6 +2362,33 @@ renderGreeting();
 document.addEventListener('touchmove', e => { if(e.touches.length > 1) e.preventDefault(); }, { passive:false });
 let __lastTouchEnd = 0;
 document.addEventListener('touchend', e => { const now = Date.now(); if(now - __lastTouchEnd < 300 && !e.target.closest('input, textarea, select')) e.preventDefault(); __lastTouchEnd = now; }, { passive:false });
+
+// ================= VERSION NOTICES =================
+function showNotice(text, onTap, sticky){
+  let el = document.getElementById('ottoNotice');
+  if(!el){ el = document.createElement('button'); el.id = 'ottoNotice'; el.type = 'button'; el.className = 'otto-notice'; el.setAttribute('role','status'); document.body.appendChild(el); }
+  el.innerHTML = `<span class="dot" aria-hidden="true"></span><span>${esc(text)}</span>`;
+  el.onclick = () => { if(onTap) onTap(); else el.classList.remove('show'); };
+  requestAnimationFrame(()=> el.classList.add('show'));
+  clearTimeout(el.__t);
+  if(!sticky) el.__t = setTimeout(()=> el.classList.remove('show'), 3500);
+}
+function hardReload(){ location.replace(location.pathname + '?v=' + Date.now() + location.hash); }
+let __updateShown = false;
+async function checkForUpdate(){
+  if(__updateShown || location.protocol === 'file:') return;
+  try{
+    const res = await fetch(location.pathname + '?check=' + Date.now(), { cache:'no-store' });
+    if(!res.ok) return;
+    const m = (await res.text()).match(/APP_BUILD = '([^']+)'/);
+    if(m && m[1] > APP_BUILD){ __updateShown = true; showNotice('New version ready. Tap to update.', hardReload, true); }
+  } catch(e){ /* offline: try again next time */ }
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') checkForUpdate(); });
+setTimeout(()=>{
+  if(window.__ottoNotice) showNotice(window.__ottoNotice.text, window.__ottoNotice.reload ? hardReload : null, !!window.__ottoNotice.reload);
+  checkForUpdate();
+}, 900);
 async function bootApp(){
   const cached = await loadCache();
   if(cached && cached.data && cached.data.length){
