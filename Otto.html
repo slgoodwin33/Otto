@@ -1014,7 +1014,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-10.20';
+const APP_BUILD = '2026-10-10.21';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1440,6 +1440,15 @@ function renderBudget(data){
     <div class="mo-bar"><div class="${left < 0 ? 'over' : ''}" style="width:${Math.min(100, usedPct)}%"></div></div>
     <div class="mo-pace">Day ${dayN} of 7. ${usedPct > pacePct + 10 ? 'Spending is ahead of the week.' : usedPct === 0 ? 'Nothing spent yet this week.' : 'On pace for the week.'}</div>
   </div>`;
+  const upcoming = (data.bills || []).filter(b=>b.due_day && Number(b.amount_cents) > 0)
+    .map(b=>({ ...b, next: nextOccurrenceFromDueDay(b.due_day) })).sort((a,b)=>a.next.localeCompare(b.next)).slice(0, 4);
+  if(upcoming.length){
+    html += `<div class="section-title">Bills coming up<span>next ${upcoming.length}</span></div><div class="gcard">${upcoming.map(b=>{
+      const n = daysUntil(b.next);
+      const when = n <= 0 ? 'Today' : n === 1 ? 'Tomorrow' : n < 7 ? `In ${n} days` : shortDate(b.next);
+      return `<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(b.name)}</div><div class="grow-sub">${b.autopay ? 'Autopay' : 'Pay it yourself'}, ${esc(shortDate(b.next))}</div></div><div class="grow-right" ${n <= 2 && !b.autopay ? 'style="color:var(--coral);font-weight:600"' : ''}>${money(b.amount_cents)}<div class="grow-sub">${when}</div></div></div>`;
+    }).join('')}</div>`;
+  }
   const ordered = exp.slice().sort((a,b)=>(parseFloat(b.pct_used)||0)-(parseFloat(a.pct_used)||0) || (b.planned_cents||0)-(a.planned_cents||0));
   const catRow = c => {
     const budget = (c.planned_cents||0) + (c.carried_in_cents||0), spentC = Number(c.spent_cents||0);
@@ -2956,7 +2965,7 @@ function renderBriefing(){
       <div class="wdg-v ${m.left<0?'neg':''}">${m.left < 0 ? money(-m.left) + ' over' : money(m.left) + ' left'}</div>
       <div class="wdg-d">${money(m.spent)} spent of ${money(m.planned)}</div>
       <div class="wdg-bar"><div class="${m.left<0?'over':''}" style="width:${pct}%"></div></div>
-      <div class="wdg-cats">${cats.map(c=>`<span><b>${esc(c.category)}</b> ${money(Number(c.spent_cents))}</span>`).join('')}</div></button>`;
+      <div class="wdg-cats">${cats.map(c=>`<span><b>${esc(c.category)}</b> ${money(Number(c.spent_cents))}</span>`).join('')}</div>${(()=>{ const nb = (lastBudgetData.bills||[]).filter(b=>b.due_day && Number(b.amount_cents)>0).map(b=>({ ...b, next: nextOccurrenceFromDueDay(b.due_day) })).sort((a,b)=>a.next.localeCompare(b.next))[0]; if(!nb) return ''; const n = daysUntil(nb.next); return `<div class="wdg-d" style="margin-top:8px">Next bill: ${esc(nb.name)} ${money(nb.amount_cents)}, ${n <= 0 ? 'today' : n === 1 ? 'tomorrow' : 'in ' + n + ' days'}</div>`; })()}</button>`;
   } else html += `<button class="wdg wide" type="button" data-area="money">${top('money','#2E8B57','Money')}<div class="wdg-d">Loading…</div></button>`;
   // Food
   const meal = homeNextMeal();
