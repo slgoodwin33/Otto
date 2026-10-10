@@ -699,6 +699,68 @@
   .msg.otto.typing{color:var(--text-faint);}
   .msg.otto.err{color:var(--coral);}
   .msg.otto{white-space:pre-wrap;}
+
+  /* ---------- Build .16: Home widgets, no tab bar, organized pages ---------- */
+  .sheet[hidden]{display:none !important;}
+  .sheet{pointer-events:none;} .sheet-open .sheet{pointer-events:auto;}
+  .tabbar{display:none !important;}
+  .sheet{bottom:0;}
+  .sheet-body{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 28px);}
+  .composer{bottom:0; padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 12px);}
+  .thread{padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 96px);}
+  .page-back{display:block !important;}
+  /* list rows that still carried old card styles */
+  .grow.asset-card, .grow.workout-card{background:none; border:none; border-top:1px solid var(--border); border-radius:0; margin:0; padding:12px 16px 12px 0; box-shadow:none;}
+  .gcard > .grow:first-child{border-top:none;}
+  .grow.asset-card.expanded, .grow.workout-card.expanded{border-color:var(--border);}
+  /* segmented controls */
+  .seg, .food-sub{display:flex; gap:2px; background:var(--surface-2); border-radius:12px; padding:3px; margin:2px 0 16px; flex-wrap:nowrap;}
+  .seg button, .food-sub .chip{flex:1; border:none; background:none; border-radius:9px; padding:8px 4px; font:inherit; font-size:0.86rem; font-weight:600; color:var(--text-muted); cursor:pointer; white-space:nowrap;}
+  .seg button.active, .food-sub .chip.active{background:var(--surface); color:var(--text); box-shadow:0 1px 3px rgba(0,0,0,0.12);}
+  .section-title{display:flex; justify-content:space-between; align-items:baseline; margin:20px 4px 8px; font-family:var(--display); font-size:1.05rem; font-weight:700;}
+  .section-title span{font-family:var(--sans); font-size:0.8rem; font-weight:400; color:var(--text-faint);}
+  .health-section-label{font-family:var(--display); font-size:1.05rem; font-weight:700; color:var(--text); text-transform:none; letter-spacing:0; margin:20px 4px 8px;}
+  /* money sections */
+  [data-mseg]{display:none !important;}
+  body[data-moneyseg="week"] [data-mseg="week"], body[data-moneyseg="txns"] [data-mseg="txns"], body[data-moneyseg="accounts"] [data-mseg="accounts"]{display:block !important;}
+  body[data-moneyseg="txns"] .money-actions[data-mseg="txns"]{display:flex !important;}
+  #moneyOverview{display:none;}
+  /* budget category rows */
+  .bcat{display:grid; grid-template-columns:auto 1fr auto; gap:3px 12px; align-items:center; padding:12px 16px 12px 14px; border-top:1px solid var(--border); cursor:pointer;}
+  .bcat:first-child{border-top:none;}
+  .bcat .txn-ico{grid-row:span 2;}
+  .bcat-name{font-size:0.95rem; font-weight:600;}
+  .bcat-amt{font-size:0.95rem; font-weight:600; text-align:right; font-variant-numeric:tabular-nums;}
+  .bcat-amt.neg{color:var(--coral);}
+  .bcat-sub{font-size:0.78rem; color:var(--text-faint);}
+  .bcat-sub2{font-size:0.78rem; color:var(--text-faint); text-align:right;}
+  .bcat-bar{grid-column:2 / 4; height:6px; border-radius:3px; background:var(--surface-2); overflow:hidden; margin-top:4px;}
+  .bcat-bar > div{height:100%; border-radius:3px;}
+  .bcat .grow-detail{grid-column:1 / -1; padding:6px 0 0;}
+  /* home widgets */
+  .home-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .wdg{background:var(--surface); border:none; border-radius:20px; padding:14px 14px 13px; text-align:left; font:inherit; color:var(--text); cursor:pointer; min-width:0; display:flex; flex-direction:column; gap:2px; min-height:118px; -webkit-tap-highlight-color:transparent; transition:transform 0.12s;}
+  .wdg:active{transform:scale(0.97);}
+  .wdg.wide{grid-column:1 / -1; min-height:0;}
+  .wdg-top{display:flex; align-items:center; gap:8px; font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:6px;}
+  .wdg-ico{width:26px; height:26px; border-radius:13px; display:grid; place-items:center;}
+  .wdg-ico svg{width:15px; height:15px;}
+  .wdg-top .chev{margin-left:auto; width:7px; height:12px; color:var(--text-faint);}
+  .wdg-v{font-family:var(--display); font-weight:700; font-size:1.45rem; letter-spacing:-0.02em; line-height:1.15; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums;}
+  .wdg-v.small{font-size:1.05rem; white-space:normal; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;}
+  .wdg-v.neg{color:var(--coral);}
+  .wdg-d{font-size:0.78rem; color:var(--text-faint); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .wdg-bar{height:7px; border-radius:4px; background:var(--surface-2); overflow:hidden; margin:8px 0 6px;}
+  .wdg-bar > div{height:100%; border-radius:4px; background:var(--accent);}
+  .wdg-bar > div.over{background:var(--coral);}
+  .wdg-cats{display:flex; gap:12px; flex-wrap:wrap; font-size:0.78rem; color:var(--text-muted);}
+  .wdg-cats b{font-weight:600; color:var(--text);}
+  .wdg-spark{display:flex; align-items:flex-end; gap:3px; height:26px; margin-top:auto; padding-top:8px;}
+  .wdg-spark i{flex:1; background:var(--accent-soft); border-radius:2px; min-height:2px;}
+  .wdg-spark i.today{background:var(--accent);}
+  .txn-filters .chip{white-space:nowrap; flex-shrink:0; padding:6px 12px; border-radius:999px; font-size:0.82rem;}
+  #dupWeekBtn{display:none !important;}
+  .money-actions .refresh-btn{background:none; border:none; color:var(--accent-text); font-weight:600; padding:4px 2px;}
 </style>
 </head>
 <body>
@@ -731,8 +793,8 @@
   </div>
   <div class="brief" id="briefCard">
     <div class="home-brief loading" id="homeBrief" aria-live="polite">Pulling your day together…</div>
-    <div class="home-tiles" id="homeTiles"><div class="brief-skel skeleton-row"></div></div>
-    <div class="home-todos" id="homeTodos"></div>
+    <div class="home-grid" id="homeTiles"><div class="brief-skel skeleton-row"></div></div>
+    <div id="homeTodos" hidden></div>
     <div id="briefRows" hidden></div>
   </div>
   <div class="thread" id="chatThread">
@@ -776,20 +838,21 @@
     <div class="tab-panel" id="panelAccounts">
       <div id="accountsErrorBanner"></div>
       <div id="moneyOverview"></div>
-      <div id="netWorthReadout"></div>
-      <div class="health-section-label">Bank connections</div>
-      <div id="bankCard" class="budget-cat" style="padding:0;"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
-      <div id="creditSummary"></div>
-      <div class="health-section-label">Bills this month</div>
-      <div id="billsCard" class="budget-cat" style="padding:0;"><div class="bank-row"><div class="bank-name"><div class="s">Loading…</div></div></div></div>
-      <div class="health-section-label">Accounts</div>
-      <div id="accountsList"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
+      <div class="seg" id="moneySeg" role="tablist"><button type="button" data-mseg-btn="week" class="active">This week</button><button type="button" data-mseg-btn="txns">Transactions</button><button type="button" data-mseg-btn="accounts">Accounts</button></div>
+      <div id="netWorthReadout" data-mseg="accounts"></div>
+      <div class="health-section-label" data-mseg="accounts">Bank connections</div>
+      <div id="bankCard" class="budget-cat" style="padding:0;" data-mseg="accounts"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
+      <div id="creditSummary" data-mseg="accounts"></div>
+      <div class="health-section-label" data-mseg="accounts">Bills this month</div>
+      <div id="billsCard" class="budget-cat" style="padding:0;" data-mseg="accounts"><div class="bank-row"><div class="bank-name"><div class="s">Loading…</div></div></div></div>
+      <div class="health-section-label" data-mseg="accounts">Accounts</div>
+      <div id="accountsList" data-mseg="accounts"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
 
     <div class="tab-panel" id="panelBudget">
       <div id="budgetErrorBanner"></div>
-      <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1rem;">
-        <button class="refresh-btn" id="addTxnBtn" type="button">+ Log transaction</button>
+      <div class="money-actions" data-mseg="txns" style="gap:0.5rem; flex-wrap:wrap; margin-bottom:0.6rem; justify-content:flex-end;">
+        <button class="refresh-btn" id="addTxnBtn" type="button">+ Log cash or other</button>
         <button class="refresh-btn" id="dupWeekBtn" type="button" hidden>Duplicate last week →</button>
       </div>
       <span class="save-status" id="dupWeekStatus"></span>
@@ -805,9 +868,8 @@
           <span class="save-status" id="txnStatus"></span>
         </div>
       </form>
-      <div class="health-section-label">Recent transactions</div>
-      <div id="txnList" class="budget-cat" style="padding:0;"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
-      <div id="budgetContent"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
+      <div id="txnList" class="budget-cat" style="padding:0;" data-mseg="txns"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
+      <div id="budgetContent" data-mseg="week"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
 
     <div class="tab-panel" id="panelAssets">
@@ -888,7 +950,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-10.14';
+const APP_BUILD = '2026-10-10.16';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1269,7 +1331,7 @@ async function refreshCredit(){
 /* ---------- Budget ---------- */
 
 async function fetchBudget(){
-  const summaryRes = await fetch(`${SUPABASE_URL}/rest/v1/v_weekly_summary?select=*&order=week_start.desc&limit=1`, { headers: authHeaders() });
+  const summaryRes = await fetch(`${SUPABASE_URL}/rest/v1/v_weekly_summary?select=*&week_start=lte.${localToday()}&order=week_start.desc&limit=1`, { headers: authHeaders() });
   if(!summaryRes.ok) throw new Error(`Supabase returned ${summaryRes.status}`);
   const summary = await summaryRes.json();
   if(!summary.length) return { summary: null, categories: [], bills: [], income: [] };
@@ -1299,13 +1361,13 @@ function renderBudget(data){
   const s = data.summary;
   const exp = data.categories.filter(c=>c.category_type !== 'savings');
   const sav = data.categories.filter(c=>c.category_type === 'savings');
-  const planned = exp.reduce((a,c)=>a+(c.planned_cents||0)+(c.carried_in_cents||0),0);
-  const spent = exp.reduce((a,c)=>a+(c.spent_cents||0),0);
+  const planned = exp.reduce((a,c)=>a+Number(c.planned_cents||0)+Number(c.carried_in_cents||0),0);
+  const spent = exp.reduce((a,c)=>a+Number(c.spent_cents||0),0);
   const left = planned - spent;
   const today = localToday();
   const dayN = Math.min(7, Math.max(1, Math.round((new Date(today) - new Date(s.week_start))/86400000) + 1));
   const pacePct = Math.round(100*dayN/7), usedPct = planned ? Math.round(100*spent/planned) : 0;
-  const savPlanned = sav.reduce((a,c)=>a+(c.planned_cents||0),0);
+  const savPlanned = sav.reduce((a,c)=>a+Number(c.planned_cents||0),0);
   const billsFor = code => (data.bills || []).filter(b => b.category && b.category.code === code);
   let html = `<div class="mo-card">
     <div class="mo-top"><span class="mo-label">Left to spend, week of ${dateRange(s.week_start, s.week_end)}</span></div>
@@ -1316,27 +1378,30 @@ function renderBudget(data){
   </div>`;
   const ordered = exp.slice().sort((a,b)=>(parseFloat(b.pct_used)||0)-(parseFloat(a.pct_used)||0) || (b.planned_cents||0)-(a.planned_cents||0));
   const catRow = c => {
-    const budget = (c.planned_cents||0) + (c.carried_in_cents||0);
-    const pct = Math.min(100, Math.max(0, parseFloat(c.pct_used) || 0));
+    const budget = (c.planned_cents||0) + (c.carried_in_cents||0), spentC = Number(c.spent_cents||0);
     const isSave = c.category_type === 'savings';
-    const cls = isSave ? 'save' : pct >= 100 ? 'over' : pct >= 80 ? 'warn' : '';
+    const ratio = budget ? spentC / budget : (spentC ? 2 : 0);
+    const color = (TXN_STYLE[c.category] || TXN_STYLE.Transfer)[0];
+    const barColor = isSave ? color : ratio > 1 ? 'var(--coral)' : ratio >= 0.85 ? '#D9A23B' : color;
     const bills = billsFor(c.category_code);
     const open = expandedBudgetCat === c.category_code;
-    const rem = budget - (c.spent_cents||0);
-    return `<div class="grow" data-bcat="${esc(c.category_code)}" style="flex-wrap:wrap">
-      <div class="grow-main"><div class="grow-title">${esc(c.category)}</div>
-        <div class="grow-sub">${money(c.spent_cents||0)} of ${money(budget)}${bills.length ? `, ${bills.length} bill${bills.length===1?'':'s'}` : ''}${c.carried_in_cents ? `, ${money(c.carried_in_cents)} carried in` : ''}</div>
-        <div class="mini-bar"><div class="${cls}" style="width:${pct}%"></div></div></div>
-      <div class="grow-right ${rem < 0 ? 'neg' : ''}">${rem < 0 ? money(-rem) + ' over' : money(rem) + (isSave ? ' to go' : ' left')}</div>
-      ${open ? `<div class="grow-detail" style="flex-basis:100%">${bills.length ? bills.map(b=>`<div class="kv"><span>${esc(b.name)}${b.autopay ? ', autopay' : ''}${b.due_day ? `, due the ${ordinal(b.due_day)}` : ''}</span><span>${money(b.amount_cents)}/${esc(b.frequency)}</span></div>`).join('') : '<div class="kv"><span>No recurring bills in this category</span></div>'}${c.rollover_enabled ? '<div class="kv"><span>Unspent money rolls over to next week</span></div>' : ''}</div>` : ''}
+    const rem = budget - spentC;
+    return `<div class="bcat" data-bcat="${esc(c.category_code)}">
+      ${txnIcon(c.category)}
+      <div class="bcat-name">${esc(c.category)}</div>
+      <div class="bcat-amt ${rem < 0 ? 'neg' : ''}">${rem < 0 ? money(-rem) + ' over' : money(rem) + (isSave ? ' to go' : ' left')}</div>
+      <div class="bcat-sub">${money(spentC)} of ${money(budget)}${bills.length ? `, ${bills.length} bill${bills.length===1?'':'s'}` : ''}</div>
+      <div class="bcat-sub2">${budget ? Math.round(ratio*100) + '%' : spentC ? 'no budget' : ''}</div>
+      <div class="bcat-bar"><div style="width:${Math.min(100, ratio*100)}%;background:${barColor}"></div></div>
+      ${open ? `<div class="grow-detail">${bills.length ? bills.map(b=>`<div class="kv"><span>${esc(b.name)}${b.autopay ? ', autopay' : ''}${b.due_day ? `, due the ${ordinal(b.due_day)}` : ''}</span><span>${money(b.amount_cents)}/${esc(b.frequency)}</span></div>`).join('') : '<div class="kv"><span>No recurring bills here</span></div>'}<div class="kv"><span>See these purchases</span><span><button class="link-btn" type="button" data-catjump="${esc(c.category)}">Transactions ›</button></span></div></div>` : ''}
     </div>`;
   };
-  html += `<div class="day-label"><span>Spending</span><span>tap for bills</span></div><div class="gcard">${ordered.map(catRow).join('')}</div>`;
-  if(sav.length) html += `<div class="day-label"><span>Saving</span></div><div class="gcard">${sav.map(catRow).join('')}</div>`;
+  html += `<div class="section-title">Spending by category<span>tap for details</span></div><div class="gcard" style="padding:0">${ordered.map(catRow).join('')}</div>`;
+  if(sav.length) html += `<div class="section-title">Saving</div><div class="gcard" style="padding:0">${sav.map(catRow).join('')}</div>`;
   const unmatched = (data.bills || []).filter(b => !b.category || !data.categories.some(c=>c.category_code === b.category.code));
-  if(unmatched.length) html += `<div class="day-label"><span>Other recurring bills</span></div><div class="gcard">${unmatched.map(b=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(b.name)}</div><div class="grow-sub">${b.autopay ? 'Autopay' : 'Manual'}</div></div><div class="grow-right">${money(b.amount_cents)}/${esc(b.frequency)}</div></div>`).join('')}</div>`;
+  if(unmatched.length) html += `<div class="section-title">Other recurring bills</div><div class="gcard">${unmatched.map(b=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(b.name)}</div><div class="grow-sub">${b.autopay ? 'Autopay' : 'Manual'}</div></div><div class="grow-right">${money(b.amount_cents)}/${esc(b.frequency)}</div></div>`).join('')}</div>`;
   if(data.goals && data.goals.length){
-    html += `<div class="day-label"><span>Savings goals</span></div><div class="gcard">${data.goals.map(g=>{
+    html += `<div class="section-title">Savings goals</div><div class="gcard">${data.goals.map(g=>{
       const hasT = g.target_amount_cents != null && g.target_amount_cents > 0;
       const pct = hasT ? Math.min(100, Math.max(0, Math.round(100 * g.saved_amount_cents / g.target_amount_cents))) : 0;
       return `<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(g.name)}</div>
@@ -1346,10 +1411,12 @@ function renderBudget(data){
     }).join('')}</div>`;
   }
   if(data.income && data.income.length){
-    html += `<div class="day-label"><span>Income</span></div><div class="gcard">${data.income.map(i=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(i.name)}</div><div class="grow-sub">${esc(i.frequency)}, take-home</div></div><div class="grow-right">${money(i.net_amount_cents)}</div></div>`).join('')}</div>`;
+    html += `<div class="section-title">Income</div><div class="gcard">${data.income.map(i=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(i.name)}</div><div class="grow-sub">${esc(i.frequency)}, take-home</div></div><div class="grow-right">${money(i.net_amount_cents)}</div></div>`).join('')}</div>`;
   }
   el.innerHTML = html;
-  el.querySelectorAll('[data-bcat]').forEach(r=>r.addEventListener('click', ()=>{
+  el.querySelectorAll('[data-bcat]').forEach(r=>r.addEventListener('click', e=>{
+    const j = e.target.closest('[data-catjump]');
+    if(j){ e.stopPropagation(); txnFilter = j.dataset.catjump; setMoneySeg('txns'); renderTxns(); return; }
     const c = r.getAttribute('data-bcat'); expandedBudgetCat = expandedBudgetCat === c ? null : c; renderBudget(data);
   }));
 }
@@ -1749,7 +1816,7 @@ function renderAssetMap(){
 }
 async function refreshLifeMap(){
   try{ await fetchMapData(); } catch(err){ const b = document.getElementById('assetsErrorBanner'); if(b) b.innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
-  renderMapControls(); renderAssetMap();
+  renderMapControls(); renderAssetMap(); renderBriefing();
 }
 document.getElementById('mapMenuBtn').addEventListener('click', ()=>{
   const panel = document.getElementById('mapPanel'), btn = document.getElementById('mapMenuBtn');
@@ -1802,7 +1869,7 @@ function renderAssets(assets){
         maint = m.length ? `<div class="kv" style="margin-top:6px"><span>Service history</span><span></span></div>` + m.map(r=>`<div class="kv"><span>${r.service_date ? shortDate(r.service_date) + ' ' + r.service_date.slice(0,4) : 'Undated'}, ${esc(r.service_type || 'Service')}${r.shop ? ` at ${esc(r.shop)}` : ''}${r.next_due_date ? `, next due ${shortDate(r.next_due_date)}` : ''}</span><span>${r.cost != null ? formatMoney(r.cost) : ''}</span></div>`).join('')
                    : `<div class="kv"><span>No service logged yet</span><span></span></div>`;
       }
-      const sub = [a.sub_category, a.brand].filter(Boolean).map(esc).join(', ');
+      const sub = [a.sub_category, (a.brand && !String(a.item||'').toLowerCase().startsWith(String(a.brand).toLowerCase())) ? a.brand : null].filter(Boolean).map(esc).join(', ');
       return `<div class="grow asset-card" data-code="${esc(a.code)}" style="flex-wrap:wrap">
         <div class="grow-main"><div class="grow-title">${esc(a.item)}</div>${sub ? `<div class="grow-sub">${sub}</div>` : ''}</div>
         <div class="grow-right">${v != null ? formatMoney(v) : ''}</div>
@@ -2592,7 +2659,7 @@ function briefRow(area, icon, title, sub, warn){
 function homeMoney(){
   if(!lastBudgetData || !lastBudgetData.summary) return null;
   const exp = lastBudgetData.categories.filter(c=>c.category_type !== 'savings');
-  const planned = exp.reduce((a,c)=>a+(c.planned_cents||0)+(c.carried_in_cents||0),0);
+  const planned = exp.reduce((a,c)=>a+Number(c.planned_cents||0)+Number(c.carried_in_cents||0),0);
   const spent = exp.reduce((a,c)=>a+Number(c.spent_cents||0),0);
   const worst = exp.map(c=>({ name:c.category, over: Number(c.spent_cents||0) - (c.planned_cents||0) - (c.carried_in_cents||0) })).sort((a,b)=>b.over-a.over)[0];
   return { planned, spent, left: planned - spent, worst };
@@ -2614,39 +2681,64 @@ function homeFallbackText(){
   return parts.join(' ') || 'Your day at a glance.';
 }
 function renderBriefing(){
-  const tiles = document.getElementById('homeTiles'); if(!tiles) return;
-  const m = homeMoney(), meal = homeNextMeal();
-  let steps = null, avg = null;
-  if(lastHealthData && lastHealthData.daily){ const S = healthSummary(lastHealthData.daily, lastHealthData.workouts || []); steps = S.todayRow && S.todayRow.steps != null ? S.todayRow.steps : 0; avg = S.avg30; }
-  const tile = (tab, icon, k, v, d, neg) => `<button class="home-tile" type="button" data-area="${tab}"><span class="k">${svgIcon(icon)}${k}</span><div class="v ${neg?'neg':''}">${v}</div><div class="d">${esc(d)}</div></button>`;
-  tiles.innerHTML =
-    tile('money','money', m && m.left < 0 ? 'Over' : 'Left', m ? money(Math.abs(m.left)) : '—', m ? `this week of ${money(m.planned)}` : 'No budget yet', m && m.left < 0) +
-    tile('health','health','Steps', steps != null ? steps.toLocaleString() : '—', avg ? `avg ${avg.toLocaleString()}` : 'today', false) +
-    tile('food','food','Next meal', meal ? esc(meal.name) : '—', meal ? meal.when : 'Nothing planned', false);
-  const todosEl = document.getElementById('homeTodos');
-  if(allTodos && allTodos.length){
+  const grid = document.getElementById('homeTiles'); if(!grid) return;
+  const ic = (name, color) => `<span class="wdg-ico" style="background:${color}22;color:${color}">${svgIcon(name)}</span>`;
+  const top = (name, color, label) => `<div class="wdg-top">${ic(name, color)}<span>${label}</span>${CHEV}</div>`;
+  let html = '';
+  // Money (full width)
+  const m = homeMoney();
+  if(m){
+    const pct = m.planned ? Math.min(100, Math.round(100*m.spent/m.planned)) : 0;
+    const cats = (lastBudgetData.categories||[]).filter(c=>c.category_type!=='savings' && Number(c.spent_cents) > 0).sort((a,b)=>Number(b.spent_cents)-Number(a.spent_cents)).slice(0,3);
+    html += `<button class="wdg wide" type="button" data-area="money">${top('money','#2E8B57','Money this week')}
+      <div class="wdg-v ${m.left<0?'neg':''}">${m.left < 0 ? money(-m.left) + ' over' : money(m.left) + ' left'}</div>
+      <div class="wdg-d">${money(m.spent)} spent of ${money(m.planned)}</div>
+      <div class="wdg-bar"><div class="${m.left<0?'over':''}" style="width:${pct}%"></div></div>
+      <div class="wdg-cats">${cats.map(c=>`<span><b>${esc(c.category)}</b> ${money(Number(c.spent_cents))}</span>`).join('')}</div></button>`;
+  } else html += `<button class="wdg wide" type="button" data-area="money">${top('money','#2E8B57','Money')}<div class="wdg-d">Loading…</div></button>`;
+  // Food
+  const meal = homeNextMeal();
+  let groc = '';
+  if(foodData && foodData.plan){ const T = groceryTotals(foodData.plan); groc = `${money(T.projected)} groceries to buy`; }
+  html += `<button class="wdg" type="button" data-area="food">${top('food','#D9822B','Food')}<div class="wdg-v small">${meal ? esc(meal.name) : 'Nothing planned'}</div><div class="wdg-d">${meal ? esc(meal.when) : ''}</div><div class="wdg-d" style="margin-top:auto">${groc}</div></button>`;
+  // Health
+  let hv = '—', hd = 'Steps today', spark = '';
+  if(lastHealthData && lastHealthData.daily){
+    const S = healthSummary(lastHealthData.daily, lastHealthData.workouts || []);
+    hv = (S.todayRow && S.todayRow.steps != null ? S.todayRow.steps : 0).toLocaleString();
+    hd = S.avg30 ? `steps, avg ${S.avg30.toLocaleString()}` : 'steps today';
+    const days = []; for(let i=6;i>=0;i--) days.push(isoAddDays(localToday(), -i));
+    const by = {}; lastHealthData.daily.forEach(d=>by[d.activity_date]=d.steps||0);
+    const mx = Math.max(1, ...days.map(d=>by[d]||0));
+    spark = `<div class="wdg-spark">${days.map((d,i)=>`<i class="${i===6?'today':''}" style="height:${Math.max(8, Math.round(100*(by[d]||0)/mx))}%"></i>`).join('')}</div>`;
+  }
+  html += `<button class="wdg" type="button" data-area="health">${top('health','#C4382A','Health')}<div class="wdg-v">${hv}</div><div class="wdg-d">${hd}</div>${spark}</button>`;
+  // Todos
+  if(allTodos){
     const today = localToday(), open = allTodos.filter(t=>t.status==='open');
+    const late = open.filter(t=>t.due_date && t.due_date < today).length;
     const rank = t => (t.due_date && t.due_date < today ? 0 : t.priority==='high' ? 1 : t.due_date ? 2 : 3);
-    const top = open.slice().sort((a,b)=>rank(a)-rank(b) || (a.due_date||'9999').localeCompare(b.due_date||'9999')).slice(0,3);
-    todosEl.innerHTML = `<div class="home-todos-head">Todos</div>` + top.map(t=>{
-      const late = t.due_date && t.due_date < today;
-      return `<div class="home-todo"><span class="dot ${t.priority==='high'||late?'high':''}"></span><span>${esc(t.title)}</span>${t.due_date ? `<span class="when ${late?'late':''}">${late?'Overdue':shortDate(t.due_date)}</span>` : ''}</div>`;
-    }).join('') + `<button class="home-todos-all" type="button" data-area="todos"><span>All ${open.length} open todos</span>${CHEV}</button>`;
-  } else todosEl.innerHTML = '';
+    const next = open.slice().sort((a,b)=>rank(a)-rank(b) || (a.due_date||'9999').localeCompare(b.due_date||'9999'))[0];
+    html += `<button class="wdg" type="button" data-area="todos">${top('todos','#8A5CC7','Todos')}<div class="wdg-v">${open.length} open</div><div class="wdg-d" ${late?'style="color:var(--coral)"':''}>${late ? `${late} overdue` : 'nothing overdue'}</div><div class="wdg-d" style="margin-top:auto">${next ? 'Next: ' + esc(next.title) : ''}</div></button>`;
+  }
+  // Map
+  const pts = (mapData && mapData.points) ? mapData.points.length : 0, buys = (mapData && mapData.txns) ? mapData.txns.length : 0;
+  html += `<button class="wdg" type="button" data-area="assets">${top('map','#3F7CC0','Map')}<div class="wdg-v">${buys}</div><div class="wdg-d">purchases mapped, 7 days</div><div class="wdg-d" style="margin-top:auto">${mapData && mapData.lastPoint ? 'Last place ' + timeAgo(mapData.lastPoint.recorded_at) : 'Places: logger not sending yet'}</div></button>`;
+  grid.innerHTML = html;
   const brief = document.getElementById('homeBrief');
   if(brief.classList.contains('loading') || brief.dataset.source !== 'ai'){ brief.textContent = homeFallbackText(); brief.classList.remove('loading'); brief.dataset.source = 'local'; }
   loadAiBriefing();
 }
-let briefInFlight = false;
+let briefInFlight = false, briefFailedAt = 0;
 async function loadAiBriefing(force){
-  if(briefInFlight || !session) return;
+  if(briefInFlight || !session || (!force && Date.now() - briefFailedAt < 15*60000)) return;
   const key = 'otto-brief-' + localToday(), brief = document.getElementById('homeBrief');
   try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c && !force && Date.now() - c.at < 3*3600000){ brief.textContent = c.text; brief.dataset.source = 'ai'; return; } } catch(e){}
   briefInFlight = true;
   try{
     const r = await callFn('otto-chat', { mode:'briefing' });
     if(r.text){ brief.textContent = r.text; brief.dataset.source = 'ai'; try{ localStorage.setItem(key, JSON.stringify({ at: Date.now(), text: r.text })); } catch(e){} }
-  } catch(e){ /* keep the local summary; chat shows the reason if asked */ }
+  } catch(e){ briefFailedAt = Date.now(); /* keep the local summary; wait 15 min before asking again */ }
   finally{ briefInFlight = false; }
 }
 document.getElementById('briefCard').addEventListener('click', e=>{ const b = e.target.closest('[data-area]'); if(b) openSheet(b.dataset.area); });
@@ -2686,7 +2778,7 @@ function openSheet(area){
   body.scrollTop = 0;
   sheet.hidden = false; backdrop.hidden = false;
   requestAnimationFrame(()=> requestAnimationFrame(()=> document.body.classList.add('sheet-open')));
-  const sub = (area === 'todos' || area === 'account' || area === 'areas');
+  const sub = true;
   document.getElementById('pageBack').classList.toggle('show', sub);
   setActiveTab(sub ? 'home' : area);
   renderSyncChips();
@@ -3135,6 +3227,9 @@ function setActiveTab(k){ document.querySelectorAll('.tab-item').forEach(b=>{ co
   });
 })();
 document.getElementById('pageBack').addEventListener('click', closeSheet);
+function setMoneySeg(k){ document.body.dataset.moneyseg = k; document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.classList.toggle('active', b.dataset.msegBtn === k)); const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
+setMoneySeg('week');
+document.getElementById('moneySeg').addEventListener('click', e=>{ const b = e.target.closest('[data-mseg-btn]'); if(b) setMoneySeg(b.dataset.msegBtn); });
 
 let lastRefreshAt = Date.now(), refreshing = false;
 function syncLabel(){
