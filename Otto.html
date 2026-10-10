@@ -641,6 +641,64 @@
   .thread{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 90px);}
   .otto-top{align-items:center;}
   @media (prefers-reduced-motion: reduce){ .sheet{transition:none;} }
+
+  /* ---------- Build .12: transaction symbols ---------- */
+  .txn-row{grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:2px 12px; padding:10px 16px 10px 14px;}
+  .txn-ico{width:36px; height:36px; border-radius:18px; display:grid; place-items:center; grid-row:span 2;}
+  .txn-ico svg{width:19px; height:19px;}
+  .txn-meta{grid-column:2 / 3;}
+  .txn-pick{grid-column:1 / -1;}
+  .txn-day{display:flex; justify-content:space-between; margin:1.1rem 6px 0.45rem; font-size:0.8rem; color:var(--text-faint);}
+  .txn-day b{font-weight:600; color:var(--text-muted);}
+  .txn-filters{display:flex; gap:8px; overflow-x:auto; padding:2px 0 6px; scrollbar-width:none;}
+  .txn-filters::-webkit-scrollbar{display:none;}
+  .txn-group{background:var(--surface); border-radius:var(--radius); overflow:hidden;}
+  .txn-more{display:block; margin:12px auto 4px; border:none; background:none; color:var(--accent-text); font:inherit; font-weight:600; cursor:pointer;}
+  #txnList{background:none !important; border:none !important;}
+
+  /* ---------- Build .13: personal map ---------- */
+  .sheet.map-mode .sheet-body{padding:0; max-width:none; position:relative; overflow:hidden; display:flex;}
+  .sheet.map-mode #panelAssets{flex:1; position:relative; min-height:0;}
+  .sheet.map-mode .asset-map{position:absolute; inset:0; height:auto; border:none; border-radius:0; margin:0;}
+  .map-btn{position:absolute; top:12px; right:12px; z-index:500; width:44px; height:44px; border-radius:12px; border:none; background:var(--surface); color:var(--text); box-shadow:0 2px 10px rgba(0,0,0,0.18); display:grid; place-items:center; cursor:pointer;}
+  .map-btn svg{width:22px; height:22px;}
+  .map-btn.on{background:var(--accent); color:var(--on-accent);}
+  .map-summary{position:absolute; left:12px; top:12px; right:68px; z-index:500; background:color-mix(in srgb, var(--surface) 92%, transparent); -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); border-radius:12px; padding:8px 12px; font-size:0.8rem; color:var(--text-muted); box-shadow:0 2px 10px rgba(0,0,0,0.12); pointer-events:none;}
+  .map-panel{position:absolute; left:8px; right:8px; bottom:8px; top:66px; z-index:600; background:var(--bg); border-radius:18px; box-shadow:0 8px 30px rgba(0,0,0,0.25); overflow-y:auto; padding:14px 14px 20px; -webkit-overflow-scrolling:touch;}
+  .map-panel[hidden]{display:none;}
+  .map-panel h3{font-family:var(--display); font-size:1.05rem; margin:4px 4px 8px;}
+  .layer-row{display:flex; align-items:center; gap:12px; padding:11px 14px; border-top:1px solid var(--border); cursor:pointer;}
+  .layer-row:first-child{border-top:none;}
+  .layer-swatch{width:14px; height:14px; border-radius:7px; flex-shrink:0;}
+  .layer-row .grow-main{flex:1;}
+  .layer-row input{width:20px; height:20px; accent-color:var(--accent);}
+  .map-ranges{display:flex; gap:8px; flex-wrap:wrap; margin:4px 0 14px;}
+  .map-help{font-size:0.8rem; color:var(--text-faint); margin:6px 4px 12px; line-height:1.4;}
+
+  /* ---------- Build .14: new Home + live chat ---------- */
+  .brief{background:none; border-radius:0; padding:0; overflow:visible;}
+  .home-brief{font-size:1.05rem; line-height:1.45; color:var(--text); padding:2px 4px 14px; min-height:1.5em;}
+  .home-brief.loading{color:var(--text-faint);}
+  .home-tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .home-tile{background:var(--surface); border:none; border-radius:18px; padding:13px 12px 12px; text-align:left; font:inherit; color:var(--text); cursor:pointer; min-width:0;}
+  .home-tile:active{transform:scale(0.98);}
+  .home-tile .k{font-size:0.74rem; color:var(--text-faint); display:flex; align-items:center; gap:5px;}
+  .home-tile .k svg{width:14px; height:14px;}
+  .home-tile .v{font-family:var(--display); font-weight:700; font-size:1.25rem; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-variant-numeric:tabular-nums;}
+  .home-tile .v.neg{color:var(--coral);}
+  .home-tile .d{font-size:0.72rem; color:var(--text-faint); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .home-todos{background:var(--surface); border-radius:18px; margin-top:10px; overflow:hidden;}
+  .home-todo{display:flex; align-items:center; gap:12px; padding:11px 16px; border-top:1px solid var(--border); font-size:0.94rem;}
+  .home-todo:first-of-type{border-top:none;}
+  .home-todo .dot{width:8px; height:8px; border-radius:4px; background:var(--text-faint); flex-shrink:0;}
+  .home-todo .dot.high{background:var(--coral);}
+  .home-todo .when{margin-left:auto; font-size:0.78rem; color:var(--text-faint); white-space:nowrap;}
+  .home-todo .when.late{color:var(--coral);}
+  .home-todos-all{display:flex; justify-content:space-between; width:100%; padding:12px 16px; border:none; border-top:1px solid var(--border); background:none; font:inherit; font-size:0.9rem; color:var(--accent-text); font-weight:600; cursor:pointer;}
+  .home-todos-head{padding:12px 16px 4px; font-size:0.8rem; color:var(--text-faint);}
+  .msg.otto.typing{color:var(--text-faint);}
+  .msg.otto.err{color:var(--coral);}
+  .msg.otto{white-space:pre-wrap;}
 </style>
 </head>
 <body>
@@ -672,11 +730,13 @@
     <h1 class="otto-hello" id="ottoHello">Hello, Samuel</h1>
   </div>
   <div class="brief" id="briefCard">
-    <div class="brief-lead">Here's where things stand.</div>
-    <div id="briefRows" aria-live="polite"><div class="brief-skel skeleton-row"></div><div class="brief-skel skeleton-row"></div><div class="brief-skel skeleton-row"></div></div>
+    <div class="home-brief loading" id="homeBrief" aria-live="polite">Pulling your day together…</div>
+    <div class="home-tiles" id="homeTiles"><div class="brief-skel skeleton-row"></div></div>
+    <div class="home-todos" id="homeTodos"></div>
+    <div id="briefRows" hidden></div>
   </div>
   <div class="thread" id="chatThread">
-    <div class="msg otto">Hi, I'm Otto. Tap anything above to open it. Chatting with me is the next thing being built, so I can't answer questions yet.</div>
+    <div class="msg otto">Ask me anything about your money, food, todos, or health. I read straight from your data, and I can't change anything yet.</div>
   </div>
   <form class="composer" id="composer" autocomplete="off">
     <div class="composer-inner">
@@ -751,15 +811,25 @@
     </div>
 
     <div class="tab-panel" id="panelAssets">
-      <div id="assetsErrorBanner"></div>
-      <div id="assetHero"></div>
       <div id="assetMap" class="asset-map"></div>
-      <div class="asset-toolbar">
-        <div id="assetTotalValue" class="asset-total"></div>
-        <button class="chip" id="assetSortToggle" type="button">Sort: A–Z</button>
+      <div class="map-summary" id="mapSummary">Loading map…</div>
+      <button class="map-btn" id="mapMenuBtn" type="button" aria-label="Map layers and settings" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
+      <div class="map-panel" id="mapPanel" hidden>
+        <div id="assetsErrorBanner"></div>
+        <h3>Show</h3>
+        <div class="gcard" style="padding:0" id="mapLayers"></div>
+        <h3 style="margin-top:14px">When</h3>
+        <div class="map-ranges" id="mapRanges"></div>
+        <div class="map-help" id="mapHelp"></div>
+        <h3>Assets</h3>
+        <div id="assetHero"></div>
+        <div class="asset-toolbar">
+          <div id="assetTotalValue" class="asset-total"></div>
+          <button class="chip" id="assetSortToggle" type="button">Sort: A–Z</button>
+        </div>
+        <div class="controls" id="assetFilters"></div>
+        <div id="assetsList"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
       </div>
-      <div class="controls" id="assetFilters"></div>
-      <div id="assetsList"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
 
     <div class="tab-panel" id="panelHealth">
@@ -818,7 +888,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-10.11';
+const APP_BUILD = '2026-10-10.14';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1594,44 +1664,105 @@ function renderAssetFilters(assets){
   });
 }
 
-function renderAssetMap(assets){
-  const mapEl = document.getElementById('assetMap');
-  const withLocation = assets.filter(a => a.location && a.location.lat != null && a.location.lng != null);
-  if(!withLocation.length){ mapEl.style.display = 'none'; return; }
-  mapEl.style.display = 'block';
-
-  const byLoc = {};
-  withLocation.forEach(a=>{
-    const code = a.location.code;
-    if(!byLoc[code]) byLoc[code] = { name: a.location.name, lat: parseFloat(a.location.lat), lng: parseFloat(a.location.lng), count: 0 };
-    byLoc[code].count++;
-  });
-
+let mapLayersOn = { places:true, purchases:true, assets:true }, mapRangeDays = 7, mapData = { points:[], txns:[] }, mapGroups = null, mapFitKey = '';
+const MAP_RANGES = [[1,'Today'],[7,'7 days'],[30,'30 days'],[90,'90 days'],[0,'All']];
+function mapSinceIso(){ if(!mapRangeDays) return null; const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - (mapRangeDays - 1)); return d; }
+async function fetchMapData(){
+  const since = mapSinceIso();
+  const tq = `${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,merchant,description,amount_cents,category_id,location_lat,location_lon,location_city&removed_at=is.null&location_lat=not.is.null${since ? `&transaction_date=gte.${since.toISOString().slice(0,10)}` : ''}&order=transaction_date.desc&limit=1000`;
+  const pq = `${SUPABASE_URL}/rest/v1/location_points?select=recorded_at,lat,lon,accuracy_m${since ? `&recorded_at=gte.${encodeURIComponent(since.toISOString())}` : ''}&order=recorded_at.asc&limit=8000`;
+  const cq = `${SUPABASE_URL}/rest/v1/location_points?select=recorded_at&order=recorded_at.desc&limit=1`;
+  const [t, p, c] = await Promise.all([fetch(tq,{headers:authHeaders()}), fetch(pq,{headers:authHeaders()}), fetch(cq,{headers:authHeaders()})]);
+  if(!t.ok || !p.ok) throw new Error(`Supabase returned ${t.ok ? p.status : t.status}`);
+  mapData = { txns: await t.json(), points: await p.json(), lastPoint: c.ok ? ((await c.json())[0] || null) : null };
+}
+function renderMapControls(){
+  const nAssets = allAssets.filter(a=>a.location && a.location.lat != null).length;
+  const layers = [
+    ['places', 'Places I went', TXN_STYLE['Phone and utilities'][0], mapData.points.length ? `${mapData.points.length.toLocaleString()} points` : 'No logger connected yet'],
+    ['purchases', 'Where I spent', TXN_STYLE['Dining out'][0], `${mapData.txns.length} purchase${mapData.txns.length===1?'':'s'} with a location`],
+    ['assets', 'My stuff', TXN_STYLE['Savings'][0], `${nAssets} items at ${new Set(allAssets.filter(a=>a.location).map(a=>a.location.code)).size} places`]
+  ];
+  document.getElementById('mapLayers').innerHTML = layers.map(([k,name,color,sub])=>`<label class="layer-row"><span class="layer-swatch" style="background:${color}"></span><span class="grow-main"><span class="grow-title" style="display:block">${name}</span><span class="grow-sub" style="display:block">${esc(sub)}</span></span><input type="checkbox" data-layer="${k}" ${mapLayersOn[k]?'checked':''}></label>`).join('');
+  document.getElementById('mapRanges').innerHTML = MAP_RANGES.map(([d,l])=>`<button class="chip ${mapRangeDays===d?'active':''}" type="button" data-maprange="${d}">${l}</button>`).join('');
+  document.getElementById('mapHelp').textContent = mapData.lastPoint ? `Last location point ${timeAgo(mapData.lastPoint.recorded_at)}.` :
+    'Places I went fills in once a location logger app (OwnTracks or Overland) is sending to Otto. Purchases only show when the bank includes a store location.';
+}
+function renderAssetMap(){
+  const mapEl = document.getElementById('assetMap'); if(!mapEl || typeof L === 'undefined') return;
   if(!assetMapInstance){
-    assetMapInstance = L.map('assetMap', { scrollWheelZoom: false });
+    assetMapInstance = L.map('assetMap', { zoomControl:false, attributionControl:true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(assetMapInstance);
+    mapGroups = { places: L.layerGroup().addTo(assetMapInstance), purchases: L.layerGroup().addTo(assetMapInstance), assets: L.layerGroup().addTo(assetMapInstance) };
   }
-  assetMapInstance.eachLayer(l => assetMapInstance.removeLayer(l));
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 18, attribution: '© OpenStreetMap'
-  }).addTo(assetMapInstance);
-
+  Object.values(mapGroups).forEach(g=>g.clearLayers());
   const bounds = [];
-  Object.entries(byLoc).forEach(([code, loc])=>{
-    const marker = L.marker([loc.lat, loc.lng]).addTo(assetMapInstance);
-    marker.bindPopup(`<strong>${loc.name}</strong><br>${loc.count} item${loc.count===1?'':'s'}`);
-    marker.on('click', ()=>{
-      activeAssetLocationCode = (activeAssetLocationCode === code) ? 'all' : code;
-      renderAssets(allAssets);
+  // places: one line per day plus a dot where you stayed put
+  if(mapLayersOn.places && mapData.points.length){
+    const color = TXN_STYLE['Phone and utilities'][0], byDay = {};
+    mapData.points.forEach(p=>{ const k = new Date(p.recorded_at).toDateString(); (byDay[k] = byDay[k] || []).push(p); });
+    Object.values(byDay).forEach(pts=>{
+      const ll = pts.map(p=>[p.lat, p.lon]); ll.forEach(x=>bounds.push(x));
+      if(ll.length > 1) L.polyline(ll, { color, weight:3, opacity:0.7 }).addTo(mapGroups.places);
+      pts.forEach((p,i)=>{ if(i===0 || i===pts.length-1 || i % 25 === 0) L.circleMarker([p.lat,p.lon], { radius:4, color, fillColor:color, fillOpacity:0.9, weight:1 })
+        .bindPopup(new Date(p.recorded_at).toLocaleString('en-US',{weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})).addTo(mapGroups.places); });
     });
-    bounds.push([loc.lat, loc.lng]);
-  });
-  if(bounds.length === 1){
-    assetMapInstance.setView(bounds[0], 11);
-  } else {
-    assetMapInstance.fitBounds(bounds, { padding: [30,30] });
   }
+  if(mapLayersOn.purchases){
+    const cats = allCategories || [];
+    mapData.txns.forEach(t=>{
+      const name = (cats.find(c=>c.id===t.category_id) || {}).name || null;
+      const color = (TXN_STYLE[name] || TXN_STYLE._none)[0];
+      const r = Math.max(5, Math.min(14, 4 + Math.sqrt(Math.abs(t.amount_cents)/100)));
+      bounds.push([t.location_lat, t.location_lon]);
+      L.circleMarker([t.location_lat, t.location_lon], { radius:r, color:'#fff', weight:1.5, fillColor:color, fillOpacity:0.9 })
+        .bindPopup(`<strong>${esc(t.merchant || t.description || '')}</strong><br>${money(t.amount_cents)}, ${shortDate(t.transaction_date)}${name ? `<br>${esc(name)}` : ''}`).addTo(mapGroups.purchases);
+    });
+  }
+  if(mapLayersOn.assets){
+    const byLoc = {};
+    allAssets.filter(a=>a.location && a.location.lat != null && a.location.lng != null).forEach(a=>{
+      const c = a.location.code; byLoc[c] = byLoc[c] || { name:a.location.name, lat:parseFloat(a.location.lat), lng:parseFloat(a.location.lng), items:[] }; byLoc[c].items.push(a.item);
+    });
+    const color = TXN_STYLE['Savings'][0];
+    Object.entries(byLoc).forEach(([code, loc])=>{
+      bounds.push([loc.lat, loc.lng]);
+      const icon = L.divIcon({ className:'', html:`<div style="background:${color};color:#fff;border:2px solid #fff;border-radius:14px;min-width:28px;height:28px;padding:0 6px;display:grid;place-items:center;font:600 12px var(--sans);box-shadow:0 2px 6px rgba(0,0,0,.3)">${loc.items.length}</div>`, iconSize:[28,28], iconAnchor:[14,14] });
+      L.marker([loc.lat, loc.lng], { icon }).bindPopup(`<strong>${esc(loc.name)}</strong><br>${loc.items.length} item${loc.items.length===1?'':'s'}<br><span style="font-size:0.85em">${loc.items.slice(0,6).map(esc).join(', ')}${loc.items.length>6?'…':''}</span>`)
+        .on('click', ()=>{ activeAssetLocationCode = code; renderAssets(allAssets); }).addTo(mapGroups.assets);
+    });
+  }
+  const key = `${mapRangeDays}|${mapLayersOn.places}|${mapLayersOn.purchases}|${mapLayersOn.assets}|${bounds.length}`;
+  if(key !== mapFitKey){
+    mapFitKey = key;
+    if(bounds.length === 1) assetMapInstance.setView(bounds[0], 14);
+    else if(bounds.length) assetMapInstance.fitBounds(bounds, { padding:[40,40], maxZoom:15 });
+    else assetMapInstance.setView([42.5584, -70.88], 12);
+  }
+  const label = MAP_RANGES.find(r=>r[0]===mapRangeDays)[1];
+  const parts = [];
+  if(mapLayersOn.places) { const d = new Set(mapData.points.map(p=>new Date(p.recorded_at).toDateString())).size; parts.push(mapData.points.length ? `${d} day${d===1?'':'s'} of places` : 'no places yet'); }
+  if(mapLayersOn.purchases) parts.push(`${mapData.txns.length} purchase${mapData.txns.length===1?'':'s'}`);
+  if(mapLayersOn.assets) parts.push('your stuff');
+  document.getElementById('mapSummary').textContent = `${label}: ${parts.join(', ') || 'all layers off'}`;
   setTimeout(()=>{ if(assetMapInstance) assetMapInstance.invalidateSize(); }, 100);
 }
+async function refreshLifeMap(){
+  try{ await fetchMapData(); } catch(err){ const b = document.getElementById('assetsErrorBanner'); if(b) b.innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
+  renderMapControls(); renderAssetMap();
+}
+document.getElementById('mapMenuBtn').addEventListener('click', ()=>{
+  const panel = document.getElementById('mapPanel'), btn = document.getElementById('mapMenuBtn');
+  panel.hidden = !panel.hidden; btn.classList.toggle('on', !panel.hidden); btn.setAttribute('aria-expanded', String(!panel.hidden));
+});
+document.getElementById('mapPanel').addEventListener('change', e=>{
+  const c = e.target.closest('[data-layer]'); if(!c) return;
+  mapLayersOn[c.dataset.layer] = c.checked; renderAssetMap();
+});
+document.getElementById('mapPanel').addEventListener('click', async e=>{
+  const r = e.target.closest('[data-maprange]'); if(!r) return;
+  mapRangeDays = Number(r.dataset.maprange); renderMapControls(); await refreshLifeMap();
+});
 
 function renderAssets(assets){
   const list = document.getElementById('assetsList');
@@ -1696,7 +1827,7 @@ async function refreshAssets(){
     allAssets = assets;
     renderAssetFilters(assets);
     renderAssets(assets);
-    renderAssetMap(assets);
+    await refreshLifeMap();
   } catch(err){
     banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${err.message}).</div>`;
   }
@@ -2436,7 +2567,7 @@ const AREAS = {
   money:   { title:'Money',   icon:'money',  panels:['panelAccounts','panelBudget'] },
   food:    { title:'Food',    icon:'food',   panels:['panelFood'] },
   health:  { title:'Health',  icon:'health', panels:['panelHealth'] },
-  assets:  { title:'Assets',  icon:'assets', panels:['panelAssets'] },
+  assets:  { title:'Map',     icon:'map',    panels:['panelAssets'] },
   account: { title:'Account', icon:null,     panels:['panelAccount'] }
 };
 function svgIcon(name){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${OTTO_ICONS[name]||''}</svg>`; }
@@ -2458,47 +2589,67 @@ function briefRow(area, icon, title, sub, warn){
     <span class="brief-text"><span class="brief-title" style="display:block">${esc(title)}</span><span class="brief-sub${warn?' warn':''}" style="display:block">${esc(sub)}</span></span>${CHEV}</button>`;
 }
 
-function renderBriefing(){
-  const el = document.getElementById('briefRows'); if(!el) return;
-  const rows = [];
-  // Food
-  if(foodData && foodData.plan){
-    const T = groceryTotals(foodData.plan);
-    const today = localToday();
-    const tonight = (foodData.plan.meal_plan_items||[]).find(i=>i.planned_date===today && i.meal_type==='dinner');
-    rows.push(briefRow('food','food', T.left >= 0 ? `Groceries, ${money(T.left)} under budget` : `Groceries, ${money(-T.left)} over budget`,
-      `${tonight ? `Tonight: ${tonight.recipe ? tonight.recipe.name : tonight.title}. ` : ''}${money(T.projected)} to buy, ${T.inCart} of ${T.buy.length} in cart`, T.left < 0));
-  }
-  // Todos
-  if(allTodos && allTodos.length){
-    const today = new Date().toISOString().slice(0,10);
-    const open = allTodos.filter(t=>t.status==='open');
-    const overdue = open.filter(t=>t.due_date && t.due_date < today);
-    const high = open.filter(t=>t.priority==='high').sort((a,b)=>(a.due_date||'9999').localeCompare(b.due_date||'9999') || String(a.code).localeCompare(String(b.code)));
-    const sub = overdue.length ? `${overdue.length} overdue` : (high.length ? `${high.length} high priority. Next up: ${high[0].title}` : 'Nothing high priority');
-    rows.push(briefRow('todos','todos', `${open.length} open todo${open.length===1?'':'s'}`, sub, overdue.length > 0));
-  }
-  // Money
-  if(lastBudgetData){
-    const nb = nextBillDue(lastBudgetData.bills);
-    if(nb){
-      const d = daysUntil(nb.nextDate);
-      rows.push(briefRow('money','money', `${nb.name}, ${money(nb.amount_cents)}`, `Next bill, due ${shortDate(nb.nextDate)} (${d===0?'today':d<0?'overdue':'in '+d+' days'})`, d <= 3));
-    }
-    const g = (lastBudgetData.goals||[]).find(x=>x.target_amount_cents > 0);
-    if(g){
-      const pct = Math.round(100 * g.saved_amount_cents / g.target_amount_cents);
-      rows.push(briefRow('money','goal', `${g.name.split(' — ')[0]}, ${pct}%`, `${money(g.saved_amount_cents)} of ${money(g.target_amount_cents)}`));
-    }
-  }
-  // Health
-  if(lastHealthData){
-    const w = lastHealthData.workouts && lastHealthData.workouts[0];
-    if(w){ const d = Math.round((new Date() - new Date(w.start_time)) / 86400000); rows.push(briefRow('health','health', 'Last workout', d<=0 ? 'Today' : `${d} day${d===1?'':'s'} ago`, d > 7)); }
-    else rows.push(briefRow('health','health', 'Health', 'No workouts logged yet'));
-  }
-  if(rows.length) el.innerHTML = rows.join('');
+function homeMoney(){
+  if(!lastBudgetData || !lastBudgetData.summary) return null;
+  const exp = lastBudgetData.categories.filter(c=>c.category_type !== 'savings');
+  const planned = exp.reduce((a,c)=>a+(c.planned_cents||0)+(c.carried_in_cents||0),0);
+  const spent = exp.reduce((a,c)=>a+Number(c.spent_cents||0),0);
+  const worst = exp.map(c=>({ name:c.category, over: Number(c.spent_cents||0) - (c.planned_cents||0) - (c.carried_in_cents||0) })).sort((a,b)=>b.over-a.over)[0];
+  return { planned, spent, left: planned - spent, worst };
 }
+function homeNextMeal(){
+  if(!foodData || !foodData.plan) return null;
+  const items = foodData.plan.meal_plan_items || [], h = new Date().getHours(), today = localToday();
+  const order = { breakfast:0, lunch:1, dinner:2, snack:3 };
+  const minSlot = h < 10 ? 0 : h < 14 ? 1 : h < 20 ? 2 : 9;
+  const pick = items.filter(i=>i.planned_date === today && (order[i.meal_type] ?? 9) >= minSlot).sort((a,b)=>(order[a.meal_type]??9)-(order[b.meal_type]??9))[0]
+    || items.filter(i=>i.planned_date > today).sort((a,b)=>a.planned_date.localeCompare(b.planned_date) || (order[a.meal_type]??9)-(order[b.meal_type]??9))[0];
+  if(!pick) return null;
+  return { name: pick.recipe ? pick.recipe.name : pick.title, when: pick.planned_date === today ? `${pick.meal_type} today` : `${pick.meal_type}, ${new Date(pick.planned_date+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}`, leftover: !!pick.leftover_of };
+}
+function homeFallbackText(){
+  const parts = [], m = homeMoney(), meal = homeNextMeal();
+  if(m) parts.push(m.left >= 0 ? `You have ${money(m.left)} left to spend this week.` : `You're ${money(-m.left)} over this week's spending budget${m.worst && m.worst.over > 0 ? `, mostly ${m.worst.name.toLowerCase()}` : ''}.`);
+  if(meal) parts.push(`Next up: ${meal.name}${meal.leftover ? ' (leftovers)' : ''}, ${meal.when}.`);
+  return parts.join(' ') || 'Your day at a glance.';
+}
+function renderBriefing(){
+  const tiles = document.getElementById('homeTiles'); if(!tiles) return;
+  const m = homeMoney(), meal = homeNextMeal();
+  let steps = null, avg = null;
+  if(lastHealthData && lastHealthData.daily){ const S = healthSummary(lastHealthData.daily, lastHealthData.workouts || []); steps = S.todayRow && S.todayRow.steps != null ? S.todayRow.steps : 0; avg = S.avg30; }
+  const tile = (tab, icon, k, v, d, neg) => `<button class="home-tile" type="button" data-area="${tab}"><span class="k">${svgIcon(icon)}${k}</span><div class="v ${neg?'neg':''}">${v}</div><div class="d">${esc(d)}</div></button>`;
+  tiles.innerHTML =
+    tile('money','money', m && m.left < 0 ? 'Over' : 'Left', m ? money(Math.abs(m.left)) : '—', m ? `this week of ${money(m.planned)}` : 'No budget yet', m && m.left < 0) +
+    tile('health','health','Steps', steps != null ? steps.toLocaleString() : '—', avg ? `avg ${avg.toLocaleString()}` : 'today', false) +
+    tile('food','food','Next meal', meal ? esc(meal.name) : '—', meal ? meal.when : 'Nothing planned', false);
+  const todosEl = document.getElementById('homeTodos');
+  if(allTodos && allTodos.length){
+    const today = localToday(), open = allTodos.filter(t=>t.status==='open');
+    const rank = t => (t.due_date && t.due_date < today ? 0 : t.priority==='high' ? 1 : t.due_date ? 2 : 3);
+    const top = open.slice().sort((a,b)=>rank(a)-rank(b) || (a.due_date||'9999').localeCompare(b.due_date||'9999')).slice(0,3);
+    todosEl.innerHTML = `<div class="home-todos-head">Todos</div>` + top.map(t=>{
+      const late = t.due_date && t.due_date < today;
+      return `<div class="home-todo"><span class="dot ${t.priority==='high'||late?'high':''}"></span><span>${esc(t.title)}</span>${t.due_date ? `<span class="when ${late?'late':''}">${late?'Overdue':shortDate(t.due_date)}</span>` : ''}</div>`;
+    }).join('') + `<button class="home-todos-all" type="button" data-area="todos"><span>All ${open.length} open todos</span>${CHEV}</button>`;
+  } else todosEl.innerHTML = '';
+  const brief = document.getElementById('homeBrief');
+  if(brief.classList.contains('loading') || brief.dataset.source !== 'ai'){ brief.textContent = homeFallbackText(); brief.classList.remove('loading'); brief.dataset.source = 'local'; }
+  loadAiBriefing();
+}
+let briefInFlight = false;
+async function loadAiBriefing(force){
+  if(briefInFlight || !session) return;
+  const key = 'otto-brief-' + localToday(), brief = document.getElementById('homeBrief');
+  try{ const c = JSON.parse(localStorage.getItem(key) || 'null'); if(c && !force && Date.now() - c.at < 3*3600000){ brief.textContent = c.text; brief.dataset.source = 'ai'; return; } } catch(e){}
+  briefInFlight = true;
+  try{
+    const r = await callFn('otto-chat', { mode:'briefing' });
+    if(r.text){ brief.textContent = r.text; brief.dataset.source = 'ai'; try{ localStorage.setItem(key, JSON.stringify({ at: Date.now(), text: r.text })); } catch(e){} }
+  } catch(e){ /* keep the local summary; chat shows the reason if asked */ }
+  finally{ briefInFlight = false; }
+}
+document.getElementById('briefCard').addEventListener('click', e=>{ const b = e.target.closest('[data-area]'); if(b) openSheet(b.dataset.area); });
 
 // ----- sheet -----
 let sheetArea = null, sheetReturnFocus = null;
@@ -2523,13 +2674,14 @@ function openSheet(area){
   if(!sheetArea) sheetReturnFocus = document.activeElement;
   returnPanels();
   sheetArea = area;
+  sheet.classList.toggle('map-mode', area === 'assets');
   if(area === 'areas'){
     document.getElementById('sheetTitle').textContent = 'Areas';
     body.innerHTML = areaListHtml();
   } else {
     document.getElementById('sheetTitle').textContent = AREAS[area].title;
     AREAS[area].panels.forEach(id=>{ const p = document.getElementById(id); p.classList.add('active'); body.appendChild(p); });
-    if(area === 'assets') setTimeout(()=>{ if(assetMapInstance) assetMapInstance.invalidateSize(); }, 350);
+    if(area === 'assets'){ setTimeout(()=>{ if(assetMapInstance) assetMapInstance.invalidateSize(); }, 60); setTimeout(()=>{ if(assetMapInstance) assetMapInstance.invalidateSize(); }, 350); }
   }
   body.scrollTop = 0;
   sheet.hidden = false; backdrop.hidden = false;
@@ -2573,14 +2725,26 @@ document.getElementById('briefRows').addEventListener('click', e=>{ const b = e.
 document.getElementById('sheetBody').addEventListener('click', e=>{ const b = e.target.closest('.area-list [data-area]'); if(b) openSheet(b.dataset.area); });
 
 // ----- chat (placeholder until the assistant is connected) -----
-document.getElementById('composer').addEventListener('submit', e=>{
+const chatHistory = [];
+let chatBusy = false;
+document.getElementById('composer').addEventListener('submit', async e=>{
   e.preventDefault();
   const input = document.getElementById('askInput'), text = input.value.trim();
-  if(!text) return;
+  if(!text || chatBusy) return;
   const thread = document.getElementById('chatThread');
-  thread.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(text)}</div><div class="msg otto">I can't answer yet. Connecting me to your data is the next build step, and this message wasn't saved.</div>`);
-  input.value = '';
-  thread.lastElementChild.scrollIntoView({ behavior:'smooth', block:'end' });
+  chatHistory.push({ role:'user', content:text });
+  thread.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(text)}</div><div class="msg otto typing">Looking at your data…</div>`);
+  input.value = ''; chatBusy = true;
+  const pending = thread.lastElementChild; pending.scrollIntoView({ behavior:'smooth', block:'end' });
+  try{
+    const r = await callFn('otto-chat', { messages: chatHistory });
+    pending.classList.remove('typing'); pending.textContent = r.text || "I didn't get an answer back.";
+    chatHistory.push({ role:'assistant', content: r.text || '' });
+  } catch(err){
+    chatHistory.pop();
+    pending.classList.remove('typing'); pending.classList.add('err');
+    pending.textContent = /ANTHROPIC_API_KEY/.test(err.message) ? "I'm not switched on yet: the AI key still needs to be added in Supabase (secret ANTHROPIC_API_KEY)." : `Couldn't answer: ${err.message}`;
+  } finally { chatBusy = false; pending.scrollIntoView({ behavior:'smooth', block:'end' }); }
 });
 renderGreeting();
 
@@ -2751,13 +2915,13 @@ async function callFn(name, body){
   if(!res.ok) throw new Error(data.error || `Function ${name} returned ${res.status}`);
   return data;
 }
-let bankConnections = [], allTxns = [], expandedTxnId = null;
+let bankConnections = [], allTxns = [], expandedTxnId = null, txnLimit = 120, txnFilter = 'all';
 
 async function fetchBank(){
   const r = await fetch(`${SUPABASE_URL}/rest/v1/v_bank_connections?select=*&order=created_at.asc`, { headers: authHeaders() });
   if(!r.ok) throw new Error(`Supabase returned ${r.status}`);
   bankConnections = await r.json();
-  const t = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,description,merchant,amount_cents,pending,source,category_id,exclude_from_budget,plaid_category_primary,account:accounts(name)&removed_at=is.null&order=transaction_date.desc,id.desc&limit=60`, { headers: authHeaders() });
+  const t = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,description,merchant,amount_cents,pending,source,category_id,exclude_from_budget,plaid_category_primary,account:accounts(name)&removed_at=is.null&order=transaction_date.desc,id.desc&limit=${txnLimit}`, { headers: authHeaders() });
   if(!t.ok) throw new Error(`Supabase returned ${t.status}`);
   allTxns = await t.json();
 }
@@ -2772,23 +2936,57 @@ function renderBank(){
   card.innerHTML = (rows || `<div class="bank-row"><div class="bank-name"><div class="s">No bank connected yet. Transactions will flow in automatically once you connect one.</div></div></div>`) +
     `<div class="bank-actions"><button class="save-btn" id="connectBankBtn" type="button">Connect a bank</button>${bankConnections.length ? '<button class="chip" id="syncNowBtn" type="button">Sync now</button>' : ''}<span class="save-status" id="bankStatus"></span></div>`;
 }
+const TXN_STYLE = {
+  'Groceries':          ['#3D8B5A','<path d="M4 5h2l2 10h10l2-7H7.2"/><circle cx="10" cy="19" r="1.3"/><circle cx="17" cy="19" r="1.3"/>'],
+  'Dining out':         ['#D9822B','<path d="M7 3v7a2 2 0 0 0 4 0V3"/><path d="M9 10v11"/><path d="M17 3c-1.7 1.3-2.5 3.3-2.5 6 0 1.4.8 2.2 2.5 2.2V21"/>'],
+  'Gas and transport':  ['#3F7CC0','<path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M4 21h12"/><path d="M15 9h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8l-3-3"/><path d="M8 7h4"/>'],
+  'Car maintenance':    ['#6B6F7A','<path d="M14.5 6.5a4 4 0 0 0-5.4 5l-5.6 5.6a1.8 1.8 0 0 0 2.5 2.5l5.6-5.6a4 4 0 0 0 5-5.4l-2.4 2.4-2.1-.5-.5-2.1z"/>'],
+  'Subscriptions':      ['#8A5CC7','<path d="M4 12a8 8 0 0 1 14-5.3L20 9"/><path d="M20 4v5h-5"/><path d="M20 12a8 8 0 0 1-14 5.3L4 15"/><path d="M4 20v-5h5"/>'],
+  'Phone and utilities':['#2F9AA8','<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>'],
+  'School and books':   ['#B5893A','<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/>'],
+  'Personal and fun':   ['#D2557E','<path d="M12 3l2.6 5.6 6 .6-4.5 4.1 1.3 6L12 16.3 6.6 19.3l1.3-6L3.4 9.2l6-.6z"/>'],
+  'Health':             ['#C4382A','<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>'],
+  'Savings':            ['#0066D6','<path d="M5 11a7 6 0 0 1 13-2l2-1v4l-1 1a7 6 0 0 1-3 4v3h-3v-2h-3v2H7v-3a6 6 0 0 1-2-6z"/><circle cx="15" cy="10.5" r=".8"/>'],
+  'Income':             ['#2E8B57','<path d="M12 4v13"/><path d="M6 11l6 6 6-6"/><path d="M5 21h14"/>'],
+  'Fees':               ['#A0522D','<path d="M19 5L5 19"/><circle cx="7" cy="7" r="2.3"/><circle cx="17" cy="17" r="2.3"/>'],
+  'Cash':               ['#4F8A3B','<rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 9.5v5M17.5 9.5v5"/>'],
+  'Transfer':           ['#7A8088','<path d="M4 8h14l-3-3"/><path d="M20 16H6l3 3"/>'],
+  '_none':              ['#C4382A','<path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14"/><path d="M12 17.5v.01"/>']
+};
+function txnIcon(label){
+  const [color, path] = TXN_STYLE[label] || TXN_STYLE[label === null ? '_none' : 'Transfer'] || TXN_STYLE._none;
+  return `<span class="txn-ico" style="background:${color}1F;color:${color}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${path}</svg></span>`;
+}
 function renderTxns(){
   const el = document.getElementById('txnList'); if(!el) return;
   if(!allTxns.length){ el.innerHTML = '<div class="bank-row"><div class="bank-name"><div class="s">No transactions yet.</div></div></div>'; return; }
   const cats = allCategories || [];
   const catName = id => (cats.find(c=>c.id===id) || {}).name;
+  const labelOf = t => t.exclude_from_budget ? 'Transfer' : (catName(t.category_id) || null);
   const needs = allTxns.filter(t=>t.category_id == null && !t.exclude_from_budget).length;
-  el.innerHTML = (needs ? `<div class="bank-row"><div class="bank-name"><div class="s" style="color:var(--coral)">${needs} need a category. Tap one to assign it.</div></div></div>` : '') +
-    allTxns.map(t=>{
-      const open = expandedTxnId === t.id, inflow = t.amount_cents > 0;
-      const label = t.exclude_from_budget ? 'Transfer' : (catName(t.category_id) || null);
+  const used = [...new Set(allTxns.map(labelOf).filter(Boolean))].sort();
+  const filters = [['all','All'], ...(needs ? [['none', `Needs category (${needs})`]] : []), ...used.map(n=>[n,n])];
+  if(!filters.some(f=>f[0]===txnFilter)) txnFilter = 'all';
+  const shown = allTxns.filter(t=> txnFilter==='all' ? true : txnFilter==='none' ? labelOf(t)===null : labelOf(t)===txnFilter);
+  const days = []; shown.forEach(t=>{ let d = days.find(x=>x.date===t.transaction_date); if(!d){ d={date:t.transaction_date, items:[]}; days.push(d); } d.items.push(t); });
+  const today = localToday(), yday = isoAddDays(today,-1);
+  let html = `<div class="txn-filters">${filters.map(([k,l])=>`<button class="chip ${txnFilter===k?'active':''}" type="button" data-txnfilter="${esc(k)}">${esc(l)}</button>`).join('')}</div>`;
+  html += days.map(d=>{
+    const out = d.items.filter(t=>t.amount_cents < 0 && !t.exclude_from_budget).reduce((a,t)=>a-t.amount_cents,0);
+    const name = d.date===today ? 'Today' : d.date===yday ? 'Yesterday' : new Date(d.date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
+    return `<div class="txn-day"><b>${name}</b><span>${out ? money(out) + ' spent' : ''}</span></div><div class="txn-group">${d.items.map(t=>{
+      const open = expandedTxnId === t.id, inflow = t.amount_cents > 0, label = labelOf(t);
       return `<div class="txn-row ${t.pending?'pending':''}" data-txn="${t.id}">
+        ${txnIcon(label)}
         <div class="txn-name">${esc(t.merchant || t.description || '')}</div>
         <div class="txn-amt ${inflow?'in':''}">${inflow ? '+' : ''}${money(t.amount_cents)}</div>
-        <div class="txn-meta"><span>${shortDate(t.transaction_date)}${t.pending ? ', pending' : ''}</span><span>${esc(t.account ? t.account.name.replace(/\s*\(.*\)$/,'') : '')}</span><span class="txn-cat ${label?'':'none'}">${esc(label || 'Needs category')}</span></div>
-        ${open ? `<div class="txn-pick">${(t.merchant || t.description) ? `<label class="rule-toggle"><input type="checkbox" id="alwaysRule" ${alwaysRule?'checked':''}> Always for “${esc(t.merchant || t.description)}”</label>` : ''}${cats.filter(c=>c.category_type!=='income' || inflow).map(c=>`<button class="chip ${c.id===t.category_id?'active':''}" type="button" data-setcat="${c.id}">${esc(c.name)}</button>`).join('')}<button class="chip ${t.exclude_from_budget?'active':''}" type="button" data-setcat="transfer">Transfer (not spending)</button></div>` : ''}
+        <div class="txn-meta"><span class="txn-cat ${label?'':'none'}">${esc(label || 'Needs category')}</span>${t.pending ? '<span>Pending</span>' : ''}</div>
+        ${open ? `<div class="txn-pick"><div style="flex-basis:100%;font-size:0.78rem;color:var(--text-faint)">${esc(t.description || '')}</div>${(t.merchant || t.description) ? `<label class="rule-toggle"><input type="checkbox" id="alwaysRule" ${alwaysRule?'checked':''}> Always for “${esc(t.merchant || t.description)}”</label>` : ''}${cats.filter(c=>c.category_type!=='income' || inflow).map(c=>`<button class="chip ${c.id===t.category_id?'active':''}" type="button" data-setcat="${c.id}">${esc(c.name)}</button>`).join('')}<button class="chip ${t.exclude_from_budget?'active':''}" type="button" data-setcat="transfer">Transfer (not spending)</button></div>` : ''}
       </div>`;
-    }).join('');
+    }).join('')}</div>`;
+  }).join('');
+  if(allTxns.length >= txnLimit) html += `<button class="txn-more" type="button" id="txnMore">Show older</button>`;
+  el.innerHTML = html;
 }
 async function refreshBank(){
   try{ await fetchBank(); renderBank(); renderTxns(); }
@@ -2824,6 +3022,9 @@ document.getElementById('bankCard').addEventListener('click', e=>{
   else { const r = e.target.closest('[data-relink]'); if(r) connectBank(r.dataset.relink); }
 });
 document.getElementById('txnList').addEventListener('click', async e=>{
+  const f = e.target.closest('[data-txnfilter]');
+  if(f){ txnFilter = f.dataset.txnfilter; expandedTxnId = null; renderTxns(); return; }
+  if(e.target.closest('#txnMore')){ txnLimit += 150; await fetchBank(); renderTxns(); return; }
   const pick = e.target.closest('[data-setcat]');
   if(pick){
     e.stopPropagation();
@@ -2918,6 +3119,7 @@ async function refreshEverything(){
 }
 
 // ----- tab bar + automatic refresh (replaces pull-to-refresh) -----
+OTTO_ICONS.map = '<path d="M9 4L3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>';
 OTTO_ICONS.home = '<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/>';
 const TABS = ['home','money','food','health','assets'];
 function setActiveTab(k){ document.querySelectorAll('.tab-item').forEach(b=>{ const on = b.dataset.tab === k; b.classList.toggle('active', on); b.setAttribute('aria-current', on ? 'page' : 'false'); }); }
