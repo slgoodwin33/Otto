@@ -586,6 +586,61 @@
   .workout-date, .stale-note, .sync-note, .empty{font-family:var(--sans);}
   .workout-card, .stale-note{border-radius:var(--radius); border-color:transparent;}
   .steps-chart text{font-family:var(--sans);}
+
+  /* ---------- Build .10: Health, Money, Assets ---------- */
+  .gcard{background:var(--surface); border-radius:var(--radius); padding:0 0 0 16px; margin-bottom:0.4rem; overflow:hidden;}
+  .grow{display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 16px 12px 0; border-top:1px solid var(--border); cursor:pointer;}
+  .grow:first-child{border-top:none;}
+  .grow.static{cursor:default;}
+  .grow-main{min-width:0; flex:1;}
+  .grow-title{font-size:0.95rem; color:var(--text);}
+  .grow-sub{font-size:0.8rem; color:var(--text-faint); margin-top:2px;}
+  .grow-right{font-size:0.88rem; color:var(--text-muted); white-space:nowrap; text-align:right; font-variant-numeric:tabular-nums;}
+  .grow-right.neg{color:var(--coral); font-weight:600;}
+  .grow-detail{padding:2px 16px 12px 0; font-size:0.84rem; color:var(--text-muted);}
+  .grow-detail .kv{display:flex; justify-content:space-between; gap:12px; padding:3px 0;}
+  .grow-detail .kv span:first-child{color:var(--text-faint);}
+  .grow .mini-bar{height:5px; border-radius:3px; background:var(--surface-2); overflow:hidden; margin-top:7px;}
+  .grow .mini-bar > div{height:100%; border-radius:3px; background:var(--accent);}
+  .grow .mini-bar > div.warn{background:#D9A23B;}
+  .grow .mini-bar > div.over{background:var(--coral);}
+  .grow .mini-bar > div.save{background:var(--blue);}
+  .stat-trio{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:8px 0 4px;}
+  .stat-trio > div{background:var(--surface); border-radius:16px; padding:12px 12px 11px;}
+  .stat-trio .k{font-size:0.74rem; color:var(--text-faint);}
+  .stat-trio .v{font-family:var(--display); font-weight:700; font-size:1.15rem; margin-top:3px; font-variant-numeric:tabular-nums;}
+  .stat-trio .d{font-size:0.72rem; color:var(--text-faint); margin-top:1px;}
+  .steps-chart line.avg{stroke:var(--text-faint); stroke-dasharray:4 4; stroke-width:1;}
+  .steps-chart rect.today{fill:var(--accent-text);}
+  .warn-note{background:rgba(196,56,42,0.08); color:var(--coral); border-radius:var(--radius); padding:10px 14px; font-size:0.84rem; margin-bottom:8px;}
+  #healthRangeFilters{margin-top:1.2rem;}
+  #addHealthBtn{background:none; border:none; color:var(--accent-text); font-weight:600; padding:4px 6px; font-size:0.88rem;}
+  .asset-toolbar{justify-content:flex-end;}
+  .asset-total:empty{display:none;}
+
+  /* ---------- Build .11: tab bar, pages instead of sheets, no pull-to-refresh ---------- */
+  :root{--tabbar-h:58px;}
+  .pull-indicator, #areasBtn, .area-dock, .dock-wrap, .sheet-grab, .sheet-backdrop{display:none !important;}
+  .tabbar{position:fixed; left:0; right:0; bottom:0; z-index:45; background:color-mix(in srgb, var(--bg) 88%, transparent); -webkit-backdrop-filter:saturate(1.6) blur(18px); backdrop-filter:saturate(1.6) blur(18px); border-top:1px solid var(--border); padding-bottom:env(safe-area-inset-bottom, 0px);}
+  .tabbar-inner{max-width:620px; margin:0 auto; display:grid; grid-template-columns:repeat(5,1fr); height:var(--tabbar-h);}
+  .tab-item{border:none; background:none; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; color:var(--text-faint); font:inherit; font-size:0.66rem; font-weight:600; cursor:pointer; -webkit-tap-highlight-color:transparent;}
+  .tab-item svg{width:24px; height:24px;}
+  .tab-item.active{color:var(--accent-text);}
+  .tab-item:active svg{transform:scale(0.92);}
+  .sheet{top:0; bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); border-radius:0; transform:none !important; transition:opacity 0.14s ease; opacity:0; z-index:41;}
+  .sheet-open .sheet{opacity:1;}
+  .sheet-head{padding:calc(env(safe-area-inset-top, 0px) + 10px) 16px 4px 20px; align-items:flex-end;}
+  .sheet-body{padding-bottom:28px;}
+  .page-back{display:none; border:none; background:none; color:var(--accent-text); font:inherit; font-size:1rem; font-weight:600; padding:0 0 4px; cursor:pointer;}
+  .page-back.show{display:block;}
+  .sheet-head .head-left{display:flex; flex-direction:column; align-items:flex-start;}
+  .sync-chip{border:none; background:none; color:var(--text-faint); font:inherit; font-size:0.78rem; padding:10px 2px; cursor:pointer; white-space:nowrap;}
+  .sync-chip.busy{color:var(--accent-text);}
+  .sheet-done{display:none;}
+  .composer{bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px)); padding-bottom:10px;}
+  .thread{padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px) + 90px);}
+  .otto-top{align-items:center;}
+  @media (prefers-reduced-motion: reduce){ .sheet{transition:none;} }
 </style>
 </head>
 <body>
@@ -609,6 +664,7 @@
     <button class="icon-btn" id="areasBtn" type="button" aria-label="Show areas" aria-expanded="false" aria-controls="areaDock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg></button>
     <div class="area-dock" id="areaDock" role="group" aria-label="Areas"></div>
     </div>
+    <button class="sync-chip" id="homeSync" type="button" aria-label="Refresh now"></button>
     <button class="icon-btn" id="accountBtn" type="button" aria-label="Account and sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.2 7-5.2s5.8 1.6 7 5.2"/></svg></button>
   </div>
   <div class="otto-greet">
@@ -696,6 +752,7 @@
 
     <div class="tab-panel" id="panelAssets">
       <div id="assetsErrorBanner"></div>
+      <div id="assetHero"></div>
       <div id="assetMap" class="asset-map"></div>
       <div class="asset-toolbar">
         <div id="assetTotalValue" class="asset-total"></div>
@@ -707,11 +764,12 @@
 
     <div class="tab-panel" id="panelHealth">
       <div id="healthErrorBanner"></div>
+      <div id="healthHero"></div>
       <div class="controls" id="healthRangeFilters">
         <button class="chip active" data-days="30" type="button">30 days</button>
         <button class="chip" data-days="90" type="button">90 days</button>
       </div>
-      <button class="refresh-btn" id="addHealthBtn" type="button" style="margin-bottom:1rem;">+ Log today's activity</button>
+      <button class="refresh-btn" id="addHealthBtn" type="button" style="margin-bottom:0.6rem;">+ Log activity by hand</button>
       <form id="healthForm" class="txn-form" style="display:none;">
         <div class="field-row"><label>Date</label><input type="date" id="healthDate" required></div>
         <div class="field-row"><label>Steps</label><input type="number" id="healthSteps" min="0" placeholder="e.g. 6500"></div>
@@ -746,10 +804,11 @@
   </section>
 </div>
 
+<nav class="tabbar" id="tabbar" aria-label="Sections" hidden><div class="tabbar-inner" id="tabbarInner"></div></nav>
 <div class="sheet-backdrop" id="sheetBackdrop" hidden></div>
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
   <div class="sheet-grab" aria-hidden="true"></div>
-  <div class="sheet-head"><h2 id="sheetTitle"></h2><button class="sheet-done" id="sheetDone" type="button">Done</button></div>
+  <div class="sheet-head"><div class="head-left"><button class="page-back" id="pageBack" type="button">‹ Home</button><h2 id="sheetTitle"></h2></div><button class="sync-chip" id="pageSync" type="button" aria-label="Refresh now"></button><button class="sheet-done" id="sheetDone" type="button">Done</button></div>
   <div class="sheet-body" id="sheetBody"></div>
 </div>
 
@@ -759,7 +818,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-09.09';
+const APP_BUILD = '2026-10-10.11';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1168,66 +1227,64 @@ function renderBudget(data){
   const el = document.getElementById('budgetContent');
   if(!data.summary){ el.innerHTML = '<div class="empty">No budget period set up yet.</div>'; return; }
   const s = data.summary;
-  let html = `<div class="budget-period" style="padding:0 6px">Week of ${dateRange(s.week_start, s.week_end)}</div>
-    <div class="readouts">
-      <div class="readout"><div class="label">Income</div><div class="value">${formatCents(s.expected_income_cents)}</div></div>
-      <div class="readout"><div class="label">Planned</div><div class="value">${formatCents(s.planned_cents)}</div></div>
-      <div class="readout accent"><div class="label">Spent</div><div class="value">${formatCents(s.spent_cents)}</div></div>
-      <div class="readout warn"><div class="label">Remaining</div><div class="value">${formatCents(s.remaining_cents)}</div></div>
-    </div>`;
-
-  if(data.income && data.income.length){
-    html += `<div class="health-section-label">Income sources</div>`;
-    html += data.income.map(i=>`<div class="field-row" style="margin-bottom:0.3rem;">
-      <label style="min-width:170px;">${i.name}</label>
-      <span>${formatCents(i.net_amount_cents)} · ${i.frequency}</span>
-    </div>`).join('');
-  }
-
-  html += `<div class="health-section-label">By category</div>`;
-  html += data.categories.map(c=>{
+  const exp = data.categories.filter(c=>c.category_type !== 'savings');
+  const sav = data.categories.filter(c=>c.category_type === 'savings');
+  const planned = exp.reduce((a,c)=>a+(c.planned_cents||0)+(c.carried_in_cents||0),0);
+  const spent = exp.reduce((a,c)=>a+(c.spent_cents||0),0);
+  const left = planned - spent;
+  const today = localToday();
+  const dayN = Math.min(7, Math.max(1, Math.round((new Date(today) - new Date(s.week_start))/86400000) + 1));
+  const pacePct = Math.round(100*dayN/7), usedPct = planned ? Math.round(100*spent/planned) : 0;
+  const savPlanned = sav.reduce((a,c)=>a+(c.planned_cents||0),0);
+  const billsFor = code => (data.bills || []).filter(b => b.category && b.category.code === code);
+  let html = `<div class="mo-card">
+    <div class="mo-top"><span class="mo-label">Left to spend, week of ${dateRange(s.week_start, s.week_end)}</span></div>
+    <div class="mo-big ${left < 0 ? 'neg' : ''}">${left < 0 ? '−' : ''}${money(Math.abs(left))}</div>
+    <div class="mo-sub">${money(spent)} spent of ${money(planned)}${savPlanned ? `, plus ${money(savPlanned)} to savings` : ''}</div>
+    <div class="mo-bar"><div class="${left < 0 ? 'over' : ''}" style="width:${Math.min(100, usedPct)}%"></div></div>
+    <div class="mo-pace">Day ${dayN} of 7. ${usedPct > pacePct + 10 ? 'Spending is ahead of the week.' : usedPct === 0 ? 'Nothing spent yet this week.' : 'On pace for the week.'}</div>
+  </div>`;
+  const ordered = exp.slice().sort((a,b)=>(parseFloat(b.pct_used)||0)-(parseFloat(a.pct_used)||0) || (b.planned_cents||0)-(a.planned_cents||0));
+  const catRow = c => {
+    const budget = (c.planned_cents||0) + (c.carried_in_cents||0);
     const pct = Math.min(100, Math.max(0, parseFloat(c.pct_used) || 0));
-    const isSavings = c.category_type === 'savings';
-    const barClass = isSavings ? '' : (pct >= 100 ? 'over' : (pct >= 80 ? 'warn' : ''));
-    const relatedBills = (data.bills || []).filter(b => b.category && b.category.code === c.category_code);
-    const billsHtml = relatedBills.length ? `<div class="budget-cat-bills">${relatedBills.map(b=>`
-      <div class="bill-row"><span>${b.name}${b.autopay ? ' (autopay)' : ''}</span><span>${formatCents(b.amount_cents)}/${b.frequency}</span></div>
-    `).join('')}</div>` : '';
-    return `<div class="budget-cat ${isSavings ? 'savings' : ''}">
-      <div class="budget-cat-top">
-        <span class="budget-cat-name">${c.category}</span>
-        <span class="budget-cat-amounts">${formatCents(c.spent_cents)} / ${formatCents(c.planned_cents)}</span>
-      </div>
-      <div class="budget-bar-track"><div class="budget-bar-fill ${barClass}" style="width:${pct}%"></div></div>
-      ${billsHtml}
+    const isSave = c.category_type === 'savings';
+    const cls = isSave ? 'save' : pct >= 100 ? 'over' : pct >= 80 ? 'warn' : '';
+    const bills = billsFor(c.category_code);
+    const open = expandedBudgetCat === c.category_code;
+    const rem = budget - (c.spent_cents||0);
+    return `<div class="grow" data-bcat="${esc(c.category_code)}" style="flex-wrap:wrap">
+      <div class="grow-main"><div class="grow-title">${esc(c.category)}</div>
+        <div class="grow-sub">${money(c.spent_cents||0)} of ${money(budget)}${bills.length ? `, ${bills.length} bill${bills.length===1?'':'s'}` : ''}${c.carried_in_cents ? `, ${money(c.carried_in_cents)} carried in` : ''}</div>
+        <div class="mini-bar"><div class="${cls}" style="width:${pct}%"></div></div></div>
+      <div class="grow-right ${rem < 0 ? 'neg' : ''}">${rem < 0 ? money(-rem) + ' over' : money(rem) + (isSave ? ' to go' : ' left')}</div>
+      ${open ? `<div class="grow-detail" style="flex-basis:100%">${bills.length ? bills.map(b=>`<div class="kv"><span>${esc(b.name)}${b.autopay ? ', autopay' : ''}${b.due_day ? `, due the ${ordinal(b.due_day)}` : ''}</span><span>${money(b.amount_cents)}/${esc(b.frequency)}</span></div>`).join('') : '<div class="kv"><span>No recurring bills in this category</span></div>'}${c.rollover_enabled ? '<div class="kv"><span>Unspent money rolls over to next week</span></div>' : ''}</div>` : ''}
     </div>`;
-  }).join('');
-
-  const unmatchedBills = (data.bills || []).filter(b => !b.category || !data.categories.some(c=>c.category_code === b.category.code));
-  if(unmatchedBills.length){
-    html += `<div class="health-section-label">Other recurring bills</div>`;
-    html += unmatchedBills.map(b=>`<div class="bill-row"><span>${b.name}${b.autopay ? ' (autopay)' : ''}</span><span>${formatCents(b.amount_cents)}/${b.frequency}</span></div>`).join('');
-  }
-
+  };
+  html += `<div class="day-label"><span>Spending</span><span>tap for bills</span></div><div class="gcard">${ordered.map(catRow).join('')}</div>`;
+  if(sav.length) html += `<div class="day-label"><span>Saving</span></div><div class="gcard">${sav.map(catRow).join('')}</div>`;
+  const unmatched = (data.bills || []).filter(b => !b.category || !data.categories.some(c=>c.category_code === b.category.code));
+  if(unmatched.length) html += `<div class="day-label"><span>Other recurring bills</span></div><div class="gcard">${unmatched.map(b=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(b.name)}</div><div class="grow-sub">${b.autopay ? 'Autopay' : 'Manual'}</div></div><div class="grow-right">${money(b.amount_cents)}/${esc(b.frequency)}</div></div>`).join('')}</div>`;
   if(data.goals && data.goals.length){
-    html += `<div class="health-section-label">Savings goals</div>`;
-    html += data.goals.map(g=>{
-      const hasTarget = g.target_amount_cents != null && g.target_amount_cents > 0;
-      const pct = hasTarget ? Math.min(100, Math.max(0, Math.round(100 * g.saved_amount_cents / g.target_amount_cents))) : null;
-      return `<div class="budget-cat">
-        <div class="budget-cat-top">
-          <span class="budget-cat-name">${g.name}</span>
-          <span class="budget-cat-amounts">${formatCents(g.saved_amount_cents)}${hasTarget ? ' / ' + formatCents(g.target_amount_cents) : ''}</span>
-        </div>
-        ${hasTarget
-          ? `<div class="budget-bar-track"><div class="budget-bar-fill" style="width:${pct}%; background:var(--blue);"></div></div>`
-          : `<div class="bill-row"><span>No target set yet</span><span>${g.target_date ? 'by ' + g.target_date : ''}</span></div>`}
-      </div>`;
-    }).join('');
+    html += `<div class="day-label"><span>Savings goals</span></div><div class="gcard">${data.goals.map(g=>{
+      const hasT = g.target_amount_cents != null && g.target_amount_cents > 0;
+      const pct = hasT ? Math.min(100, Math.max(0, Math.round(100 * g.saved_amount_cents / g.target_amount_cents))) : 0;
+      return `<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(g.name)}</div>
+        <div class="grow-sub">${hasT ? `${money(g.saved_amount_cents)} of ${money(g.target_amount_cents)}` : `${money(g.saved_amount_cents)} saved, no target set yet`}${g.target_date ? `, by ${shortDate(g.target_date)}${g.target_date.slice(0,4) !== today.slice(0,4) ? ' ' + g.target_date.slice(0,4) : ''}` : ''}</div>
+        ${hasT ? `<div class="mini-bar"><div class="save" style="width:${pct}%"></div></div>` : ''}</div>
+        <div class="grow-right">${hasT ? pct + '%' : ''}</div></div>`;
+    }).join('')}</div>`;
   }
-
+  if(data.income && data.income.length){
+    html += `<div class="day-label"><span>Income</span></div><div class="gcard">${data.income.map(i=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(i.name)}</div><div class="grow-sub">${esc(i.frequency)}, take-home</div></div><div class="grow-right">${money(i.net_amount_cents)}</div></div>`).join('')}</div>`;
+  }
   el.innerHTML = html;
+  el.querySelectorAll('[data-bcat]').forEach(r=>r.addEventListener('click', ()=>{
+    const c = r.getAttribute('data-bcat'); expandedBudgetCat = expandedBudgetCat === c ? null : c; renderBudget(data);
+  }));
 }
+function ordinal(n){ const v = n % 100; return n + (['th','st','nd','rd'][(v-20)%10] || ['th','st','nd','rd'][v] || 'th'); }
+let expandedBudgetCat = null;
 
 let lastBudgetData = null;
 
@@ -1579,62 +1636,49 @@ function renderAssetMap(assets){
 function renderAssets(assets){
   const list = document.getElementById('assetsList');
   let filtered = activeAssetCategory === 'all' ? assets.slice() : assets.filter(a=>a.category===activeAssetCategory);
-  if(activeAssetLocationCode !== 'all'){
-    filtered = filtered.filter(a => a.location && a.location.code === activeAssetLocationCode);
-  }
-
-  const totalValue = filtered.reduce((sum,a)=>{
-    const v = a.estimated_value ?? a.purchase_price;
-    const num = typeof v === 'string' ? parseFloat(v) : v;
-    return sum + (isNaN(num) ? 0 : num);
-  }, 0);
-  document.getElementById('assetTotalValue').innerHTML = `${filtered.length} item${filtered.length===1?'':'s'} · <strong>${formatMoney(totalValue)}</strong> total (priced items only)`;
-
-  if(assetSortByValue){
-    filtered.sort((a,b)=>{
-      const va = parseFloat(a.estimated_value ?? a.purchase_price) || 0;
-      const vb = parseFloat(b.estimated_value ?? b.purchase_price) || 0;
-      return vb - va;
-    });
-  }
-
+  if(activeAssetLocationCode !== 'all') filtered = filtered.filter(a => a.location && a.location.code === activeAssetLocationCode);
+  const valOf = a => { const v = parseFloat(a.estimated_value ?? a.purchase_price); return isNaN(v) ? null : v; };
+  const priced = filtered.filter(a=>valOf(a) != null);
+  const total = priced.reduce((t,a)=>t+valOf(a),0);
+  const places = {}; filtered.forEach(a=>{ const n = (a.location && a.location.name) || 'No location'; places[n] = (places[n]||0)+1; });
+  document.getElementById('assetTotalValue').innerHTML = '';
+  document.getElementById('assetHero').innerHTML = `<div class="mo-card">
+    <div class="mo-label">${activeAssetCategory === 'all' && activeAssetLocationCode === 'all' ? 'Everything you own' : 'Matching this filter'}</div>
+    <div class="mo-big">${filtered.length} item${filtered.length===1?'':'s'}</div>
+    <div class="mo-sub">${Object.entries(places).sort((a,b)=>b[1]-a[1]).map(([n,c])=> n==='No location' ? `${c} with no location` : `${c} at ${esc(n)}`).join(', ')}</div>
+    <div class="mo-pace">${priced.length ? `${priced.length} of ${filtered.length} ${priced.length===1?'has a':'have a'} value, ${formatMoney(total)} total. Tap an item to see it.` : 'No values recorded yet.'}</div>
+  </div>`;
   if(!filtered.length){ list.innerHTML = '<div class="empty">No assets match this filter.</div>'; return; }
-  list.innerHTML = filtered.map(a=>{
-    const isExpanded = expandedAssetCode === a.code;
-    const value = a.estimated_value ?? a.purchase_price;
-    let detailHtml = '';
-    if(isExpanded){
-      detailHtml = `<div class="asset-detail">
-        ${a.brand ? `<div class="field-row"><label>Brand</label><span>${a.brand}</span></div>` : ''}
-        ${a.model ? `<div class="field-row"><label>Model</label><span>${a.model}</span></div>` : ''}
-        ${a.condition ? `<div class="field-row"><label>Condition</label><span>${a.condition}</span></div>` : ''}
-        ${a.color ? `<div class="field-row"><label>Color</label><span>${a.color}</span></div>` : ''}
-        <div class="field-row"><label>Status</label><span>${a.status || '—'}</span></div>
-        <div class="field-row"><label>Owner</label><span>${a.owner || '—'}</span></div>
-        <div class="field-row"><label>Location</label><span>${(a.location && a.location.name) || 'Unknown'}</span></div>
-        ${a.notes ? `<div class="field-row"><label>Notes</label><span>${a.notes}</span></div>` : ''}
-        ${a.category === 'Vehicle' ? (
-          a.maintenance && a.maintenance.length
-            ? `<div class="field-row" style="display:block;"><label>Maintenance history</label>${a.maintenance
-                .slice().sort((x,y)=> (y.service_date||'') < (x.service_date||'') ? -1 : 1)
-                .map(m=>`<div class="bill-row"><span>${m.service_date || '—'} · ${m.service_type || 'Service'}${m.shop ? ' (' + m.shop + ')' : ''}</span><span>${m.cost!=null ? formatMoney(m.cost) : '—'}</span></div>`)
-                .join('')}</div>`
-            : `<div class="field-row"><label>Maintenance history</label><span>None logged yet</span></div>`
-        ) : ''}
+  const groups = {};
+  filtered.forEach(a=>{ (groups[a.category || 'Other'] = groups[a.category || 'Other'] || []).push(a); });
+  const sortFn = assetSortByValue ? (a,b)=>(valOf(b)||0)-(valOf(a)||0) : (a,b)=>(a.item||'').localeCompare(b.item||'');
+  list.innerHTML = Object.keys(groups).sort().map(cat=>{
+    const items = groups[cat].sort(sortFn);
+    return `<div class="day-label"><span>${esc(cat)}</span><span>${items.length}</span></div><div class="gcard">${items.map(a=>{
+      const open = expandedAssetCode === a.code, v = valOf(a);
+      const kv = [];
+      if(a.brand) kv.push(['Brand', a.brand]);
+      if(a.model) kv.push(['Model', a.model]);
+      if(a.condition) kv.push(['Condition', a.condition]);
+      if(a.color) kv.push(['Color', a.color]);
+      if(a.status && a.status !== 'owned') kv.push(['Status', a.status]);
+      if(a.owner && a.owner !== 'Samuel') kv.push(['Owner', a.owner]);
+      kv.push(['Where', (a.location && a.location.name) || 'No location set']);
+      if(a.notes) kv.push(['Notes', a.notes]);
+      let maint = '';
+      if(a.category === 'Vehicle'){
+        const m = (a.maintenance||[]).slice().sort((x,y)=>(y.service_date||'').localeCompare(x.service_date||''));
+        maint = m.length ? `<div class="kv" style="margin-top:6px"><span>Service history</span><span></span></div>` + m.map(r=>`<div class="kv"><span>${r.service_date ? shortDate(r.service_date) + ' ' + r.service_date.slice(0,4) : 'Undated'}, ${esc(r.service_type || 'Service')}${r.shop ? ` at ${esc(r.shop)}` : ''}${r.next_due_date ? `, next due ${shortDate(r.next_due_date)}` : ''}</span><span>${r.cost != null ? formatMoney(r.cost) : ''}</span></div>`).join('')
+                   : `<div class="kv"><span>No service logged yet</span><span></span></div>`;
+      }
+      const sub = [a.sub_category, a.brand].filter(Boolean).map(esc).join(', ');
+      return `<div class="grow asset-card" data-code="${esc(a.code)}" style="flex-wrap:wrap">
+        <div class="grow-main"><div class="grow-title">${esc(a.item)}</div>${sub ? `<div class="grow-sub">${sub}</div>` : ''}</div>
+        <div class="grow-right">${v != null ? formatMoney(v) : ''}</div>
+        ${open ? `<div class="grow-detail" style="flex-basis:100%">${kv.map(([k,val])=>`<div class="kv"><span>${k}</span><span>${esc(String(val))}</span></div>`).join('')}${maint}</div>` : ''}
       </div>`;
-    }
-    return `<div class="asset-card ${isExpanded ? 'expanded' : ''}" data-code="${a.code}">
-      <div class="asset-top">
-        <div>
-          <div class="asset-name">${a.item}</div>
-          <div class="asset-cat">${a.category}${a.sub_category ? ' · ' + a.sub_category : ''}</div>
-        </div>
-        <div class="asset-value">${formatMoney(value)}</div>
-      </div>
-      ${detailHtml}
-    </div>`;
+    }).join('')}</div>`;
   }).join('');
-
   list.querySelectorAll('.asset-card').forEach(card=>{
     card.addEventListener('click', ()=>{
       const code = card.getAttribute('data-code');
@@ -1666,88 +1710,101 @@ let lastHealthData = null;
 let healthRangeDays = 30;
 
 async function fetchHealth(days){
-  const dailyRes = await fetch(`${SUPABASE_URL}/rest/v1/daily_activity?select=activity_date,steps,active_energy_kcal,distance_walking_running_qty,distance_unit&order=activity_date.desc&limit=${days}`, { headers: authHeaders() });
+  const dailyRes = await fetch(`${SUPABASE_URL}/rest/v1/daily_activity?select=activity_date,steps,active_energy_kcal,distance_walking_running_qty,distance_unit,created_at,updated_at&order=activity_date.desc&limit=${Math.max(days, 75)}`, { headers: authHeaders() });
   if(!dailyRes.ok) throw new Error(`Supabase returned ${dailyRes.status}`);
   const daily = await dailyRes.json();
 
-  const workoutsRes = await fetch(`${SUPABASE_URL}/rest/v1/workouts?select=activity_type,start_time,duration_seconds,active_energy_kcal,distance_qty,distance_unit,avg_heart_rate&order=start_time.desc&limit=10`, { headers: authHeaders() });
+  const workoutsRes = await fetch(`${SUPABASE_URL}/rest/v1/workouts?select=activity_type,start_time,duration_seconds,active_energy_kcal,distance_qty,distance_unit,avg_heart_rate&order=start_time.desc&limit=40`, { headers: authHeaders() });
   if(!workoutsRes.ok) throw new Error(`Supabase returned ${workoutsRes.status}`);
   const workouts = await workoutsRes.json();
 
   return { daily, workouts };
 }
 
-function buildStepsChart(daily){
+function buildStepsChart(daily, avg){
   if(!daily.length) return '';
   const chronological = [...daily].reverse();
-  const max = Math.max(...chronological.map(d=>d.steps || 0), 1);
-  const w = 600, h = 100;
+  const today = localToday();
+  const max = Math.max(...chronological.map(d=>d.steps || 0), avg || 0, 1);
+  const w = 600, h = 100, plot = h - 14;
   const barWidth = Math.max(1, (w / chronological.length) - 2);
   const bars = chronological.map((d,i)=>{
-    const barH = Math.max(2, (d.steps||0)/max * (h-14));
+    const barH = Math.max(2, (d.steps||0)/max * plot);
     const x = i * (w/chronological.length);
-    const y = h - barH - 14;
-    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" rx="1"></rect>`;
+    return `<rect class="${d.activity_date===today?'today':''}" x="${x.toFixed(1)}" y="${(plot-barH).toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" rx="1"></rect>`;
   }).join('');
-  const firstLabel = shortDate(chronological[0].activity_date);
-  const lastLabel = shortDate(chronological[chronological.length-1].activity_date);
-  return `<svg class="steps-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
-    ${bars}
-    <text x="0" y="${h-2}">${firstLabel}</text>
-    <text x="${w}" y="${h-2}" text-anchor="end">${lastLabel}</text>
+  const avgY = avg ? (plot - avg/max*plot).toFixed(1) : null;
+  return `<svg class="steps-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Daily steps">
+    ${bars}${avgY ? `<line class="avg" x1="0" x2="${w}" y1="${avgY}" y2="${avgY}"></line>` : ''}
+    <text x="0" y="${h-2}">${shortDate(chronological[0].activity_date)}</text>
+    <text x="${w}" y="${h-2}" text-anchor="end">${shortDate(chronological[chronological.length-1].activity_date)}</text>
   </svg>`;
+}
+
+function isoAddDays(iso, n){ const [y,m,d] = iso.split('-').map(Number); const t = new Date(y, m-1, d+n); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
+function weekStartIso(iso){ const [y,m,d] = iso.split('-').map(Number); const dow = (new Date(y,m-1,d).getDay()+6)%7; return isoAddDays(iso, -dow); }
+function healthSummary(daily, workouts){
+  const today = localToday();
+  const byDate = {}; daily.forEach(d=>byDate[d.activity_date]=d);
+  const stepsOn = iso => (byDate[iso] && byDate[iso].steps != null) ? byDate[iso].steps : null;
+  const prior = []; for(let i=1;i<=30;i++){ const v = stepsOn(isoAddDays(today,-i)); if(v != null) prior.push(v); }
+  const avg30 = prior.length ? Math.round(prior.reduce((a,b)=>a+b,0)/prior.length) : 0;
+  const ws = weekStartIso(today), daysIn = Math.round((new Date(today) - new Date(ws))/86400000) + 1;
+  let thisWeek = 0, lastWeek = 0;
+  for(let i=0;i<daysIn;i++){ thisWeek += stepsOn(isoAddDays(ws,i)) || 0; lastWeek += stepsOn(isoAddDays(ws,i-7)) || 0; }
+  const monthKey = today.slice(0,7);
+  const wkMonth = workouts.filter(w=>{ const t=new Date(w.start_time); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}` === monthKey; }).length;
+  const wkWeek = workouts.filter(w=>{ const t=new Date(w.start_time); const iso=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; return iso >= ws && iso <= today; }).length;
+  const synced = daily.reduce((m,d)=>{ const t = d.updated_at || d.created_at; return t && t > m ? t : m; }, '');
+  return { today, todayRow: byDate[today] || null, avg30, thisWeek, lastWeek, daysIn, wkMonth, wkWeek, synced };
 }
 
 function renderHealth(data){
   const el = document.getElementById('healthContent');
+  const hero = document.getElementById('healthHero');
   const { daily, workouts } = data;
-  if(!daily.length && !workouts.length){ el.innerHTML = '<div class="empty">No activity data yet.</div>'; return; }
-
-  const avgSteps = daily.length ? Math.round(daily.reduce((sum,d)=>sum+(d.steps||0),0) / daily.length) : 0;
-  const totalDistance = daily.reduce((sum,d)=>sum+(parseFloat(d.distance_walking_running_qty)||0),0);
-  const totalEnergy = daily.reduce((sum,d)=>sum+(parseFloat(d.active_energy_kcal)||0),0);
-  const mostRecent = daily[0] ? daily[0].activity_date : null;
-  const distUnit = (daily[0] && daily[0].distance_unit) || 'mi';
-
-  let html = '';
-  if(mostRecent){
-    html += `<div class="stale-note">Last activity recorded ${shortDate(mostRecent)}. This shows your last Apple Health import, not a live feed.</div>`;
-  }
-  html += `<div class="health-stats">
-    <div class="health-stat"><div class="label">Avg steps/day</div><div class="value">${avgSteps.toLocaleString()}</div></div>
-    <div class="health-stat"><div class="label">Distance (${distUnit})</div><div class="value">${totalDistance.toFixed(1)}</div></div>
-    <div class="health-stat"><div class="label">Active kcal</div><div class="value">${Math.round(totalEnergy).toLocaleString()}</div></div>
-    <div class="health-stat"><div class="label">Days shown</div><div class="value">${daily.length}</div></div>
+  if(!daily.length && !workouts.length){ hero.innerHTML = ''; el.innerHTML = '<div class="empty">No activity data yet.</div>'; return; }
+  const S = healthSummary(daily, workouts);
+  const steps = S.todayRow && S.todayRow.steps != null ? S.todayRow.steps : 0;
+  const diff = S.avg30 ? Math.round(100 * (steps - S.avg30) / S.avg30) : null;
+  const pct = S.avg30 ? Math.min(100, Math.round(100 * steps / S.avg30)) : 0;
+  const ageH = S.synced ? (Date.now() - new Date(S.synced).getTime())/3600000 : Infinity;
+  let h = '';
+  if(ageH > 48) h += `<div class="warn-note">No new health data in ${S.synced ? timeAgo(S.synced).replace(' ago','') : 'a while'}. Check that Health Auto Export is still enabled.</div>`;
+  h += `<div class="mo-card">
+    <div class="mo-top"><span class="mo-label">Steps today</span><span class="mo-label">${S.synced ? 'Synced ' + timeAgo(S.synced) : ''}</span></div>
+    <div class="mo-big">${steps.toLocaleString()}</div>
+    <div class="mo-sub">${S.avg30 ? (diff >= 0 ? `${diff}% above` : `${-diff}% below`) + ` your 30-day average of ${S.avg30.toLocaleString()}` : 'Not enough history for an average yet'}</div>
+    <div class="mo-bar"><div style="width:${pct}%"></div></div>
+    <div class="mo-pace">${S.todayRow && S.todayRow.active_energy_kcal != null ? `${Math.round(S.todayRow.active_energy_kcal)} active kcal, ` : ''}${S.todayRow && S.todayRow.distance_walking_running_qty != null ? `${parseFloat(S.todayRow.distance_walking_running_qty).toFixed(1)} ${S.todayRow.distance_unit||'mi'} walked` : 'No distance yet today'}</div>
+  </div>
+  <div class="stat-trio">
+    <div><div class="k">This week</div><div class="v">${S.thisWeek.toLocaleString()}</div><div class="d">steps, ${S.daysIn} day${S.daysIn===1?'':'s'}</div></div>
+    <div><div class="k">Last week</div><div class="v">${S.lastWeek.toLocaleString()}</div><div class="d">same ${S.daysIn} day${S.daysIn===1?'':'s'}</div></div>
+    <div><div class="k">Workouts</div><div class="v">${S.wkMonth}</div><div class="d">this month, ${S.wkWeek} this week</div></div>
   </div>`;
-  html += buildStepsChart(daily);
+  hero.innerHTML = h;
 
-  html += `<div class="health-section-label">Recent workouts</div>`;
-  if(!workouts.length){
-    html += '<div class="empty">No workouts logged.</div>';
-  } else {
-    html += workouts.map((w,i)=>{
-      const isExpanded = expandedWorkoutIndex === i;
+  let html = buildStepsChart(daily.slice(0, healthRangeDays), S.avg30);
+  if(!workouts.length){ html += '<div class="empty">No workouts logged.</div>'; el.innerHTML = html; return; }
+  const months = [];
+  workouts.forEach((w,i)=>{ const t = new Date(w.start_time); const key = t.toLocaleDateString('en-US',{month:'long', year:'numeric'}); let g = months.find(m=>m.key===key); if(!g){ g={key, items:[]}; months.push(g); } g.items.push({w,i}); });
+  html += months.map(g=>`<div class="day-label"><span>${esc(g.key)}</span><span>${g.items.length} workout${g.items.length===1?'':'s'}</span></div>
+    <div class="gcard">${g.items.map(({w,i})=>{
+      const open = expandedWorkoutIndex === i;
       const dateStr = new Date(w.start_time).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
       const minutes = Math.round((parseFloat(w.duration_seconds)||0)/60);
-      let detail = '';
-      if(isExpanded){
-        detail = `<div class="workout-detail">
-          <div class="field-row"><label>Duration</label><span>${minutes} min</span></div>
-          ${w.active_energy_kcal ? `<div class="field-row"><label>Active kcal</label><span>${Math.round(w.active_energy_kcal)}</span></div>` : ''}
-          ${w.distance_qty ? `<div class="field-row"><label>Distance</label><span>${parseFloat(w.distance_qty).toFixed(2)} ${w.distance_unit||''}</span></div>` : ''}
-          ${w.avg_heart_rate ? `<div class="field-row"><label>Avg heart rate</label><span>${Math.round(w.avg_heart_rate)} bpm</span></div>` : ''}
-        </div>`;
-      }
-      return `<div class="workout-card ${isExpanded?'expanded':''}" data-idx="${i}">
-        <div class="workout-top">
-          <span class="workout-type">${(w.activity_type||'').replace(/_/g,' ')}</span>
-          <span class="workout-date">${dateStr}, ${minutes} min</span>
-        </div>
-        ${detail}
+      const kv = [];
+      if(w.active_energy_kcal) kv.push(['Active kcal', Math.round(w.active_energy_kcal)]);
+      if(w.avg_heart_rate) kv.push(['Avg heart rate', Math.round(w.avg_heart_rate) + ' bpm']);
+      if(w.distance_qty) kv.push(['Distance', parseFloat(w.distance_qty).toFixed(2) + ' ' + (w.distance_unit||'')]);
+      kv.push(['Started', new Date(w.start_time).toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'})]);
+      return `<div class="grow workout-card" data-idx="${i}" style="flex-wrap:wrap">
+        <div class="grow-main"><div class="grow-title workout-type">${esc((w.activity_type||'').replace(/_/g,' '))}</div><div class="grow-sub">${dateStr}</div></div>
+        <div class="grow-right">${minutes} min</div>
+        ${open ? `<div class="grow-detail" style="flex-basis:100%">${kv.map(([k,v])=>`<div class="kv"><span>${k}</span><span>${esc(String(v))}</span></div>`).join('')}</div>` : ''}
       </div>`;
-    }).join('');
-  }
-
+    }).join('')}</div>`).join('');
   el.innerHTML = html;
   el.querySelectorAll('.workout-card').forEach(card=>{
     card.addEventListener('click', ()=>{
@@ -1771,7 +1828,7 @@ async function refreshHealth(){
 }
 
 async function saveHealthEntry({ date, steps, energy, distance }){
-  const body = { activity_date: date };
+  const body = { activity_date: date, updated_at: new Date().toISOString() };
   if(steps !== '') body.steps = parseInt(steps, 10);
   if(energy !== '') body.active_energy_kcal = parseFloat(energy);
   if(distance !== ''){ body.distance_walking_running_qty = parseFloat(distance); body.distance_unit = 'mi'; }
@@ -2477,7 +2534,10 @@ function openSheet(area){
   body.scrollTop = 0;
   sheet.hidden = false; backdrop.hidden = false;
   requestAnimationFrame(()=> requestAnimationFrame(()=> document.body.classList.add('sheet-open')));
-  document.getElementById('sheetDone').focus({ preventScroll:true });
+  const sub = (area === 'todos' || area === 'account' || area === 'areas');
+  document.getElementById('pageBack').classList.toggle('show', sub);
+  setActiveTab(sub ? 'home' : area);
+  renderSyncChips();
 }
 function closeSheet(){
   if(!sheetArea) return;
@@ -2487,8 +2547,8 @@ function closeSheet(){
     if(sheetArea) return;
     document.getElementById('sheet').hidden = true; document.getElementById('sheetBackdrop').hidden = true;
     returnPanels(); renderBriefing();
-    if(sheetReturnFocus && sheetReturnFocus.focus) sheetReturnFocus.focus({ preventScroll:true });
-  }, 320);
+  }, 140);
+  setActiveTab('home');
 }
 document.getElementById('sheetDone').addEventListener('click', closeSheet);
 document.getElementById('sheetBackdrop').addEventListener('click', closeSheet);
@@ -2810,11 +2870,13 @@ async function bootApp(){
 function showApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appWrap').style.display = '';
+  document.getElementById('tabbar').hidden = false; lastRefreshAt = Date.now(); renderSyncChips();
   bootApp();
 }
 function showLogin(errorMsg){
   document.getElementById('loginScreen').style.display = 'flex';
   document.getElementById('appWrap').style.display = 'none';
+  document.getElementById('tabbar').hidden = true; if(sheetArea) closeSheet();
   document.getElementById('loginError').textContent = errorMsg || '';
 }
 
@@ -2855,50 +2917,42 @@ async function refreshEverything(){
   await refreshBills();
 }
 
-(function setupPullToRefresh(){
-  const indicator = document.getElementById('pullIndicator');
-  const threshold = 70;
-  let startY = null, pulling = false, refreshing = false;
-
-  window.addEventListener('touchstart', (e)=>{
-    if(window.scrollY <= 0 && !refreshing && !document.body.classList.contains('sheet-open')){
-      startY = e.touches[0].clientY;
-      pulling = true;
-    }
-  }, { passive: true });
-
-  window.addEventListener('touchmove', (e)=>{
-    if(!pulling || startY === null) return;
-    const delta = e.touches[0].clientY - startY;
-    if(delta > 0 && window.scrollY <= 0){
-      const height = Math.min(threshold + 10, delta * 0.5);
-      indicator.style.height = height + 'px';
-      const ready = delta * 0.5 >= threshold;
-      indicator.classList.toggle('ready', ready);
-      indicator.textContent = ready ? 'Release to refresh' : 'Pull to refresh';
-    }
-  }, { passive: true });
-
-  window.addEventListener('touchend', async ()=>{
-    if(!pulling) return;
-    const isReady = indicator.classList.contains('ready');
-    pulling = false;
-    startY = null;
-    if(isReady && !refreshing){
-      refreshing = true;
-      indicator.textContent = 'Refreshing…';
-      indicator.style.height = '40px';
-      try{ await refreshEverything(); } finally {
-        refreshing = false;
-        indicator.style.height = '0';
-        indicator.classList.remove('ready');
-      }
-    } else {
-      indicator.style.height = '0';
-      indicator.classList.remove('ready');
-    }
+// ----- tab bar + automatic refresh (replaces pull-to-refresh) -----
+OTTO_ICONS.home = '<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/>';
+const TABS = ['home','money','food','health','assets'];
+function setActiveTab(k){ document.querySelectorAll('.tab-item').forEach(b=>{ const on = b.dataset.tab === k; b.classList.toggle('active', on); b.setAttribute('aria-current', on ? 'page' : 'false'); }); }
+(function buildTabbar(){
+  const inner = document.getElementById('tabbarInner');
+  inner.innerHTML = TABS.map(k=>`<button class="tab-item${k==='home'?' active':''}" type="button" data-tab="${k}">${svgIcon(k==='home'?'home':AREAS[k].icon)}<span>${k==='home'?'Home':AREAS[k].title}</span></button>`).join('');
+  inner.addEventListener('click', e=>{
+    const b = e.target.closest('[data-tab]'); if(!b) return;
+    const k = b.dataset.tab;
+    if(k === 'home'){ if(sheetArea) closeSheet(); else window.scrollTo({ top:0, behavior:'smooth' }); }
+    else if(sheetArea === k){ document.getElementById('sheetBody').scrollTo({ top:0, behavior:'smooth' }); }
+    else openSheet(k);
   });
 })();
+document.getElementById('pageBack').addEventListener('click', closeSheet);
+
+let lastRefreshAt = Date.now(), refreshing = false;
+function syncLabel(){
+  if(refreshing) return 'Updating…';
+  const m = Math.round((Date.now() - lastRefreshAt)/60000);
+  return m < 1 ? 'Updated just now' : m < 60 ? `Updated ${m}m ago` : `Updated ${Math.round(m/60)}h ago`;
+}
+function renderSyncChips(){ ['homeSync','pageSync'].forEach(id=>{ const el = document.getElementById(id); if(el){ el.textContent = syncLabel(); el.classList.toggle('busy', refreshing); } }); }
+async function autoRefresh(force){
+  if(refreshing || !session) return;
+  if(!force && Date.now() - lastRefreshAt < 60000) return;
+  refreshing = true; renderSyncChips();
+  try{ await refreshEverything(); lastRefreshAt = Date.now(); }
+  finally{ refreshing = false; renderSyncChips(); }
+}
+['homeSync','pageSync'].forEach(id=>document.getElementById(id).addEventListener('click', ()=>autoRefresh(true)));
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') autoRefresh(false); });
+window.addEventListener('pageshow', e=>{ if(e.persisted) autoRefresh(false); });
+setInterval(()=>{ if(document.visibilityState === 'visible') autoRefresh(false); }, 5*60000);
+setInterval(renderSyncChips, 30000);
 
 (async function boot(){
   session = loadSession();
