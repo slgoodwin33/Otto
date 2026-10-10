@@ -761,6 +761,11 @@
   .txn-filters .chip{white-space:nowrap; flex-shrink:0; padding:6px 12px; border-radius:999px; font-size:0.82rem;}
   #dupWeekBtn{display:none !important;}
   .money-actions .refresh-btn{background:none; border:none; color:var(--accent-text); font-weight:600; padding:4px 2px;}
+  .sheet.map-mode .asset-map{position:absolute !important; top:0 !important; left:0 !important; width:100% !important; height:100% !important;}
+  .chat-done{display:none; border:none; background:none; color:var(--accent-text); font:inherit; font-size:1rem; font-weight:600; padding:8px 2px; cursor:pointer;}
+  body.chatting .chat-done{display:block;}
+  body.chatting #homeSync, body.chatting .otto-greet, body.chatting #briefCard, body.chatting #chatThread > .msg.intro{display:none !important;}
+  body.chatting .thread{padding-top:4px;}
 </style>
 </head>
 <body>
@@ -785,6 +790,7 @@
     <div class="area-dock" id="areaDock" role="group" aria-label="Areas"></div>
     </div>
     <button class="sync-chip" id="homeSync" type="button" aria-label="Refresh now"></button>
+    <button class="chat-done" id="chatDone" type="button">‹ Home</button>
     <button class="icon-btn" id="accountBtn" type="button" aria-label="Account and sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.2 7-5.2s5.8 1.6 7 5.2"/></svg></button>
   </div>
   <div class="otto-greet">
@@ -798,7 +804,7 @@
     <div id="briefRows" hidden></div>
   </div>
   <div class="thread" id="chatThread">
-    <div class="msg otto">Ask me anything about your money, food, todos, or health. I read straight from your data, and I can't change anything yet.</div>
+    <div class="msg otto intro">Ask me anything about your money, food, todos, or health. I read straight from your data, and I can't change anything yet.</div>
   </div>
   <form class="composer" id="composer" autocomplete="off">
     <div class="composer-inner">
@@ -950,7 +956,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-10.16';
+const APP_BUILD = '2026-10-10.17';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2773,7 +2779,7 @@ function openSheet(area){
   } else {
     document.getElementById('sheetTitle').textContent = AREAS[area].title;
     AREAS[area].panels.forEach(id=>{ const p = document.getElementById(id); p.classList.add('active'); body.appendChild(p); });
-    if(area === 'assets'){ setTimeout(()=>{ if(assetMapInstance) assetMapInstance.invalidateSize(); }, 60); setTimeout(()=>{ if(assetMapInstance) assetMapInstance.invalidateSize(); }, 350); }
+    if(area === 'assets'){ const refit = ()=>{ if(assetMapInstance){ assetMapInstance.invalidateSize(); mapFitKey = ''; renderAssetMap(); } }; setTimeout(refit, 60); setTimeout(refit, 350); }
   }
   body.scrollTop = 0;
   sheet.hidden = false; backdrop.hidden = false;
@@ -2819,12 +2825,19 @@ document.getElementById('sheetBody').addEventListener('click', e=>{ const b = e.
 // ----- chat (placeholder until the assistant is connected) -----
 const chatHistory = [];
 let chatBusy = false;
+document.getElementById('chatDone').addEventListener('click', ()=>{
+  if(chatBusy) return;
+  chatHistory.length = 0;
+  document.querySelectorAll('#chatThread > .msg:not(.intro)').forEach(m=>m.remove());
+  document.body.classList.remove('chatting'); renderBriefing(); window.scrollTo({ top:0 });
+});
 document.getElementById('composer').addEventListener('submit', async e=>{
   e.preventDefault();
   const input = document.getElementById('askInput'), text = input.value.trim();
   if(!text || chatBusy) return;
   const thread = document.getElementById('chatThread');
   chatHistory.push({ role:'user', content:text });
+  if(!document.body.classList.contains('chatting')){ document.body.classList.add('chatting'); window.scrollTo({ top:0 }); }
   thread.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(text)}</div><div class="msg otto typing">Looking at your data…</div>`);
   input.value = ''; chatBusy = true;
   const pending = thread.lastElementChild; pending.scrollIntoView({ behavior:'smooth', block:'end' });
