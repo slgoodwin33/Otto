@@ -425,7 +425,7 @@
   .star.on{color:var(--accent-text);}
   .grocery-price .act{color:var(--accent-text);}
   .budget-period, .grocery-meta, .recipe-tags, .food-note, .bill-row, .budget-cat-amounts{font-family:var(--sans);}
-  #foodSubTabs{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:2px; background:var(--surface-2); border-radius:9px; padding:2px;}
+  #foodSubTabs{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:2px; background:var(--surface-2); border-radius:12px; padding:3px;}
   #foodSubTabs .chip{border:none; background:transparent; border-radius:7px; height:32px; padding:0; font-size:0.82rem; color:var(--text);}
   #foodSubTabs .chip.active{background:var(--surface); box-shadow:0 1px 3px rgba(0,0,0,0.12); font-weight:600;}
   .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap;}
@@ -773,6 +773,53 @@
   .visit-time{font-size:0.8rem; color:var(--text-faint);}
   .visit-dur{margin-left:auto; font-size:0.9rem; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap;}
   .place-label{background:var(--surface); color:var(--text); border-radius:10px; padding:3px 8px; font:600 12px var(--sans); box-shadow:0 1px 4px rgba(0,0,0,.25); white-space:nowrap;}
+  #statusFilters{display:none !important;}
+  .quick-add-form{margin-bottom:12px;}
+  .tgroup{background:var(--surface); border-radius:var(--radius); overflow:hidden;}
+  .swipe{position:relative; overflow:hidden; border-top:1px solid var(--border);}
+  .tgroup > .swipe:first-child{border-top:none;}
+  .swipe-bg{position:absolute; inset:0; display:flex; justify-content:space-between; align-items:center; padding:0 18px; font-size:0.85rem; font-weight:700; color:#fff;}
+  .swipe-bg .l{opacity:0;} .swipe-bg .r{opacity:0;}
+  .swipe.go-done .swipe-bg{background:#2E8B57;} .swipe.go-done .swipe-bg .l{opacity:1;}
+  .swipe.go-snooze .swipe-bg{background:#3F7CC0;} .swipe.go-snooze .swipe-bg .r{opacity:1;}
+  .trow{position:relative; background:var(--surface); display:grid; grid-template-columns:auto 1fr auto; gap:2px 12px; align-items:start; padding:12px 16px 12px 14px; touch-action:pan-y; cursor:pointer;}
+  .trow .quick-complete{margin-top:1px;}
+  .trow-title{font-size:0.95rem; line-height:1.3;}
+  .trow.done .trow-title{color:var(--text-faint); text-decoration:line-through;}
+  .trow-meta{grid-column:2 / 3; display:flex; gap:8px; flex-wrap:wrap; font-size:0.78rem; color:var(--text-faint);}
+  .trow-date{font-size:0.8rem; color:var(--text-faint); white-space:nowrap; padding-top:2px;}
+  .trow-date.late{color:var(--coral); font-weight:600;} .trow-date.today{color:var(--accent-text); font-weight:600;}
+  .pdot{display:inline-block; width:7px; height:7px; border-radius:4px; background:var(--coral); margin-right:4px; vertical-align:1px;}
+  .trow-edit{grid-column:1 / -1; padding:10px 0 2px; display:flex; flex-direction:column; gap:10px;}
+  .chiprow{display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .chiprow .lbl{font-size:0.75rem; color:var(--text-faint); width:58px;}
+  .chiprow .chip{padding:5px 11px; border-radius:999px; font-size:0.8rem;}
+  .trow-notes{font-size:0.85rem; color:var(--text-muted); white-space:pre-wrap;}
+  .suggest-note{font-size:0.82rem; color:var(--text-faint); margin:4px 4px 8px;}
+  .swipe-hint{font-size:0.75rem; color:var(--text-faint); text-align:center; margin:14px 0 0;}
+  .food-ico{width:30px; height:30px; border-radius:15px; background:var(--surface-2); display:inline-grid; place-items:center; font-size:17px; line-height:1; flex-shrink:0;}
+  .food-ico.big{width:44px; height:44px; border-radius:14px; font-size:26px;}
+  .grocery-row.checked .food-ico{opacity:0.45;}
+  .fridge-row{display:flex; align-items:center; gap:12px; padding:12px 16px; border-top:1px solid var(--border);}
+  .fridge-row:first-child{border-top:none;}
+  .fridge-row.gone{opacity:0.5;}
+  .portion-dots{display:flex; gap:4px; margin:5px 0 3px;}
+  .portion-dots i{width:9px; height:9px; border-radius:5px; background:var(--accent);}
+  .portion-dots i.eaten{background:var(--surface-2); box-shadow:inset 0 0 0 1px var(--border);}
+  .ate-btn{border:none; background:var(--accent-soft); color:var(--accent-text); font:inherit; font-weight:600; font-size:0.85rem; padding:8px 12px; border-radius:999px; cursor:pointer; white-space:nowrap;}
+  .ate-btn.small{padding:5px 10px; font-size:0.78rem; margin-left:auto;}
+  .ate-btn:disabled{opacity:0.5;}
+  .meal-row{align-items:center; gap:10px;}
+  .meal-row .meal-name{flex:1;}
+  .meal-row.eaten .meal-name{color:var(--text-faint);}
+  .eaten-mark{font-size:0.75rem; color:var(--accent-text); font-weight:600; white-space:nowrap;}
+  .offplan{display:flex; gap:8px; flex-wrap:wrap;}
+  .offplan .chip{padding:8px 14px; border-radius:999px;}
+  .offplan-form{display:flex; gap:8px; margin-top:10px;}
+  .offplan-form input{flex:1; border:1px solid var(--border); border-radius:12px; padding:10px 12px; font:inherit; background:var(--surface); color:var(--text);}
+  .food-sub{flex-wrap:nowrap !important;}
+  .food-sub .chip{padding:8px 2px; font-size:0.84rem;}
+  .offplan-form[hidden]{display:none !important;}
 </style>
 </head>
 <body>
@@ -840,10 +887,11 @@
 
     <div class="tab-panel" id="panelTodos">
       <form id="quickAddForm" class="quick-add-form">
-        <input type="text" id="quickAddInput" placeholder="Add a todo…" required>
+        <input type="text" id="quickAddInput" placeholder="Add a todo for today…" required>
         <button class="save-btn" type="submit">Add</button>
       </form>
-      <div class="controls" id="statusFilters"></div>
+      <div class="seg" id="todoSeg"><button type="button" data-tview="today" class="active">Today</button><button type="button" data-tview="upcoming">Upcoming</button><button type="button" data-tview="anytime">Anytime</button><button type="button" data-tview="done">Done</button></div>
+      <div class="controls" id="statusFilters" hidden></div>
       <div id="errorBanner"></div>
       <div class="todo-list" id="todoList"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
@@ -933,8 +981,9 @@
     <div class="tab-panel" id="panelFood">
       <div id="foodErrorBanner"></div>
       <div class="food-sub" id="foodSubTabs">
-        <button class="chip active" data-food="list" type="button">Grocery list</button>
-        <button class="chip" data-food="meals" type="button">This week</button>
+        <button class="chip active" data-food="fridge" type="button">Fridge</button>
+        <button class="chip" data-food="list" type="button">Groceries</button>
+        <button class="chip" data-food="meals" type="button">Meals</button>
         <button class="chip" data-food="recipes" type="button">Recipes</button>
       </div>
       <div id="foodContent"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
@@ -965,7 +1014,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-10.18';
+const APP_BUILD = '2026-10-10.20';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2202,46 +2251,123 @@ function buildTodoListHtml(rows, expandedCodeForThisList){
   }).join('');
 }
 
-function renderList(todos){
-  let rows = activeStatus==='all' ? todos.slice() : todos.filter(t=>t.status===activeStatus);
-  const list = document.getElementById('todoList');
-  list.innerHTML = buildTodoListHtml(rows, expandedCode);
-
-  list.querySelectorAll('.todo-card').forEach(card=>{
-    card.addEventListener('click', ()=>{
-      const code = card.getAttribute('data-code');
-      expandedCode = (expandedCode === code) ? null : code;
-      renderList(allTodos);
-    });
-  });
-  list.querySelectorAll('.quick-complete').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      toggleTodoComplete(btn.getAttribute('data-code'));
-    });
-  });
+let todoView = 'today';
+function nextDow(fromIso, dow){ const [y,m,d] = fromIso.split('-').map(Number); const t = new Date(y,m-1,d); let add = (dow - t.getDay() + 7) % 7; if(add === 0) add = 7; return isoAddDays(fromIso, add); }
+function quickDates(){ const t = localToday(), dow = new Date().getDay(); return [['Today', t], ['Tomorrow', isoAddDays(t,1)], ['Weekend', (dow===6||dow===0) ? t : nextDow(t,6)], ['Next week', nextDow(t,1)], ['No date', null]]; }
+function todoDateLabel(iso){
+  const t = localToday();
+  if(iso < t) { const n = Math.round((new Date(t) - new Date(iso))/86400000); return [`${n}d late`, 'late']; }
+  if(iso === t) return ['Today', 'today'];
+  if(iso === isoAddDays(t,1)) return ['Tomorrow', ''];
+  const diff = Math.round((new Date(iso) - new Date(t))/86400000);
+  return [diff < 7 ? new Date(iso+'T12:00').toLocaleDateString('en-US',{weekday:'short'}) : shortDate(iso), ''];
 }
+function todoRowHtml(t){
+  const open = expandedCode === t.code, done = t.status !== 'open';
+  const [dl, dc] = t.due_date && !done ? todoDateLabel(t.due_date) : ['', ''];
+  const meta = [];
+  if(t.priority === 'high' && !done) meta.push(`<span><span class="pdot"></span>High</span>`);
+  if(t.project && t.project.title) meta.push(`<span>${esc(t.project.title)}</span>`);
+  if(t.asset && t.asset.item) meta.push(`<span>${esc(t.asset.item)}</span>`);
+  if(done && t.completed_at) meta.push(`<span>${t.status === 'done' ? 'Done' : 'Cancelled'} ${shortDate(t.completed_at.slice(0,10))}</span>`);
+  const edit = open ? `<div class="trow-edit">
+      ${!done ? `<div class="chiprow"><span class="lbl">When</span>${quickDates().map(([l,v])=>`<button class="chip ${(t.due_date||null)===v?'active':''}" type="button" data-setdue="${v||''}">${l}</button>`).join('')}</div>
+      <div class="chiprow"><span class="lbl">Priority</span>${['high','medium','low'].map(p=>`<button class="chip ${t.priority===p?'active':''}" type="button" data-setprio="${p}">${p[0].toUpperCase()+p.slice(1)}</button>`).join('')}</div>` : ''}
+      ${t.notes ? `<div class="trow-notes">${esc(t.notes)}</div>` : ''}
+      <div class="chiprow">${done ? `<button class="link-btn" type="button" data-reopen="1">Reopen</button>` : `<button class="link-btn" type="button" data-cancel="1" style="color:var(--text-faint)">Cancel this todo</button>`}</div>
+    </div>` : '';
+  return `<div class="swipe" data-code="${esc(t.code)}"><div class="swipe-bg"><span class="l">Done ✓</span><span class="r">Tomorrow →</span></div>
+    <div class="trow ${done?'done':''}">
+      <button type="button" class="quick-complete ${t.status==='done'?'done':''}" data-code="${esc(t.code)}" aria-label="Toggle complete"></button>
+      <div class="trow-title">${esc(t.title)}</div>
+      <div class="trow-date ${dc}">${dl}</div>
+      ${meta.length ? `<div class="trow-meta">${meta.join('')}</div>` : ''}
+      ${edit}
+    </div></div>`;
+}
+function renderList(todos){
+  const list = document.getElementById('todoList'); if(!list) return;
+  const today = localToday(), open = todos.filter(t=>t.status==='open');
+  const prio = { high:0, medium:1, low:2 };
+  const byPrio = (a,b)=>(prio[a.priority]??3)-(prio[b.priority]??3) || (a.title||'').localeCompare(b.title||'');
+  const group = (title, rows, right) => rows.length ? `<div class="section-title">${esc(title)}${right ? `<span>${right}</span>` : ''}</div><div class="tgroup">${rows.map(todoRowHtml).join('')}</div>` : '';
+  const counts = { today: open.filter(t=>t.due_date && t.due_date <= today).length, upcoming: open.filter(t=>t.due_date && t.due_date > today).length, anytime: open.filter(t=>!t.due_date).length };
+  document.querySelectorAll('[data-tview]').forEach(b=>{ const k = b.dataset.tview; b.classList.toggle('active', k===todoView); b.textContent = { today:'Today', upcoming:'Upcoming', anytime:'Anytime', done:'Done' }[k] + (counts[k] ? ` ${counts[k]}` : ''); });
+  let html = '';
+  if(todoView === 'today'){
+    const late = open.filter(t=>t.due_date && t.due_date < today).sort((a,b)=>a.due_date.localeCompare(b.due_date));
+    const now = open.filter(t=>t.due_date === today).sort(byPrio);
+    html += group('Overdue', late, `${late.length}`) + group('Today', now);
+    if(!late.length && !now.length) html += `<div class="empty">Nothing due today.</div>`;
+    const sugg = open.filter(t=>!t.due_date).sort(byPrio).slice(0, 3);
+    if(late.length + now.length < 3 && sugg.length) html += `<div class="section-title">Pick something for today</div><div class="suggest-note">Your top undated todos. Tap one and choose Today, or swipe left to plan it for tomorrow.</div><div class="tgroup">${sugg.map(todoRowHtml).join('')}</div>`;
+  } else if(todoView === 'upcoming'){
+    const up = open.filter(t=>t.due_date && t.due_date > today).sort((a,b)=>a.due_date.localeCompare(b.due_date) || byPrio(a,b));
+    const days = []; up.forEach(t=>{ let d = days.find(x=>x.date===t.due_date); if(!d){ d={date:t.due_date, rows:[]}; days.push(d); } d.rows.push(t); });
+    html += days.map(d=>group(dayLong(d.date), d.rows)).join('') || `<div class="empty">Nothing scheduled ahead. Give a todo a date and it shows up here.</div>`;
+  } else if(todoView === 'anytime'){
+    const any = open.filter(t=>!t.due_date);
+    const groups = {}; any.forEach(t=>{ const k = (t.project && t.project.title) || 'No project'; (groups[k] = groups[k] || []).push(t); });
+    html += Object.keys(groups).sort((a,b)=> a==='No project' ? 1 : b==='No project' ? -1 : a.localeCompare(b)).map(k=>group(k, groups[k].sort(byPrio), `${groups[k].length}`)).join('') || `<div class="empty">Everything has a date.</div>`;
+  } else {
+    const done = todos.filter(t=>t.status!=='open').sort((a,b)=>(b.completed_at||'').localeCompare(a.completed_at||'')).slice(0, 40);
+    html += group('Finished', done) || `<div class="empty">Nothing finished yet.</div>`;
+  }
+  if(todoView !== 'done' && html.includes('class="swipe"')) html += `<div class="swipe-hint">Swipe right to finish, left to push to tomorrow</div>`;
+  list.innerHTML = html;
+}
+async function patchTodo(code, body){
+  const t = allTodos.find(x=>x.code===code); if(!t) return;
+  const before = { ...t }; Object.assign(t, body); renderAll(allTodos);
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/todos?code=eq.${encodeURIComponent(code)}`, { method:'PATCH', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=minimal' }), body: JSON.stringify(body) });
+    if(!res.ok) throw new Error(`Supabase returned ${res.status}`);
+  } catch(err){ Object.assign(t, before); renderAll(allTodos); document.getElementById('errorBanner').innerHTML = `<div class="error-banner">Couldn't save (${esc(err.message)}).</div>`; }
+}
+(function wireTodoList(){
+  const list = document.getElementById('todoList');
+  document.getElementById('todoSeg').addEventListener('click', e=>{ const b = e.target.closest('[data-tview]'); if(!b) return; todoView = b.dataset.tview; expandedCode = null; renderList(allTodos);
+    document.getElementById('quickAddInput').placeholder = todoView === 'today' ? 'Add a todo for today…' : 'Add a todo…'; });
+  list.addEventListener('click', e=>{
+    const row = e.target.closest('.swipe'); if(!row || row.dataset.swiped === '1') return;
+    const code = row.dataset.code;
+    const qc = e.target.closest('.quick-complete'); if(qc){ e.stopPropagation(); hapticPulse(); toggleTodoComplete(code); return; }
+    const sd = e.target.closest('[data-setdue]'); if(sd){ patchTodo(code, { due_date: sd.dataset.setdue || null }); return; }
+    const sp = e.target.closest('[data-setprio]'); if(sp){ patchTodo(code, { priority: sp.dataset.setprio }); return; }
+    if(e.target.closest('[data-cancel]')){ expandedCode = null; patchTodo(code, { status:'cancelled', completed_at: new Date().toISOString() }); return; }
+    if(e.target.closest('[data-reopen]')){ expandedCode = null; patchTodo(code, { status:'open', completed_at: null }); return; }
+    if(e.target.closest('.trow-edit')) return;
+    expandedCode = expandedCode === code ? null : code; renderList(allTodos);
+  });
+  // swipe: right = done, left = tomorrow
+  let sx = 0, sy = 0, cur = null, dx = 0, locked = null;
+  list.addEventListener('touchstart', e=>{ const r = e.target.closest('.swipe'); if(!r || e.target.closest('.trow-edit')) return; cur = r; sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; locked = null; cur.dataset.swiped = ''; }, { passive:true });
+  list.addEventListener('touchmove', e=>{
+    if(!cur) return;
+    const mx = e.touches[0].clientX - sx, my = e.touches[0].clientY - sy;
+    if(locked === null && (Math.abs(mx) > 8 || Math.abs(my) > 8)) locked = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+    if(locked !== 'x') return;
+    dx = mx; const fg = cur.querySelector('.trow'); fg.style.transition = 'none'; fg.style.transform = `translateX(${dx}px)`;
+    cur.classList.toggle('go-done', dx > 20); cur.classList.toggle('go-snooze', dx < -20);
+  }, { passive:true });
+  list.addEventListener('touchend', ()=>{
+    if(!cur) return;
+    const r = cur, fg = r.querySelector('.trow'), code = r.dataset.code, t = allTodos.find(x=>x.code===code);
+    fg.style.transition = 'transform 0.18s ease'; fg.style.transform = '';
+    setTimeout(()=>r.classList.remove('go-done','go-snooze'), 180);
+    if(locked === 'x' && Math.abs(dx) > 8){ r.dataset.swiped = '1'; setTimeout(()=>{ r.dataset.swiped = ''; }, 350); }
+    if(locked === 'x' && t && t.status === 'open'){
+      if(dx > 80){ hapticPulse(); toggleTodoComplete(code); }
+      else if(dx < -80){ hapticPulse(); patchTodo(code, { due_date: isoAddDays(t.due_date && t.due_date > localToday() ? t.due_date : localToday(), 1) }); }
+    }
+    cur = null; locked = null; dx = 0;
+  });
+})();
 
 async function toggleTodoComplete(code){
-  const todo = allTodos.find(t=>t.code===code);
-  if(!todo) return;
+  const todo = allTodos.find(t=>t.code===code); if(!todo) return;
   const nowDone = todo.status !== 'done';
-  const patch = { status: nowDone ? 'done' : 'open', completed_at: nowDone ? new Date().toISOString() : null };
-  try{
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/todos?code=eq.${encodeURIComponent(code)}`, {
-      method: 'PATCH',
-      headers: authHeaders({ 'Content-Type': 'application/json', Prefer: 'return=representation' }),
-      body: JSON.stringify(patch)
-    });
-    if(!res.ok) throw new Error(`Supabase returned ${res.status}`);
-    const updated = await res.json();
-    const idx = allTodos.findIndex(t=>t.code===code);
-    if(idx!==-1 && updated[0]) allTodos[idx] = { ...allTodos[idx], ...updated[0] };
-    renderAll(allTodos);
-  } catch(err){
-    const banner = document.getElementById('errorBanner');
-    banner.innerHTML = `<div class="error-banner">Couldn't update (${err.message}).</div>`;
-  }
+  await patchTodo(code, { status: nowDone ? 'done' : 'open', completed_at: nowDone ? new Date().toISOString() : null });
 }
 
 function renderHomeTodos(todos){
@@ -2378,10 +2504,11 @@ function renderOverdueBadge(todos){
 
 async function quickAddTodo(title){
   const code = await nextCodeFor('todos', 'TD');
+  const due = todoView === 'today' ? localToday() : null;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/todos`, {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json', Prefer: 'return=representation' }),
-    body: JSON.stringify([{ code, title, status: 'open' }])
+    body: JSON.stringify([{ code, title, status: 'open', due_date: due }])
   });
   if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.message || `Supabase returned ${res.status}`); }
   return res.json();
@@ -2445,7 +2572,7 @@ document.querySelectorAll('#tabbar .tab-btn').forEach(btn=>{
 
 // ================= FOOD =================
 let foodData = null;
-let foodView = 'list';
+let foodView = 'fridge';
 let expandedGroceryId = null;
 let expandedRecipeId = null;
 
@@ -2453,11 +2580,11 @@ function esc(v){ return String(v ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<'
 function fmtQty(n){ const x = Number(n); return Number.isInteger(x) ? String(x) : String(+x.toFixed(2)); }
 
 async function fetchFood(){
-  const planSel = encodeURIComponent('*,meal_plan_items(*,recipe:recipes(id,name,meal_type)),grocery_list_items(*,food:food_items(name,store_section,purchase_unit,is_pantry_staple,price_source))');
+  const planSel = encodeURIComponent('*,meal_plan_items(*,recipe:recipes(id,name,meal_type,emoji)),grocery_list_items(*,food:food_items(name,emoji,store_section,purchase_unit,is_pantry_staple,price_source))');
   const planRes = await fetch(`${SUPABASE_URL}/rest/v1/meal_plans?select=${planSel}&order=week_start.desc&limit=1`, { headers: authHeaders() });
   if(!planRes.ok) throw new Error(`Supabase returned ${planRes.status}`);
   const plans = await planRes.json();
-  const recSel = encodeURIComponent('*,recipe_ingredients(quantity,unit,prep_note,is_optional,food:food_items(name))');
+  const recSel = encodeURIComponent('*,recipe_ingredients(quantity,unit,prep_note,is_optional,food:food_items(name,emoji))');
   const recRes = await fetch(`${SUPABASE_URL}/rest/v1/recipes?select=${recSel}&status=neq.retired&order=rating.desc.nullslast,name.asc`, { headers: authHeaders() });
   if(!recRes.ok) throw new Error(`Supabase returned ${recRes.status}`);
   const plan = plans[0] || null;
@@ -2465,8 +2592,85 @@ async function fetchFood(){
     const vRes = await fetch(`${SUPABASE_URL}/rest/v1/v_grocery_list?select=id,for_recipes&meal_plan_id=eq.${plan.id}`, { headers: authHeaders() });
     if(vRes.ok){ const byId = {}; (await vRes.json()).forEach(v=>byId[v.id]=v.for_recipes); (plan.grocery_list_items||[]).forEach(i=>{ i.for_recipes = byId[i.id] || null; }); }
   }
-  return { plan, recipes: await recRes.json() };
+  let log = [], onHand = [], pace = null;
+  const [lr, hr, pr] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/meal_log?select=*,recipe:recipes(name,emoji)&order=eaten_on.desc,id.desc&limit=60`, { headers: authHeaders() }),
+    fetch(`${SUPABASE_URL}/rest/v1/v_food_on_hand?select=*${plan ? `&meal_plan_id=eq.${plan.id}` : ''}`, { headers: authHeaders() }),
+    fetch(`${SUPABASE_URL}/rest/v1/v_meal_pace?select=*`, { headers: authHeaders() })]);
+  if(lr.ok) log = await lr.json(); if(hr.ok) onHand = await hr.json(); if(pr.ok) pace = (await pr.json())[0] || null;
+  return { plan, recipes: await recRes.json(), log, onHand, pace };
 }
+const FOOD_EMOJI_FALLBACK = { Produce:'🥬', Meat:'🥩', Dairy:'🥛', Bakery:'🍞', Grains:'🌾', Canned:'🥫', Condiments:'🫙', Spices:'🧂', Frozen:'🧊', Other:'🛒' };
+function foodEmoji(food){ return (food && food.emoji) || FOOD_EMOJI_FALLBACK[(food && food.store_section) || 'Other'] || '🛒'; }
+function recipeEmoji(r){ return (r && r.emoji) || '🍽️'; }
+function mealSlotNow(){ const h = new Date().getHours(); return h < 10 ? 'breakfast' : h < 15 ? 'lunch' : 'dinner'; }
+function renderFoodFridge(fd){
+  const plan = fd.plan;
+  if(!plan) return '<div class="empty">No meal plan yet.</div>';
+  const today = localToday();
+  let html = '';
+  if(!plan.started_on){
+    const T = groceryTotals(plan);
+    html += `<div class="mo-card"><div class="mo-label">Fridge</div><div class="mo-big" style="font-size:1.5rem">Not shopped yet</div>
+      <div class="mo-sub">${T.buy.length} items to buy, about ${money(T.projected)}. When you're back from the store, start the batch and Otto counts down your meals.</div>
+      <button class="save-btn" type="button" data-startbatch="${plan.id}" style="margin-top:12px; width:100%; padding:12px;">I've done the shopping, start the batch</button></div>`;
+  } else {
+    const p = fd.pace || {};
+    const mains = Number(p.mains_left ?? 0), bf = Number(p.breakfasts_left ?? 0);
+    html += `<div class="mo-card"><div class="mo-top"><span class="mo-label">In the fridge</span><span class="mo-label">since ${shortDate(plan.started_on)}</span></div>
+      <div class="mo-big">${mains} meal${mains===1?'':'s'} left</div>
+      <div class="mo-sub">${bf ? `plus ${bf} breakfast${bf===1?'':'s'}. ` : ''}${p.est_days_left != null ? `About ${Math.round(Number(p.est_days_left))} day${Math.round(Number(p.est_days_left))===1?'':'s'} at your pace.` : 'Log a few meals and Otto will estimate how many days that lasts.'}</div></div>`;
+    const items = (fd.onHand || []).slice().sort((a,b)=>Number(b.portions_left)-Number(a.portions_left) || (a.next_suggested_date||'').localeCompare(b.next_suggested_date||''));
+    const recById = {}; (fd.recipes||[]).forEach(r=>recById[r.id]=r);
+    html += `<div class="section-title">What's ready<span>tap Ate one after eating</span></div><div class="gcard" style="padding:0">${items.map(it=>{
+      const left = Number(it.portions_left), total = Number(it.portions_total);
+      const dots = Array.from({length: Math.min(total, 10)}, (_,i)=>`<i class="${i < total-left ? 'eaten' : ''}"></i>`).join('');
+      return `<div class="fridge-row ${left ? '' : 'gone'}"><span class="food-ico big">${recipeEmoji(recById[it.recipe_id])}</span>
+        <div class="grow-main"><div class="grow-title">${esc(it.name)}</div><div class="portion-dots">${dots}</div><div class="grow-sub">${left ? `${left} of ${total} left` : 'All eaten'}${left && it.next_suggested_date ? `, planned ${it.next_suggested_date === today ? 'today' : shortDate(it.next_suggested_date)}` : ''}</div></div>
+        ${left ? `<button class="ate-btn" type="button" data-ategroup="${it.group_item_id}">Ate one</button>` : ''}</div>`;
+    }).join('') || '<div class="grow static"><div class="grow-sub">Nothing cooked in this batch.</div></div>'}</div>`;
+  }
+  html += `<div class="section-title">Ate something else?</div><div class="offplan">
+    <button class="chip" type="button" data-offplan="eating_out">🍽️ Ate out</button><button class="chip" type="button" data-offplan="off_plan">🥡 Something else</button></div>
+    <div id="offplanForm" hidden class="offplan-form"><input type="text" id="offplanTitle" placeholder="What was it? e.g. Chipotle"><button class="save-btn" type="button" id="offplanSave">Log it</button></div>`;
+  const recent = (fd.log || []).slice(0, 12);
+  if(recent.length){
+    const days = []; recent.forEach(m=>{ let d = days.find(x=>x.date===m.eaten_on); if(!d){ d={date:m.eaten_on, rows:[]}; days.push(d); } d.rows.push(m); });
+    html += `<div class="section-title">Recently eaten</div>` + days.map(d=>`<div class="day-label"><span>${d.date===today ? 'Today' : dayLong(d.date)}</span></div><div class="gcard">${d.rows.map(m=>`
+      <div class="grow static"><span class="food-ico">${m.kind==='eating_out' ? '🍽️' : m.kind==='off_plan' ? '🥡' : recipeEmoji(m.recipe)}</span><div class="grow-main"><div class="grow-title">${esc((m.recipe && m.recipe.name) || m.title || 'Meal')}</div><div class="grow-sub" style="text-transform:capitalize">${esc(m.meal_type || '')}${m.kind==='eating_out' ? ', ate out' : m.kind==='off_plan' ? ', off plan' : ''}</div></div></div>`).join('')}</div>`).join('');
+  }
+  return html;
+}
+let offplanKind = null;
+async function logMeal(body){
+  await ensureValidSession();
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/meal_log`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=minimal' }), body: JSON.stringify([body]) });
+  if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.message || `Supabase returned ${res.status}`); }
+}
+document.getElementById('foodContent').addEventListener('click', async e=>{
+  const banner = document.getElementById('foodErrorBanner');
+  const sb = e.target.closest('[data-startbatch]');
+  if(sb){ sb.disabled = true; try{ await ensureValidSession(); const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/start_meal_batch`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify({ p_plan_id: Number(sb.dataset.startbatch) }) }); if(!r.ok) throw new Error(`Supabase returned ${r.status}`); hapticPulse(); await refreshFood(); } catch(err){ sb.disabled = false; banner.innerHTML = `<div class="error-banner">Couldn't start the batch (${esc(err.message)}).</div>`; } return; }
+  const ate = e.target.closest('[data-ategroup], [data-ateitem]');
+  if(ate){
+    const plan = foodData.plan, eaten = new Set((foodData.log||[]).map(m=>m.meal_plan_item_id));
+    let item;
+    if(ate.dataset.ateitem) item = (plan.meal_plan_items||[]).find(i=>i.id === Number(ate.dataset.ateitem));
+    else { const g = Number(ate.dataset.ategroup); item = (plan.meal_plan_items||[]).filter(i=>(i.leftover_of || i.id) === g && !eaten.has(i.id)).sort((a,b)=>(a.planned_date||'').localeCompare(b.planned_date||'') || a.id-b.id)[0]; }
+    if(!item) return;
+    ate.disabled = true;
+    try{ await logMeal({ eaten_on: localToday(), meal_type: item.meal_type === 'breakfast' ? 'breakfast' : mealSlotNow(), kind:'planned', meal_plan_item_id: item.id, servings: 1 }); hapticPulse(); await refreshFood(); }
+    catch(err){ ate.disabled = false; banner.innerHTML = `<div class="error-banner">Couldn't log that meal (${esc(err.message)}).</div>`; }
+    return;
+  }
+  const op = e.target.closest('[data-offplan]');
+  if(op){ offplanKind = op.dataset.offplan; document.querySelectorAll('[data-offplan]').forEach(b=>b.classList.toggle('active', b===op)); const f = document.getElementById('offplanForm'); f.hidden = false; document.getElementById('offplanTitle').focus(); return; }
+  if(e.target.closest('#offplanSave')){
+    const title = document.getElementById('offplanTitle').value.trim() || (offplanKind === 'eating_out' ? 'Ate out' : 'Something else');
+    try{ await logMeal({ eaten_on: localToday(), meal_type: mealSlotNow(), kind: offplanKind || 'off_plan', title, servings: 1 }); hapticPulse(); offplanKind = null; await refreshFood(); }
+    catch(err){ banner.innerHTML = `<div class="error-banner">Couldn't log that (${esc(err.message)}).</div>`; }
+  }
+});
 
 async function patchRow(table, id, body){
   await ensureValidSession();
@@ -2502,7 +2706,7 @@ function groceryRowHtml(i){
     : `<div class="est">${i.est_price_cents != null ? money(i.est_price_cents) : ''}</div>`);
   return `<div class="grocery-row ${i.checked?'checked':''} ${i.on_hand?'have':''}" data-gid="${i.id}">
     <button class="grocery-box" data-check="${i.id}" type="button" aria-label="${i.checked?'Uncheck':'Check'} ${esc(name)}" ${i.on_hand?'disabled':''}>${i.checked?'✓':''}</button>
-    <div style="min-width:0"><div class="grocery-name">${esc(name)}</div><div class="grocery-meta">${buyLine}</div>${forLine ? `<div class="grocery-for">${forLine}</div>` : ''}</div>
+    <div style="min-width:0; display:flex; gap:10px; align-items:flex-start"><span class="food-ico">${foodEmoji(i.food)}</span><div style="min-width:0"><div class="grocery-name">${esc(name)}</div><div class="grocery-meta">${buyLine}</div>${forLine ? `<div class="grocery-for">${forLine}</div>` : ''}</div></div>
     <div class="grocery-price">${price}</div>
     ${open ? `<div class="grocery-edit">
       ${i.on_hand ? '' : `<input type="number" step="0.01" min="0" inputmode="decimal" placeholder="Paid $" id="actual-${i.id}" value="${i.actual_price_cents != null ? (i.actual_price_cents/100).toFixed(2) : ''}" aria-label="Actual price paid">
@@ -2560,8 +2764,12 @@ function renderFoodMeals(plan){
       <div class="budget-cat day-card">${rows.map(i=>{
         const kind = i.leftover_of ? 'leftover' : (!i.recipe ? 'out' : '');
         const note = i.leftover_of ? 'Leftovers' : (i.notes || '');
-        return `<div class="meal-row ${kind}"><span class="meal-type">${esc(i.meal_type || '')}</span>
-          <span class="meal-name">${esc(i.recipe ? i.recipe.name : i.title)}${note ? `<span class="meal-note">${esc(note)}</span>` : ''}</span></div>`;
+        const logged = (foodData.log||[]).some(m=>m.meal_plan_item_id === i.id);
+        const canEat = plan.started_on && i.recipe && !logged;
+        return `<div class="meal-row ${kind} ${logged?'eaten':''}"><span class="meal-type">${esc(i.meal_type || '')}</span>
+          <span class="food-ico">${i.recipe ? recipeEmoji(i.recipe) : '🍽️'}</span>
+          <span class="meal-name">${esc(i.recipe ? i.recipe.name : i.title)}${note ? `<span class="meal-note">${esc(note)}</span>` : ''}</span>
+          ${logged ? '<span class="eaten-mark">✓ Eaten</span>' : canEat ? `<button class="ate-btn small" type="button" data-ateitem="${i.id}">Ate it</button>` : ''}</div>`;
       }).join('')}</div>`;
   });
   if(plan.notes) html += `<p class="food-note" style="padding:0 6px;">${esc(plan.notes)}</p>`;
@@ -2575,10 +2783,10 @@ function renderFoodRecipes(recipes){
     const tags = [r.cuisine, r.meal_type, `serves ${r.servings}`, (r.prep_minutes||0)+(r.cook_minutes||0) ? `${(r.prep_minutes||0)+(r.cook_minutes||0)} min` : null, r.freezer_friendly ? 'freezes' : null, r.status === 'want_to_try' ? 'not made yet' : null].filter(Boolean);
     const ings = (r.recipe_ingredients || []).slice().sort((a,b)=>(a.food?.name||'').localeCompare(b.food?.name||''));
     return `<div class="budget-cat recipe-card" data-rid="${r.id}">
-      <div class="budget-cat-top"><span class="budget-cat-name">${esc(r.name)}</span>${starsHtml(r)}</div>
+      <div class="budget-cat-top"><span class="budget-cat-name"><span class="food-ico" style="margin-right:10px">${recipeEmoji(r)}</span>${esc(r.name)}</span>${starsHtml(r)}</div>
       <div class="recipe-tags">${tags.map(esc).join(' · ')}</div>
       ${open ? `<div class="recipe-detail">
-        ${ings.map(g=>`<div class="ing-row"><span>${esc(g.food?.name)}${g.prep_note ? `, ${esc(g.prep_note)}` : ''}${g.is_optional ? ' (optional)' : ''}</span><span class="q">${g.quantity != null ? fmtQty(g.quantity) : ''} ${esc(g.unit || '')}</span></div>`).join('')}
+        ${ings.map(g=>`<div class="ing-row"><span>${foodEmoji(g.food)} ${esc(g.food?.name)}${g.prep_note ? `, ${esc(g.prep_note)}` : ''}${g.is_optional ? ' (optional)' : ''}</span><span class="q">${g.quantity != null ? fmtQty(g.quantity) : ''} ${esc(g.unit || '')}</span></div>`).join('')}
         ${r.instructions ? `<p>${esc(r.instructions)}</p>` : ''}
       </div>` : ''}
     </div>`;
@@ -2589,6 +2797,7 @@ function renderFood(){
   const el = document.getElementById('foodContent');
   if(!foodData) return;
   if(foodView === 'recipes'){ el.innerHTML = renderFoodRecipes(foodData.recipes); return; }
+  if(foodView === 'fridge'){ el.innerHTML = renderFoodFridge(foodData); return; }
   if(!foodData.plan){ el.innerHTML = '<div class="empty">No meal plan yet. Ask Claude to build this week\'s plan.</div>'; return; }
   el.innerHTML = foodView === 'meals' ? renderFoodMeals(foodData.plan) : renderFoodList(foodData.plan);
 }
@@ -2753,6 +2962,7 @@ function renderBriefing(){
   const meal = homeNextMeal();
   let groc = '';
   if(foodData && foodData.plan){ const T = groceryTotals(foodData.plan); groc = `${money(T.projected)} groceries to buy`; }
+  if(foodData && foodData.plan && foodData.plan.started_on && foodData.pace){ const ml = Number(foodData.pace.mains_left||0); groc = ml ? `${ml} meal${ml===1?'':'s'} left in the fridge` : 'Fridge is empty'; }
   html += `<button class="wdg" type="button" data-area="food">${top('food','#D9822B','Food')}<div class="wdg-v small">${meal ? esc(meal.name) : 'Nothing planned'}</div><div class="wdg-d">${meal ? esc(meal.when) : ''}</div><div class="wdg-d" style="margin-top:auto">${groc}</div></button>`;
   // Health
   let hv = '—', hd = 'Steps today', spark = '';
@@ -2772,7 +2982,8 @@ function renderBriefing(){
     const late = open.filter(t=>t.due_date && t.due_date < today).length;
     const rank = t => (t.due_date && t.due_date < today ? 0 : t.priority==='high' ? 1 : t.due_date ? 2 : 3);
     const next = open.slice().sort((a,b)=>rank(a)-rank(b) || (a.due_date||'9999').localeCompare(b.due_date||'9999'))[0];
-    html += `<button class="wdg" type="button" data-area="todos">${top('todos','#8A5CC7','Todos')}<div class="wdg-v">${open.length} open</div><div class="wdg-d" ${late?'style="color:var(--coral)"':''}>${late ? `${late} overdue` : 'nothing overdue'}</div><div class="wdg-d" style="margin-top:auto">${next ? 'Next: ' + esc(next.title) : ''}</div></button>`;
+    const dueToday = open.filter(t=>t.due_date && t.due_date <= today).length;
+    html += `<button class="wdg" type="button" data-area="todos">${top('todos','#8A5CC7','Todos')}<div class="wdg-v">${dueToday} today</div><div class="wdg-d" ${late?'style="color:var(--coral)"':''}>${late ? `${late} overdue, ` : ''}${open.length} open in all</div><div class="wdg-d" style="margin-top:auto">${next ? 'Next: ' + esc(next.title) : ''}</div></button>`;
   }
   // Map
   const buys = (mapData && mapData.txns) ? mapData.txns.length : 0;
