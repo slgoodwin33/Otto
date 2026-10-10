@@ -766,6 +766,13 @@
   body.chatting .chat-done{display:block;}
   body.chatting #homeSync, body.chatting .otto-greet, body.chatting #briefCard, body.chatting #chatThread > .msg.intro{display:none !important;}
   body.chatting .thread{padding-top:4px;}
+  .visit-row{display:flex; align-items:center; gap:12px; padding:11px 16px 11px 0; border-top:1px solid var(--border);}
+  .visit-row:first-child{border-top:none;}
+  .visit-dot{width:10px; height:10px; border-radius:5px; flex-shrink:0;}
+  .visit-dot.now{box-shadow:0 0 0 4px rgba(46,139,87,0.18);}
+  .visit-time{font-size:0.8rem; color:var(--text-faint);}
+  .visit-dur{margin-left:auto; font-size:0.9rem; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .place-label{background:var(--surface); color:var(--text); border-radius:10px; padding:3px 8px; font:600 12px var(--sans); box-shadow:0 1px 4px rgba(0,0,0,.25); white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -889,6 +896,8 @@
         <h3 style="margin-top:14px">When</h3>
         <div class="map-ranges" id="mapRanges"></div>
         <div class="map-help" id="mapHelp"></div>
+        <h3>Visits</h3>
+        <div id="visitList"></div>
         <h3>Assets</h3>
         <div id="assetHero"></div>
         <div class="asset-toolbar">
@@ -956,7 +965,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-10.17';
+const APP_BUILD = '2026-10-10.18';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1737,7 +1746,7 @@ function renderAssetFilters(assets){
   });
 }
 
-let mapLayersOn = { places:true, purchases:true, assets:true }, mapRangeDays = 7, mapData = { points:[], txns:[] }, mapGroups = null, mapFitKey = '';
+let mapLayersOn = { visits:true, places:true, purchases:true, assets:true }, mapRangeDays = 7, mapData = { points:[], txns:[] }, mapGroups = null, mapFitKey = '';
 const MAP_RANGES = [[1,'Today'],[7,'7 days'],[30,'30 days'],[90,'90 days'],[0,'All']];
 function mapSinceIso(){ if(!mapRangeDays) return null; const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - (mapRangeDays - 1)); return d; }
 async function fetchMapData(){
@@ -1747,29 +1756,66 @@ async function fetchMapData(){
   const cq = `${SUPABASE_URL}/rest/v1/location_points?select=recorded_at&order=recorded_at.desc&limit=1`;
   const [t, p, c] = await Promise.all([fetch(tq,{headers:authHeaders()}), fetch(pq,{headers:authHeaders()}), fetch(cq,{headers:authHeaders()})]);
   if(!t.ok || !p.ok) throw new Error(`Supabase returned ${t.ok ? p.status : t.status}`);
-  mapData = { txns: await t.json(), points: await p.json(), lastPoint: c.ok ? ((await c.json())[0] || null) : null };
+  const sinceIso = since ? since.toISOString() : null;
+  const vq = `${SUPABASE_URL}/rest/v1/v_visits?select=id,location_id,place,arrived_at,left_at,minutes,is_open${sinceIso ? `&or=(arrived_at.gte.${encodeURIComponent(sinceIso)},left_at.gte.${encodeURIComponent(sinceIso)},is_open.eq.true)` : ''}&order=arrived_at.desc.nullslast&limit=500`;
+  const lq = `${SUPABASE_URL}/rest/v1/locations?select=id,code,name,lat,lng,radius_m&lat=not.is.null`;
+  const [v, l] = await Promise.all([fetch(vq,{headers:authHeaders()}), fetch(lq,{headers:authHeaders()})]);
+  mapData = { txns: await t.json(), points: await p.json(), lastPoint: c.ok ? ((await c.json())[0] || null) : null,
+    visits: v.ok ? await v.json() : [], places: l.ok ? await l.json() : [] };
+}
+function fmtMinutes(m){ m = Math.max(0, Math.round(Number(m)||0)); const h = Math.floor(m/60), r = m%60; return h ? (r ? `${h}h ${r}m` : `${h}h`) : `${r}m`; }
+function clockTime(iso){ return new Date(iso).toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'}); }
+function visitTotals(){
+  const by = {};
+  (mapData.visits||[]).forEach(v=>{ const k = v.location_id; by[k] = by[k] || { place:v.place, minutes:0, count:0, open:false }; by[k].minutes += Number(v.minutes)||0; by[k].count++; if(v.is_open) by[k].open = v; });
+  return by;
 }
 function renderMapControls(){
   const nAssets = allAssets.filter(a=>a.location && a.location.lat != null).length;
+  const vt = visitTotals(), nPlaces = Object.keys(vt).length;
   const layers = [
-    ['places', 'Places I went', TXN_STYLE['Phone and utilities'][0], mapData.points.length ? `${mapData.points.length.toLocaleString()} points` : 'No logger connected yet'],
+    ['visits', 'Places I spend time', '#2E8B57', (mapData.places||[]).length ? `${(mapData.places||[]).length} places, ${nPlaces ? `${(mapData.visits||[]).length} visit${(mapData.visits||[]).length===1?'':'s'} in this range` : 'no visits yet'}` : 'Add regions in OwnTracks'],
+    ['places', 'Where I traveled', TXN_STYLE['Phone and utilities'][0], mapData.points.length ? `${mapData.points.length.toLocaleString()} points` : 'No logger connected yet'],
     ['purchases', 'Where I spent', TXN_STYLE['Dining out'][0], `${mapData.txns.length} purchase${mapData.txns.length===1?'':'s'} with a location`],
     ['assets', 'My stuff', TXN_STYLE['Savings'][0], `${nAssets} items at ${new Set(allAssets.filter(a=>a.location).map(a=>a.location.code)).size} places`]
   ];
   document.getElementById('mapLayers').innerHTML = layers.map(([k,name,color,sub])=>`<label class="layer-row"><span class="layer-swatch" style="background:${color}"></span><span class="grow-main"><span class="grow-title" style="display:block">${name}</span><span class="grow-sub" style="display:block">${esc(sub)}</span></span><input type="checkbox" data-layer="${k}" ${mapLayersOn[k]?'checked':''}></label>`).join('');
   document.getElementById('mapRanges').innerHTML = MAP_RANGES.map(([d,l])=>`<button class="chip ${mapRangeDays===d?'active':''}" type="button" data-maprange="${d}">${l}</button>`).join('');
+  renderVisitList();
   document.getElementById('mapHelp').textContent = mapData.lastPoint ? `Last location point ${timeAgo(mapData.lastPoint.recorded_at)}.` :
-    'Places I went fills in once a location logger app (OwnTracks or Overland) is sending to Otto. Purchases only show when the bank includes a store location.';
+    'Where I traveled fills in once OwnTracks is sending to Otto. Purchases only show when the bank includes a store location.';
+}
+function renderVisitList(){
+  const el = document.getElementById('visitList'); if(!el) return;
+  const vs = (mapData.visits||[]).filter(v=>v.arrived_at || v.left_at);
+  if(!vs.length){ el.innerHTML = `<div class="map-help" style="margin-top:0">No visits yet. In OwnTracks, open Regions and add a circle for each place (Home, City Hall, gym, Hannah's). Use the same names as your Otto places and Otto fills in the rest; arriving and leaving get logged on their own.</div>`; return; }
+  const days = [];
+  vs.forEach(v=>{ const d = new Date(v.arrived_at || v.left_at); const key = d.toDateString(); let g = days.find(x=>x.key===key); if(!g){ g = { key, label: d.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}), items:[] }; days.push(g); } g.items.push(v); });
+  el.innerHTML = days.map(g=>`<div class="day-label"><span>${esc(g.label)}</span><span>${fmtMinutes(g.items.reduce((a,v)=>a+(v.arrived_at?Number(v.minutes)||0:0),0))}</span></div><div class="gcard">${g.items.map(v=>`
+    <div class="visit-row"><span class="visit-dot ${v.is_open?'now':''}" style="background:#2E8B57"></span>
+      <div><div class="grow-title">${esc(v.place)}</div><div class="visit-time">${v.arrived_at ? clockTime(v.arrived_at) : 'Before tracking'} – ${v.is_open ? 'now' : clockTime(v.left_at)}</div></div>
+      <div class="visit-dur">${v.arrived_at ? fmtMinutes(v.minutes) : '—'}</div></div>`).join('')}</div>`).join('');
 }
 function renderAssetMap(){
   const mapEl = document.getElementById('assetMap'); if(!mapEl || typeof L === 'undefined') return;
   if(!assetMapInstance){
     assetMapInstance = L.map('assetMap', { zoomControl:false, attributionControl:true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(assetMapInstance);
-    mapGroups = { places: L.layerGroup().addTo(assetMapInstance), purchases: L.layerGroup().addTo(assetMapInstance), assets: L.layerGroup().addTo(assetMapInstance) };
+    mapGroups = { visits: L.layerGroup().addTo(assetMapInstance), places: L.layerGroup().addTo(assetMapInstance), purchases: L.layerGroup().addTo(assetMapInstance), assets: L.layerGroup().addTo(assetMapInstance) };
   }
   Object.values(mapGroups).forEach(g=>g.clearLayers());
   const bounds = [];
+  if(mapLayersOn.visits){
+    const vt = visitTotals();
+    (mapData.places||[]).forEach(pl=>{
+      const lat = parseFloat(pl.lat), lng = parseFloat(pl.lng); if(isNaN(lat) || isNaN(lng)) return;
+      bounds.push([lat, lng]);
+      const t = vt[pl.id];
+      L.circle([lat, lng], { radius: Number(pl.radius_m) || 100, color:'#2E8B57', weight:1.5, fillColor:'#2E8B57', fillOpacity: t ? 0.22 : 0.08 }).addTo(mapGroups.visits);
+      const label = L.divIcon({ className:'', html:`<div class="place-label">${esc(pl.name)}${t ? ` · ${fmtMinutes(t.minutes)}` : ''}</div>`, iconSize:null, iconAnchor:[0,-6] });
+      L.marker([lat, lng], { icon:label, interactive:true }).bindPopup(`<strong>${esc(pl.name)}</strong><br>${t ? `${t.count} visit${t.count===1?'':'s'}, ${fmtMinutes(t.minutes)} total${t.open ? `<br>Here now, since ${clockTime(t.open.arrived_at)}` : ''}` : 'No visits in this range'}`).addTo(mapGroups.visits);
+    });
+  }
   // places: one line per day plus a dot where you stayed put
   if(mapLayersOn.places && mapData.points.length){
     const color = TXN_STYLE['Phone and utilities'][0], byDay = {};
@@ -1805,7 +1851,7 @@ function renderAssetMap(){
         .on('click', ()=>{ activeAssetLocationCode = code; renderAssets(allAssets); }).addTo(mapGroups.assets);
     });
   }
-  const key = `${mapRangeDays}|${mapLayersOn.places}|${mapLayersOn.purchases}|${mapLayersOn.assets}|${bounds.length}`;
+  const key = `${mapRangeDays}|${mapLayersOn.visits}|${mapLayersOn.places}|${mapLayersOn.purchases}|${mapLayersOn.assets}|${bounds.length}`;
   if(key !== mapFitKey){
     mapFitKey = key;
     if(bounds.length === 1) assetMapInstance.setView(bounds[0], 14);
@@ -1814,7 +1860,8 @@ function renderAssetMap(){
   }
   const label = MAP_RANGES.find(r=>r[0]===mapRangeDays)[1];
   const parts = [];
-  if(mapLayersOn.places) { const d = new Set(mapData.points.map(p=>new Date(p.recorded_at).toDateString())).size; parts.push(mapData.points.length ? `${d} day${d===1?'':'s'} of places` : 'no places yet'); }
+  if(mapLayersOn.visits){ const n = (mapData.visits||[]).length; parts.push(`${n} visit${n===1?'':'s'}`); }
+  if(mapLayersOn.places) { const d = new Set(mapData.points.map(p=>new Date(p.recorded_at).toDateString())).size; parts.push(mapData.points.length ? `${d} day${d===1?'':'s'} of travel` : 'no travel yet'); }
   if(mapLayersOn.purchases) parts.push(`${mapData.txns.length} purchase${mapData.txns.length===1?'':'s'}`);
   if(mapLayersOn.assets) parts.push('your stuff');
   document.getElementById('mapSummary').textContent = `${label}: ${parts.join(', ') || 'all layers off'}`;
@@ -2728,8 +2775,15 @@ function renderBriefing(){
     html += `<button class="wdg" type="button" data-area="todos">${top('todos','#8A5CC7','Todos')}<div class="wdg-v">${open.length} open</div><div class="wdg-d" ${late?'style="color:var(--coral)"':''}>${late ? `${late} overdue` : 'nothing overdue'}</div><div class="wdg-d" style="margin-top:auto">${next ? 'Next: ' + esc(next.title) : ''}</div></button>`;
   }
   // Map
-  const pts = (mapData && mapData.points) ? mapData.points.length : 0, buys = (mapData && mapData.txns) ? mapData.txns.length : 0;
-  html += `<button class="wdg" type="button" data-area="assets">${top('map','#3F7CC0','Map')}<div class="wdg-v">${buys}</div><div class="wdg-d">purchases mapped, 7 days</div><div class="wdg-d" style="margin-top:auto">${mapData && mapData.lastPoint ? 'Last place ' + timeAgo(mapData.lastPoint.recorded_at) : 'Places: logger not sending yet'}</div></button>`;
+  const buys = (mapData && mapData.txns) ? mapData.txns.length : 0;
+  const openV = (mapData && mapData.visits || []).find(v=>v.is_open && v.arrived_at);
+  const todayKey = new Date().toDateString();
+  const todayV = (mapData && mapData.visits || []).filter(v=>v.arrived_at && new Date(v.arrived_at).toDateString() === todayKey);
+  const todayMin = todayV.reduce((a,v)=>a+(Number(v.minutes)||0),0);
+  const mv = openV ? esc(openV.place) : todayV.length ? fmtMinutes(todayMin) : String(buys);
+  const md = openV ? `here since ${clockTime(openV.arrived_at)}` : todayV.length ? `at ${new Set(todayV.map(v=>v.place)).size} place${new Set(todayV.map(v=>v.place)).size===1?'':'s'} today` : 'purchases mapped, 7 days';
+  const mfoot = mapData && mapData.lastPoint ? 'Location updated ' + timeAgo(mapData.lastPoint.recorded_at) : 'Location: phone not sending yet';
+  html += `<button class="wdg" type="button" data-area="assets">${top('map','#3F7CC0','Map')}<div class="wdg-v ${openV?'small':''}">${mv}</div><div class="wdg-d">${md}</div><div class="wdg-d" style="margin-top:auto">${mfoot}</div></button>`;
   grid.innerHTML = html;
   const brief = document.getElementById('homeBrief');
   if(brief.classList.contains('loading') || brief.dataset.source !== 'ai'){ brief.textContent = homeFallbackText(); brief.classList.remove('loading'); brief.dataset.source = 'local'; }
