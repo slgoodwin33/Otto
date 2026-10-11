@@ -893,6 +893,42 @@
   .map-week .dd .bar i{display:block;}
   .map-week .dd.today{color:var(--area); font-weight:700;}
   .stat-trio[hidden]{display:none !important;}
+  .leaflet-popup-content{margin:12px 14px;} .leaflet-popup-content-wrapper{border-radius:14px !important;}
+  .sheet-head{align-items:flex-start;}
+  .sheet-head .sync-chip{margin-top:calc(env(safe-area-inset-top, 0px) + 2px);}
+  .page-sub{max-width:calc(100vw - 48px);}
+  /* ---------- Build .25 ---------- */
+  .acct-strip{display:flex; gap:10px; overflow-x:auto; margin:0 -2px 14px; padding:2px; scrollbar-width:none;}
+  .acct-strip::-webkit-scrollbar{display:none;}
+  .acct-card{flex:1 0 46%; min-width:160px; text-align:left; border:none; font:inherit; color:var(--text); background:var(--surface); border-radius:18px; padding:13px 14px; display:flex; flex-direction:column; gap:2px; cursor:pointer;}
+  .acct-card.credit{background:linear-gradient(135deg, #23243D, #3B3E63); color:#fff;}
+  .acct-card.credit .acct-sub{color:rgba(255,255,255,0.7);}
+  .acct-name{font-size:0.78rem; font-weight:600; opacity:0.8;}
+  .acct-bal{font-family:var(--display); font-weight:700; font-size:1.35rem; font-variant-numeric:tabular-nums;}
+  .acct-sub{font-size:0.74rem; color:var(--text-faint);}
+  .acct-bar{height:5px; border-radius:3px; background:rgba(255,255,255,0.2); overflow:hidden; margin:5px 0 3px;}
+  .acct-bar i{display:block; height:100%; background:#F28C28; border-radius:3px;}
+  .wk-txns{border-bottom:1px solid var(--border); padding-bottom:6px; margin-bottom:6px;}
+  .wk-txns .kv span:first-child{color:var(--text-muted);}
+  .tl-open{border:none; background:none; color:var(--area); font:inherit; font-size:0.8rem; font-weight:700; padding:0; cursor:pointer;}
+  .tl-sheet{position:absolute; left:0; right:0; bottom:0; z-index:650; max-height:58%; background:var(--bg); border-radius:20px 20px 0 0; box-shadow:0 -8px 24px rgba(0,0,0,0.18); display:flex; flex-direction:column; padding-bottom:env(safe-area-inset-bottom, 0px); animation:sheetUp 0.18s ease;}
+  .tl-sheet[hidden]{display:none;}
+  @keyframes sheetUp{from{transform:translateY(30px); opacity:0;} to{transform:none; opacity:1;}}
+  .tl-head{display:flex; align-items:center; gap:8px; padding:12px 12px 10px; border-bottom:1px solid var(--border);}
+  .tl-head > div{flex:1; text-align:center;} .tl-head b{display:block; font-size:1rem;} .tl-head span{font-size:0.75rem; color:var(--text-faint);}
+  .tl-nav, .tl-close{border:none; background:var(--surface-2); width:34px; height:34px; border-radius:17px; font-size:1.2rem; color:var(--text); cursor:pointer;}
+  .tl-nav:disabled{opacity:0.3;} .tl-close{font-size:0.9rem;}
+  .tl-body{overflow-y:auto; padding:8px 14px 16px;}
+  .tl-stop{display:flex; gap:12px; align-items:flex-start; background:var(--surface); border-radius:14px; padding:12px; cursor:pointer;}
+  .tl-stop.sug{box-shadow:inset 0 0 0 1.5px color-mix(in srgb, var(--area) 45%, transparent);}
+  .tl-ico{width:34px; height:34px; border-radius:17px; background:var(--area); color:#fff; display:grid; place-items:center; flex-shrink:0;}
+  .tl-ico svg{width:18px; height:18px;}
+  .tl-badge{font-size:0.7rem; font-weight:700; color:var(--area); background:color-mix(in srgb, var(--area) 14%, transparent); border-radius:8px; padding:1px 6px; margin-left:4px;}
+  .tl-actions{display:flex; gap:14px; margin-top:4px;}
+  .tl-name{display:flex; gap:6px; margin-top:8px;} .tl-name input{flex:1; min-width:0; border:1px solid var(--border); border-radius:10px; padding:8px 10px; font:inherit; background:var(--bg); color:var(--text);}
+  .tl-trip{display:flex; align-items:center; gap:10px; padding:8px 0 8px 16px; font-size:0.82rem; color:var(--text-muted); position:relative;}
+  .tl-line{position:absolute; left:28px; top:0; bottom:0; border-left:2px dashed var(--border);}
+  .tl-mode{position:relative; z-index:1; width:26px; height:26px; border-radius:13px; background:var(--bg); display:grid; place-items:center; margin-left:-1px;}
 </style>
 </head>
 <body>
@@ -972,6 +1008,7 @@
     <div class="tab-panel" id="panelAccounts">
       <div id="accountsErrorBanner"></div>
       <div id="moneyOverview"></div>
+      <div class="acct-strip" id="moneyAccounts"></div>
       <div class="seg" id="moneySeg" role="tablist"><button type="button" data-mseg-btn="week" class="active">This week</button><button type="button" data-mseg-btn="txns">Transactions</button><button type="button" data-mseg-btn="accounts">Accounts</button></div>
       <div id="netWorthReadout" data-mseg="accounts"></div>
       <div class="health-section-label" data-mseg="accounts">Bank connections</div>
@@ -1010,6 +1047,7 @@
       <div id="assetMap" class="asset-map"></div>
       <div class="map-summary" id="mapSummary">Loading map…</div>
       <div class="map-week" id="mapWeek"></div>
+      <div class="tl-sheet" id="tlSheet" hidden></div>
       <button class="map-btn" id="mapMenuBtn" type="button" aria-label="Map layers and settings" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
       <div class="map-panel" id="mapPanel" hidden>
         <div id="assetsErrorBanner"></div>
@@ -1017,6 +1055,8 @@
         <div class="gcard" style="padding:0" id="mapLayers"></div>
         <h3 style="margin-top:14px">When</h3>
         <div class="map-ranges" id="mapRanges"></div>
+        <h3>Or one day</h3>
+        <div class="map-ranges" id="mapDays"></div>
         <div class="map-help" id="mapHelp"></div>
         <h3>Visits</h3>
         <div id="visitList"></div>
@@ -1088,7 +1128,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-10.23';
+const APP_BUILD = '2026-10-11.25';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -1209,7 +1249,7 @@ async function fetchTodos(){
 }
 
 async function fetchAccounts(){
-  const url = `${SUPABASE_URL}/rest/v1/accounts?select=*,rewards:card_rewards(category_name,cashback_rate,spending_cap_cents,period_start,period_end,activated),snapshots:balance_snapshots(captured_on,balance_cents)&order=code.asc`;
+  const url = `${SUPABASE_URL}/rest/v1/accounts?select=*,rewards:card_rewards(category_name,cashback_rate,spending_cap_cents,period_start,period_end,activated),snapshots:balance_snapshots(captured_on,balance_cents)&status=neq.closed&order=code.asc`;
   const res = await fetch(url, { headers: authHeaders() });
   if(!res.ok) throw new Error(`Supabase returned ${res.status}`);
   return res.json();
@@ -1290,6 +1330,24 @@ async function saveAccountBalance(code, accountId, newDollars, btn, statusEl){
   }
 }
 
+function renderAccountStrip(){
+  const el = document.getElementById('moneyAccounts'); if(!el) return;
+  const accts = (allAccounts || []).filter(a=>a.status !== 'closed');
+  const bills = (lastBudgetData && lastBudgetData.bills) || [];
+  el.innerHTML = accts.map(a=>{
+    const credit = /credit/i.test(a.account_type || ''), bal = Number(a.current_balance_cents || 0);
+    const short = String(a.name || '').replace(/\s*\(\.\.\.(\d+)\)/, ' ··$1');
+    let sub = a.institution || '';
+    if(credit){
+      const lim = Number(a.credit_limit_cents || 0), pct = lim ? Math.min(100, Math.round(100*bal/lim)) : 0;
+      const due = bills.find(b=>/discover/i.test(b.name) && /discover/i.test(a.name + (a.institution||'')));
+      sub = `${pct}% of ${money(lim)} used${due && due.due_day ? `, due ${shortDate(nextOccurrenceFromDueDay(due.due_day))}` : ''}`;
+      return `<button class="acct-card credit" type="button" data-acctjump="1"><span class="acct-name">${esc(short)}</span><span class="acct-bal">${money(bal)}</span><span class="acct-sub">owed</span><span class="acct-bar"><i style="width:${pct}%"></i></span><span class="acct-sub">${esc(sub)}</span></button>`;
+    }
+    return `<button class="acct-card" type="button" data-acctjump="1"><span class="acct-name">${esc(short)}</span><span class="acct-bal">${money(bal)}</span><span class="acct-sub">${a.available_balance_cents != null ? `${money(a.available_balance_cents)} available` : esc(sub)}</span><span class="acct-sub">${a.balance_updated_at ? 'Updated ' + timeAgo(a.balance_updated_at) : ''}</span></button>`;
+  }).join('');
+}
+document.addEventListener('click', e=>{ if(e.target.closest('[data-acctjump]')) setMoneySeg('accounts'); });
 function renderNetWorth(accounts){
   const el = document.getElementById('netWorthReadout');
   if(!accounts.length){ el.innerHTML = ''; renderHomeKpis(); return; }
@@ -1425,6 +1483,7 @@ async function refreshAccounts(){
     allAccounts = accounts;
     renderAccounts(accounts);
     renderNetWorth(accounts);
+    renderAccountStrip();
   } catch(err){
     banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${err.message}).</div>`;
   }
@@ -1519,12 +1578,12 @@ function renderBudget(data){
     if(parts.length){
       const top = parts.slice(0,5), rest = parts.slice(5).reduce((a,p)=>a+p.v,0);
       html += `<div class="viz-card"><div class="viz-title"><span>Where it went</span><span>${parts.length} categories</span></div><div class="viz-row">${svgDonut(parts, 128, 18, [money(spent), 'spent'])}
-        <div class="viz-legend">${top.map(p=>`<div><i style="background:${p.color}"></i><span>${esc(p.name)}</span><b>${money(p.v)}</b></div>`).join('')}${rest ? `<div><i style="background:var(--surface-2)"></i><span>Everything else</span><b>${money(rest)}</b></div>` : ''}</div></div></div>`;
+        <div class="viz-legend">${top.map(p=>`<div data-legendcat="${esc(p.name)}" style="cursor:pointer"><i style="background:${p.color}"></i><span>${esc(p.name)}</span><b>${money(p.v)}</b></div>`).join('')}${rest ? `<div><i style="background:var(--surface-2)"></i><span>Everything else</span><b>${money(rest)}</b></div>` : ''}</div></div></div>`;
     }
     const days = []; for(let i=0;i<7;i++) days.push(isoAddDays(s.week_start, i));
     const per = {}; (allTxns||[]).forEach(t=>{ if(t.amount_cents < 0 && !t.exclude_from_budget && t.transaction_date >= s.week_start && t.transaction_date <= s.week_end){ const cat = (allCategories||[]).find(c=>c.id===t.category_id); if(!cat || cat.category_type === 'expense') per[t.transaction_date] = (per[t.transaction_date]||0) - t.amount_cents; } });
     const mx = Math.max(1, ...days.map(d=>per[d]||0));
-    html += `<div class="viz-card"><div class="viz-title"><span>Spending by day</span><span>${money(Math.round(spent/Math.max(1,dayN)))} a day so far</span></div><div class="bars7">${days.map(d=>{ const v = per[d]||0, fut = d > today; return `<div class="b ${d===today?'today':''} ${fut?'future':''}"><em>${v ? '$'+Math.round(v/100) : ''}</em><i style="height:${fut ? 3 : Math.max(3, Math.round(100*v/mx))}%"></i><small>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</small></div>`; }).join('')}</div></div>`;
+    html += `<div class="viz-card"><div class="viz-title"><span>Spending by day</span><span>${money(Math.round(spent/Math.max(1,dayN)))} a day so far</span></div><div class="bars7">${days.map(d=>{ const v = per[d]||0, fut = d > today; return `<div class="b ${d===today?'today':''} ${fut?'future':''}" data-barday="${d}" style="cursor:pointer"><em>${v ? '$'+Math.round(v/100) : ''}</em><i style="height:${fut ? 3 : Math.max(3, Math.round(100*v/mx))}%"></i><small>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</small></div>`; }).join('')}</div></div>`;
   }
   const upcoming = (data.bills || []).filter(b=>b.due_day && Number(b.amount_cents) > 0)
     .map(b=>({ ...b, next: nextOccurrenceFromDueDay(b.due_day) })).sort((a,b)=>a.next.localeCompare(b.next)).slice(0, 4);
@@ -1552,7 +1611,11 @@ function renderBudget(data){
       <div class="bcat-sub">${money(spentC)} of ${money(budget)}${bills.length ? `, ${bills.length} bill${bills.length===1?'':'s'}` : ''}</div>
       <div class="bcat-sub2">${budget ? Math.round(ratio*100) + '%' : spentC ? 'no budget' : ''}</div>
       <div class="bcat-bar"><div style="width:${Math.min(100, ratio*100)}%;background:${barColor}"></div></div>
-      ${open ? `<div class="grow-detail">${bills.length ? bills.map(b=>`<div class="kv"><span>${esc(b.name)}${b.autopay ? ', autopay' : ''}${b.due_day ? `, due the ${ordinal(b.due_day)}` : ''}</span><span>${money(b.amount_cents)}/${esc(b.frequency)}</span></div>`).join('') : '<div class="kv"><span>No recurring bills here</span></div>'}<div class="kv"><span>See these purchases</span><span><button class="link-btn" type="button" data-catjump="${esc(c.category)}">Transactions ›</button></span></div></div>` : ''}
+      ${open ? `<div class="grow-detail">${(()=>{
+        const cid = ((allCategories||[]).find(x=>x.name===c.category) || {}).id;
+        const rows = (allTxns||[]).filter(t=>t.category_id === cid && !t.exclude_from_budget && t.transaction_date >= data.summary.week_start && t.transaction_date <= data.summary.week_end).sort((a,b)=>b.transaction_date.localeCompare(a.transaction_date));
+        return rows.length ? `<div class="wk-txns">${rows.slice(0,20).map(t=>`<div class="kv"><span>${esc(new Date(t.transaction_date+'T12:00').toLocaleDateString('en-US',{weekday:'short'}))} · ${esc(t.merchant || t.description || '')}${t.pending ? ' (pending)' : ''}</span><span>${t.amount_cents > 0 ? '+' : ''}${money(Math.abs(t.amount_cents))}</span></div>`).join('')}${rows.length > 20 ? `<div class="kv"><span>${rows.length - 20} more</span><span></span></div>` : ''}</div>` : '<div class="kv"><span>No transactions in this category this week</span><span></span></div>';
+      })()}${bills.length ? bills.map(b=>`<div class="kv"><span>${esc(b.name)}${b.autopay ? ', autopay' : ''}${b.due_day ? `, due the ${ordinal(b.due_day)}` : ''}</span><span>${money(b.amount_cents)}/${esc(b.frequency)}</span></div>`).join('') : '<div class="kv"><span>No recurring bills here</span></div>'}<div class="kv"><span>See these purchases</span><span><button class="link-btn" type="button" data-catjump="${esc(c.category)}">Transactions ›</button></span></div></div>` : ''}
     </div>`;
   };
   html += `<div class="section-title">Spending by category<span>tap for details</span></div><div class="gcard" style="padding:0">${ordered.map(catRow).join('')}</div>`;
@@ -1573,6 +1636,8 @@ function renderBudget(data){
     html += `<div class="section-title">Income</div><div class="gcard">${data.income.map(i=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(i.name)}</div><div class="grow-sub">${esc(i.frequency)}, take-home</div></div><div class="grow-right">${money(i.net_amount_cents)}</div></div>`).join('')}</div>`;
   }
   el.innerHTML = html;
+  el.querySelectorAll('[data-legendcat]').forEach(r=>r.addEventListener('click', ()=>{ const c = (data.categories||[]).find(x=>x.category===r.dataset.legendcat); if(!c) return; expandedBudgetCat = c.category_code; renderBudget(data); const row = el.querySelector(`[data-bcat="${c.category_code}"]`); if(row) row.scrollIntoView({ behavior:'smooth', block:'center' }); }));
+  el.querySelectorAll('[data-barday]').forEach(b=>b.addEventListener('click', ()=>{ if(b.classList.contains('future')) return; txnDay = b.dataset.barday; txnFilter = 'all'; setMoneySeg('txns'); renderTxns(); }));
   el.querySelectorAll('[data-bcat]').forEach(r=>r.addEventListener('click', e=>{
     const j = e.target.closest('[data-catjump]');
     if(j){ e.stopPropagation(); txnFilter = j.dataset.catjump; setMoneySeg('txns'); renderTxns(); return; }
@@ -1890,18 +1955,37 @@ function renderAssetFilters(assets){
   });
 }
 
+let mapDay = null;
+const PLACE_ICONS = {
+  home:'<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/>',
+  work:'<path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 21v-4h6v4"/><path d="M9 11h.01M12 11h.01M15 11h.01"/>',
+  gym:'<path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12"/>',
+  heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  pin:'<path d="M12 21s-6-5.3-6-10a6 6 0 0 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2"/>',
+  box:'<path d="M3 7l9-4 9 4-9 4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/>'
+};
+function placeKind(name){ const n = String(name||'').toLowerCase(); if(/house|home|mom|dad/.test(n)) return /hannah/.test(n) ? 'heart' : 'home'; if(/hall|office|work|city/.test(n)) return 'work'; if(/fitness|gym|planet/.test(n)) return 'gym'; if(/hannah/.test(n)) return 'heart'; return 'pin'; }
+function mapBadge(svgPath, color, size, count){ const s = size || 30; return L.divIcon({ className:'', iconSize:[s,s], iconAnchor:[s/2,s/2], popupAnchor:[0,-s/2],
+  html:`<div style="width:${s}px;height:${s}px;border-radius:${s/2}px;background:${color};color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.35);position:relative"><svg viewBox="0 0 24 24" width="${Math.round(s*0.55)}" height="${Math.round(s*0.55)}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${svgPath}</svg>${count ? `<span style="position:absolute;top:-6px;right:-8px;background:#fff;color:${color};border-radius:9px;min-width:18px;height:18px;padding:0 4px;font:700 11px var(--sans);display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.3)">${count}</span>` : ''}</div>` }); }
+function popRows(title, rows){ return `<div style="min-width:180px"><div style="font-weight:700;font-size:14px;margin-bottom:4px">${title}</div>${rows.filter(r=>r && r[1] != null && r[1] !== '').map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:12px;font-size:12px;padding:2px 0"><span style="color:#888">${k}</span><span style="text-align:right">${v}</span></div>`).join('')}</div>`; }
+function isoOf(ts){ const t = new Date(ts); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
+function mapView(){
+  if(!mapDay) return mapData;
+  return { ...mapData, points:(mapData.points||[]).filter(p=>isoOf(p.recorded_at)===mapDay), txns:(mapData.txns||[]).filter(t=>t.transaction_date===mapDay),
+    visits:(mapData.visits||[]).filter(v=>(v.arrived_at && isoOf(v.arrived_at)===mapDay) || (v.left_at && isoOf(v.left_at)===mapDay) || (v.is_open && mapDay===localToday())) };
+}
 let mapLayersOn = { visits:true, places:true, purchases:true, assets:true }, mapRangeDays = 7, mapData = { points:[], txns:[] }, mapGroups = null, mapFitKey = '';
 const MAP_RANGES = [[1,'Today'],[7,'7 days'],[30,'30 days'],[90,'90 days'],[0,'All']];
 function mapSinceIso(){ if(!mapRangeDays) return null; const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - (mapRangeDays - 1)); return d; }
 async function fetchMapData(){
   const since = mapSinceIso();
-  const tq = `${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,merchant,description,amount_cents,category_id,location_lat,location_lon,location_city&removed_at=is.null&location_lat=not.is.null${since ? `&transaction_date=gte.${since.toISOString().slice(0,10)}` : ''}&order=transaction_date.desc&limit=1000`;
-  const pq = `${SUPABASE_URL}/rest/v1/location_points?select=recorded_at,lat,lon,accuracy_m${since ? `&recorded_at=gte.${encodeURIComponent(since.toISOString())}` : ''}&order=recorded_at.asc&limit=8000`;
+  const tq = `${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,merchant,description,amount_cents,category_id,pending,location_lat,location_lon,location_city,location_region,location_address,account:accounts(name)&removed_at=is.null&location_lat=not.is.null${since ? `&transaction_date=gte.${since.toISOString().slice(0,10)}` : ''}&order=transaction_date.desc&limit=1000`;
+  const pq = `${SUPABASE_URL}/rest/v1/location_points?select=recorded_at,lat,lon,accuracy_m,speed_kmh,battery_pct${since ? `&recorded_at=gte.${encodeURIComponent(since.toISOString())}` : ''}&order=recorded_at.asc&limit=8000`;
   const cq = `${SUPABASE_URL}/rest/v1/location_points?select=recorded_at&order=recorded_at.desc&limit=1`;
   const [t, p, c] = await Promise.all([fetch(tq,{headers:authHeaders()}), fetch(pq,{headers:authHeaders()}), fetch(cq,{headers:authHeaders()})]);
   if(!t.ok || !p.ok) throw new Error(`Supabase returned ${t.ok ? p.status : t.status}`);
   const sinceIso = since ? since.toISOString() : null;
-  const vq = `${SUPABASE_URL}/rest/v1/v_visits?select=id,location_id,place,arrived_at,left_at,minutes,is_open${sinceIso ? `&or=(arrived_at.gte.${encodeURIComponent(sinceIso)},left_at.gte.${encodeURIComponent(sinceIso)},is_open.eq.true)` : ''}&order=arrived_at.desc.nullslast&limit=500`;
+  const vq = `${SUPABASE_URL}/rest/v1/v_visits?select=id,location_id,place,arrived_at,left_at,minutes,is_open,lat,lon,status,source${sinceIso ? `&or=(arrived_at.gte.${encodeURIComponent(sinceIso)},left_at.gte.${encodeURIComponent(sinceIso)},is_open.eq.true)` : ''}&order=arrived_at.desc.nullslast&limit=500`;
   const lq = `${SUPABASE_URL}/rest/v1/locations?select=id,code,name,lat,lng,radius_m&lat=not.is.null`;
   const [v, l] = await Promise.all([fetch(vq,{headers:authHeaders()}), fetch(lq,{headers:authHeaders()})]);
   mapData = { txns: await t.json(), points: await p.json(), lastPoint: c.ok ? ((await c.json())[0] || null) : null,
@@ -1919,12 +2003,14 @@ function renderMapControls(){
   const vt = visitTotals(), nPlaces = Object.keys(vt).length;
   const layers = [
     ['visits', 'Places I spend time', '#2E8B57', (mapData.places||[]).length ? `${(mapData.places||[]).length} places, ${nPlaces ? `${(mapData.visits||[]).length} visit${(mapData.visits||[]).length===1?'':'s'} in this range` : 'no visits yet'}` : 'Add regions in OwnTracks'],
-    ['places', 'Where I traveled', TXN_STYLE['Phone and utilities'][0], mapData.points.length ? `${mapData.points.length.toLocaleString()} points` : 'No logger connected yet'],
+    ['places', 'Where I traveled', TXN_STYLE['Bills'][0], mapData.points.length ? `${mapData.points.length.toLocaleString()} points` : 'No logger connected yet'],
     ['purchases', 'Where I spent', TXN_STYLE['Dining out'][0], `${mapData.txns.length} purchase${mapData.txns.length===1?'':'s'} with a location`],
     ['assets', 'My stuff', TXN_STYLE['Savings'][0], `${nAssets} items at ${new Set(allAssets.filter(a=>a.location).map(a=>a.location.code)).size} places`]
   ];
   document.getElementById('mapLayers').innerHTML = layers.map(([k,name,color,sub])=>`<label class="layer-row"><span class="layer-swatch" style="background:${color}"></span><span class="grow-main"><span class="grow-title" style="display:block">${name}</span><span class="grow-sub" style="display:block">${esc(sub)}</span></span><input type="checkbox" data-layer="${k}" ${mapLayersOn[k]?'checked':''}></label>`).join('');
-  document.getElementById('mapRanges').innerHTML = MAP_RANGES.map(([d,l])=>`<button class="chip ${mapRangeDays===d?'active':''}" type="button" data-maprange="${d}">${l}</button>`).join('');
+  document.getElementById('mapRanges').innerHTML = MAP_RANGES.map(([d,l])=>`<button class="chip ${!mapDay && mapRangeDays===d?'active':''}" type="button" data-maprange="${d}">${l}</button>`).join('');
+  const dl = []; for(let i=0;i<7;i++){ const d = isoAddDays(localToday(), -i); dl.push(`<button class="chip ${mapDay===d?'active':''}" type="button" data-mapday="${d}">${i===0 ? 'Today' : i===1 ? 'Yesterday' : new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short', day:'numeric'})}</button>`); }
+  document.getElementById('mapDays').innerHTML = dl.join('');
   renderVisitList();
   document.getElementById('mapHelp').textContent = mapData.lastPoint ? `Last location point ${timeAgo(mapData.lastPoint.recorded_at)}.` :
     'Where I traveled fills in once OwnTracks is sending to Otto. Purchases only show when the bank includes a store location.';
@@ -1945,73 +2031,170 @@ function renderAssetMap(){
   if(!assetMapInstance){
     assetMapInstance = L.map('assetMap', { zoomControl:false, attributionControl:true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(assetMapInstance);
+    L.Popup.prototype.options.autoPanPaddingTopLeft = L.point(12, 96);
+    L.Popup.prototype.options.autoPanPaddingBottomRight = L.point(12, 150);
     mapGroups = { visits: L.layerGroup().addTo(assetMapInstance), places: L.layerGroup().addTo(assetMapInstance), purchases: L.layerGroup().addTo(assetMapInstance), assets: L.layerGroup().addTo(assetMapInstance) };
   }
   Object.values(mapGroups).forEach(g=>g.clearLayers());
   const bounds = [];
+  const V = mapView();
   if(mapLayersOn.visits){
-    const vt = visitTotals();
+    const by = {}; (V.visits||[]).forEach(v=>{ const k = v.location_id; by[k] = by[k] || { minutes:0, count:0, last:null, open:null }; by[k].minutes += Number(v.minutes)||0; by[k].count++; if(!by[k].last || (v.arrived_at||'') > (by[k].last.arrived_at||'')) by[k].last = v; if(v.is_open) by[k].open = v; });
     (mapData.places||[]).forEach(pl=>{
       const lat = parseFloat(pl.lat), lng = parseFloat(pl.lng); if(isNaN(lat) || isNaN(lng)) return;
       bounds.push([lat, lng]);
-      const t = vt[pl.id];
-      L.circle([lat, lng], { radius: Number(pl.radius_m) || 100, color:'#2E8B57', weight:1.5, fillColor:'#2E8B57', fillOpacity: t ? 0.22 : 0.08 }).addTo(mapGroups.visits);
-      const label = L.divIcon({ className:'', html:`<div class="place-label">${esc(pl.name)}${t ? ` · ${fmtMinutes(t.minutes)}` : ''}</div>`, iconSize:null, iconAnchor:[0,-6] });
-      L.marker([lat, lng], { icon:label, interactive:true }).bindPopup(`<strong>${esc(pl.name)}</strong><br>${t ? `${t.count} visit${t.count===1?'':'s'}, ${fmtMinutes(t.minutes)} total${t.open ? `<br>Here now, since ${clockTime(t.open.arrived_at)}` : ''}` : 'No visits in this range'}`).addTo(mapGroups.visits);
+      const t = by[pl.id], color = '#2E8B57';
+      L.circle([lat, lng], { radius: Number(pl.radius_m) || 100, color, weight:1.5, fillColor:color, fillOpacity: t ? 0.18 : 0.06, interactive:false }).addTo(mapGroups.visits);
+      const last = t && t.last;
+      L.marker([lat, lng], { icon: mapBadge(PLACE_ICONS[placeKind(pl.name)], t && t.open ? '#1F7A45' : color, 34) }).bindPopup(popRows(esc(pl.name), [
+        ['Right now', t && t.open ? `Here since ${clockTime(t.open.arrived_at)}` : ''],
+        ['Visits', t ? String(t.count) : '0'], ['Time here', t ? fmtMinutes(t.minutes) : '—'], ['Average stay', t && t.count ? fmtMinutes(t.minutes / t.count) : ''],
+        ['Last visit', last && last.arrived_at ? `${new Date(last.arrived_at).toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})}, ${clockTime(last.arrived_at)}–${last.left_at ? clockTime(last.left_at) : 'now'}` : ''],
+        ['Region size', `${Math.round(Number(pl.radius_m)||100)} m`]])).addTo(mapGroups.visits);
     });
   }
-  // places: one line per day plus a dot where you stayed put
-  if(mapLayersOn.places && mapData.points.length){
-    const color = TXN_STYLE['Phone and utilities'][0], byDay = {};
-    mapData.points.forEach(p=>{ const k = new Date(p.recorded_at).toDateString(); (byDay[k] = byDay[k] || []).push(p); });
+  if(mapLayersOn.places && (V.points||[]).length){
+    const color = '#3F7CC0', byDay = {};
+    V.points.forEach(p=>{ const k = isoOf(p.recorded_at); (byDay[k] = byDay[k] || []).push(p); });
     Object.values(byDay).forEach(pts=>{
       const ll = pts.map(p=>[p.lat, p.lon]); ll.forEach(x=>bounds.push(x));
-      if(ll.length > 1) L.polyline(ll, { color, weight:3, opacity:0.7 }).addTo(mapGroups.places);
-      pts.forEach((p,i)=>{ if(i===0 || i===pts.length-1 || i % 25 === 0) L.circleMarker([p.lat,p.lon], { radius:4, color, fillColor:color, fillOpacity:0.9, weight:1 })
-        .bindPopup(new Date(p.recorded_at).toLocaleString('en-US',{weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'})).addTo(mapGroups.places); });
+      if(ll.length > 1) L.polyline(ll, { color, weight:4, opacity:0.75, lineCap:'round' }).addTo(mapGroups.places);
+      const step = Math.max(1, Math.round(pts.length / 12));
+      pts.forEach((p,i)=>{
+        const ends = i === 0 || i === pts.length-1;
+        if(!ends && i % step) return;
+        const pop = popRows(new Date(p.recorded_at).toLocaleString('en-US',{weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}), [
+          ['Accuracy', p.accuracy_m != null ? `±${Math.round(p.accuracy_m)} m` : ''], ['Speed', p.speed_kmh != null && p.speed_kmh >= 0 ? `${Math.round(p.speed_kmh * 0.621)} mph` : ''],
+          ['Phone battery', p.battery_pct != null ? `${Math.round(p.battery_pct)}%` : ''], ['Point', `${i+1} of ${pts.length} that day`], ['Coordinates', `${Number(p.lat).toFixed(5)}, ${Number(p.lon).toFixed(5)}`]]);
+        if(ends && mapDay) L.marker([p.lat,p.lon], { icon: L.divIcon({ className:'', iconSize:null, iconAnchor:[-8,10], html:`<div class="place-label" style="background:${color};color:#fff">${i===0 ? 'Start' : 'End'} ${clockTime(p.recorded_at)}</div>` }) }).bindPopup(pop).addTo(mapGroups.places);
+        L.circleMarker([p.lat,p.lon], { radius: ends ? 6 : 4, color:'#fff', weight:1.5, fillColor:color, fillOpacity:1 }).bindPopup(pop).addTo(mapGroups.places);
+      });
     });
   }
   if(mapLayersOn.purchases){
     const cats = allCategories || [];
-    mapData.txns.forEach(t=>{
-      const name = (cats.find(c=>c.id===t.category_id) || {}).name || null;
-      const color = (TXN_STYLE[name] || TXN_STYLE._none)[0];
-      const r = Math.max(5, Math.min(14, 4 + Math.sqrt(Math.abs(t.amount_cents)/100)));
+    (V.txns||[]).forEach(t=>{
+      const cat = cats.find(c=>c.id===t.category_id), name = cat ? cat.name : null;
+      const [color, path] = TXN_STYLE[name] || TXN_STYLE._none;
       bounds.push([t.location_lat, t.location_lon]);
-      L.circleMarker([t.location_lat, t.location_lon], { radius:r, color:'#fff', weight:1.5, fillColor:color, fillOpacity:0.9 })
-        .bindPopup(`<strong>${esc(t.merchant || t.description || '')}</strong><br>${money(t.amount_cents)}, ${shortDate(t.transaction_date)}${name ? `<br>${esc(name)}` : ''}`).addTo(mapGroups.purchases);
+      L.marker([t.location_lat, t.location_lon], { icon: mapBadge(path, color, 28) }).bindPopup(popRows(esc(t.merchant || t.description || 'Purchase'), [
+        ['Amount', `<b>${money(Math.abs(t.amount_cents))}</b>${t.amount_cents > 0 ? ' in' : ''}`], ['Date', new Date(t.transaction_date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})],
+        ['Category', esc(name || 'Needs category')], ['Where', esc([t.location_address, t.location_city, t.location_region].filter(Boolean).join(', '))],
+        ['Paid with', t.account ? esc(t.account.name) : ''], ['Status', t.pending ? 'Pending' : 'Posted'],
+        ['Bank text', t.merchant && t.description && t.description !== t.merchant ? esc(t.description) : '']])).addTo(mapGroups.purchases);
     });
   }
   if(mapLayersOn.assets){
     const byLoc = {};
     allAssets.filter(a=>a.location && a.location.lat != null && a.location.lng != null).forEach(a=>{
-      const c = a.location.code; byLoc[c] = byLoc[c] || { name:a.location.name, lat:parseFloat(a.location.lat), lng:parseFloat(a.location.lng), items:[] }; byLoc[c].items.push(a.item);
+      const c = a.location.code; byLoc[c] = byLoc[c] || { name:a.location.name, lat:parseFloat(a.location.lat), lng:parseFloat(a.location.lng), items:[] }; byLoc[c].items.push(a);
     });
-    const color = TXN_STYLE['Savings'][0];
     Object.entries(byLoc).forEach(([code, loc])=>{
       bounds.push([loc.lat, loc.lng]);
-      const icon = L.divIcon({ className:'', html:`<div style="background:${color};color:#fff;border:2px solid #fff;border-radius:14px;min-width:28px;height:28px;padding:0 6px;display:grid;place-items:center;font:600 12px var(--sans);box-shadow:0 2px 6px rgba(0,0,0,.3)">${loc.items.length}</div>`, iconSize:[28,28], iconAnchor:[14,14] });
-      L.marker([loc.lat, loc.lng], { icon }).bindPopup(`<strong>${esc(loc.name)}</strong><br>${loc.items.length} item${loc.items.length===1?'':'s'}<br><span style="font-size:0.85em">${loc.items.slice(0,6).map(esc).join(', ')}${loc.items.length>6?'…':''}</span>`)
+      const cats = {}; loc.items.forEach(a=>{ cats[a.category||'Other'] = (cats[a.category||'Other']||0)+1; });
+      const val = loc.items.reduce((s,a)=>s+(parseFloat(a.estimated_value ?? a.purchase_price)||0),0);
+      L.marker([loc.lat, loc.lng], { icon: mapBadge(PLACE_ICONS.box, '#0066D6', 32, loc.items.length), zIndexOffset:-100 }).bindPopup(popRows(`Your stuff at ${esc(loc.name)}`, [
+        ['Items', String(loc.items.length)], ...Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([k,n])=>[esc(k), String(n)]), ['Known value', val ? formatMoney(val) : ''],
+        ['Includes', loc.items.slice(0,5).map(a=>esc(a.item)).join(', ') + (loc.items.length > 5 ? '…' : '')]]))
         .on('click', ()=>{ activeAssetLocationCode = code; renderAssets(allAssets); }).addTo(mapGroups.assets);
     });
   }
-  const key = `${mapRangeDays}|${mapLayersOn.visits}|${mapLayersOn.places}|${mapLayersOn.purchases}|${mapLayersOn.assets}|${bounds.length}`;
+  const key = `${mapDay}|${mapRangeDays}|${mapLayersOn.visits}|${mapLayersOn.places}|${mapLayersOn.purchases}|${mapLayersOn.assets}|${bounds.length}`;
   if(key !== mapFitKey){
     mapFitKey = key;
     if(bounds.length === 1) assetMapInstance.setView(bounds[0], 14);
     else if(bounds.length) assetMapInstance.fitBounds(bounds, { padding:[40,40], maxZoom:15 });
     else assetMapInstance.setView([42.5584, -70.88], 12);
   }
-  const label = MAP_RANGES.find(r=>r[0]===mapRangeDays)[1];
+  const label = mapDay ? new Date(mapDay+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}) : MAP_RANGES.find(r=>r[0]===mapRangeDays)[1];
   const parts = [];
   if(mapLayersOn.visits){ const n = (mapData.visits||[]).length; parts.push(`${n} visit${n===1?'':'s'}`); }
   if(mapLayersOn.places) { const d = new Set(mapData.points.map(p=>new Date(p.recorded_at).toDateString())).size; parts.push(mapData.points.length ? `${d} day${d===1?'':'s'} of travel` : 'no travel yet'); }
   if(mapLayersOn.purchases) parts.push(`${mapData.txns.length} purchase${mapData.txns.length===1?'':'s'}`);
   if(mapLayersOn.assets) parts.push('your stuff');
   document.getElementById('mapSummary').textContent = `${label}: ${parts.join(', ') || 'all layers off'}`;
-  renderMapWeek();
+  renderMapWeek(); renderTimeline();
   setTimeout(()=>{ if(assetMapInstance) assetMapInstance.invalidateSize(); }, 100);
 }
+let tlDay = null, tlNaming = null;
+function distM(a, b){ const R = 6371000, r = x=>x*Math.PI/180; const dLa = r(b.lat-a.lat), dLo = r(b.lon-a.lon); const h = Math.sin(dLa/2)**2 + Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+function renderTimeline(){
+  const el = document.getElementById('tlSheet'); if(!el || el.hidden) return;
+  const day = tlDay || localToday(), today = localToday();
+  const vs = (mapData.visits||[]).filter(v=>(v.arrived_at && isoOf(v.arrived_at)===day) || (v.left_at && isoOf(v.left_at)===day) || (v.is_open && day===today)).sort((a,b)=>(a.arrived_at||'').localeCompare(b.arrived_at||''));
+  const pts = (mapData.points||[]).filter(p=>isoOf(p.recorded_at)===day).sort((a,b)=>a.recorded_at.localeCompare(b.recorded_at));
+  const trip = (from, to) => {
+    const seg = pts.filter(p=>(!from || p.recorded_at >= from) && (!to || p.recorded_at <= to));
+    if(seg.length < 2) return null;
+    let d = 0; for(let i=1;i<seg.length;i++) d += distM(seg[i-1], seg[i]);
+    if(d < 150) return null;
+    const mins = (new Date(to || seg[seg.length-1].recorded_at) - new Date(from || seg[0].recorded_at))/60000;
+    const kmh = mins > 0 ? (d/1000)/(mins/60) : 0;
+    const mode = kmh < 7 ? ['🚶','Walking'] : ['🚗','Driving'];
+    return `<div class="tl-trip"><span class="tl-line"></span><span class="tl-mode">${mode[0]}</span><span>${mode[1]} ${(d/1609.34).toFixed(1)} mi${mins >= 1 ? `, ${fmtMinutes(mins)}` : ''}</span></div>`;
+  };
+  let rows = '';
+  if(!vs.length){ const t = trip(null, null); rows = t || `<div class="map-help">${pts.length ? 'No stops of 10+ minutes this day.' : 'No location data for this day. OwnTracks needs to be running (not in Low Power Mode) to record your day.'}</div>`; }
+  vs.forEach((v,i)=>{
+    if(i === 0){ const t = trip(null, v.arrived_at); if(t) rows += t; }
+    const kind = placeKind(v.place), sug = v.status === 'suggested';
+    rows += `<div class="tl-stop ${sug?'sug':''}" data-tlvisit="${v.id}">
+      <span class="tl-ico">${svgIcon ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${PLACE_ICONS[sug ? 'pin' : kind]}</svg>` : ''}</span>
+      <div class="grow-main"><div class="grow-title">${esc(v.place)}${sug ? ' <span class="tl-badge">new place?</span>' : ''}</div>
+        <div class="grow-sub">${v.arrived_at && isoOf(v.arrived_at)===day ? clockTime(v.arrived_at) : 'Earlier'} – ${v.is_open ? 'now' : v.left_at && isoOf(v.left_at)===day ? clockTime(v.left_at) : 'later'}</div>
+        ${sug ? (tlNaming === v.id ? `<div class="tl-name"><input type="text" id="tlNameInput" placeholder="Name this place, e.g. Hannah's" value="${esc(v.place === 'Unnamed stop' ? '' : v.place)}"><button class="save-btn" type="button" data-tlsave="${v.id}">Save</button></div>` : `<div class="tl-actions"><button class="link-btn" type="button" data-tlname="${v.id}">Name it</button><button class="link-btn" type="button" data-tldecline="${v.id}" style="color:var(--text-faint)">Not a stop</button></div>`) : ''}</div>
+      <div class="visit-dur">${v.arrived_at ? fmtMinutes(v.minutes) : ''}</div></div>`;
+    const next = vs[i+1]; const t = trip(v.left_at, next ? next.arrived_at : null); if(t && v.left_at) rows += t;
+  });
+  const label = day === today ? 'Today' : day === isoAddDays(today,-1) ? 'Yesterday' : new Date(day+'T12:00').toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
+  el.innerHTML = `<div class="tl-head"><button class="tl-nav" type="button" data-tlstep="-1" aria-label="Previous day">‹</button><div><b>${label}</b><span>${vs.length} stop${vs.length===1?'':'s'}${pts.length ? `, ${pts.length} points` : ''}</span></div><button class="tl-nav" type="button" data-tlstep="1" ${day >= today ? 'disabled' : ''} aria-label="Next day">›</button><button class="tl-close" type="button" id="tlClose" aria-label="Close timeline">✕</button></div><div class="tl-body">${rows}</div>`;
+  autoNameStops(vs);
+}
+let namingBusy = false;
+async function autoNameStops(vs){
+  if(namingBusy) return; const todo = vs.filter(v=>!v.location_id && v.place === 'Unnamed stop' && v.lat != null).slice(0, 3); if(!todo.length) return;
+  namingBusy = true;
+  try{
+    for(const v of todo){
+      const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&lat=${v.lat}&lon=${v.lon}`, { headers: { 'Accept-Language':'en' } });
+      if(!r.ok) break;
+      const j = await r.json(), a = j.address || {};
+      const street = [a.house_number, a.road].filter(Boolean).join(' ');
+      const name = j.name || a.amenity || a.shop || a.building || street || a.neighbourhood || a.suburb || null;
+      const town = a.town || a.city || a.village || a.suburb || '';
+      const label = name ? (town && !String(name).includes(town) ? `${name}, ${town}` : String(name)) : (town || null);
+      if(label){ v.place = label; await patchRow('visits', v.id, { place_name: label }).catch(()=>{}); renderTimeline(); }
+      await new Promise(res=>setTimeout(res, 1100));
+    }
+  } catch(e){} finally { namingBusy = false; }
+}
+document.getElementById('panelAssets').addEventListener('click', async e=>{
+  if(e.target.closest('#tlOpen')){ const sh = document.getElementById('tlSheet'); sh.hidden = false; tlDay = tlDay || localToday(); mapDay = tlDay; mapFitKey = ''; renderAssetMap(); renderTimeline(); return; }
+  if(e.target.closest('#tlClose')){ document.getElementById('tlSheet').hidden = true; mapDay = null; mapFitKey = ''; renderAssetMap(); return; }
+  const st = e.target.closest('[data-tlstep]');
+  if(st){ const d = isoAddDays(tlDay || localToday(), Number(st.dataset.tlstep)); if(d > localToday()) return; tlDay = d; mapDay = d; mapFitKey = '';
+    const daysBack = Math.round((new Date(localToday()) - new Date(d))/86400000) + 1; if(mapRangeDays && daysBack > mapRangeDays){ mapRangeDays = daysBack <= 30 ? 30 : 90; await refreshLifeMap(); } else renderAssetMap(); renderTimeline(); return; }
+  const nm = e.target.closest('[data-tlname]'); if(nm){ tlNaming = Number(nm.dataset.tlname); renderTimeline(); const i = document.getElementById('tlNameInput'); if(i) i.focus(); return; }
+  const dc = e.target.closest('[data-tldecline]');
+  if(dc){ const id = Number(dc.dataset.tldecline); mapData.visits = (mapData.visits||[]).filter(v=>v.id!==id); renderTimeline(); renderAssetMap(); patchRow('visits', id, { status:'declined' }).catch(()=>{}); return; }
+  const sv = e.target.closest('[data-tlsave]');
+  if(sv){
+    const id = Number(sv.dataset.tlsave), v = (mapData.visits||[]).find(x=>x.id===id), name = (document.getElementById('tlNameInput').value || '').trim(); if(!v || !name) return;
+    sv.disabled = true;
+    try{
+      await ensureValidSession();
+      const code = await nextCodeFor('locations', 'LOC');
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/locations`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([{ code, name, lat: v.lat, lng: v.lon, radius_m: 120, notes: 'Named from the Timeline' }]) });
+      if(!r.ok) throw new Error(`Supabase returned ${r.status}`);
+      const loc = (await r.json())[0];
+      await patchRow('visits', id, { location_id: loc.id, status:'confirmed', place_name: name });
+      tlNaming = null; await refreshLifeMap(); renderTimeline();
+    } catch(err){ sv.disabled = false; const b = document.getElementById('assetsErrorBanner'); if(b) b.innerHTML = `<div class="error-banner">Couldn't save that place (${esc(err.message)}).</div>`; }
+    return;
+  }
+  const stop = e.target.closest('[data-tlvisit]');
+  if(stop && !e.target.closest('button, input')){ const v = (mapData.visits||[]).find(x=>x.id===Number(stop.dataset.tlvisit)); if(v && v.lat != null && assetMapInstance) assetMapInstance.setView([v.lat, v.lon], 16); }
+});
 function renderMapWeek(){
   const el = document.getElementById('mapWeek'); if(!el) return;
   const today = localToday(), ws = weekStartIso(today), days = []; for(let i=0;i<7;i++) days.push(isoAddDays(ws,i));
@@ -2020,7 +2203,7 @@ function renderMapWeek(){
   const names = Object.keys(places), colors = ['#2E8B57','#3F7CC0','#D9822B','#8A5CC7','#C4382A','#2F9AA8'];
   const col = n => colors[names.indexOf(n) % colors.length];
   const total = Object.values(per).reduce((a,o)=>a+Object.values(o).reduce((x,y)=>x+y,0),0);
-  el.innerHTML = `<div class="t"><span>This week by place</span><span>${names.length ? fmtMinutes(total) + ' tracked' : 'add regions in OwnTracks'}</span></div><div class="row">${days.map(d=>{ const o = per[d] || {}; return `<div class="dd ${d===today?'today':''}"><div class="bar">${Object.entries(o).map(([n,m])=>`<i style="height:${Math.min(100, Math.round(100*m/(16*60)))}%;background:${col(n)}" title="${esc(n)} ${fmtMinutes(m)}"></i>`).join('')}</div>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</div>`; }).join('')}</div>${names.length ? `<div class="t" style="margin:6px 0 0; justify-content:flex-start; gap:10px; flex-wrap:wrap">${names.slice(0,4).map(n=>`<span class="pchip"><i style="background:${col(n)}"></i>${esc(n)}</span>`).join('')}</div>` : ''}`;
+  el.innerHTML = `<div class="t"><span>This week by place</span><button class="tl-open" type="button" id="tlOpen">Timeline ›</button></div><div class="row">${days.map(d=>{ const o = per[d] || {}; return `<div class="dd ${d===today?'today':''}"><div class="bar">${Object.entries(o).map(([n,m])=>`<i style="height:${Math.min(100, Math.round(100*m/(16*60)))}%;background:${col(n)}" title="${esc(n)} ${fmtMinutes(m)}"></i>`).join('')}</div>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</div>`; }).join('')}</div>${names.length ? `<div class="t" style="margin:6px 0 0; justify-content:flex-start; gap:10px; flex-wrap:wrap">${names.slice(0,4).map(n=>`<span class="pchip"><i style="background:${col(n)}"></i>${esc(n)}</span>`).join('')}</div>` : ''}`;
 }
 async function refreshLifeMap(){
   try{ await fetchMapData(); } catch(err){ const b = document.getElementById('assetsErrorBanner'); if(b) b.innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
@@ -2035,8 +2218,10 @@ document.getElementById('mapPanel').addEventListener('change', e=>{
   mapLayersOn[c.dataset.layer] = c.checked; renderAssetMap();
 });
 document.getElementById('mapPanel').addEventListener('click', async e=>{
+  const dbtn = e.target.closest('[data-mapday]');
+  if(dbtn){ mapDay = mapDay === dbtn.dataset.mapday ? null : dbtn.dataset.mapday; mapFitKey = ''; if(mapDay && mapRangeDays && mapRangeDays < 7){ mapRangeDays = 7; await refreshLifeMap(); } else { renderMapControls(); renderAssetMap(); } return; }
   const r = e.target.closest('[data-maprange]'); if(!r) return;
-  mapRangeDays = Number(r.dataset.maprange); renderMapControls(); await refreshLifeMap();
+  mapDay = null; mapRangeDays = Number(r.dataset.maprange); renderMapControls(); await refreshLifeMap();
 });
 
 function renderAssets(assets){
@@ -3280,7 +3465,7 @@ document.getElementById('composer').addEventListener('submit', async e=>{
   if(!document.body.classList.contains('chatting')){ document.body.classList.add('chatting'); window.scrollTo({ top:0 }); }
   thread.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(text)}</div><div class="msg otto typing">Looking at your data…</div>`);
   input.value = ''; chatBusy = true;
-  const pending = thread.lastElementChild; pending.scrollIntoView({ behavior:'smooth', block:'end' });
+  const pending = thread.lastElementChild; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30);
   try{
     const r = await callFn('otto-chat', { messages: chatHistory });
     pending.classList.remove('typing'); pending.textContent = r.text || "I didn't get an answer back.";
@@ -3289,7 +3474,7 @@ document.getElementById('composer').addEventListener('submit', async e=>{
     chatHistory.pop();
     pending.classList.remove('typing'); pending.classList.add('err');
     pending.textContent = /ANTHROPIC_API_KEY/.test(err.message) ? "I'm not switched on yet: the AI key still needs to be added in Supabase (secret ANTHROPIC_API_KEY)." : `Couldn't answer: ${err.message}`;
-  } finally { chatBusy = false; pending.scrollIntoView({ behavior:'smooth', block:'end' }); }
+  } finally { chatBusy = false; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30); }
 });
 renderGreeting();
 
@@ -3460,7 +3645,7 @@ async function callFn(name, body){
   if(!res.ok) throw new Error(data.error || `Function ${name} returned ${res.status}`);
   return data;
 }
-let bankConnections = [], allTxns = [], expandedTxnId = null, txnLimit = 120, txnFilter = 'all';
+let bankConnections = [], allTxns = [], expandedTxnId = null, txnLimit = 120, txnFilter = 'all', txnDay = null;
 
 async function fetchBank(){
   const r = await fetch(`${SUPABASE_URL}/rest/v1/v_bank_connections?select=*&order=created_at.asc`, { headers: authHeaders() });
@@ -3487,6 +3672,7 @@ const TXN_STYLE = {
   'Gas and transport':  ['#3F7CC0','<path d="M5 21V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v16"/><path d="M4 21h12"/><path d="M15 9h2a2 2 0 0 1 2 2v5a1.5 1.5 0 0 0 3 0V8l-3-3"/><path d="M8 7h4"/>'],
   'Car maintenance':    ['#6B6F7A','<path d="M14.5 6.5a4 4 0 0 0-5.4 5l-5.6 5.6a1.8 1.8 0 0 0 2.5 2.5l5.6-5.6a4 4 0 0 0 5-5.4l-2.4 2.4-2.1-.5-.5-2.1z"/>'],
   'Subscriptions':      ['#8A5CC7','<path d="M4 12a8 8 0 0 1 14-5.3L20 9"/><path d="M20 4v5h-5"/><path d="M20 12a8 8 0 0 1-14 5.3L4 15"/><path d="M4 20v-5h5"/>'],
+  'Bills':              ['#2F9AA8','<path d="M7 3h10v18l-2.5-1.5L12 21l-2.5-1.5L7 21z"/><path d="M10 8h4M10 12h4"/>'],
   'Phone and utilities':['#2F9AA8','<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>'],
   'School and books':   ['#B5893A','<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 1 6.5 18H20v3H6.5"/>'],
   'Personal and fun':   ['#D2557E','<path d="M12 3l2.6 5.6 6 .6-4.5 4.1 1.3 6L12 16.3 6.6 19.3l1.3-6L3.4 9.2l6-.6z"/>'],
@@ -3512,10 +3698,10 @@ function renderTxns(){
   const used = [...new Set(allTxns.map(labelOf).filter(Boolean))].sort();
   const filters = [['all','All'], ...(needs ? [['none', `Needs category (${needs})`]] : []), ...used.map(n=>[n,n])];
   if(!filters.some(f=>f[0]===txnFilter)) txnFilter = 'all';
-  const shown = allTxns.filter(t=> txnFilter==='all' ? true : txnFilter==='none' ? labelOf(t)===null : labelOf(t)===txnFilter);
+  const shown = allTxns.filter(t=> (!txnDay || t.transaction_date === txnDay) && (txnFilter==='all' ? true : txnFilter==='none' ? labelOf(t)===null : labelOf(t)===txnFilter));
   const days = []; shown.forEach(t=>{ let d = days.find(x=>x.date===t.transaction_date); if(!d){ d={date:t.transaction_date, items:[]}; days.push(d); } d.items.push(t); });
   const today = localToday(), yday = isoAddDays(today,-1);
-  let html = `<div class="txn-filters">${filters.map(([k,l])=>`<button class="chip ${txnFilter===k?'active':''}" type="button" data-txnfilter="${esc(k)}">${esc(l)}</button>`).join('')}</div>`;
+  let html = `<div class="txn-filters">${txnDay ? `<button class="chip active" type="button" data-cleartxnday="1">${esc(new Date(txnDay+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}))} ✕</button>` : ''}${filters.map(([k,l])=>`<button class="chip ${txnFilter===k?'active':''}" type="button" data-txnfilter="${esc(k)}">${esc(l)}</button>`).join('')}</div>`;
   html += days.map(d=>{
     const out = d.items.filter(t=>t.amount_cents < 0 && !t.exclude_from_budget).reduce((a,t)=>a-t.amount_cents,0);
     const name = d.date===today ? 'Today' : d.date===yday ? 'Yesterday' : new Date(d.date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
@@ -3567,6 +3753,7 @@ document.getElementById('bankCard').addEventListener('click', e=>{
   else { const r = e.target.closest('[data-relink]'); if(r) connectBank(r.dataset.relink); }
 });
 document.getElementById('txnList').addEventListener('click', async e=>{
+  if(e.target.closest('[data-cleartxnday]')){ txnDay = null; renderTxns(); return; }
   const f = e.target.closest('[data-txnfilter]');
   if(f){ txnFilter = f.dataset.txnfilter; expandedTxnId = null; renderTxns(); return; }
   if(e.target.closest('#txnMore')){ txnLimit += 150; await fetchBank(); renderTxns(); return; }
