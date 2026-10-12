@@ -15,8 +15,80 @@
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+// Build 018: functional wardrobe, laundry and saved outfits (Supabase RLS protected)
+let wardrobeItems=[], savedOutfits=[], wardrobeMode='closet';
+function wardrobeMarkup(){return `<section class="wardrobe-space"><div class="wardrobe-intro"><span class="eyebrow">YOUR COLLECTION</span><h2>Wear what you love.</h2><p>Keep track of clothing, laundry, and outfits in one place.</p></div><div class="wardrobe-tabs" role="group" aria-label="Wardrobe views"><button data-wmode="closet" class="active">Closet</button><button data-wmode="laundry">Laundry</button><button data-wmode="outfits">Outfits</button></div><div id="wardrobeNotice" role="status" aria-live="polite"></div><div id="wardrobeContent"></div></section>`;}
+function wardrobeNotice(msg,isError=false){const e=document.getElementById('wardrobeNotice');if(e){e.textContent=msg;e.className=isError?'wardrobe-error':'wardrobe-note';}}
+async function wardrobeRequest(table,options={}){
+ const {method='GET',id,body,query=''}=options;
+ const url=`${SUPABASE_URL}/rest/v1/${table}?${id!=null?`id=eq.${encodeURIComponent(id)}&`:''}${query||'select=*'}`;
+ const r=await fetch(url,{method,headers:authHeaders({'Content-Type':'application/json',Prefer:'return=representation'}),...(body?{body:JSON.stringify(body)}:{})});
+ if(!r.ok){let message=`Request failed (${r.status})`;try{const d=await r.json();message=d.message||message;}catch{}throw new Error(message);}
+ if(method==='DELETE'||r.status===204)return [];
+ return await r.json();
+}
+async function loadWardrobe(){
+ wardrobeNotice('Loading your wardrobe…');
+ try{[wardrobeItems,savedOutfits]=await Promise.all([wardrobeRequest('wardrobe_items',{query:'select=*&order=created_at.desc'}),wardrobeRequest('saved_outfits',{query:'select=*&order=created_at.desc'})]);wardrobeNotice('');renderWardrobe();}
+ catch(e){wardrobeNotice(`Could not load wardrobe: ${e.message}`,true);}
+}
+function renderWardrobe(){
+ const host=document.getElementById('wardrobeContent');if(!host)return;
+ document.querySelectorAll('[data-wmode]').forEach(b=>b.classList.toggle('active',b.dataset.wmode===wardrobeMode));
+ if(wardrobeMode==='closet')host.innerHTML=`<form id="wardrobeAdd" class="wardrobe-form"><label>Item name<input name="name" maxlength="160" required placeholder="e.g. Black linen shirt"></label><label>Category<select name="category"><option>Top</option><option>Bottom</option><option>Outerwear</option><option>Shoes</option><option>Accessory</option><option>Other</option></select></label><label>Color<input name="color" maxlength="80" placeholder="Optional"></label><button type="submit">Add item</button></form><div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><span class="wardrobe-type">${esc(w.category)}</span><strong>${esc(w.name)}</strong><small>${esc(w.color||'No color')} · ${esc(w.laundry_status)}</small><div class="wardrobe-actions"><button data-wlaundry="${w.id}" data-next="${w.laundry_status==='clean'?'worn':'clean'}">Mark ${w.laundry_status==='clean'?'worn':'clean'}</button><button data-wdelete="${w.id}" aria-label="Delete ${esc(w.name)}">Delete</button></div></article>`).join('')||'<p class="wardrobe-empty">No clothing added yet. Add your first item above.</p>'}</div>`;
+ else if(wardrobeMode==='laundry')host.innerHTML=`<div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><strong>${esc(w.name)}</strong><small>${esc(w.category)}</small><label>Status<select data-wstatus="${w.id}">${['clean','worn','washing','drying'].map(st=>`<option value="${st}" ${st===w.laundry_status?'selected':''}>${st[0].toUpperCase()+st.slice(1)}</option>`).join('')}</select></label></article>`).join('')||'<p class="wardrobe-empty">Add items in Closet to track laundry.</p>'}</div>`;
+ else host.innerHTML=`<form id="outfitAdd" class="wardrobe-form"><label>Outfit name<input name="name" maxlength="160" required placeholder="e.g. Weekend casual"></label><label>Occasion<input name="occasion" maxlength="100" placeholder="Optional"></label><fieldset><legend>Choose clothing</legend><div class="wardrobe-picks">${wardrobeItems.map(w=>`<label><input type="checkbox" name="items" value="${w.id}">${esc(w.name)}</label>`).join('')||'Add clothes in Closet first.'}</div></fieldset><button type="submit" ${wardrobeItems.length?'':'disabled'}>Save outfit</button></form><div class="wardrobe-grid">${savedOutfits.map(o=>`<article class="wardrobe-card"><strong>${esc(o.name)}</strong><small>${esc(o.occasion||'Any occasion')}</small><button data-odelete="${o.id}">Delete outfit</button></article>`).join('')||'<p class="wardrobe-empty">No saved outfits yet.</p>'}</div>`;
+}
+document.addEventListener('click',async e=>{
+ const mode=e.target.closest('[data-wmode]');if(mode){wardrobeMode=mode.dataset.wmode;renderWardrobe();return;}
+ const del=e.target.closest('[data-wdelete],[data-odelete]');if(del){if(!confirm('Delete this item?'))return;const isOutfit=del.hasAttribute('data-odelete');try{await wardrobeRequest(isOutfit?'saved_outfits':'wardrobe_items',{method:'DELETE',id:del.dataset[isOutfit?'odelete':'wdelete']});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}return;}
+ const mark=e.target.closest('[data-wlaundry]');if(mark){try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:mark.dataset.wlaundry,body:{laundry_status:mark.dataset.next}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+});
+document.addEventListener('change',async e=>{const el=e.target.closest('[data-wstatus]');if(!el)return;try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:el.dataset.wstatus,body:{laundry_status:el.value}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}});
+document.addEventListener('submit',async e=>{
+ if(e.target.id==='wardrobeAdd'){e.preventDefault();const f=new FormData(e.target);try{await wardrobeRequest('wardrobe_items',{method:'POST',body:{name:String(f.get('name')).trim(),category:f.get('category'),color:String(f.get('color')||'').trim()||null}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+ if(e.target.id==='outfitAdd'){e.preventDefault();const f=new FormData(e.target);const ids=f.getAll('items').map(Number);try{const created=await wardrobeRequest('saved_outfits',{method:'POST',body:{name:String(f.get('name')).trim(),occasion:String(f.get('occasion')||'').trim()||null}});if(ids.length){try{await wardrobeRequest('saved_outfit_items',{method:'POST',body:ids.map(item_id=>({outfit_id:created[0].id,item_id}))});}catch(err){await wardrobeRequest('saved_outfits',{method:'DELETE',id:created[0].id});throw err;}}await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+});
+
+</script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js">
+// Build 018: functional wardrobe, laundry and saved outfits (Supabase RLS protected)
+let wardrobeItems=[], savedOutfits=[], wardrobeMode='closet';
+function wardrobeMarkup(){return `<section class="wardrobe-space"><div class="wardrobe-intro"><span class="eyebrow">YOUR COLLECTION</span><h2>Wear what you love.</h2><p>Keep track of clothing, laundry, and outfits in one place.</p></div><div class="wardrobe-tabs" role="group" aria-label="Wardrobe views"><button data-wmode="closet" class="active">Closet</button><button data-wmode="laundry">Laundry</button><button data-wmode="outfits">Outfits</button></div><div id="wardrobeNotice" role="status" aria-live="polite"></div><div id="wardrobeContent"></div></section>`;}
+function wardrobeNotice(msg,isError=false){const e=document.getElementById('wardrobeNotice');if(e){e.textContent=msg;e.className=isError?'wardrobe-error':'wardrobe-note';}}
+async function wardrobeRequest(table,options={}){
+ const {method='GET',id,body,query=''}=options;
+ const url=`${SUPABASE_URL}/rest/v1/${table}?${id!=null?`id=eq.${encodeURIComponent(id)}&`:''}${query||'select=*'}`;
+ const r=await fetch(url,{method,headers:authHeaders({'Content-Type':'application/json',Prefer:'return=representation'}),...(body?{body:JSON.stringify(body)}:{})});
+ if(!r.ok){let message=`Request failed (${r.status})`;try{const d=await r.json();message=d.message||message;}catch{}throw new Error(message);}
+ if(method==='DELETE'||r.status===204)return [];
+ return await r.json();
+}
+async function loadWardrobe(){
+ wardrobeNotice('Loading your wardrobe…');
+ try{[wardrobeItems,savedOutfits]=await Promise.all([wardrobeRequest('wardrobe_items',{query:'select=*&order=created_at.desc'}),wardrobeRequest('saved_outfits',{query:'select=*&order=created_at.desc'})]);wardrobeNotice('');renderWardrobe();}
+ catch(e){wardrobeNotice(`Could not load wardrobe: ${e.message}`,true);}
+}
+function renderWardrobe(){
+ const host=document.getElementById('wardrobeContent');if(!host)return;
+ document.querySelectorAll('[data-wmode]').forEach(b=>b.classList.toggle('active',b.dataset.wmode===wardrobeMode));
+ if(wardrobeMode==='closet')host.innerHTML=`<form id="wardrobeAdd" class="wardrobe-form"><label>Item name<input name="name" maxlength="160" required placeholder="e.g. Black linen shirt"></label><label>Category<select name="category"><option>Top</option><option>Bottom</option><option>Outerwear</option><option>Shoes</option><option>Accessory</option><option>Other</option></select></label><label>Color<input name="color" maxlength="80" placeholder="Optional"></label><button type="submit">Add item</button></form><div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><span class="wardrobe-type">${esc(w.category)}</span><strong>${esc(w.name)}</strong><small>${esc(w.color||'No color')} · ${esc(w.laundry_status)}</small><div class="wardrobe-actions"><button data-wlaundry="${w.id}" data-next="${w.laundry_status==='clean'?'worn':'clean'}">Mark ${w.laundry_status==='clean'?'worn':'clean'}</button><button data-wdelete="${w.id}" aria-label="Delete ${esc(w.name)}">Delete</button></div></article>`).join('')||'<p class="wardrobe-empty">No clothing added yet. Add your first item above.</p>'}</div>`;
+ else if(wardrobeMode==='laundry')host.innerHTML=`<div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><strong>${esc(w.name)}</strong><small>${esc(w.category)}</small><label>Status<select data-wstatus="${w.id}">${['clean','worn','washing','drying'].map(st=>`<option value="${st}" ${st===w.laundry_status?'selected':''}>${st[0].toUpperCase()+st.slice(1)}</option>`).join('')}</select></label></article>`).join('')||'<p class="wardrobe-empty">Add items in Closet to track laundry.</p>'}</div>`;
+ else host.innerHTML=`<form id="outfitAdd" class="wardrobe-form"><label>Outfit name<input name="name" maxlength="160" required placeholder="e.g. Weekend casual"></label><label>Occasion<input name="occasion" maxlength="100" placeholder="Optional"></label><fieldset><legend>Choose clothing</legend><div class="wardrobe-picks">${wardrobeItems.map(w=>`<label><input type="checkbox" name="items" value="${w.id}">${esc(w.name)}</label>`).join('')||'Add clothes in Closet first.'}</div></fieldset><button type="submit" ${wardrobeItems.length?'':'disabled'}>Save outfit</button></form><div class="wardrobe-grid">${savedOutfits.map(o=>`<article class="wardrobe-card"><strong>${esc(o.name)}</strong><small>${esc(o.occasion||'Any occasion')}</small><button data-odelete="${o.id}">Delete outfit</button></article>`).join('')||'<p class="wardrobe-empty">No saved outfits yet.</p>'}</div>`;
+}
+document.addEventListener('click',async e=>{
+ const mode=e.target.closest('[data-wmode]');if(mode){wardrobeMode=mode.dataset.wmode;renderWardrobe();return;}
+ const del=e.target.closest('[data-wdelete],[data-odelete]');if(del){if(!confirm('Delete this item?'))return;const isOutfit=del.hasAttribute('data-odelete');try{await wardrobeRequest(isOutfit?'saved_outfits':'wardrobe_items',{method:'DELETE',id:del.dataset[isOutfit?'odelete':'wdelete']});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}return;}
+ const mark=e.target.closest('[data-wlaundry]');if(mark){try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:mark.dataset.wlaundry,body:{laundry_status:mark.dataset.next}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+});
+document.addEventListener('change',async e=>{const el=e.target.closest('[data-wstatus]');if(!el)return;try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:el.dataset.wstatus,body:{laundry_status:el.value}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}});
+document.addEventListener('submit',async e=>{
+ if(e.target.id==='wardrobeAdd'){e.preventDefault();const f=new FormData(e.target);try{await wardrobeRequest('wardrobe_items',{method:'POST',body:{name:String(f.get('name')).trim(),category:f.get('category'),color:String(f.get('color')||'').trim()||null}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+ if(e.target.id==='outfitAdd'){e.preventDefault();const f=new FormData(e.target);const ids=f.getAll('items').map(Number);try{const created=await wardrobeRequest('saved_outfits',{method:'POST',body:{name:String(f.get('name')).trim(),occasion:String(f.get('occasion')||'').trim()||null}});if(ids.length){try{await wardrobeRequest('saved_outfit_items',{method:'POST',body:ids.map(item_id=>({outfit_id:created[0].id,item_id}))});}catch(err){await wardrobeRequest('saved_outfits',{method:'DELETE',id:created[0].id});throw err;}}await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+});
+
+</script>
 <style>
   :root{
     --bg:#10140f;
@@ -1345,6 +1417,63 @@ input:not([type=checkbox]):not([type=radio]),textarea,select{accent-color:#D8FF7
 .otto-nav-choice-icon svg{width:22px;height:22px}
 .otto-nav-choice span:nth-child(2){flex:1;display:grid;gap:3px}
 .otto-nav-choice small{color:#bfc0bb;font-size:12px}
+
+/* Build 014 — AI-first Home: actionable starters, deliberate spacing, accessible states */
+.otto-chat-starters{padding:14px 0 8px;display:grid;gap:10px}
+.otto-starters-label{font-size:10px;letter-spacing:.14em;font-weight:800;color:#a6a8a1;padding-left:3px}
+.otto-starters-scroll{display:flex;gap:9px;overflow-x:auto;scrollbar-width:none;padding:2px 2px 9px;scroll-snap-type:x proximity}
+.otto-starters-scroll::-webkit-scrollbar{display:none}
+.otto-starters-scroll button{flex:0 0 auto;scroll-snap-align:start;min-height:45px;padding:10px 14px;background:#242627;color:#f1f3eb;border:1px solid #3b3e3b;border-radius:14px;font:inherit;font-size:13px;font-weight:650;cursor:pointer;display:flex;align-items:center;gap:14px}
+.otto-starters-scroll button span{color:#d8ff70;font-size:16px}
+.otto-starters-scroll button:focus-visible{outline:2px solid #d8ff70;outline-offset:2px}
+body.chatting .otto-chat-starters{display:none}
+#chatThread .msg{max-width:min(92%,540px);overflow-wrap:anywhere}
+#chatThread .msg.me{margin-left:auto}
+#chatThread .msg.otto{margin-right:auto}
+@media(min-width:720px){.otto-chat-starters{padding-top:20px}.otto-starters-scroll{flex-wrap:wrap;overflow:visible}}
+@media(prefers-reduced-motion:reduce){.otto-starters-scroll{scroll-behavior:auto}}
+
+/* Build 015 — functional agenda-first Plan */
+.plan-week{margin:12px 0 20px;padding:17px 14px 15px;background:#222421;border:1px solid #3c4036;border-radius:22px;color:#f6f7f0}
+.plan-week-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}
+.plan-overline{font-size:10px;letter-spacing:.14em;font-weight:800;color:#c4e98d}
+.plan-week h3{margin:5px 0 0;font-size:20px;line-height:1.2;font-weight:750}
+.plan-week-reset{background:transparent;color:#d8fa93;border:1px solid #63764b;border-radius:12px;padding:10px 12px;min-height:44px}
+.plan-week-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.plan-day{display:flex;align-items:center;flex-direction:column;gap:5px;min-width:0;padding:10px 1px 8px;border:1px solid transparent;border-radius:14px;background:#2d302b;color:#c7c9c1;cursor:pointer;min-height:92px}
+.plan-day span{font-size:10px;font-weight:700}.plan-day strong{font-size:20px;color:#f5f6ee}.plan-day small{font-size:9px;white-space:nowrap;color:#b6bcb0}
+.plan-day.selected{background:#d8fa83;color:#20241b;border-color:#d8fa83}.plan-day.selected strong,.plan-day.selected small{color:#20241b}
+.plan-day.is-today:not(.selected){border-color:#879c63}
+.plan-day-dot{width:5px;height:5px;border-radius:50%;background:#565b50}.plan-day-dot.has-tasks{background:#c7f47c}.plan-day.selected .plan-day-dot{background:#4a6034}
+.plan-week-summary{font-size:11px;color:#b9c0b2;margin-top:13px;line-height:1.5}
+.plan-day:focus-visible{outline:2px solid #d8fa83;outline-offset:2px}
+@media(max-width:370px){.plan-week{padding:12px 8px}.plan-week-days{gap:3px}.plan-day{min-height:86px}.plan-day small{font-size:8px}}
+
+/* Build 016: intentional task scheduling */
+#quickAddForm{display:flex;flex-wrap:wrap;gap:9px;align-items:stretch}
+#quickAddInput{flex:1 1 175px;min-width:0}
+#quickAddWhen{flex:0 1 130px;min-height:45px;padding:0 10px;border-radius:12px;border:1px solid #484b43;background:#292b28;color:#eaf1dd;font:inherit;font-size:13px}
+#quickAddWhen:focus-visible{outline:2px solid #d8ff70;outline-offset:2px}
+#quickAddForm .save-btn{min-width:65px}
+@media(max-width:390px){#quickAddWhen{flex:1 1 130px}#quickAddForm .save-btn{flex:0 0 65px}}
+
+/* Build 017 — calendar-first Plan, backed by existing tasks */
+.plan-view-switch{display:flex;gap:5px;padding:4px;background:#171918;border-radius:13px;width:max-content;margin-bottom:14px}
+.plan-view-switch button{border:0;border-radius:10px;padding:9px 17px;min-height:40px;background:transparent;color:#c3c8bc;font-weight:700;cursor:pointer}
+.plan-view-switch button.active{background:#d8ff70;color:#151911}
+.plan-month-nav{display:flex;align-items:center;gap:9px;margin:0 0 12px}
+.plan-month-nav strong{flex:1;text-align:center;font-size:15px}
+.plan-month-nav button{min-width:38px;min-height:38px;border-radius:11px;border:1px solid #44473e;background:#282a27;color:#f4f6ed;cursor:pointer}
+.plan-month-nav #planCurrentMonth{padding:0 10px;font-size:12px}
+.plan-week-days.month-mode{grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.plan-week-days.month-mode .plan-day{min-height:65px;padding:5px 1px}
+.plan-week-days.month-mode .plan-day strong{font-size:18px}
+.plan-week-days.month-mode .plan-day small{font-size:9px}
+.plan-week-days.month-mode .outside-month{opacity:.34}
+@media(max-width:390px){.plan-week-days.month-mode .plan-day{min-height:60px}.plan-week-days.month-mode .plan-day small{font-size:8px}}
+
+/* Build 018 — wardrobe */
+.wardrobe-space{padding:8px 0 40px;color:#f3f4ef}.wardrobe-intro h2{font-size:clamp(30px,7vw,44px);letter-spacing:-.05em;line-height:1.06;margin:8px 0}.wardrobe-intro p{color:#aaaead}.wardrobe-tabs{display:flex;gap:6px;background:#1b1d1b;padding:5px;border-radius:15px;margin:24px 0}.wardrobe-tabs button{flex:1;border:0;border-radius:11px;padding:12px 8px;background:transparent;color:#c6c9c2;font-weight:700;cursor:pointer}.wardrobe-tabs button.active{background:#d8ff70;color:#12150c}.wardrobe-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;background:#232523;border:1px solid #3b4037;padding:16px;border-radius:20px;margin:12px 0 20px}.wardrobe-form label{display:grid;gap:6px;color:#e5e8df;font-size:13px}.wardrobe-form input,.wardrobe-form select,.wardrobe-card select{width:100%;min-height:44px;border:1px solid #4c5147;border-radius:10px;background:#171917;color:#fff;padding:10px}.wardrobe-form button{grid-column:1/-1;min-height:46px;border:0;border-radius:12px;background:#d8ff70;color:#161a0f;font-weight:800}.wardrobe-form fieldset{grid-column:1/-1;border:1px solid #4c5147;border-radius:12px}.wardrobe-picks{display:grid;gap:9px;padding:8px}.wardrobe-picks label{display:flex;align-items:center;gap:9px}.wardrobe-picks input{width:20px;min-height:20px}.wardrobe-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.wardrobe-card{min-width:0;display:flex;flex-direction:column;gap:10px;background:#252825;border:1px solid #3c4239;border-radius:18px;padding:16px}.wardrobe-card strong{font-size:17px;overflow-wrap:anywhere}.wardrobe-card small,.wardrobe-type{color:#b8beb2}.wardrobe-type{text-transform:uppercase;letter-spacing:.1em;font-size:10px}.wardrobe-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}.wardrobe-card button{border:1px solid #555d4c;border-radius:10px;background:#343a30;color:#e9f7d4;min-height:38px;padding:8px 10px}.wardrobe-empty{grid-column:1/-1;color:#bdc3b8;padding:20px}.wardrobe-error{color:#ffaaa5;margin:12px 0}.wardrobe-note{color:#d8ff70;margin:12px 0}@media(max-width:390px){.wardrobe-form,.wardrobe-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -1386,6 +1515,15 @@ input:not([type=checkbox]):not([type=radio]),textarea,select{accent-color:#D8FF7
   <div class="thread" id="chatThread">
     <div class="msg otto intro">Ask me anything about your money, food, todos, or health. I read straight from your data, and I can't change anything yet.</div>
   </div>
+  <div class="otto-chat-starters" id="ottoChatStarters" aria-label="Suggested questions">
+    <span class="otto-starters-label">START WITH A QUESTION</span>
+    <div class="otto-starters-scroll">
+      <button type="button" data-otto-prompt="What should I focus on today?">Plan my day <span aria-hidden="true">↗</span></button>
+      <button type="button" data-otto-prompt="What bills or spending should I pay attention to this week?">Review my money <span aria-hidden="true">↗</span></button>
+      <button type="button" data-otto-prompt="What meals could I make using the food I have?">Meal ideas <span aria-hidden="true">↗</span></button>
+      <button type="button" data-otto-prompt="Summarize my tasks and overdue items.">My tasks <span aria-hidden="true">↗</span></button>
+    </div>
+  </div>
   <form class="composer" id="composer" autocomplete="off">
     <div class="composer-inner">
       <label for="askInput" class="sr-only">Ask Otto</label>
@@ -1413,8 +1551,10 @@ input:not([type=checkbox]):not([type=radio]),textarea,select{accent-color:#D8FF7
 
     <div class="tab-panel" id="panelTodos">
       <div class="studio-page-head"><div class="studio-kicker">YOUR WORKSPACE <span class="studio-dot"></span> STAY ON TRACK</div><h2>Make today<br><span>count.</span></h2><p>Focus on what matters, one task at a time.</p></div>
+      <div class="plan-week" aria-label="Task agenda"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><div class="plan-week-top"><div><span class="plan-overline">YOUR WEEK</span><h3 id="planWeekTitle">Next seven days</h3></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div>
       <form id="quickAddForm" class="quick-add-form">
         <input type="text" id="quickAddInput" placeholder="Add a todo for today…" required>
+        <label class="sr-only" for="quickAddWhen">Schedule task</label><select id="quickAddWhen" aria-label="Schedule task"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="selected">Selected day</option><option value="anytime">Anytime</option></select>
         <button class="save-btn" type="submit">Add</button>
       </form>
       <div class="seg" id="todoSeg"><button type="button" data-tview="today" class="active">Today</button><button type="button" data-tview="upcoming">Upcoming</button><button type="button" data-tview="anytime">Anytime</button><button type="button" data-tview="done">Done</button></div>
@@ -2271,7 +2411,7 @@ document.getElementById('quickAddForm').addEventListener('submit', async (e)=>{
   if(!title) return;
   input.disabled = true;
   try{
-    await quickAddTodo(title);
+    await quickAddTodo(title, document.getElementById('quickAddWhen').value);
     input.value = '';
     await refresh(false);
   } catch(err){
@@ -3205,7 +3345,57 @@ function todoRowHtml(t){
       ${edit}
     </div></div>`;
 }
+let planSelectedDate = null;
+let planCalendarMode = "week";
+let planCalendarMonth = new Date(new Date().getFullYear(),new Date().getMonth(),1);
+function planLocalDate(offset){
+  const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+offset);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function renderPlanWeek(todos){
+  const host=document.getElementById('planWeekDays'); if(!host)return;
+  const dates=planCalendarMode==='week' ? Array.from({length:7},(_,i)=>planLocalDate(i)) : (()=>{const start=new Date(planCalendarMonth);const offset=start.getDay();start.setDate(1-offset);return Array.from({length:42},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;});})();
+  const nav=document.getElementById('planMonthNav');
+  nav.hidden=planCalendarMode!=='month';
+  document.getElementById('planMonthLabel').textContent=planCalendarMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});
+  host.classList.toggle('month-mode',planCalendarMode==='month');
+  document.getElementById('planWeekMode').classList.toggle('active',planCalendarMode==='week');
+  document.getElementById('planMonthMode').classList.toggle('active',planCalendarMode==='month');
+  document.getElementById('planWeekMode').setAttribute('aria-pressed',String(planCalendarMode==='week'));
+  document.getElementById('planMonthMode').setAttribute('aria-pressed',String(planCalendarMode==='month'));
+  const fmt=new Intl.DateTimeFormat(undefined,{weekday:'short'});
+  host.innerHTML=dates.map((date,i)=>{
+    const d=new Date(date+'T12:00:00');
+    const n=todos.filter(t=>t.status==='open'&&t.due_date===date).length;
+    const outside=planCalendarMode==='month'&&d.getMonth()!==planCalendarMonth.getMonth();
+    return `<button type="button" data-plan-date="${date}" class="plan-day${planSelectedDate===date?' selected':''}${date===localToday()?' is-today':''}${outside?' outside-month':''}" aria-pressed="${planSelectedDate===date}"><span>${fmt.format(d)}</span><strong>${d.getDate()}</strong><i class="plan-day-dot${n?' has-tasks':''}" aria-hidden="true"></i><small>${n?n+' task'+(n===1?'':'s'):'Free'}</small></button>`;
+  }).join('');
+  const open=todos.filter(t=>t.status==='open');
+  const due=open.filter(t=>t.due_date && t.due_date<=planLocalDate(0)).length;
+  const week=open.filter(t=>t.due_date && (planCalendarMode==='week'?dates.includes(t.due_date):t.due_date.startsWith(`${planCalendarMonth.getFullYear()}-${String(planCalendarMonth.getMonth()+1).padStart(2,'0')}`))).length;
+  document.getElementById('planWeekSummary').textContent=`${week} scheduled this ${planCalendarMode} · ${due} due or overdue · ${open.filter(t=>!t.due_date).length} unscheduled`;
+  document.getElementById('planWeekReset').hidden=!planSelectedDate;
+  const selectedOption=document.querySelector('#quickAddWhen option[value=selected]');
+  if(selectedOption){selectedOption.disabled=!planSelectedDate;selectedOption.textContent=planSelectedDate?'Selected: '+shortDate(planSelectedDate):'Select a day above';if(!planSelectedDate&&document.getElementById('quickAddWhen').value==='selected')document.getElementById('quickAddWhen').value='today';}
+}
+(function wirePlanCalendar(){
+  document.getElementById('planWeekMode').addEventListener('click',()=>{planCalendarMode='week';renderList(allTodos);});
+  document.getElementById('planMonthMode').addEventListener('click',()=>{planCalendarMode='month';renderList(allTodos);});
+  document.getElementById('planPrevMonth').addEventListener('click',()=>{planCalendarMonth=new Date(planCalendarMonth.getFullYear(),planCalendarMonth.getMonth()-1,1);renderList(allTodos);});
+  document.getElementById('planNextMonth').addEventListener('click',()=>{planCalendarMonth=new Date(planCalendarMonth.getFullYear(),planCalendarMonth.getMonth()+1,1);renderList(allTodos);});
+  document.getElementById('planCurrentMonth').addEventListener('click',()=>{planCalendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);renderList(allTodos);});
+})();
+(function wirePlanWeek(){
+  document.getElementById('planWeekDays')?.addEventListener('click',e=>{
+    const b=e.target.closest('[data-plan-date]');if(!b)return;
+    planSelectedDate=planSelectedDate===b.dataset.planDate?null:b.dataset.planDate;
+    if(planSelectedDate) document.getElementById('quickAddWhen').value='selected';
+    renderList(allTodos);
+  });
+  document.getElementById('planWeekReset')?.addEventListener('click',()=>{planSelectedDate=null;document.getElementById('quickAddWhen').value='today';renderList(allTodos);});
+})();
 function renderList(todos){
+  renderPlanWeek(todos);
   const list = document.getElementById('todoList'); if(!list) return;
   const today = localToday(), open = todos.filter(t=>t.status==='open');
   const prio = { high:0, medium:1, low:2 };
@@ -3226,6 +3416,12 @@ function renderList(todos){
     if(searchCount) searchCount.textContent = `${matches.length} ${matches.length === 1 ? 'todo' : 'todos'} found across all views`;
     list.innerHTML = matches.length ? `<div class="tgroup">${matches.map(todoRowHtml).join('')}</div>`
       : `<div class="empty">No matching todos. Try a different search.</div>`;
+    return;
+  }
+  if(planSelectedDate){
+    const dayTasks=todos.filter(t=>t.status==='open'&&t.due_date===planSelectedDate);
+    const heading=new Intl.DateTimeFormat(undefined,{weekday:'long',month:'long',day:'numeric'}).format(new Date(planSelectedDate+'T12:00:00'));
+    list.innerHTML=`<div class="section-title">${heading}<span>${dayTasks.length} scheduled</span></div>`+(dayTasks.length?`<div class="tgroup">${dayTasks.map(todoRowHtml).join('')}</div>`:'<div class="empty">Nothing scheduled. Add a task above to plan this day.</div>');
     return;
   }
   let html = '';
@@ -3272,7 +3468,7 @@ async function patchTodo(code, body){
   search.addEventListener('keydown', e => { if(e.key === 'Escape' && search.value){
     search.value = ''; expandedCode = null; renderList(allTodos); e.preventDefault();
   }});
-  document.getElementById('todoSeg').addEventListener('click', e=>{ const b = e.target.closest('[data-tview]'); if(!b) return; todoView = b.dataset.tview; expandedCode = null; renderList(allTodos);
+  document.getElementById('todoSeg').addEventListener('click', e=>{ const b = e.target.closest('[data-tview]'); if(!b) return; todoView = b.dataset.tview; planSelectedDate = null; expandedCode = null; renderList(allTodos);
     document.getElementById('quickAddInput').placeholder = todoView === 'today' ? 'Add a todo for today…' : 'Add a todo…'; });
   list.addEventListener('click', e=>{
     const row = e.target.closest('.swipe'); if(!row || row.dataset.swiped === '1') return;
@@ -3448,9 +3644,9 @@ function renderOverdueBadge(todos){
   }
 }
 
-async function quickAddTodo(title){
+async function quickAddTodo(title, when){
   const code = await nextCodeFor('todos', 'TD');
-  const due = todoView === 'today' ? localToday() : null;
+  const due = when === 'today' ? localToday() : when === 'tomorrow' ? isoAddDays(localToday(),1) : when === 'selected' ? (planSelectedDate || localToday()) : null;
   const res = await fetch(`${SUPABASE_URL}/rest/v1/todos`, {
     method: 'POST',
     headers: authHeaders({ 'Content-Type': 'application/json', Prefer: 'return=representation' }),
@@ -3859,7 +4055,8 @@ const AREAS = {
   food:    { title:'Food',    icon:'food',   panels:['panelFood'] },
   health:  { title:'Health',  icon:'health', panels:['panelHealth'] },
   assets:  { title:'Map',     icon:'map',    panels:['panelAssets'] },
-  account: { title:'Account', icon:null,     panels:['panelAccount'] }
+  account: { title:'Account', icon:null,     panels:['panelAccount'] },
+  wardrobe: { title:'Wardrobe', icon:'food', panels:[] }
 };
 function svgIcon(name){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${OTTO_ICONS[name]||''}</svg>`; }
 const CHEV = '<svg class="chev" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 2l6 6-6 6"/></svg>';
@@ -4085,6 +4282,7 @@ function openSheet(area){
     document.getElementById('sheetTitle').textContent = AREAS[area].title;
     sheet.dataset.area = area; renderPageHead();
     AREAS[area].panels.forEach(id=>{ const p = document.getElementById(id); p.classList.add('active'); body.appendChild(p); });
+    if(area === 'wardrobe'){ body.innerHTML = wardrobeMarkup(); loadWardrobe(); }
     if(area === 'assets'){ const refit = ()=>{ if(assetMapInstance){ assetMapInstance.invalidateSize(); mapFitKey = ''; renderAssetMap(); } }; setTimeout(refit, 60); setTimeout(refit, 350); }
   }
   body.scrollTop = 0;
@@ -4092,7 +4290,7 @@ function openSheet(area){
   requestAnimationFrame(()=> requestAnimationFrame(()=> document.body.classList.add('sheet-open')));
   const sub = true;
   document.getElementById('pageBack').classList.toggle('show', sub);
-  setActiveTab(sub ? 'home' : area);
+  closeNavChooser(); setActiveTab(area);
   renderSyncChips();
 }
 function closeSheet(){
@@ -4131,6 +4329,14 @@ document.getElementById('sheetBody').addEventListener('click', e=>{ const b = e.
 // ----- chat (placeholder until the assistant is connected) -----
 const chatHistory = [];
 let chatBusy = false;
+// Build 014: suggested questions reuse the existing chat submit path.
+document.getElementById('ottoChatStarters').addEventListener('click', e=>{
+  const button=e.target.closest('[data-otto-prompt]');
+  if(!button || chatBusy) return;
+  const input=document.getElementById('askInput');
+  input.value=button.dataset.ottoPrompt;
+  document.getElementById('composer').requestSubmit();
+});
 document.getElementById('chatDone').addEventListener('click', ()=>{
   if(chatBusy) return;
   chatHistory.length = 0;
@@ -4553,7 +4759,7 @@ function closeNavChooser(){
 function openNavChooser(group){
   closeNavChooser();
   const choices = group === 'life'
-    ? [['food','Food','Meals, groceries, recipes'],['health','Health','Activity and wellbeing']]
+    ? [['food','Food','Meals, groceries, recipes'],['health','Health','Activity and wellbeing'],['wardrobe','Wardrobe','Clothes, outfits, laundry']]
     : [['assets','Map','Places, visits, layers'],['account','Account','Connections and settings']];
   const el = document.createElement('div');
   el.className = 'otto-nav-chooser';
@@ -4584,6 +4790,10 @@ function setActiveTab(k){ k = NAV_GROUP[k] || k; document.querySelectorAll('.tab
   });
 })();
 document.getElementById('pageBack').addEventListener('click', closeSheet);
+document.addEventListener('pointerdown', e=>{
+  if(navChooser && !e.target.closest('.otto-nav-chooser') && !e.target.closest('[data-tab="life"]') && !e.target.closest('[data-tab="more"]')) closeNavChooser();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeNavChooser(); });
 function setMoneySeg(k){ document.body.dataset.moneyseg = k; document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.classList.toggle('active', b.dataset.msegBtn === k)); const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
 setMoneySeg('week');
 document.getElementById('moneySeg').addEventListener('click', e=>{ const b = e.target.closest('[data-mseg-btn]'); if(b) setMoneySeg(b.dataset.msegBtn); });
@@ -4616,6 +4826,42 @@ setInterval(renderSyncChips, 30000);
   }
   showLogin();
 })();
+
+// Build 018: functional wardrobe, laundry and saved outfits (Supabase RLS protected)
+let wardrobeItems=[], savedOutfits=[], wardrobeMode='closet';
+function wardrobeMarkup(){return `<section class="wardrobe-space"><div class="wardrobe-intro"><span class="eyebrow">YOUR COLLECTION</span><h2>Wear what you love.</h2><p>Keep track of clothing, laundry, and outfits in one place.</p></div><div class="wardrobe-tabs" role="group" aria-label="Wardrobe views"><button data-wmode="closet" class="active">Closet</button><button data-wmode="laundry">Laundry</button><button data-wmode="outfits">Outfits</button></div><div id="wardrobeNotice" role="status" aria-live="polite"></div><div id="wardrobeContent"></div></section>`;}
+function wardrobeNotice(msg,isError=false){const e=document.getElementById('wardrobeNotice');if(e){e.textContent=msg;e.className=isError?'wardrobe-error':'wardrobe-note';}}
+async function wardrobeRequest(table,options={}){
+ const {method='GET',id,body,query=''}=options;
+ const url=`${SUPABASE_URL}/rest/v1/${table}?${id!=null?`id=eq.${encodeURIComponent(id)}&`:''}${query||'select=*'}`;
+ const r=await fetch(url,{method,headers:authHeaders({'Content-Type':'application/json',Prefer:'return=representation'}),...(body?{body:JSON.stringify(body)}:{})});
+ if(!r.ok){let message=`Request failed (${r.status})`;try{const d=await r.json();message=d.message||message;}catch{}throw new Error(message);}
+ if(method==='DELETE'||r.status===204)return [];
+ return await r.json();
+}
+async function loadWardrobe(){
+ wardrobeNotice('Loading your wardrobe…');
+ try{[wardrobeItems,savedOutfits]=await Promise.all([wardrobeRequest('wardrobe_items',{query:'select=*&order=created_at.desc'}),wardrobeRequest('saved_outfits',{query:'select=*&order=created_at.desc'})]);wardrobeNotice('');renderWardrobe();}
+ catch(e){wardrobeNotice(`Could not load wardrobe: ${e.message}`,true);}
+}
+function renderWardrobe(){
+ const host=document.getElementById('wardrobeContent');if(!host)return;
+ document.querySelectorAll('[data-wmode]').forEach(b=>b.classList.toggle('active',b.dataset.wmode===wardrobeMode));
+ if(wardrobeMode==='closet')host.innerHTML=`<form id="wardrobeAdd" class="wardrobe-form"><label>Item name<input name="name" maxlength="160" required placeholder="e.g. Black linen shirt"></label><label>Category<select name="category"><option>Top</option><option>Bottom</option><option>Outerwear</option><option>Shoes</option><option>Accessory</option><option>Other</option></select></label><label>Color<input name="color" maxlength="80" placeholder="Optional"></label><button type="submit">Add item</button></form><div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><span class="wardrobe-type">${esc(w.category)}</span><strong>${esc(w.name)}</strong><small>${esc(w.color||'No color')} · ${esc(w.laundry_status)}</small><div class="wardrobe-actions"><button data-wlaundry="${w.id}" data-next="${w.laundry_status==='clean'?'worn':'clean'}">Mark ${w.laundry_status==='clean'?'worn':'clean'}</button><button data-wdelete="${w.id}" aria-label="Delete ${esc(w.name)}">Delete</button></div></article>`).join('')||'<p class="wardrobe-empty">No clothing added yet. Add your first item above.</p>'}</div>`;
+ else if(wardrobeMode==='laundry')host.innerHTML=`<div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><strong>${esc(w.name)}</strong><small>${esc(w.category)}</small><label>Status<select data-wstatus="${w.id}">${['clean','worn','washing','drying'].map(st=>`<option value="${st}" ${st===w.laundry_status?'selected':''}>${st[0].toUpperCase()+st.slice(1)}</option>`).join('')}</select></label></article>`).join('')||'<p class="wardrobe-empty">Add items in Closet to track laundry.</p>'}</div>`;
+ else host.innerHTML=`<form id="outfitAdd" class="wardrobe-form"><label>Outfit name<input name="name" maxlength="160" required placeholder="e.g. Weekend casual"></label><label>Occasion<input name="occasion" maxlength="100" placeholder="Optional"></label><fieldset><legend>Choose clothing</legend><div class="wardrobe-picks">${wardrobeItems.map(w=>`<label><input type="checkbox" name="items" value="${w.id}">${esc(w.name)}</label>`).join('')||'Add clothes in Closet first.'}</div></fieldset><button type="submit" ${wardrobeItems.length?'':'disabled'}>Save outfit</button></form><div class="wardrobe-grid">${savedOutfits.map(o=>`<article class="wardrobe-card"><strong>${esc(o.name)}</strong><small>${esc(o.occasion||'Any occasion')}</small><button data-odelete="${o.id}">Delete outfit</button></article>`).join('')||'<p class="wardrobe-empty">No saved outfits yet.</p>'}</div>`;
+}
+document.addEventListener('click',async e=>{
+ const mode=e.target.closest('[data-wmode]');if(mode){wardrobeMode=mode.dataset.wmode;renderWardrobe();return;}
+ const del=e.target.closest('[data-wdelete],[data-odelete]');if(del){if(!confirm('Delete this item?'))return;const isOutfit=del.hasAttribute('data-odelete');try{await wardrobeRequest(isOutfit?'saved_outfits':'wardrobe_items',{method:'DELETE',id:del.dataset[isOutfit?'odelete':'wdelete']});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}return;}
+ const mark=e.target.closest('[data-wlaundry]');if(mark){try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:mark.dataset.wlaundry,body:{laundry_status:mark.dataset.next}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+});
+document.addEventListener('change',async e=>{const el=e.target.closest('[data-wstatus]');if(!el)return;try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:el.dataset.wstatus,body:{laundry_status:el.value}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}});
+document.addEventListener('submit',async e=>{
+ if(e.target.id==='wardrobeAdd'){e.preventDefault();const f=new FormData(e.target);try{await wardrobeRequest('wardrobe_items',{method:'POST',body:{name:String(f.get('name')).trim(),category:f.get('category'),color:String(f.get('color')||'').trim()||null}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+ if(e.target.id==='outfitAdd'){e.preventDefault();const f=new FormData(e.target);const ids=f.getAll('items').map(Number);try{const created=await wardrobeRequest('saved_outfits',{method:'POST',body:{name:String(f.get('name')).trim(),occasion:String(f.get('occasion')||'').trim()||null}});if(ids.length){try{await wardrobeRequest('saved_outfit_items',{method:'POST',body:ids.map(item_id=>({outfit_id:created[0].id,item_id}))});}catch(err){await wardrobeRequest('saved_outfits',{method:'DELETE',id:created[0].id});throw err;}}await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
+});
+
 </script>
 </body>
 </html>
