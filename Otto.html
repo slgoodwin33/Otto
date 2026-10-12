@@ -949,6 +949,12 @@
   /* overlays must sit above Leaflet's controls (z-index 800–1000) or they lose taps */
   .map-summary, .map-week{z-index:1001 !important;} .map-btn{z-index:1002 !important;}
   .map-panel, .tl-sheet{z-index:1003 !important;}
+  .sync-dot{width:10px; height:10px; border-radius:5px; flex-shrink:0; margin-top:5px; background:var(--text-faint);}
+  .sync-dot.good{background:#2E8B57;} .sync-dot.bad{background:#C4382A; box-shadow:0 0 0 4px rgba(196,56,42,0.15);} .sync-dot.off{background:#D9A23B;}
+  .grow.static{align-items:flex-start;}
+  .sync-fix{font-size:0.8rem; color:var(--text-muted); background:var(--surface-2); border-radius:10px; padding:8px 10px; margin-top:6px; line-height:1.35;}
+  .sync-warn{grid-column:1 / -1; text-align:left; border:none; font:inherit; cursor:pointer; background:rgba(196,56,42,0.09); color:var(--text); border-radius:18px; padding:12px 14px; display:flex; flex-direction:column; gap:2px;}
+  .sync-warn b{color:#C4382A; font-size:0.92rem;} .sync-warn span{font-size:0.78rem; color:var(--text-muted);} .sync-warn .sync-warn-cta{color:#C4382A; font-weight:600; margin-top:2px;}
 </style>
 </head>
 <body>
@@ -1125,6 +1131,8 @@
       <div id="foodContent"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
     <div class="tab-panel" id="panelAccount">
+      <div class="section-title" style="margin-top:4px">Data sources<span>is everything flowing in?</span></div>
+      <div id="syncHealth" class="gcard" style="padding:0;margin-bottom:16px"><div class="grow static"><div class="grow-sub">Checking…</div></div></div>
       <div class="budget-cat" style="padding:0;">
         <div class="account-row"><span id="syncNote" class="sync-note">Loading…</span>
           <button class="refresh-btn" id="refreshBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg> Refresh</button></div>
@@ -1150,7 +1158,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-12.27';
+const APP_BUILD = '2026-10-12.28';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -3469,7 +3477,7 @@ function renderPageHead(){
   const sheet = document.getElementById('sheet'), area = sheet.dataset.area; if(!area || !sheetArea) return;
   const color = AREA_COLORS[area] || 'var(--accent)';
   sheet.style.setProperty('--area', color);
-  const icoName = area === 'assets' ? 'map' : (AREAS[area] && AREAS[area].icon) || area;
+  const icoName = area === 'assets' ? 'map' : area === 'account' ? 'user' : (AREAS[area] && AREAS[area].icon) || area;
   document.getElementById('pageIco').innerHTML = svgIcon(icoName);
   document.getElementById('pageSub').textContent = pageSubtitle(area);
 }
@@ -3487,6 +3495,48 @@ function svgDonut(parts, size, stroke, center){
 }
 const PROJECT_COLORS = ['#8A5CC7','#3F7CC0','#D9822B','#2E8B57','#C4382A','#2F9AA8','#B5893A','#D2557E'];
 function projectColor(name){ let h = 0; for(const ch of String(name||'')) h = (h*31 + ch.charCodeAt(0)) >>> 0; return PROJECT_COLORS[h % PROJECT_COLORS.length]; }
+let syncHealth = null;
+const SYNC_SOURCES = [
+  { key:'banks', name:'Banks (Plaid)', icon:'money', staleH:30, fix:'Banks sync every morning at 7. If a bank shows "login required", re-connect it under Money → Accounts.' },
+  { key:'health', name:'Apple Health', icon:'health', staleH:6, fix:'Open Health Auto Export for a second, and keep Low Power Mode off — it pauses background syncing.' },
+  { key:'location', name:'Location (OwnTracks)', icon:'map', staleH:24, fix:'Open OwnTracks, check it says Move (not Quiet), location is set to Always, and Low Power Mode is off. Don\'t swipe the app closed.' },
+  { key:'sleep', name:'Sleep (Health Auto Export)', icon:'health', staleH:36, fix:'Add Sleep Analysis to your Health Auto Export metrics automation.' }
+];
+async function refreshSyncHealth(){
+  try{
+    const H = { headers: authHeaders() };
+    const [b, d, l, sl] = await Promise.all([
+      fetch(`${SUPABASE_URL}/rest/v1/v_bank_connections?select=institution_name,status,last_synced_at`, H),
+      fetch(`${SUPABASE_URL}/rest/v1/daily_activity?select=updated_at&order=updated_at.desc.nullslast&limit=1`, H),
+      fetch(`${SUPABASE_URL}/rest/v1/location_points?select=created_at&order=created_at.desc&limit=1`, H),
+      fetch(`${SUPABASE_URL}/rest/v1/sleep_nights?select=updated_at&order=updated_at.desc&limit=1`, H)]);
+    const banks = b.ok ? await b.json() : [], one = async r => r.ok ? ((await r.json())[0] || null) : null;
+    const dh = await one(d), lp = await one(l), sp = await one(sl);
+    const bankBad = banks.find(x=>x.status && x.status !== 'good');
+    const bankLast = banks.map(x=>x.last_synced_at).filter(Boolean).sort()[0] || null; // oldest bank sync
+    syncHealth = { banks: { at: bankLast, bad: bankBad ? `${bankBad.institution_name}: ${bankBad.status.replace(/_/g,' ')}` : null, detail: banks.map(x=>x.institution_name).join(', ') },
+      health: { at: dh && dh.updated_at }, location: { at: lp && lp.created_at }, sleep: { at: sp && sp.updated_at } };
+  } catch(e){ syncHealth = null; }
+  renderSyncHealth(); renderBriefing();
+}
+function syncState(src){
+  const v = syncHealth && syncHealth[src.key]; if(!v) return { level:'unknown', label:'Not checked' };
+  if(v.bad) return { level:'bad', label: v.bad };
+  if(!v.at) return { level: src.key === 'sleep' ? 'off' : 'bad', label: src.key === 'sleep' ? 'Not set up yet' : 'Never received' };
+  const h = (Date.now() - new Date(v.at).getTime())/3600000;
+  return { level: h > src.staleH ? 'bad' : 'good', label: `${h > src.staleH ? 'Last update' : 'Updated'} ${timeAgo(v.at)}` };
+}
+function renderSyncHealth(){
+  const el = document.getElementById('syncHealth'); if(!el) return;
+  el.innerHTML = SYNC_SOURCES.map(src=>{ const st = syncState(src);
+    return `<div class="grow static" style="flex-wrap:wrap"><span class="sync-dot ${st.level}"></span><div class="grow-main"><div class="grow-title">${esc(src.name)}</div><div class="grow-sub">${esc(st.label)}${syncHealth && syncHealth[src.key] && syncHealth[src.key].detail ? ` · ${esc(syncHealth[src.key].detail)}` : ''}</div>${st.level === 'bad' || st.level === 'off' ? `<div class="sync-fix">${esc(src.fix)}</div>` : ''}</div></div>`; }).join('');
+}
+function syncWarningHtml(){
+  if(!syncHealth) return '';
+  const bad = SYNC_SOURCES.filter(src=>src.key !== 'sleep' && syncState(src).level === 'bad');
+  if(!bad.length) return '';
+  return `<button class="sync-warn" type="button" data-area="account"><b>${bad.length === 1 ? esc(bad[0].name) + ' isn\'t updating' : bad.length + ' data sources aren\'t updating'}</b><span>${esc(bad.map(src=>`${src.name.split(' (')[0]}: ${syncState(src).label.toLowerCase()}`).join(' · '))}</span><span class="sync-warn-cta">See how to fix ›</span></button>`;
+}
 function renderBriefing(){
   renderPageHead();
   const grid = document.getElementById('homeTiles'); if(!grid) return;
@@ -3543,7 +3593,7 @@ function renderBriefing(){
   const md = openV ? `here since ${clockTime(openV.arrived_at)}` : todayV.length ? `at ${new Set(todayV.map(v=>v.place)).size} place${new Set(todayV.map(v=>v.place)).size===1?'':'s'} today` : 'purchases mapped, 7 days';
   const mfoot = mapData && mapData.lastPoint ? 'Location updated ' + timeAgo(mapData.lastPoint.recorded_at) : 'Location: phone not sending yet';
   html += `<button class="wdg" type="button" data-area="assets">${top('map','#3F7CC0','Map')}<div class="wdg-v ${openV?'small':''}">${mv}</div><div class="wdg-d">${md}</div><div class="wdg-d" style="margin-top:auto">${mfoot}</div></button>`;
-  grid.innerHTML = html;
+  grid.innerHTML = syncWarningHtml().replace('class="sync-warn"', 'class="sync-warn wide"') + html;
   const brief = document.getElementById('homeBrief');
   if(brief.classList.contains('loading') || brief.dataset.source !== 'ai'){ brief.textContent = homeFallbackText(); brief.classList.remove('loading'); brief.dataset.source = 'local'; }
   loadAiBriefing();
@@ -3976,16 +4026,10 @@ async function bootApp(){
     renderAll(cached.data);
     document.getElementById('syncNote').textContent = 'Showing cached data from ' + timeAgo(cached.fetchedAt) + ' — refreshing…';
   }
-  await refresh(false);
-  await refreshAccounts();
-  await refreshCredit();
-  try{ allCategories = await fetchCategories(); } catch(e){ /* form will just show no categories */ }
-  await refreshBudget();
-  await refreshAssets();
-  await refreshHealth();
-  await refreshFood();
-  await refreshBank();
-  await refreshBills();
+  // categories first (budget + transaction views need them), everything else in parallel
+  await Promise.allSettled([refresh(false), refreshAccounts(), refreshCredit(), (async()=>{ try{ allCategories = await fetchCategories(); } catch(e){ /* form will just show no categories */ } })()]);
+  await Promise.allSettled([refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth()]);
+  renderBriefing();
   resumePlaidOAuth();
 }
 
@@ -4029,18 +4073,13 @@ document.getElementById('signOutBtn').addEventListener('click', ()=>{
 
 async function refreshEverything(){
   await ensureValidSession();
-  await refresh(true);
-  await refreshAccounts();
-  await refreshCredit();
-  await refreshBudget();
-  await refreshAssets();
-  await refreshHealth();
-  await refreshFood();
-  await refreshBank();
-  await refreshBills();
+  // independent areas load in parallel; each catches its own errors and shows its own banner
+  await Promise.allSettled([refresh(true), refreshAccounts(), refreshCredit(), refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth()]);
+  renderBriefing();
 }
 
 // ----- tab bar + automatic refresh (replaces pull-to-refresh) -----
+OTTO_ICONS.user = '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>';
 OTTO_ICONS.map = '<path d="M9 4L3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>';
 OTTO_ICONS.home = '<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/>';
 const TABS = ['home','money','food','health','assets'];
