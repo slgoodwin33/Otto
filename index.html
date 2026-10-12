@@ -1474,6 +1474,34 @@ body.chatting .otto-chat-starters{display:none}
 
 /* Build 018 — wardrobe */
 .wardrobe-space{padding:8px 0 40px;color:#f3f4ef}.wardrobe-intro h2{font-size:clamp(30px,7vw,44px);letter-spacing:-.05em;line-height:1.06;margin:8px 0}.wardrobe-intro p{color:#aaaead}.wardrobe-tabs{display:flex;gap:6px;background:#1b1d1b;padding:5px;border-radius:15px;margin:24px 0}.wardrobe-tabs button{flex:1;border:0;border-radius:11px;padding:12px 8px;background:transparent;color:#c6c9c2;font-weight:700;cursor:pointer}.wardrobe-tabs button.active{background:#d8ff70;color:#12150c}.wardrobe-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;background:#232523;border:1px solid #3b4037;padding:16px;border-radius:20px;margin:12px 0 20px}.wardrobe-form label{display:grid;gap:6px;color:#e5e8df;font-size:13px}.wardrobe-form input,.wardrobe-form select,.wardrobe-card select{width:100%;min-height:44px;border:1px solid #4c5147;border-radius:10px;background:#171917;color:#fff;padding:10px}.wardrobe-form button{grid-column:1/-1;min-height:46px;border:0;border-radius:12px;background:#d8ff70;color:#161a0f;font-weight:800}.wardrobe-form fieldset{grid-column:1/-1;border:1px solid #4c5147;border-radius:12px}.wardrobe-picks{display:grid;gap:9px;padding:8px}.wardrobe-picks label{display:flex;align-items:center;gap:9px}.wardrobe-picks input{width:20px;min-height:20px}.wardrobe-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.wardrobe-card{min-width:0;display:flex;flex-direction:column;gap:10px;background:#252825;border:1px solid #3c4239;border-radius:18px;padding:16px}.wardrobe-card strong{font-size:17px;overflow-wrap:anywhere}.wardrobe-card small,.wardrobe-type{color:#b8beb2}.wardrobe-type{text-transform:uppercase;letter-spacing:.1em;font-size:10px}.wardrobe-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto}.wardrobe-card button{border:1px solid #555d4c;border-radius:10px;background:#343a30;color:#e9f7d4;min-height:38px;padding:8px 10px}.wardrobe-empty{grid-column:1/-1;color:#bdc3b8;padding:20px}.wardrobe-error{color:#ffaaa5;margin:12px 0}.wardrobe-note{color:#d8ff70;margin:12px 0}@media(max-width:390px){.wardrobe-form,.wardrobe-grid{grid-template-columns:1fr}}
+
+/* Build 019: compact information hierarchy, readable controls, responsive map */
+.studio-page-head{padding:4px 3px 17px;overflow:hidden}
+.studio-page-head::after{width:110px;height:110px;right:-55px;top:0}
+.studio-page-head h2{font-size:clamp(1.85rem,7.5vw,2.65rem);line-height:1.08;letter-spacing:-.055em;margin:10px 0 7px}
+.studio-page-head h2 br{display:none}
+.studio-page-head p{font-size:.82rem;line-height:1.4;max-width:52ch}
+.studio-kicker{font-size:.62rem;letter-spacing:.12em}
+#panelFood .studio-page-head,#panelHealth .studio-page-head,#panelAccount .studio-page-head,#panelTodos .studio-page-head{padding-bottom:14px}
+#panelFood .studio-page-head h2,#panelHealth .studio-page-head h2{font-size:clamp(1.9rem,7.5vw,2.5rem)}
+.otto-about{margin:18px 0 4px;padding:17px 18px;border-radius:19px;background:#222324;border:1px solid rgba(255,255,255,.11)}
+.otto-about-title{font-size:1.03rem;font-weight:800;color:#f6f7f4}
+.otto-about-sub{font-size:.77rem;color:#b2b4b1;line-height:1.5;margin-top:5px}
+.otto-about-actions{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:13px}
+.otto-about-actions button{border:1px solid rgba(255,255,255,.18);background:#303133;color:#f4f4f2;border-radius:12px;padding:11px 13px;font:inherit;font-size:.8rem;font-weight:700;min-height:44px;flex-shrink:0}
+.otto-about-actions button:disabled{opacity:.55}
+/* Timeline bottom sheet: three sizes, map remains visible */
+#tlSheet{max-height:none;height:min(39%,350px);transition:height .2s ease;overflow:hidden;z-index:660}
+#tlSheet.otto-map-collapsed{height:100px}
+#tlSheet.otto-map-half{height:min(44%,390px)}
+#tlSheet.otto-map-expanded{height:calc(100% - 20px)}
+#tlSheet .tl-head{padding-top:46px;position:relative;min-height:95px;flex-shrink:0}
+#tlSheet .otto-map-sizebar{position:absolute;top:7px;left:10px;right:10px;display:flex;align-items:center;justify-content:center;gap:7px;z-index:2}
+#tlSheet .otto-map-sizebar button{border:1px solid #474947;border-radius:9px;background:#2b2d2c;color:#dedfd9;padding:5px 11px;font-size:11px;min-height:30px;cursor:pointer}
+#tlSheet .otto-map-sizebar button[aria-pressed=true]{background:#d9ff76;color:#131713;border-color:#d9ff76;font-weight:800}
+#tlSheet .otto-map-sizebar button:focus-visible{outline:2px solid #d9ff76;outline-offset:2px}
+#mapPanel:not([hidden]){z-index:690;max-height:calc(100% - 16px);overflow:auto}
+@media(max-width:430px){.studio-page-head h2{font-size:2rem}.studio-page-head p{font-size:.8rem}.otto-about-actions{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -1689,6 +1717,7 @@ body.chatting .otto-chat-starters{display:none}
         <div class="account-row"><span>Version</span><span id="buildTag" class="build-tag" style="font-family:var(--sans); color:var(--text-faint);"></span></div>
         <div class="account-row"><span>Signed in</span><button class="sign-out-link" id="signOutBtn" type="button">Sign out</button></div>
       </div>
+      <div class="otto-about" aria-label="About Otto"><div class="otto-about-title">About Otto</div><div class="otto-about-sub">Installed build: <strong id="aboutBuildTag">2026-10-12.32</strong> · Updated October 12, 2026</div><div class="otto-about-actions"><span class="otto-about-sub" id="aboutUpdateStatus" role="status">Check the published version</span><button id="ottoCheckUpdates" type="button">Check for updates</button></div></div>
       <p class="food-note" style="padding:0 6px;">Changes save straight to your database.</p>
     </div>
   </section>
@@ -1708,7 +1737,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-12.31';
+const APP_BUILD = '2026-10-12.32';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4862,6 +4891,57 @@ document.addEventListener('submit',async e=>{
  if(e.target.id==='outfitAdd'){e.preventDefault();const f=new FormData(e.target);const ids=f.getAll('items').map(Number);try{const created=await wardrobeRequest('saved_outfits',{method:'POST',body:{name:String(f.get('name')).trim(),occasion:String(f.get('occasion')||'').trim()||null}});if(ids.length){try{await wardrobeRequest('saved_outfit_items',{method:'POST',body:ids.map(item_id=>({outfit_id:created[0].id,item_id}))});}catch(err){await wardrobeRequest('saved_outfits',{method:'DELETE',id:created[0].id});throw err;}}await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
 });
 
+</script>
+<script>
+/* Build 019: update status and accessible timeline sizing. No database changes. */
+(function(){
+  const init=()=>{
+    const version=document.getElementById('aboutBuildTag');
+    if(version)version.textContent=APP_BUILD;
+    const btn=document.getElementById('ottoCheckUpdates');
+    if(btn)btn.addEventListener('click',async()=>{
+      const status=document.getElementById('aboutUpdateStatus');
+      btn.disabled=true;
+      if(status)status.textContent='Checking published file…';
+      try{
+        const url=new URL(window.location.href);url.searchParams.set('otto_check',String(Date.now()));
+        const response=await fetch(url.toString(),{cache:'no-store'});
+        if(!response.ok)throw Error('Unable to fetch deployed page');
+        const html=await response.text();
+        const match=html.match(/const APP_BUILD\s*=\s*['"]([^'"]+)['"]/);
+        if(!match)throw Error('No build tag found');
+        if(match[1]===APP_BUILD){if(status)status.textContent='Latest deployed version installed';}
+        else {if(status)status.textContent='Deployed version: '+match[1]+' · Current: '+APP_BUILD;btn.textContent='Reload page';btn.onclick=()=>location.reload();}
+      }catch(err){if(status)status.textContent='Unable to check right now';}
+      finally{btn.disabled=false;}
+    });
+    const sheet=document.getElementById('tlSheet');
+    if(!sheet)return;
+    let size='half';
+    const apply=()=>{
+      sheet.classList.remove('otto-map-collapsed','otto-map-half','otto-map-expanded');
+      sheet.classList.add('otto-map-'+size);
+      sheet.querySelectorAll('[data-otto-map-size]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.ottoMapSize===size)));
+    };
+    const addBar=()=>{
+      if(sheet.hidden)return;
+      const head=sheet.querySelector('.tl-head');
+      if(!head||head.querySelector('.otto-map-sizebar'))return;
+      const bar=document.createElement('div');bar.className='otto-map-sizebar';bar.setAttribute('role','group');bar.setAttribute('aria-label','Timeline panel size');
+      [['collapsed','Minimize'],['half','Half'],['expanded','Expand']].forEach(([key,label])=>{
+        const button=document.createElement('button');button.type='button';button.dataset.ottoMapSize=key;button.textContent=label;
+        button.addEventListener('click',()=>{size=key;apply();});bar.appendChild(button);
+      });
+      head.prepend(bar);apply();
+    };
+    const observer=new MutationObserver(addBar);
+    observer.observe(sheet,{childList:true,attributes:true,attributeFilter:['hidden']});
+    addBar();
+    const mapBtn=document.getElementById('mapMenuBtn');
+    if(mapBtn)mapBtn.addEventListener('click',()=>{if(!sheet.hidden){size='collapsed';apply();}});
+  };
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
 </script>
 </body>
 </html>
