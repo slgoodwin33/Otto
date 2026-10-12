@@ -1334,6 +1334,17 @@ input:not([type=checkbox]):not([type=radio]),textarea,select{accent-color:#D8FF7
 
 /* Build 012 Studio Lime */
 #panelHome{padding-bottom:24px}#panelHome .chat-thread,#panelHome #chatMessages{scrollbar-width:thin;scrollbar-color:#505647 transparent}#panelHome .msg{line-height:1.56;overflow-wrap:anywhere}#panelHome .msg.otto{background:#222422;border:1px solid #393e35;border-radius:18px 18px 18px 5px}#panelHome .msg.user{background:#d8ff70;color:#141811;border-radius:18px 18px 5px 18px}#panelHome textarea,#panelHome #chatInput{font-size:16px;line-height:1.45}#panelHome button:focus-visible,#panelAccount button:focus-visible{outline:3px solid #d8ff70;outline-offset:2px}#panelAccount{padding-bottom:30px}#panelAccount #syncHealth,#panelAccount .budget-cat{background:#202123!important;border:1px solid #3b3e38;border-radius:19px;overflow:hidden}#panelAccount .account-row{min-height:60px;border-color:#363a35}#panelAccount .refresh-btn{border-radius:12px;min-height:44px}#panelAccount .section-title{font-size:.75rem;letter-spacing:.09em;text-transform:uppercase;color:#b9c1ae}#panelAccount .sync-note{overflow-wrap:anywhere}@media(prefers-reduced-motion:reduce){.studio-page-head::after{animation:none!important}}
+
+/* Build 013 — simplified information architecture */
+.otto-nav-chooser{position:fixed;z-index:10020;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));width:min(420px,calc(100vw - 28px));padding:14px;background:#202124;border:1px solid #414345;border-radius:24px;box-shadow:0 18px 60px #000a;color:#f5f6f1}
+.otto-nav-chooser-head{display:flex;align-items:center;justify-content:space-between;padding:4px 6px 12px;font-size:17px}
+.otto-nav-chooser-head button{border:0;background:#353638;color:inherit;border-radius:50%;width:32px;height:32px;cursor:pointer}
+.otto-nav-choice{width:100%;display:flex;align-items:center;gap:14px;text-align:left;padding:15px 12px;margin-top:7px;background:#2b2c2d;border:1px solid #3b3c3d;border-radius:16px;color:#f7f7f3;cursor:pointer;min-height:68px}
+.otto-nav-choice:focus-visible,.otto-nav-chooser button:focus-visible{outline:2px solid #d7fa75;outline-offset:2px}
+.otto-nav-choice-icon{display:grid;place-items:center;background:#3c4130;color:#d7fa75;width:40px;height:40px;border-radius:12px;flex:none}
+.otto-nav-choice-icon svg{width:22px;height:22px}
+.otto-nav-choice span:nth-child(2){flex:1;display:grid;gap:3px}
+.otto-nav-choice small{color:#bfc0bb;font-size:12px}
 </style>
 </head>
 <body>
@@ -4530,15 +4541,44 @@ async function refreshEverything(){
 OTTO_ICONS.user = '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>';
 OTTO_ICONS.map = '<path d="M9 4L3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>';
 OTTO_ICONS.home = '<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/>';
-const TABS = ['home','money','food','health','assets'];
-function setActiveTab(k){ document.querySelectorAll('.tab-item').forEach(b=>{ const on = b.dataset.tab === k; b.classList.toggle('active', on); b.setAttribute('aria-current', on ? 'page' : 'false'); }); }
+// Build 013: five-destination information architecture, retaining existing modules.
+const TABS = ['home','plan','money','life','more'];
+const NAV_LABELS = {home:'Otto',plan:'Plan',money:'Money',life:'Life',more:'More'};
+const NAV_ICONS = {home:'home',plan:'todos',money:'money',life:'food',more:'map'};
+const NAV_GROUP = {todos:'plan',money:'money',food:'life',health:'life',assets:'more',account:'more'};
+let navChooser = null;
+function closeNavChooser(){
+  if(navChooser){ navChooser.remove(); navChooser = null; }
+}
+function openNavChooser(group){
+  closeNavChooser();
+  const choices = group === 'life'
+    ? [['food','Food','Meals, groceries, recipes'],['health','Health','Activity and wellbeing']]
+    : [['assets','Map','Places, visits, layers'],['account','Account','Connections and settings']];
+  const el = document.createElement('div');
+  el.className = 'otto-nav-chooser';
+  el.setAttribute('role','dialog');
+  el.setAttribute('aria-label', group === 'life' ? 'Life workspaces' : 'More workspaces');
+  el.innerHTML = `<div class="otto-nav-chooser-head"><strong>${group==='life'?'Your life':'More from Otto'}</strong><button type="button" data-nav-close aria-label="Close menu">✕</button></div>` +
+    choices.map(([key,label,desc])=>`<button class="otto-nav-choice" type="button" data-nav-area="${key}"><span class="otto-nav-choice-icon">${svgIcon(key==='assets'?'map':key==='account'?'user':key)}</span><span><strong>${label}</strong><small>${desc}</small></span><span aria-hidden="true">›</span></button>`).join('');
+  document.body.appendChild(el);
+  navChooser=el;
+  el.addEventListener('click',e=>{
+    if(e.target.closest('[data-nav-close]')){closeNavChooser();return;}
+    const b=e.target.closest('[data-nav-area]');
+    if(b){const k=b.dataset.navArea;closeNavChooser();openSheet(k);}
+  });
+}
+function setActiveTab(k){ k = NAV_GROUP[k] || k; document.querySelectorAll('.tab-item').forEach(b=>{ const on = b.dataset.tab === k; b.classList.toggle('active', on); b.setAttribute('aria-current', on ? 'page' : 'false'); }); }
 (function buildTabbar(){
   const inner = document.getElementById('tabbarInner');
-  inner.innerHTML = TABS.map(k=>`<button class="tab-item${k==='home'?' active':''}" type="button" data-tab="${k}">${svgIcon(k==='home'?'home':AREAS[k].icon)}<span>${k==='home'?'Home':AREAS[k].title}</span></button>`).join('');
+  inner.innerHTML = TABS.map(k=>`<button class="tab-item${k==='home'?' active':''}" type="button" data-tab="${k}">${svgIcon(NAV_ICONS[k])}<span>${NAV_LABELS[k]}</span></button>`).join('');
   inner.addEventListener('click', e=>{
     const b = e.target.closest('[data-tab]'); if(!b) return;
     const k = b.dataset.tab;
-    if(k === 'home'){ if(sheetArea) closeSheet(); else window.scrollTo({ top:0, behavior:'smooth' }); }
+    if(k === 'home'){ closeNavChooser(); if(sheetArea) closeSheet(); else window.scrollTo({ top:0, behavior:'smooth' }); }
+    else if(k === 'life' || k === 'more'){ openNavChooser(k); }
+    else if(k === 'plan'){ closeNavChooser(); openSheet('todos'); }
     else if(sheetArea === k){ document.getElementById('sheetBody').scrollTo({ top:0, behavior:'smooth' }); }
     else openSheet(k);
   });
