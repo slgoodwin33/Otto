@@ -1719,7 +1719,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-14.36';
+const APP_BUILD = '2026-10-14.37';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4563,7 +4563,7 @@ function renderBank(){
     const when = c.last_synced_at ? 'Synced ' + timeAgo(c.last_synced_at) : 'Not synced yet';
     const bad = c.status !== 'good';
     return `<div class="bank-row"><div class="bank-name"><div class="t">${esc(c.institution_name || 'Bank')}</div><div class="s ${bad?'err':''}">${bad ? esc(c.status === 'login_required' ? 'Needs to be reconnected' : (c.last_error || c.status)) : when}</div></div>
-      ${bad ? `<button class="chip" type="button" data-relink="${esc(c.item_id)}">Reconnect</button>` : ''}</div>`;
+      <button class="chip" type="button" data-relink="${esc(c.item_id)}" title="Log in again to reset this bank's feed">${bad ? 'Reconnect' : 'Reconnect'}</button></div>`;
   }).join('');
   card.innerHTML = (rows || `<div class="bank-row"><div class="bank-name"><div class="s">No bank connected yet. Transactions will flow in automatically once you connect one.</div></div></div>`) +
     `<div class="bank-actions"><button class="save-btn" id="connectBankBtn" type="button">Connect a bank</button>${bankConnections.length ? '<button class="chip" id="syncNowBtn" type="button">Sync now</button>' : ''}<span class="save-status" id="bankStatus"></span></div>`;
