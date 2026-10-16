@@ -1482,6 +1482,11 @@ body.chatting .otto-chat-starters{display:none}
   .page-sub{color:var(--text-muted) !important; max-width:calc(100vw - 40px) !important;}
   .sheet .section-title{border-left:none !important; padding-left:2px !important; margin-left:0 !important; font-size:12px !important; font-weight:700 !important; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted) !important;}
   .sheet .section-title span{text-transform:none; letter-spacing:0; font-weight:500;}
+  .me-dot{width:16px; height:16px; margin:3px; border-radius:50%; background:#2448C9; border:3px solid #fff; box-shadow:0 0 0 1px rgba(36,72,201,.35), 0 1px 4px rgba(0,0,0,.35);}
+  .me-dot.live{animation:mePulse 2s ease-out infinite;}
+  .me-dot.stale{background:#8A8C95;}
+  @keyframes mePulse{0%{box-shadow:0 0 0 0 rgba(36,72,201,.45), 0 1px 4px rgba(0,0,0,.35);} 100%{box-shadow:0 0 0 14px rgba(36,72,201,0), 0 1px 4px rgba(0,0,0,.35);}}
+  @media (prefers-reduced-motion: reduce){ .me-dot.live{animation:none;} }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -1719,7 +1724,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-14.37';
+const APP_BUILD = '2026-10-15.38';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2565,7 +2570,7 @@ function mapView(){
   return { ...mapData, points:(mapData.points||[]).filter(p=>isoOf(p.recorded_at)===mapDay), txns:(mapData.txns||[]).filter(t=>t.transaction_date===mapDay),
     visits:(mapData.visits||[]).filter(v=>(v.arrived_at && isoOf(v.arrived_at)===mapDay) || (v.left_at && isoOf(v.left_at)===mapDay) || (v.is_open && mapDay===localToday())) };
 }
-let mapLayersOn = { visits:true, places:true, purchases:true, assets:true, radar:false, transit:false }, mapRangeDays = 7, mapData = { points:[], txns:[] }, mapGroups = null, mapFitKey = '';
+let mapLayersOn = { visits:true, places:true, purchases:true, assets:true, radar:false, transit:false, buses:false }, mapRangeDays = 7, mapData = { points:[], txns:[] }, mapGroups = null, mapFitKey = '';
 const MAP_RANGES = [[1,'Today'],[7,'7 days'],[30,'30 days'],[90,'90 days'],[0,'All']];
 function mapSinceIso(){ if(!mapRangeDays) return null; const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - (mapRangeDays - 1)); return d; }
 async function fetchMapData(){
@@ -2595,10 +2600,11 @@ function renderMapControls(){
   const layers = [
     ['visits', 'Saved places & visits', '#36B58C', (mapData.places||[]).length ? `${(mapData.places||[]).length} saved places · ${(mapData.visits||[]).length} visits` : 'Places from OwnTracks', 'places', '●'],
     ['assets', 'My belongings', '#E3B451', `${nAssets} mapped items`, 'places', '◆'],
-    ['places', 'Travel history', '#65B9F0', mapData.points.length ? `${mapData.points.length.toLocaleString()} location points` : 'No location history yet', 'activity', '━'],
-    ['purchases', 'Purchase locations', '#EF9371', `${mapData.txns.length} mapped purchases`, 'activity', '◈'],
+    ['places', 'My trail', '#2448C9', mapData.points.length ? `${mapData.points.length.toLocaleString()} location points` : 'No location history yet', 'activity', '━'],
+    ['purchases', 'Purchase locations', '#1F7A45', `${mapData.txns.length} mapped purchases`, 'activity', '$'],
     ['radar', 'Weather radar', '#52C9D0', 'Recent radar imagery', 'live', '◉'],
-    ['transit', 'Live transit', '#B78AF4', 'MBTA vehicles nearby', 'live', '▰']
+    ['transit', 'MBTA trains & ferries', '#80276C', 'Subway, light rail, commuter rail, ferries', 'live', '🚆'],
+    ['buses', 'MBTA buses', '#C99A00', 'Buses in view', 'live', '🚌']
   ];
   const groups = [
     ['places','PLACES & ITEMS','Locations you have saved'],
@@ -2653,30 +2659,52 @@ function renderAssetMap(){
     });
   }
   if(mapLayersOn.places && (V.points||[]).length){
-    const color = '#3F7CC0', byDay = {};
-    V.points.forEach(p=>{ const k = isoOf(p.recorded_at); (byDay[k] = byDay[k] || []).push(p); });
+    const color = '#2448C9', byDay = {};
+    const sorted = V.points.slice().sort((a,b)=>a.recorded_at.localeCompare(b.recorded_at));
+    const t0 = Date.parse(sorted[0].recorded_at), t1 = Date.parse(sorted[sorted.length-1].recorded_at), span = Math.max(1, t1 - t0);
+    sorted.forEach(p=>{ const k = isoOf(p.recorded_at); (byDay[k] = byDay[k] || []).push(p); });
+    const pointPop = (p, i, n) => popRows(new Date(p.recorded_at).toLocaleString('en-US',{weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}), [
+      ['Accuracy', p.accuracy_m != null ? `±${Math.round(p.accuracy_m)} m` : ''], ['Speed', p.speed_kmh != null && p.speed_kmh >= 0 ? `${Math.round(p.speed_kmh * 0.621)} mph` : ''],
+      ['Phone battery', p.battery_pct != null ? `${Math.round(p.battery_pct)}%` : ''], ['Point', `${i+1} of ${n} that day`], ['Coordinates', `${Number(p.lat).toFixed(5)}, ${Number(p.lon).toFixed(5)}`]]);
     Object.values(byDay).forEach(pts=>{
-      const ll = pts.map(p=>[p.lat, p.lon]); ll.forEach(x=>bounds.push(x));
-      if(ll.length > 1) L.polyline(ll, { color, weight:4, opacity:0.75, lineCap:'round' }).addTo(mapGroups.places);
-      const step = Math.max(1, Math.round(pts.length / 12));
+      pts.forEach(p=>bounds.push([p.lat, p.lon]));
+      // older segments fade, recent ones are solid
+      for(let k=1;k<pts.length;k++){
+        const age = (Date.parse(pts[k].recorded_at) - t0) / span;
+        L.polyline([[pts[k-1].lat, pts[k-1].lon],[pts[k].lat, pts[k].lon]], { color, weight:4, opacity: 0.22 + 0.73*age, lineCap:'round', interactive:false }).addTo(mapGroups.places);
+      }
+      const step = Math.max(1, Math.round(pts.length / 10));
       pts.forEach((p,i)=>{
-        const ends = i === 0 || i === pts.length-1;
-        if(!ends && i % step) return;
-        const pop = popRows(new Date(p.recorded_at).toLocaleString('en-US',{weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}), [
-          ['Accuracy', p.accuracy_m != null ? `±${Math.round(p.accuracy_m)} m` : ''], ['Speed', p.speed_kmh != null && p.speed_kmh >= 0 ? `${Math.round(p.speed_kmh * 0.621)} mph` : ''],
-          ['Phone battery', p.battery_pct != null ? `${Math.round(p.battery_pct)}%` : ''], ['Point', `${i+1} of ${pts.length} that day`], ['Coordinates', `${Number(p.lat).toFixed(5)}, ${Number(p.lon).toFixed(5)}`]]);
-        if(ends && mapDay) L.marker([p.lat,p.lon], { icon: L.divIcon({ className:'', iconSize:null, iconAnchor:[-8,10], html:`<div class="place-label" style="background:${color};color:#fff">${i===0 ? 'Start' : 'End'} ${clockTime(p.recorded_at)}</div>` }) }).bindPopup(pop).addTo(mapGroups.places);
-        L.circleMarker([p.lat,p.lon], { radius: ends ? 6 : 4, color:'#fff', weight:1.5, fillColor:color, fillOpacity:1 }).bindPopup(pop).addTo(mapGroups.places);
+        if(i === 0){ L.circleMarker([p.lat,p.lon], { radius:6, color, weight:2.5, fillColor:'#fff', fillOpacity:1 }).bindPopup(pointPop(p,i,pts.length)).addTo(mapGroups.places); return; }
+        if(i === pts.length-1 || i % step) return;
+        const age = (Date.parse(p.recorded_at) - t0) / span;
+        L.circleMarker([p.lat,p.lon], { radius:3, color:'#fff', weight:1, fillColor:color, fillOpacity:0.35 + 0.6*age }).bindPopup(pointPop(p,i,pts.length)).addTo(mapGroups.places);
       });
+      if(mapDay){ const a = pts[0], z = pts[pts.length-1];
+        L.marker([a.lat,a.lon], { icon: L.divIcon({ className:'', iconSize:null, iconAnchor:[-10,10], html:`<div class="place-label">Start ${clockTime(a.recorded_at)}</div>` }), interactive:false }).addTo(mapGroups.places);
+        if(z !== a) L.marker([z.lat,z.lon], { icon: L.divIcon({ className:'', iconSize:null, iconAnchor:[-12,10], html:`<div class="place-label">${clockTime(z.recorded_at)}</div>` }), interactive:false }).addTo(mapGroups.places); }
+    });
+    // you are here: the latest point, with its accuracy ring
+    const last = sorted[sorted.length-1], ageMin = (Date.now() - Date.parse(last.recorded_at))/60000, fresh = ageMin < 360;
+    if(last.accuracy_m) L.circle([last.lat,last.lon], { radius: Math.min(Number(last.accuracy_m), 300), color, weight:1, opacity:0.35, fillColor:color, fillOpacity:0.08, interactive:false }).addTo(mapGroups.places);
+    L.marker([last.lat,last.lon], { zIndexOffset:900, icon: L.divIcon({ className:'', iconSize:[22,22], iconAnchor:[11,11], popupAnchor:[0,-11],
+      html:`<div class="me-dot ${fresh?'live':'stale'}"></div>` }) }).bindPopup(popRows(fresh ? 'You are here' : 'Last known location', [['Updated', timeAgo(last.recorded_at)], ['Accuracy', last.accuracy_m != null ? `±${Math.round(last.accuracy_m)} m` : ''], ['Phone battery', last.battery_pct != null ? `${Math.round(last.battery_pct)}%` : '']])).addTo(mapGroups.places);
+  }
+  // places you've stopped that aren't saved places yet (Timeline stops)
+  if(mapLayersOn.visits){
+    (V.visits||[]).filter(v=>!v.location_id && v.lat != null && v.status !== 'declined').forEach(v=>{
+      bounds.push([v.lat, v.lon]);
+      L.marker([v.lat, v.lon], { icon: mapBadge(PLACE_ICONS.pin, v.status === 'suggested' ? '#6B6D76' : '#36B58C', 26) }).bindPopup(popRows(esc(v.place), [
+        ['When', v.arrived_at ? `${new Date(v.arrived_at).toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})}, ${clockTime(v.arrived_at)}–${v.left_at ? clockTime(v.left_at) : 'now'}` : ''],
+        ['Stayed', v.minutes ? fmtMinutes(v.minutes) : ''], ['Status', v.status === 'suggested' ? 'New place · name it in Timeline' : 'Stop']])).addTo(mapGroups.visits);
     });
   }
   if(mapLayersOn.purchases){
     const cats = allCategories || [];
     (V.txns||[]).forEach(t=>{
       const cat = cats.find(c=>c.id===t.category_id), name = cat ? cat.name : null;
-      const [color, path] = TXN_STYLE[name] || TXN_STYLE._none;
       bounds.push([t.location_lat, t.location_lon]);
-      L.marker([t.location_lat, t.location_lon], { icon: mapBadge(path, color, 28) }).bindPopup(popRows(esc(t.merchant || t.description || 'Purchase'), [
+      L.marker([t.location_lat, t.location_lon], { icon: symIcon(SYM.dollar, t.amount_cents > 0 ? '#2448C9' : '#1F7A45', 26) }).bindPopup(popRows(esc(t.merchant || t.description || 'Purchase'), [
         ['Amount', `<b>${money(Math.abs(t.amount_cents))}</b>${t.amount_cents > 0 ? ' in' : ''}`], ['Date', new Date(t.transaction_date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})],
         ['Category', esc(name || 'Needs category')], ['Where', esc([t.location_address, t.location_city, t.location_region].filter(Boolean).join(', '))],
         ['Paid with', t.account ? esc(t.account.name) : ''], ['Status', t.pending ? 'Pending' : 'Posted'],
@@ -2718,6 +2746,17 @@ function renderAssetMap(){
 // ---------- live layers: radar (IEM NEXRAD), MBTA vehicles ----------
 const RADAR_FRAMES = ['-m50m','-m45m','-m40m','-m35m','-m30m','-m25m','-m20m','-m15m','-m10m','-m05m',''];
 let radarLayers = null, radarTimer = null, radarIdx = RADAR_FRAMES.length - 1, transitTimer = null, transitGroup = null, transitInfo = '';
+const SYM = {
+  dollar:'<text x="12" y="17" text-anchor="middle" font-size="15" font-weight="800" fill="currentColor" stroke="none" font-family="system-ui">$</text>',
+  train:'<rect x="6" y="3" width="12" height="14" rx="3"/><path d="M6 11h12M9 21l1.5-4M15 21l-1.5-4"/><circle cx="9" cy="14" r=".6" fill="currentColor"/><circle cx="15" cy="14" r=".6" fill="currentColor"/>',
+  bus:'<rect x="5" y="3" width="14" height="15" rx="2.5"/><path d="M5 10h14M8 18v2M16 18v2"/><circle cx="8.5" cy="14" r=".6" fill="currentColor"/><circle cx="15.5" cy="14" r=".6" fill="currentColor"/>',
+  ferry:'<path d="M4 15l2 4h12l2-4H4z"/><path d="M7 15V9h10v6M10 9V6h4v3"/><path d="M2 21c2 0 2-1 4-1s2 1 4 1 2-1 4-1 2 1 4 1 2-1 4-1"/>'
+};
+function symIcon(svg, bg, size, shape, label){
+  const s2 = size || 28, r = shape === 'square' ? 7 : s2/2;
+  return L.divIcon({ className:'', iconSize:[s2, s2], iconAnchor:[s2/2, s2/2], popupAnchor:[0, -s2/2],
+    html:`<div style="position:relative;width:${s2}px;height:${s2}px;border-radius:${r}px;background:${bg};color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35)"><svg viewBox="0 0 24 24" width="${Math.round(s2*0.62)}" height="${Math.round(s2*0.62)}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>${label ? `<span style="position:absolute;left:50%;top:100%;transform:translate(-50%,2px);background:#fff;color:${bg};font:700 9px var(--sans);padding:0 4px;border-radius:5px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.25)">${label}</span>` : ''}</div>` });
+}
 function radarLabel(i){ const back = Number((RADAR_FRAMES[i].match(/\d+/)||['0'])[0]); return back ? `${back} min ago` : 'Now'; }
 function showRadarFrame(i){ radarIdx = i; radarLayers.forEach((l,j)=>l.setOpacity(j===i ? 0.65 : 0)); const el = document.getElementById('radarTime'); if(el) el.textContent = radarLabel(i); }
 function syncLiveLayers(){
@@ -2726,8 +2765,11 @@ function syncLiveLayers(){
     radarLayers = RADAR_FRAMES.map(f=>L.tileLayer(`https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913${f}/{z}/{x}/{y}.png`, { opacity:0, zIndex:350, attribution:'Radar NWS/IEM' }).addTo(assetMapInstance));
     showRadarFrame(RADAR_FRAMES.length - 1);
   } else if(!mapLayersOn.radar && radarLayers){ clearInterval(radarTimer); radarTimer = null; radarLayers.forEach(l=>assetMapInstance.removeLayer(l)); radarLayers = null; }
-  if(mapLayersOn.transit){ if(!transitGroup) transitGroup = L.layerGroup().addTo(assetMapInstance); if(!transitTimer){ loadTransit(); transitTimer = setInterval(()=>{ if(sheetArea === 'assets' && document.visibilityState === 'visible') loadTransit(); }, 15000); } }
-  else if(transitGroup){ clearInterval(transitTimer); transitTimer = null; transitGroup.clearLayers(); assetMapInstance.removeLayer(transitGroup); transitGroup = null; transitInfo = ''; }
+  const wantTransit = mapLayersOn.transit || mapLayersOn.buses, tKey = `${mapLayersOn.transit}|${mapLayersOn.buses}`;
+  if(wantTransit && transitGroup && syncLiveLayers.lastKey !== tKey){ syncLiveLayers.lastKey = tKey; loadTransit(); }
+  syncLiveLayers.lastKey = tKey;
+  if(wantTransit){ if(!transitGroup) transitGroup = L.layerGroup().addTo(assetMapInstance); if(!transitTimer){ loadTransit(); transitTimer = setInterval(()=>{ if(sheetArea === 'assets' && document.visibilityState === 'visible') loadTransit(); }, 15000); } }
+  else if(transitGroup && !wantTransit){ clearInterval(transitTimer); transitTimer = null; transitGroup.clearLayers(); assetMapInstance.removeLayer(transitGroup); transitGroup = null; transitInfo = ''; }
 }
 function toggleRadarPlay(){
   if(!radarLayers) return;
@@ -2739,7 +2781,9 @@ const TRANSIT_KIND = { 0:'Light rail', 1:'Subway', 2:'Commuter rail', 3:'Bus', 4
 async function loadTransit(){
   if(!transitGroup || !assetMapInstance) return;
   try{
-    const r = await fetch('https://api-v3.mbta.com/vehicles?filter[route_type]=0,1,2,3,4&include=route&fields[vehicle]=latitude,longitude,bearing,current_status,label,updated_at,speed&fields[route]=short_name,long_name,color,type');
+    const types = [mapLayersOn.transit ? '0,1,2,4' : '', mapLayersOn.buses ? '3' : ''].filter(Boolean).join(',');
+    if(!types){ transitGroup.clearLayers(); return; }
+    const r = await fetch('https://api-v3.mbta.com/vehicles?filter[route_type]=' + types + '&include=route&fields[vehicle]=latitude,longitude,bearing,current_status,label,updated_at,speed&fields[route]=short_name,long_name,color,type');
     if(!r.ok) throw new Error(`MBTA returned ${r.status}`);
     const j = await r.json(), routes = {}; (j.included||[]).forEach(x=>routes[x.id] = x.attributes);
     const b = assetMapInstance.getBounds().pad(0.3);
@@ -2748,11 +2792,13 @@ async function loadTransit(){
       const a = v.attributes; if(a.latitude == null || !b.contains([a.latitude, a.longitude])) return;
       const rid = v.relationships && v.relationships.route && v.relationships.route.data && v.relationships.route.data.id, rt = routes[rid] || {};
       const color = '#' + (rt.color || '80276C'), name = rt.short_name || rt.long_name || rid || 'MBTA';
-      const icon = L.divIcon({ className:'', iconSize:[26,26], iconAnchor:[13,13], popupAnchor:[0,-13], html:`<div style="width:26px;height:26px;border-radius:13px;background:${color};border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);display:grid;place-items:center;color:#fff;font:700 9px var(--sans);transform:rotate(${a.bearing||0}deg)"><span style="transform:rotate(${-(a.bearing||0)}deg)">${esc(String(rt.short_name || (rt.type===2 ? 'CR' : rt.type===4 ? '⛴' : '•')).slice(0,4))}</span></div>` });
+      const kind = rt.type === 3 ? 'bus' : rt.type === 4 ? 'ferry' : 'train';
+      const tag = rt.type === 2 ? 'CR' : rt.type === 3 ? (rt.short_name || '') : rt.type === 4 ? '' : (rt.short_name || String(rt.long_name || '').replace(/ Line$/,'').split(' ')[0]);
+      const icon = symIcon(SYM[kind], color, kind === 'bus' ? 22 : 28, 'square', esc(String(tag).slice(0,6)));
       L.marker([a.latitude, a.longitude], { icon, zIndexOffset:500 }).bindPopup(popRows(esc(rt.long_name || name), [['Type', TRANSIT_KIND[rt.type] || ''], ['Vehicle', a.label ? esc(a.label) : ''], ['Status', esc(String(a.current_status||'').replace(/_/g,' ').toLowerCase())], ['Speed', a.speed != null ? `${Math.round(a.speed*2.237)} mph` : ''], ['Updated', a.updated_at ? timeAgo(a.updated_at) : '']])).addTo(transitGroup);
       n++;
     });
-    transitInfo = `${n} MBTA vehicle${n===1?'':'s'} in view`;
+    transitInfo = `${n} MBTA ${mapLayersOn.transit && !mapLayersOn.buses ? 'train' : mapLayersOn.buses && !mapLayersOn.transit ? 'bus' : 'vehicle'}${n===1?'':(mapLayersOn.buses && !mapLayersOn.transit ? 'es' : 's')} in view`;
   } catch(err){ transitInfo = `MBTA: ${err.message}`; }
   const sum = document.getElementById('mapSummary'); if(sum && mapLayersOn.transit && !sum.textContent.includes('MBTA')) sum.textContent += ` · ${transitInfo}`;
 }
