@@ -1487,6 +1487,47 @@ body.chatting .otto-chat-starters{display:none}
   .me-dot.stale{background:#8A8C95;}
   @keyframes mePulse{0%{box-shadow:0 0 0 0 rgba(36,72,201,.45), 0 1px 4px rgba(0,0,0,.35);} 100%{box-shadow:0 0 0 14px rgba(36,72,201,0), 0 1px 4px rgba(0,0,0,.35);}}
   @media (prefers-reduced-motion: reduce){ .me-dot.live{animation:none;} }
+  /* ===== Places: Timeline-first (build .39) ===== */
+  .tl-sheet{max-height:52% !important; height:52%;}
+  .tl-grab{width:36px; height:4px; border-radius:2px; background:var(--border); margin:8px auto 0;}
+  .tl-head{border-bottom:1px solid var(--border);}
+  .tl-trip{all:unset; box-sizing:border-box; display:flex; align-items:center; gap:10px; width:100%; padding:8px 0 8px 16px; font-size:0.84rem; color:var(--text-muted); position:relative; cursor:pointer; min-height:44px;}
+  .tl-trip.on{color:#B4441C; font-weight:600;}
+  .tl-trip .tl-when{margin-left:auto; font-size:0.75rem; color:var(--text-faint);}
+  .tl-gap{display:flex; align-items:center; gap:10px; padding:8px 0 8px 16px; font-size:0.8rem; color:var(--text-faint); font-style:italic; position:relative;}
+  .tl-gap .tl-line{border-left-style:dotted;}
+  .map-week{background:none !important; box-shadow:none !important; padding:0 !important; left:auto !important; right:12px !important; width:auto !important;}
+  .map-week.tl-on{display:none !important;}
+  .tl-pill{all:unset; cursor:pointer; display:inline-flex; align-items:center; min-height:44px; padding:0 18px; border-radius:22px; background:var(--text); color:var(--bg); font-weight:700; font-size:0.9rem; box-shadow:0 4px 14px rgba(0,0,0,.25);}
+  /* ===== Plan agenda (build .40) ===== */
+  .plan-agenda{margin:14px 0 6px;}
+  .plan-items{padding:0 !important;}
+  .plan-item{display:flex; align-items:center; gap:12px; padding:12px 14px; border-top:1px solid var(--border); min-height:44px;}
+  .plan-item:first-child{border-top:none;}
+  .plan-item[data-area]{cursor:pointer;}
+  .plan-kind{width:10px; height:10px; border-radius:3px; flex-shrink:0; margin:0 7px;}
+  .plan-item .quick-complete{flex-shrink:0;}
+  .plan-time{font-size:0.8rem; color:var(--text-muted); white-space:nowrap; font-variant-numeric:tabular-nums;}
+  .plan-item.late .plan-time{color:var(--alert); font-weight:600;}
+  .plan-dots{display:flex; gap:3px; justify-content:center; min-height:6px; margin:2px 0;}
+  .plan-dots i{width:6px; height:6px; border-radius:3px; display:block;}
+  /* ===== Todos: Later / Someday + weekly triage (build .41) ===== */
+  .triage-card{all:unset; box-sizing:border-box; display:flex; flex-direction:column; gap:3px; width:100%; margin:4px 0 14px; padding:14px 16px; border-radius:var(--radius); background:var(--accent-soft); cursor:pointer;}
+  .triage-card b{font-size:1rem; color:var(--text);} .triage-card span{font-size:0.84rem; color:var(--text-muted);} .triage-card .triage-cta{color:var(--accent); font-weight:700; margin-top:4px;}
+  .triage-ov{position:fixed; inset:0; z-index:2000; background:rgba(21,22,26,0.35); display:flex; align-items:flex-end;}
+  .triage-sheet{width:100%; box-sizing:border-box; background:var(--bg); border-radius:22px 22px 0 0; padding:14px 18px calc(env(safe-area-inset-bottom, 0px) + 18px); max-height:88vh; overflow:auto; animation:sheetUp 0.18s ease;}
+  .triage-top{display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; color:var(--text-muted);}
+  .triage-bar{height:4px; border-radius:2px; background:var(--surface-2); margin:10px 0 16px; overflow:hidden;} .triage-bar i{display:block; height:100%; background:var(--accent);}
+  .triage-title{font-family:var(--display); font-size:1.45rem; font-weight:700; line-height:1.2;}
+  .triage-meta{font-size:0.84rem; color:var(--text-muted); margin-top:6px;}
+  .triage-notes{font-size:0.9rem; color:var(--text-muted); margin-top:10px; white-space:pre-wrap;}
+  .triage-label{font-size:12px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--text-muted); margin:18px 0 8px;}
+  .triage-sheet .chiprow .chip{padding:10px 14px; min-height:44px;}
+  .triage-actions{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px;}
+  .triage-actions button{min-height:52px; border-radius:14px; border:1px solid var(--border); background:var(--surface); font:inherit; font-size:0.9rem; font-weight:600; color:var(--text); cursor:pointer;}
+  .triage-skip{display:block; margin:16px auto 0;}
+  .triage-done{display:flex; flex-direction:column; gap:8px; align-items:flex-start; padding:24px 0 8px;} .triage-done b{font-size:1.3rem;} .triage-done span{color:var(--text-muted);}
+  body.triaging{overflow:hidden;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -1566,13 +1607,13 @@ body.chatting .otto-chat-starters{display:none}
 
     <div class="tab-panel" id="panelTodos">
       <div class="studio-page-head"><div class="studio-kicker">YOUR WORKSPACE <span class="studio-dot"></span> STAY ON TRACK</div><h2>Make today<br><span>count.</span></h2><p>Focus on what matters, one task at a time.</p></div>
-      <div class="plan-week" aria-label="Task agenda"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><div class="plan-week-top"><div><span class="plan-overline">YOUR WEEK</span><h3 id="planWeekTitle">Next seven days</h3></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div>
+      <div class="plan-week" aria-label="Task agenda"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><div class="plan-week-top"><div><span class="plan-overline">YOUR WEEK</span><h3 id="planWeekTitle">Events, todos, meals, bills</h3></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" aria-live="polite"></div>
       <form id="quickAddForm" class="quick-add-form">
         <input type="text" id="quickAddInput" placeholder="Add a todo for today…" required>
         <label class="sr-only" for="quickAddWhen">Schedule task</label><select id="quickAddWhen" aria-label="Schedule task"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="selected">Selected day</option><option value="anytime">Anytime</option></select>
         <button class="save-btn" type="submit">Add</button>
       </form>
-      <div class="seg" id="todoSeg"><button type="button" data-tview="today" class="active">Today</button><button type="button" data-tview="upcoming">Upcoming</button><button type="button" data-tview="anytime">Anytime</button><button type="button" data-tview="done">Done</button></div>
+      <div id="triageCard"></div><div class="seg" id="todoSeg"><button type="button" data-tview="later" class="active">Later</button><button type="button" data-tview="someday">Someday</button><button type="button" data-tview="done">Done</button></div>
       <!-- Build 003: local, cross-view todo search -->
       <div class="todo-search-wrap">
         <label class="sr-only" for="todoSearch">Search all todos</label>
@@ -1648,8 +1689,8 @@ body.chatting .otto-chat-starters{display:none}
         <h3>Or one day</h3>
         <div class="map-ranges" id="mapDays"></div>
         <div class="map-help" id="mapHelp"></div>
-        <h3>Visits</h3>
-        <div id="visitList"></div>
+        <h3 hidden>Visits</h3>
+        <div id="visitList" hidden></div>
         <h3>Assets</h3>
         <div id="assetHero"></div>
         <div class="asset-toolbar">
@@ -1724,7 +1765,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-15.38';
+const APP_BUILD = '2026-10-17.41';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2666,23 +2707,17 @@ function renderAssetMap(){
     const pointPop = (p, i, n) => popRows(new Date(p.recorded_at).toLocaleString('en-US',{weekday:'short', month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}), [
       ['Accuracy', p.accuracy_m != null ? `±${Math.round(p.accuracy_m)} m` : ''], ['Speed', p.speed_kmh != null && p.speed_kmh >= 0 ? `${Math.round(p.speed_kmh * 0.621)} mph` : ''],
       ['Phone battery', p.battery_pct != null ? `${Math.round(p.battery_pct)}%` : ''], ['Point', `${i+1} of ${n} that day`], ['Coordinates', `${Number(p.lat).toFixed(5)}, ${Number(p.lon).toFixed(5)}`]]);
-    Object.values(byDay).forEach(pts=>{
+    const days = Object.keys(byDay).sort(), nDays = days.length;
+    days.forEach((day, di)=>{
+      const pts = byDay[day];
       pts.forEach(p=>bounds.push([p.lat, p.lon]));
-      // older segments fade, recent ones are solid
-      for(let k=1;k<pts.length;k++){
-        const age = (Date.parse(pts[k].recorded_at) - t0) / span;
-        L.polyline([[pts[k-1].lat, pts[k-1].lon],[pts[k].lat, pts[k].lon]], { color, weight:4, opacity: 0.22 + 0.73*age, lineCap:'round', interactive:false }).addTo(mapGroups.places);
-      }
-      const step = Math.max(1, Math.round(pts.length / 10));
-      pts.forEach((p,i)=>{
-        if(i === 0){ L.circleMarker([p.lat,p.lon], { radius:6, color, weight:2.5, fillColor:'#fff', fillOpacity:1 }).bindPopup(pointPop(p,i,pts.length)).addTo(mapGroups.places); return; }
-        if(i === pts.length-1 || i % step) return;
-        const age = (Date.parse(p.recorded_at) - t0) / span;
-        L.circleMarker([p.lat,p.lon], { radius:3, color:'#fff', weight:1, fillColor:color, fillOpacity:0.35 + 0.6*age }).bindPopup(pointPop(p,i,pts.length)).addTo(mapGroups.places);
-      });
+      const line = simplifyPts(pts, 12);
+      const strong = !!mapDay || di === nDays - 1;
+      if(line.length > 1) L.polyline(line, { color, weight: mapDay ? 5 : 4, opacity: strong ? 0.9 : 0.3 + 0.5*(di/Math.max(1,nDays-1)), lineCap:'round', lineJoin:'round', interactive:false }).addTo(mapGroups.places);
+      L.circleMarker([pts[0].lat,pts[0].lon], { radius:5, color, weight:2.5, fillColor:'#fff', fillOpacity:1 }).bindPopup(pointPop(pts[0],0,pts.length)).addTo(mapGroups.places);
       if(mapDay){ const a = pts[0], z = pts[pts.length-1];
         L.marker([a.lat,a.lon], { icon: L.divIcon({ className:'', iconSize:null, iconAnchor:[-10,10], html:`<div class="place-label">Start ${clockTime(a.recorded_at)}</div>` }), interactive:false }).addTo(mapGroups.places);
-        if(z !== a) L.marker([z.lat,z.lon], { icon: L.divIcon({ className:'', iconSize:null, iconAnchor:[-12,10], html:`<div class="place-label">${clockTime(z.recorded_at)}</div>` }), interactive:false }).addTo(mapGroups.places); }
+        if(z !== a && day !== localToday()) L.marker([z.lat,z.lon], { icon: L.divIcon({ className:'', iconSize:null, iconAnchor:[-12,10], html:`<div class="place-label">End ${clockTime(z.recorded_at)}</div>` }), interactive:false }).addTo(mapGroups.places); }
     });
     // you are here: the latest point, with its accuracy ring
     const last = sorted[sorted.length-1], ageMin = (Date.now() - Date.parse(last.recorded_at))/60000, fresh = ageMin < 360;
@@ -2729,8 +2764,14 @@ function renderAssetMap(){
   const key = `${mapDay}|${mapRangeDays}|${mapLayersOn.visits}|${mapLayersOn.places}|${mapLayersOn.purchases}|${mapLayersOn.assets}|${bounds.length}`;
   if(key !== mapFitKey){
     mapFitKey = key;
-    if(bounds.length === 1) assetMapInstance.setView(bounds[0], 14);
-    else if(bounds.length) assetMapInstance.fitBounds(bounds, { padding:[40,40], maxZoom:15 });
+    const sheetH = (()=>{ const sh = document.getElementById('tlSheet'); return sh && !sh.hidden ? sh.offsetHeight : 120; })();
+    let fit = bounds;
+    if(mapDay){
+      const dayPts = (V.points||[]).map(p=>[p.lat, p.lon]).concat((V.visits||[]).filter(v=>v.lat != null).map(v=>[v.lat, v.lon]));
+      if(dayPts.length) fit = dayPts;
+    }
+    if(fit.length === 1) assetMapInstance.setView(fit[0], 15);
+    else if(fit.length) assetMapInstance.fitBounds(fit, { paddingTopLeft:[30, 90], paddingBottomRight:[30, sheetH + 20], maxZoom:16 });
     else assetMapInstance.setView([42.5584, -70.88], 12);
   }
   const label = mapDay ? new Date(mapDay+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}) : MAP_RANGES.find(r=>r[0]===mapRangeDays)[1];
@@ -2852,38 +2893,73 @@ document.getElementById('panelAssets').addEventListener('click', e=>{
   const rb = e.target.closest('[data-wxradar]');
   if(rb){ if(rb.dataset.wxradar === 'toggle'){ mapLayersOn.radar = !mapLayersOn.radar; syncLiveLayers(); renderMapControls(); renderWeather(); } else toggleRadarPlay(); }
 });
-let tlDay = null, tlNaming = null;
+let tlDay = null, tlNaming = null, tlUserClosed = false, tlLegs = [], tlHighlight = null;
+// Douglas–Peucker in meters (equirectangular), so a 2,000-point day becomes a clean line
+function simplifyPts(pts, tolM){
+  if(pts.length < 3) return pts.map(p=>[p.lat, p.lon]);
+  const lat0 = pts[0].lat * Math.PI/180, X = p=>[p.lon*111320*Math.cos(lat0), p.lat*110540];
+  const xy = pts.map(X), keep = new Uint8Array(pts.length); keep[0] = keep[pts.length-1] = 1;
+  const stack = [[0, pts.length-1]];
+  while(stack.length){
+    const [a,b] = stack.pop(); let dmax = 0, idx = -1;
+    const [x1,y1] = xy[a], [x2,y2] = xy[b], dx = x2-x1, dy = y2-y1, L2 = dx*dx+dy*dy || 1;
+    for(let i=a+1;i<b;i++){ const t = Math.max(0, Math.min(1, ((xy[i][0]-x1)*dx + (xy[i][1]-y1)*dy)/L2)); const ex = x1+t*dx-xy[i][0], ey = y1+t*dy-xy[i][1]; const d = ex*ex+ey*ey; if(d > dmax){ dmax = d; idx = i; } }
+    if(idx > 0 && dmax > tolM*tolM){ keep[idx] = 1; stack.push([a,idx],[idx,b]); }
+  }
+  return pts.filter((_,i)=>keep[i]).map(p=>[p.lat, p.lon]);
+}
+function openTimeline(){
+  const sh = document.getElementById('tlSheet'); if(!sh) return;
+  sh.hidden = false; document.getElementById('mapWeek')?.classList.add('tl-on');
+  tlDay = tlDay || localToday(); mapDay = tlDay; mapFitKey = ''; renderAssetMap(); renderTimeline();
+}
 function distM(a, b){ const R = 6371000, r = x=>x*Math.PI/180; const dLa = r(b.lat-a.lat), dLo = r(b.lon-a.lon); const h = Math.sin(dLa/2)**2 + Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLo/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
 function renderTimeline(){
   const el = document.getElementById('tlSheet'); if(!el || el.hidden) return;
   const day = tlDay || localToday(), today = localToday();
   const vs = (mapData.visits||[]).filter(v=>(v.arrived_at && isoOf(v.arrived_at)===day) || (v.left_at && isoOf(v.left_at)===day) || (v.is_open && day===today)).sort((a,b)=>(a.arrived_at||'').localeCompare(b.arrived_at||''));
   const pts = (mapData.points||[]).filter(p=>isoOf(p.recorded_at)===day).sort((a,b)=>a.recorded_at.localeCompare(b.recorded_at));
-  const trip = (from, to) => {
-    const seg = pts.filter(p=>(!from || p.recorded_at >= from) && (!to || p.recorded_at <= to));
-    if(seg.length < 2) return null;
+  const items = []; tlLegs = [];
+  const leg = (from, to) => {
+    const all = pts.filter(p=>(!from || p.recorded_at >= from) && (!to || p.recorded_at <= to));
+    // split at reporting gaps: a leg only measures time the phone was actually tracking
+    const parts = [[]]; all.forEach((p,i)=>{ if(i && (Date.parse(p.recorded_at) - Date.parse(all[i-1].recorded_at)) > 45*60000) parts.push([]); parts[parts.length-1].push(p); });
+    if(parts.length > 1){ parts.forEach(seg=>{ if(seg.length >= 2) leg(seg[0].recorded_at, seg[seg.length-1].recorded_at); }); return; }
+    const seg = all;
+    if(seg.length < 2) return;
     let d = 0; for(let i=1;i<seg.length;i++) d += distM(seg[i-1], seg[i]);
-    if(d < 150) return null;
-    const mins = (new Date(to || seg[seg.length-1].recorded_at) - new Date(from || seg[0].recorded_at))/60000;
-    const kmh = mins > 0 ? (d/1000)/(mins/60) : 0;
-    const mode = kmh < 7 ? ['🚶','Walking'] : ['🚗','Driving'];
-    return `<div class="tl-trip"><span class="tl-line"></span><span class="tl-mode">${mode[0]}</span><span>${mode[1]} ${(d/1609.34).toFixed(1)} mi${mins >= 1 ? `, ${fmtMinutes(mins)}` : ''}</span></div>`;
+    if(d < 150) return;
+    // time the leg by its own first and last points (a gap before it doesn't count as travel)
+    const t0 = seg[0].recorded_at, t1 = seg[seg.length-1].recorded_at;
+    const mins = (new Date(t1) - new Date(t0))/60000, kmh = mins > 0 ? (d/1000)/(mins/60) : 0;
+    const mode = kmh < 7 ? ['🚶','Walk'] : ['🚗','Drive'];
+    const idx = tlLegs.push({ line: simplifyPts(seg, 8) }) - 1;
+    items.push({ t: t0, html: `<button class="tl-trip" type="button" data-tlleg="${idx}"><span class="tl-line"></span><span class="tl-mode">${mode[0]}</span><span>${mode[1]} · ${(d/1609.34).toFixed(1)} mi${mins >= 1 ? ` · ${fmtMinutes(mins)}` : ''}</span><span class="tl-when">${clockTime(t0)}–${clockTime(t1)}</span></button>` });
   };
-  let rows = '';
-  if(!vs.length){ const t = trip(null, null); rows = t || `<div class="map-help">${pts.length ? 'No stops of 10+ minutes this day.' : 'No location data for this day. OwnTracks needs to be running (not in Low Power Mode) to record your day.'}</div>`; }
   vs.forEach((v,i)=>{
-    if(i === 0){ const t = trip(null, v.arrived_at); if(t) rows += t; }
+    if(i === 0) leg(null, v.arrived_at);
     const kind = placeKind(v.place), sug = v.status === 'suggested';
-    rows += `<div class="tl-stop ${sug?'sug':''}" data-tlvisit="${v.id}">
-      <span class="tl-ico">${svgIcon ? `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${PLACE_ICONS[sug ? 'pin' : kind]}</svg>` : ''}</span>
+    items.push({ t: v.arrived_at || day+'T00:00:00Z', html: `<div class="tl-stop ${sug?'sug':''}" data-tlvisit="${v.id}">
+      <span class="tl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${PLACE_ICONS[sug ? 'pin' : kind]}</svg></span>
       <div class="grow-main"><div class="grow-title">${esc(v.place)}${sug ? ' <span class="tl-badge">new place?</span>' : ''}</div>
         <div class="grow-sub">${v.arrived_at && isoOf(v.arrived_at)===day ? clockTime(v.arrived_at) : 'Earlier'} – ${v.is_open ? 'now' : v.left_at && isoOf(v.left_at)===day ? clockTime(v.left_at) : 'later'}</div>
         ${sug ? (tlNaming === v.id ? `<div class="tl-name"><input type="text" id="tlNameInput" placeholder="Name this place, e.g. Hannah's" value="${esc(v.place === 'Unnamed stop' ? '' : v.place)}"><button class="save-btn" type="button" data-tlsave="${v.id}">Save</button></div>` : `<div class="tl-actions"><button class="link-btn" type="button" data-tlname="${v.id}">Name it</button><button class="link-btn" type="button" data-tldecline="${v.id}" style="color:var(--text-faint)">Not a stop</button></div>`) : ''}</div>
-      <div class="visit-dur">${v.arrived_at ? fmtMinutes(v.minutes) : ''}</div></div>`;
-    const next = vs[i+1]; const t = trip(v.left_at, next ? next.arrived_at : null); if(t && v.left_at) rows += t;
+      <div class="visit-dur">${v.arrived_at ? fmtMinutes(v.minutes) : ''}</div></div>` });
+    const next = vs[i+1]; if(v.left_at) leg(v.left_at, next ? next.arrived_at : null);
   });
+  if(!vs.length) leg(null, null);
+  // honest gaps: 45+ minutes with no points and no stop covering them
+  const covered = (a, b) => vs.some(v=>v.arrived_at && v.arrived_at <= a && (v.is_open || (v.left_at && v.left_at >= b)));
+  const gapRow = (a, b, label) => items.push({ t: a, html: `<div class="tl-gap"><span class="tl-line"></span><span class="tl-mode">·</span><span>${label} ${clockTime(a)}–${clockTime(b)}</span></div>` });
+  for(let i=1;i<pts.length;i++){ const a = pts[i-1].recorded_at, b = pts[i].recorded_at; if((Date.parse(b)-Date.parse(a)) > 45*60000 && !covered(a,b)) gapRow(a, b, 'No location data'); }
+  if(day === today && pts.length && (Date.now() - Date.parse(pts[pts.length-1].recorded_at)) > 45*60000 && !vs.some(v=>v.is_open)) gapRow(pts[pts.length-1].recorded_at, new Date().toISOString(), 'Phone not reporting since');
+  items.sort((a,b)=>a.t.localeCompare(b.t));
+  let rows = items.map(x=>x.html).join('');
+  if(!rows) rows = `<div class="map-help">${pts.length ? 'No stops of 10+ minutes this day.' : 'No location data for this day. Your phone needs OwnTracks running in the background (not swiped closed, not in Low Power Mode).'}</div>`;
+  const missing = (mapData.places||[]).length ? [] : [];
   const label = day === today ? 'Today' : day === isoAddDays(today,-1) ? 'Yesterday' : new Date(day+'T12:00').toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
-  el.innerHTML = `<div class="tl-head"><button class="tl-nav" type="button" data-tlstep="-1" aria-label="Previous day">‹</button><div><b>${label}</b><span>${vs.length} stop${vs.length===1?'':'s'}${pts.length ? `, ${pts.length} points` : ''}</span></div><button class="tl-nav" type="button" data-tlstep="1" ${day >= today ? 'disabled' : ''} aria-label="Next day">›</button><button class="tl-close" type="button" id="tlClose" aria-label="Close timeline">✕</button></div><div class="tl-body">${rows}</div>`;
+  let miles = 0; for(let i=1;i<pts.length;i++) miles += distM(pts[i-1], pts[i]) / 1609.34;
+  el.innerHTML = `<div class="tl-grab" aria-hidden="true"></div><div class="tl-head"><button class="tl-nav" type="button" data-tlstep="-1" aria-label="Previous day">‹</button><div><b>${label}</b><span>${vs.length} stop${vs.length===1?'':'s'}${miles >= 0.1 ? ` · ${miles.toFixed(1)} mi` : ''}</span></div><button class="tl-nav" type="button" data-tlstep="1" ${day >= today ? 'disabled' : ''} aria-label="Next day">›</button><button class="tl-close" type="button" id="tlClose" aria-label="Hide timeline">⌄</button></div><div class="tl-body">${rows}</div>`;
   autoNameStops(vs);
 }
 let namingBusy = false;
@@ -2905,8 +2981,14 @@ async function autoNameStops(vs){
   } catch(e){} finally { namingBusy = false; }
 }
 document.getElementById('panelAssets').addEventListener('click', async e=>{
-  if(e.target.closest('#tlOpen')){ const sh = document.getElementById('tlSheet'); sh.hidden = false; tlDay = tlDay || localToday(); mapDay = tlDay; mapFitKey = ''; renderAssetMap(); renderTimeline(); return; }
-  if(e.target.closest('#tlClose')){ document.getElementById('tlSheet').hidden = true; mapDay = null; mapFitKey = ''; renderAssetMap(); return; }
+  if(e.target.closest('#tlOpen')){ tlUserClosed = false; openTimeline(); return; }
+  if(e.target.closest('#tlClose')){ tlUserClosed = true; document.getElementById('tlSheet').hidden = true; document.getElementById('mapWeek')?.classList.remove('tl-on'); if(tlHighlight && assetMapInstance){ assetMapInstance.removeLayer(tlHighlight); tlHighlight = null; } mapDay = null; mapFitKey = ''; renderAssetMap(); return; }
+  const lg = e.target.closest('[data-tlleg]');
+  if(lg && assetMapInstance){ const L1 = tlLegs[Number(lg.dataset.tlleg)]; if(!L1) return;
+    if(tlHighlight) assetMapInstance.removeLayer(tlHighlight);
+    tlHighlight = L.polyline(L1.line, { color:'#B4441C', weight:7, opacity:0.95, lineCap:'round', lineJoin:'round' }).addTo(assetMapInstance);
+    document.querySelectorAll('.tl-trip.on').forEach(x=>x.classList.remove('on')); lg.classList.add('on');
+    const sh = document.getElementById('tlSheet'); assetMapInstance.fitBounds(tlHighlight.getBounds(), { paddingTopLeft:[30,90], paddingBottomRight:[30,(sh && !sh.hidden ? sh.offsetHeight : 120) + 20], maxZoom:16 }); return; }
   const st = e.target.closest('[data-tlstep]');
   if(st){ const d = isoAddDays(tlDay || localToday(), Number(st.dataset.tlstep)); if(d > localToday()) return; tlDay = d; mapDay = d; mapFitKey = '';
     const daysBack = Math.round((new Date(localToday()) - new Date(d))/86400000) + 1; if(mapRangeDays && daysBack > mapRangeDays){ mapRangeDays = daysBack <= 30 ? 30 : 90; await refreshLifeMap(); } else renderAssetMap(); renderTimeline(); return; }
@@ -2933,13 +3015,8 @@ document.getElementById('panelAssets').addEventListener('click', async e=>{
 });
 function renderMapWeek(){
   const el = document.getElementById('mapWeek'); if(!el) return;
-  const today = localToday(), ws = weekStartIso(today), days = []; for(let i=0;i<7;i++) days.push(isoAddDays(ws,i));
-  const per = {}, places = {};
-  (mapData.visits||[]).forEach(v=>{ if(!v.arrived_at) return; const t = new Date(v.arrived_at); const d = `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; if(!days.includes(d)) return; per[d] = per[d] || {}; per[d][v.place] = (per[d][v.place]||0) + (Number(v.minutes)||0); places[v.place] = true; });
-  const names = Object.keys(places), colors = ['#2E8B57','#3F7CC0','#D9822B','#8A5CC7','#C4382A','#2F9AA8'];
-  const col = n => colors[names.indexOf(n) % colors.length];
-  const total = Object.values(per).reduce((a,o)=>a+Object.values(o).reduce((x,y)=>x+y,0),0);
-  el.innerHTML = `<div class="t"><span>This week by place</span><button class="tl-open" type="button" id="tlOpen">Timeline ›</button></div><div class="row">${days.map(d=>{ const o = per[d] || {}; return `<div class="dd ${d===today?'today':''}"><div class="bar">${Object.entries(o).map(([n,m])=>`<i style="height:${Math.min(100, Math.round(100*m/(16*60)))}%;background:${col(n)}" title="${esc(n)} ${fmtMinutes(m)}"></i>`).join('')}</div>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</div>`; }).join('')}</div>${names.length ? `<div class="t" style="margin:6px 0 0; justify-content:flex-start; gap:10px; flex-wrap:wrap">${names.slice(0,4).map(n=>`<span class="pchip"><i style="background:${col(n)}"></i>${esc(n)}</span>`).join('')}</div>` : ''}`;
+  const pts = (mapData.points||[]).filter(p=>isoOf(p.recorded_at)===localToday()).length;
+  el.innerHTML = `<button class="tl-pill" type="button" id="tlOpen">Timeline · ${tlDay && tlDay !== localToday() ? new Date(tlDay+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}) : 'Today'}${pts ? '' : ' · no data yet'} ›</button>`;
 }
 async function refreshLifeMap(){
   try{ await fetchMapData(); } catch(err){ const b = document.getElementById('assetsErrorBanner'); if(b) b.innerHTML = `<div class="error-banner">${esc(err.message)}</div>`; }
@@ -3369,7 +3446,7 @@ function buildTodoListHtml(rows, expandedCodeForThisList){
   }).join('');
 }
 
-let todoView = 'today';
+let todoView = 'later';
 function nextDow(fromIso, dow){ const [y,m,d] = fromIso.split('-').map(Number); const t = new Date(y,m-1,d); let add = (dow - t.getDay() + 7) % 7; if(add === 0) add = 7; return isoAddDays(fromIso, add); }
 function quickDates(){ const t = localToday(), dow = new Date().getDay(); return [['Today', t], ['Tomorrow', isoAddDays(t,1)], ['Weekend', (dow===6||dow===0) ? t : nextDow(t,6)], ['Next week', nextDow(t,1)], ['No date', null]]; }
 function todoDateLabel(iso){
@@ -3410,6 +3487,45 @@ function planLocalDate(offset){
   const d=new Date(); d.setHours(12,0,0,0); d.setDate(d.getDate()+offset);
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
+let calEvents = [];
+async function refreshCalendar(){
+  try{
+    const from = new Date(Date.now() - 2*86400000).toISOString(), to = new Date(Date.now() + 60*86400000).toISOString();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/calendar_events?select=title,starts_at,ends_at,all_day,location,calendar_name&starts_at=gte.${encodeURIComponent(from)}&starts_at=lt.${encodeURIComponent(to)}&order=starts_at.asc&limit=500`, { headers: authHeaders() });
+    calEvents = r.ok ? await r.json() : [];
+  } catch(e){ calEvents = []; }
+  if(allTodos) renderList(allTodos);
+}
+const MEAL_HOUR = { breakfast: 8, lunch: 12, dinner: 18, snack: 15 };
+function planItemsFor(date){
+  const today = localToday(), items = [];
+  (calEvents||[]).forEach(e=>{ if(isoOf(e.starts_at) !== date) return;
+    items.push({ kind:'event', sort: e.all_day ? '00:00' : new Date(e.starts_at).toTimeString().slice(0,5), time: e.all_day ? 'All day' : clockTime(e.starts_at) + (e.ends_at ? `–${clockTime(e.ends_at)}` : ''), title: e.title, sub: [e.location, e.calendar_name].filter(Boolean).join(' · ') }); });
+  (allTodos||[]).filter(t=>t.status==='open' && t.due_date && (t.due_date === date || (date === today && t.due_date < today))).forEach(t=>{
+    items.push({ kind:'todo', sort:'99:00', time: t.due_date < today ? `${Math.round((new Date(today)-new Date(t.due_date))/86400000)}d late` : 'Todo', late: t.due_date < today, title: t.title, sub: t.project && t.project.title ? t.project.title : '', code: t.code }); });
+  if(foodData && foodData.plan) (foodData.plan.meal_plan_items||[]).filter(m=>m.planned_date === date).forEach(m=>{
+    const h = MEAL_HOUR[m.meal_type] ?? 12;
+    items.push({ kind:'meal', sort: String(h).padStart(2,'0')+':00', time: (m.meal_type||'meal').replace(/^./, c=>c.toUpperCase()), title: (m.recipe ? (m.recipe.emoji ? m.recipe.emoji + ' ' : '') + m.recipe.name : m.title) || 'Meal', sub: m.leftover_of ? 'Leftovers' : '' }); });
+  ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.due_day && Number(b.amount_cents) > 0).forEach(b=>{
+    const [y,mo] = date.split('-').map(Number), last = new Date(y, mo, 0).getDate(), dueDay = Math.min(Number(b.due_day), last);
+    if(Number(date.slice(8)) === dueDay) items.push({ kind:'bill', sort:'09:00', time:'Bill due', title: `${b.name} · ${money(b.amount_cents)}`, sub: b.autopay ? 'Autopay' : 'Pay it yourself' }); });
+  return items.sort((a,b)=>a.sort.localeCompare(b.sort));
+}
+const PLAN_KIND = { event:['Event','#2448C9'], todo:['Todo','#15161A'], meal:['Meal','#B5893A'], bill:['Bill','#B4441C'] };
+function renderPlanAgenda(){
+  const el = document.getElementById('planAgenda'); if(!el) return;
+  const date = planSelectedDate || localToday(), items = planItemsFor(date);
+  const label = date === localToday() ? 'Today' : date === isoAddDays(localToday(), 1) ? 'Tomorrow' : new Date(date+'T12:00').toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
+  el.innerHTML = `<div class="section-title">${esc(label)}<span>${items.length ? `${items.length} item${items.length===1?'':'s'}` : ''}</span></div>` + (items.length ? `<div class="gcard plan-items">${items.map(it=>`
+    <div class="plan-item ${it.kind}${it.late?' late':''}" ${it.kind==='meal' ? 'data-area="food"' : it.kind==='bill' ? 'data-area="money"' : ''}>
+      ${it.kind === 'todo' ? `<button type="button" class="quick-complete" data-code="${esc(it.code)}" aria-label="Mark done"></button>` : `<span class="plan-kind" style="background:${PLAN_KIND[it.kind][1]}"></span>`}
+      <div class="grow-main"><div class="grow-title">${esc(it.title)}</div>${it.sub ? `<div class="grow-sub">${esc(it.sub)}</div>` : ''}</div>
+      <div class="plan-time">${esc(it.time)}</div></div>`).join('')}</div>` : `<div class="map-help">Nothing planned${calEvents.length ? '' : '. Calendar events will show here once the iCloud calendar is connected'}.</div>`);
+}
+document.addEventListener('click', e=>{
+  const it = e.target.closest('.plan-item[data-area]'); if(it && !e.target.closest('button')) openSheet(it.dataset.area);
+  const qc = e.target.closest('#planAgenda .quick-complete'); if(qc){ e.stopPropagation(); toggleTodoComplete(qc.dataset.code); }
+}, true);
 function renderPlanWeek(todos){
   const host=document.getElementById('planWeekDays'); if(!host)return;
   const dates=planCalendarMode==='week' ? Array.from({length:7},(_,i)=>planLocalDate(i)) : (()=>{const start=new Date(planCalendarMonth);const offset=start.getDay();start.setDate(1-offset);return Array.from({length:42},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;});})();
@@ -3424,15 +3540,17 @@ function renderPlanWeek(todos){
   const fmt=new Intl.DateTimeFormat(undefined,{weekday:'short'});
   host.innerHTML=dates.map((date,i)=>{
     const d=new Date(date+'T12:00:00');
-    const n=todos.filter(t=>t.status==='open'&&t.due_date===date).length;
+    const its=planItemsFor(date).filter(x=>!(x.kind==='todo' && x.late && date!==localToday())), n=its.length;
+    const kinds=[...new Set(its.map(x=>x.kind))];
     const outside=planCalendarMode==='month'&&d.getMonth()!==planCalendarMonth.getMonth();
-    return `<button type="button" data-plan-date="${date}" class="plan-day${planSelectedDate===date?' selected':''}${date===localToday()?' is-today':''}${outside?' outside-month':''}" aria-pressed="${planSelectedDate===date}"><span>${fmt.format(d)}</span><strong>${d.getDate()}</strong><i class="plan-day-dot${n?' has-tasks':''}" aria-hidden="true"></i><small>${n?n+' task'+(n===1?'':'s'):'Free'}</small></button>`;
+    return `<button type="button" data-plan-date="${date}" class="plan-day${planSelectedDate===date?' selected':''}${date===localToday()?' is-today':''}${outside?' outside-month':''}" aria-pressed="${planSelectedDate===date}"><span>${fmt.format(d)}</span><strong>${d.getDate()}</strong><span class="plan-dots" aria-hidden="true">${kinds.map(k=>`<i style="background:${PLAN_KIND[k][1]}"></i>`).join('')}</span><small>${n?n+' item'+(n===1?'':'s'):'Free'}</small></button>`;
   }).join('');
   const open=todos.filter(t=>t.status==='open');
   const due=open.filter(t=>t.due_date && t.due_date<=planLocalDate(0)).length;
   const week=open.filter(t=>t.due_date && (planCalendarMode==='week'?dates.includes(t.due_date):t.due_date.startsWith(`${planCalendarMonth.getFullYear()}-${String(planCalendarMonth.getMonth()+1).padStart(2,'0')}`))).length;
   document.getElementById('planWeekSummary').textContent=`${week} scheduled this ${planCalendarMode} · ${due} due or overdue · ${open.filter(t=>!t.due_date).length} unscheduled`;
   document.getElementById('planWeekReset').hidden=!planSelectedDate;
+  renderPlanAgenda();
   const selectedOption=document.querySelector('#quickAddWhen option[value=selected]');
   if(selectedOption){selectedOption.disabled=!planSelectedDate;selectedOption.textContent=planSelectedDate?'Selected: '+shortDate(planSelectedDate):'Select a day above';if(!planSelectedDate&&document.getElementById('quickAddWhen').value==='selected')document.getElementById('quickAddWhen').value='today';}
 }
@@ -3452,6 +3570,54 @@ function renderPlanWeek(todos){
   });
   document.getElementById('planWeekReset')?.addEventListener('click',()=>{planSelectedDate=null;document.getElementById('quickAddWhen').value='today';renderList(allTodos);});
 })();
+const TRIAGE_DAYS = 7;
+function triageQueue(todos){
+  const cut = Date.now() - TRIAGE_DAYS*86400000;
+  return (todos||[]).filter(t=>t.status==='open' && !t.due_date && !t.someday && (!t.reviewed_at || Date.parse(t.reviewed_at) < cut))
+    .sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
+}
+function renderTriageCard(todos){
+  const el = document.getElementById('triageCard'); if(!el) return;
+  const q = triageQueue(todos);
+  el.innerHTML = q.length ? `<button class="triage-card" type="button" id="triageStart"><b>${q.length} todo${q.length===1?'':'s'} need a decision</b><span>Date it, park it for someday, mark it done, or drop it. About ${Math.max(1, Math.round(q.length*5/60))} min.</span><span class="triage-cta">Start triage ›</span></button>` : '';
+}
+let triageList = [], triageIdx = 0;
+function renderTriage(){
+  let ov = document.getElementById('triageOverlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'triageOverlay'; ov.className = 'triage-ov'; document.body.appendChild(ov); }
+  const t = triageList[triageIdx];
+  if(!t){ ov.innerHTML = `<div class="triage-sheet"><div class="triage-top"><span>Triage</span><button type="button" data-tri="close" class="tl-close" aria-label="Close">✕</button></div><div class="triage-done"><b>All decided.</b><span>Next triage in a week. Your Later list is now only things you mean to do.</span><button class="save-btn" type="button" data-tri="close">Done</button></div></div>`; return; }
+  const ageD = t.created_at ? Math.round((Date.now() - Date.parse(t.created_at))/86400000) : null;
+  const age = ageD == null ? '' : ageD < 7 ? `added ${ageD}d ago` : ageD < 60 ? `added ${Math.round(ageD/7)} weeks ago` : `added ${Math.round(ageD/30)} months ago`;
+  const dts = quickDates().filter(([l])=>l !== 'No date');
+  ov.innerHTML = `<div class="triage-sheet"><div class="triage-top"><span>${triageIdx+1} of ${triageList.length}</span><button type="button" data-tri="close" class="tl-close" aria-label="Close">✕</button></div>
+    <div class="triage-bar"><i style="width:${Math.round(100*triageIdx/triageList.length)}%"></i></div>
+    <div class="triage-title">${esc(t.title)}</div>
+    <div class="triage-meta">${[t.project && t.project.title, t.priority ? t.priority + ' priority' : '', age].filter(Boolean).map(esc).join(' · ')}</div>
+    ${t.notes ? `<div class="triage-notes">${esc(t.notes)}</div>` : ''}
+    <div class="triage-label">Do it…</div>
+    <div class="chiprow">${dts.map(([l,v])=>`<button class="chip" type="button" data-tri="date" data-v="${v}">${l}</button>`).join('')}</div>
+    <div class="triage-label">Or…</div>
+    <div class="triage-actions">
+      <button type="button" data-tri="someday">🌙 Someday</button>
+      <button type="button" data-tri="done">✓ Already done</button>
+      <button type="button" data-tri="drop">✕ Drop it</button>
+    </div>
+    <button type="button" class="link-btn triage-skip" data-tri="skip">Skip for now</button></div>`;
+}
+document.addEventListener('click', async e=>{
+  if(e.target.closest('#triageStart')){ triageList = triageQueue(allTodos); triageIdx = 0; renderTriage(); document.body.classList.add('triaging'); return; }
+  const b = e.target.closest('[data-tri]'); if(!b) return;
+  const act = b.dataset.tri, t = triageList[triageIdx], now = new Date().toISOString();
+  if(act === 'close'){ document.getElementById('triageOverlay')?.remove(); document.body.classList.remove('triaging'); renderList(allTodos); return; }
+  if(!t) return;
+  if(act === 'date') patchTodo(t.code, { due_date: b.dataset.v, reviewed_at: now });
+  else if(act === 'someday') patchTodo(t.code, { someday: true, reviewed_at: now });
+  else if(act === 'done') patchTodo(t.code, { status:'done', completed_at: now, reviewed_at: now });
+  else if(act === 'drop') patchTodo(t.code, { status:'cancelled', completed_at: now, reviewed_at: now });
+  else if(act === 'skip') patchTodo(t.code, { reviewed_at: now });
+  hapticPulse(); triageIdx++; renderTriage();
+});
 function renderList(todos){
   renderPlanWeek(todos);
   const list = document.getElementById('todoList'); if(!list) return;
@@ -3459,8 +3625,10 @@ function renderList(todos){
   const prio = { high:0, medium:1, low:2 };
   const byPrio = (a,b)=>(prio[a.priority]??3)-(prio[b.priority]??3) || (a.title||'').localeCompare(b.title||'');
   const group = (title, rows, right) => rows.length ? `<div class="section-title">${esc(title)}${right ? `<span>${right}</span>` : ''}</div><div class="tgroup">${rows.map(todoRowHtml).join('')}</div>` : '';
-  const counts = { today: open.filter(t=>t.due_date && t.due_date <= today).length, upcoming: open.filter(t=>t.due_date && t.due_date > today).length, anytime: open.filter(t=>!t.due_date).length };
-  document.querySelectorAll('[data-tview]').forEach(b=>{ const k = b.dataset.tview; b.classList.toggle('active', k===todoView); b.textContent = { today:'Today', upcoming:'Upcoming', anytime:'Anytime', done:'Done' }[k] + (counts[k] ? ` ${counts[k]}` : ''); });
+  if(!['later','someday','done'].includes(todoView)) todoView = 'later';
+  const counts = { later: open.filter(t=>!t.someday && !(t.due_date && t.due_date <= today)).length, someday: open.filter(t=>t.someday).length };
+  document.querySelectorAll('[data-tview]').forEach(b=>{ const k = b.dataset.tview; b.classList.toggle('active', k===todoView); b.textContent = { later:'Later', someday:'Someday', done:'Done' }[k] + (counts[k] ? ` ${counts[k]}` : ''); });
+  renderTriageCard(todos);
   const searchTerm = (document.getElementById('todoSearch')?.value || '').trim().toLocaleLowerCase();
   const clearSearch = document.getElementById('todoSearchClear');
   const searchCount = document.getElementById('todoSearchCount');
@@ -3483,24 +3651,18 @@ function renderList(todos){
     return;
   }
   let html = '';
-  if(todoView === 'today'){
-    const doneToday = todos.filter(t=>t.status==='done' && t.completed_at && new Date(t.completed_at).toDateString() === new Date().toDateString()).length;
-    const dueNow = open.filter(t=>t.due_date && t.due_date <= today).length, totalToday = doneToday + dueNow;
-    html += `<div class="viz-card today-ring">${svgRing(totalToday ? doneToday/totalToday : 0, '#8A5CC7', 72, 9, totalToday ? `${doneToday}/${totalToday}` : '0')}<div class="txt"><b>${!totalToday ? 'Nothing planned yet' : dueNow ? `${dueNow} left for today` : 'Today is done'}</b><span>${doneToday} finished today${open.filter(t=>!t.due_date).length ? `, ${open.filter(t=>!t.due_date).length} without a date` : ''}</span></div></div>`;
-    const late = open.filter(t=>t.due_date && t.due_date < today).sort((a,b)=>a.due_date.localeCompare(b.due_date));
-    const now = open.filter(t=>t.due_date === today).sort(byPrio);
-    html += group('Overdue', late, `${late.length}`) + group('Today', now);
-    if(!late.length && !now.length) html += `<div class="empty">Nothing due today.</div>`;
-    const sugg = open.filter(t=>!t.due_date).sort(byPrio).slice(0, 3);
-    if(late.length + now.length < 3 && sugg.length) html += `<div class="section-title">Pick something for today</div><div class="suggest-note">Your top undated todos. Tap one and choose Today, or swipe left to plan it for tomorrow.</div><div class="tgroup">${sugg.map(todoRowHtml).join('')}</div>`;
-  } else if(todoView === 'upcoming'){
-    const up = open.filter(t=>t.due_date && t.due_date > today).sort((a,b)=>a.due_date.localeCompare(b.due_date) || byPrio(a,b));
-    const days = []; up.forEach(t=>{ let d = days.find(x=>x.date===t.due_date); if(!d){ d={date:t.due_date, rows:[]}; days.push(d); } d.rows.push(t); });
-    html += days.map(d=>group(dayLong(d.date), d.rows)).join('') || `<div class="empty">Nothing scheduled ahead. Give a todo a date and it shows up here.</div>`;
-  } else if(todoView === 'anytime'){
-    const any = open.filter(t=>!t.due_date);
-    const groups = {}; any.forEach(t=>{ const k = (t.project && t.project.title) || 'No project'; (groups[k] = groups[k] || []).push(t); });
-    html += Object.keys(groups).sort((a,b)=> a==='No project' ? 1 : b==='No project' ? -1 : a.localeCompare(b)).map(k=>group(k, groups[k].sort(byPrio), `${groups[k].length}`)).join('') || `<div class="empty">Everything has a date.</div>`;
+  if(todoView === 'later'){
+    // today's and overdue todos live in the agenda above; this is everything after that
+    const up = open.filter(t=>!t.someday && t.due_date && t.due_date > today).sort((a,b)=>a.due_date.localeCompare(b.due_date) || byPrio(a,b));
+    const weekEnd = isoAddDays(today, 7);
+    html += group('Next 7 days', up.filter(t=>t.due_date <= weekEnd), '') + group('Later on', up.filter(t=>t.due_date > weekEnd), '');
+    const undated = open.filter(t=>!t.someday && !t.due_date);
+    const groups = {}; undated.forEach(t=>{ const k = (t.project && t.project.title) || 'No project'; (groups[k] = groups[k] || []).push(t); });
+    Object.keys(groups).sort((a,b)=> a==='No project' ? 1 : b==='No project' ? -1 : a.localeCompare(b)).forEach(k=>{ html += group(`${k} · no date`, groups[k].sort(byPrio), `${groups[k].length}`); });
+    if(!html) html = `<div class="empty">Nothing waiting. Today's todos are in the agenda above.</div>`;
+  } else if(todoView === 'someday'){
+    const sd = open.filter(t=>t.someday).sort(byPrio);
+    html += sd.length ? group('Parked for someday', sd, `${sd.length}`) + `<div class="suggest-note">Tap one and give it a date to bring it back.</div>` : `<div class="empty">Nothing parked. Triage moves things here that you're not doing soon.</div>`;
   } else {
     const done = todos.filter(t=>t.status!=='open').sort((a,b)=>(b.completed_at||'').localeCompare(a.completed_at||'')).slice(0, 40);
     html += group('Finished', done) || `<div class="empty">Nothing finished yet.</div>`;
@@ -3532,7 +3694,7 @@ async function patchTodo(code, body){
     const row = e.target.closest('.swipe'); if(!row || row.dataset.swiped === '1') return;
     const code = row.dataset.code;
     const qc = e.target.closest('.quick-complete'); if(qc){ e.stopPropagation(); hapticPulse(); toggleTodoComplete(code); return; }
-    const sd = e.target.closest('[data-setdue]'); if(sd){ patchTodo(code, { due_date: sd.dataset.setdue || null }); return; }
+    const sd = e.target.closest('[data-setdue]'); if(sd){ patchTodo(code, sd.dataset.setdue ? { due_date: sd.dataset.setdue, someday: false } : { due_date: null }); return; }
     const sp = e.target.closest('[data-setprio]'); if(sp){ patchTodo(code, { priority: sp.dataset.setprio }); return; }
     if(e.target.closest('[data-cancel]')){ expandedCode = null; patchTodo(code, { status:'cancelled', completed_at: new Date().toISOString() }); return; }
     if(e.target.closest('[data-reopen]')){ expandedCode = null; patchTodo(code, { status:'open', completed_at: null }); return; }
@@ -4108,7 +4270,7 @@ const OTTO_ICONS = {"food": "<path d=\"M5 7h14l-1.4 11.2a2 2 0 0 1-2 1.8H8.4a2 2
 
 // ================= OTTO SHELL =================
 const AREAS = {
-  todos:   { title:'Todos',   icon:'todos',  panels:['panelTodos'] },
+  todos:   { title:'Plan',    icon:'todos',  panels:['panelTodos'] },
   money:   { title:'Money',   icon:'money',  panels:['panelAccounts','panelBudget'] },
   food:    { title:'Food',    icon:'food',   panels:['panelFood'] },
   health:  { title:'Health',  icon:'health', panels:['panelHealth'] },
@@ -4165,7 +4327,7 @@ function pageSubtitle(area){
     if(area === 'money'){ const m = homeMoney(); return m ? (m.left < 0 ? `${money(-m.left)} over this week` : `${money(m.left)} left this week`) : ''; }
     if(area === 'food'){ if(!foodData || !foodData.plan) return ''; if(foodData.plan.started_on && foodData.pace) return `${Number(foodData.pace.mains_left||0)} meals left in the fridge`; const meal = homeNextMeal(); return meal ? `Next: ${meal.name}` : ''; }
     if(area === 'health'){ if(!lastHealthData || !lastHealthData.daily) return ''; const S = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); const stale = !S.synced || (Date.now() - new Date(S.synced).getTime()) > 6*3600000; return stale && !(S.todayRow && S.todayRow.steps) ? `Not synced since ${timeAgo(S.synced || new Date().toISOString())}` : `${(S.todayRow && S.todayRow.steps || 0).toLocaleString()} steps today`; }
-    if(area === 'todos'){ const t = localToday(), open = (allTodos||[]).filter(x=>x.status==='open'); const d = open.filter(x=>x.due_date && x.due_date <= t).length; return `${d} for today, ${open.length} open`; }
+    if(area === 'todos'){ const its = planItemsFor(localToday()); const ev = its.find(x=>x.kind==='event' && x.sort >= new Date().toTimeString().slice(0,5)); return its.length ? `${its.length} today${ev ? ` · next: ${ev.title}` : ''}` : 'Nothing planned today'; }
     if(area === 'assets'){ const lp = mapData && mapData.lastPoint, fresh = lp && (Date.now() - new Date(lp.recorded_at).getTime()) < 6*3600000; const v = (mapData && mapData.visits || []).find(x=>x.is_open && x.arrived_at); return fresh && v ? `At ${v.place} since ${clockTime(v.arrived_at)}` : (lp ? `Location ${fresh ? 'updated' : 'paused, last update'} ${timeAgo(lp.recorded_at)}` : 'Your places, purchases and stuff'); }
   } catch(e){}
   return '';
@@ -4237,6 +4399,8 @@ function syncWarningHtml(){
 }
 function renderBriefing(){
   renderPageHead();
+  // Plan pulls from todos, meals, bills and events — redraw once everything has loaded
+  if(allTodos && document.getElementById('planWeekDays')){ try{ renderPlanWeek(allTodos); } catch(e){} }
   const grid = document.getElementById('homeTiles'), hero = document.getElementById('homeHero'); if(!grid) return;
   const today = localToday(), H = 3600000;
   // ---- hero: money left this week ----
@@ -4269,7 +4433,9 @@ function renderBriefing(){
   if(allTodos){
     const open = allTodos.filter(t=>t.status==='open'), late = open.filter(t=>t.due_date && t.due_date < today).length;
     const dueToday = open.filter(t=>t.due_date && t.due_date <= today).length;
-    cells += cell('todos','Todos', `${dueToday} today`, late ? `${late} overdue · ${open.length} open` : `${open.length} open`, late > 0);
+    const its = planItemsFor(today).filter(x=>x.kind !== 'todo' || x.late || true);
+    const nextIt = its.find(x=>x.kind==='event' && x.sort >= new Date().toTimeString().slice(0,5)) || its.find(x=>x.kind!=='todo') || its[0];
+    cells += cell('todos','Plan', its.length ? `${its.length} today` : 'Nothing today', nextIt ? `Next: ${esc(nextIt.title)}` : (late ? `${late} overdue` : `${open.length} open todos`), late > 0 && !nextIt);
   }
   // ---- health: never show a bare 0 when the feed is stale ----
   let hv = '—', hs = 'No data yet', hAlert = false;
@@ -4331,6 +4497,7 @@ function areaListHtml(){
     <span class="brief-icon">${svgIcon(AREAS[k].icon)}</span><span class="brief-text"><span class="brief-title" style="display:block">${AREAS[k].title}</span><span class="brief-sub" style="display:block">${esc(subs[k])}</span></span>${CHEV}</button>`).join('')}</div>`;
 }
 function openSheet(area){
+  if(area === 'assets' && !tlUserClosed) setTimeout(()=>{ if(sheetArea === 'assets') openTimeline(); }, 350);
   const sheet = document.getElementById('sheet'), backdrop = document.getElementById('sheetBackdrop'), body = document.getElementById('sheetBody');
   if(!sheetArea) sheetReturnFocus = document.activeElement;
   returnPanels();
@@ -4754,7 +4921,7 @@ async function bootApp(){
   }
   // categories first (budget + transaction views need them), everything else in parallel
   await Promise.allSettled([refresh(false), refreshAccounts(), refreshCredit(), (async()=>{ try{ allCategories = await fetchCategories(); } catch(e){ /* form will just show no categories */ } })()]);
-  await Promise.allSettled([refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth()]);
+  await Promise.allSettled([refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar()]);
   renderBriefing();
   resumePlaidOAuth();
 }
@@ -4800,7 +4967,7 @@ document.getElementById('signOutBtn').addEventListener('click', ()=>{
 async function refreshEverything(){
   await ensureValidSession();
   // independent areas load in parallel; each catches its own errors and shows its own banner
-  await Promise.allSettled([refresh(true), refreshAccounts(), refreshCredit(), refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth()]);
+  await Promise.allSettled([refresh(true), refreshAccounts(), refreshCredit(), refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar()]);
   renderBriefing();
 }
 
