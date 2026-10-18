@@ -1536,6 +1536,25 @@ body.chatting .otto-chat-starters{display:none}
   @media (prefers-reduced-motion: reduce){ .mic-btn.on{animation:none;} }
   .msg-sources{display:flex; flex-direction:column; gap:4px; margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.8rem;}
   .msg-sources a{color:var(--accent); text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  /* ===== Chat actions + nightly check-in (build .43) ===== */
+  .msg-actions{display:flex; flex-direction:column; gap:6px; margin-top:10px; padding-top:8px; border-top:1px solid var(--border);}
+  .msg-action{display:flex; align-items:center; gap:8px; font-size:0.84rem; color:var(--text);}
+  .msg-action .ma-check{color:var(--ok); font-weight:800;}
+  .msg-action .ma-text{flex:1; min-width:0;}
+  .msg-action .ma-undo{border:1px solid var(--border); background:var(--surface); color:var(--accent); font:inherit; font-size:0.78rem; font-weight:700; border-radius:999px; padding:5px 10px; min-height:32px; cursor:pointer;}
+  .msg-action.undone .ma-text{text-decoration:line-through; color:var(--text-faint);} .msg-action.undone .ma-check{color:var(--text-faint);}
+  .ma-undone{font-size:0.75rem; color:var(--text-faint);}
+  .pp-night{all:unset; box-sizing:border-box; display:flex; align-items:center; gap:12px; width:100%; margin-top:18px; padding:14px 16px; border-radius:var(--radius); background:#1E2340; color:#F3F1FF; cursor:pointer;}
+  .pp-night > span:first-child{font-size:1.6rem;}
+  .pp-night div{flex:1; display:flex; flex-direction:column; gap:2px;} .pp-night b{font-size:1rem;} .pp-night div span{font-size:0.8rem; opacity:0.8; line-height:1.35;}
+  .pp-night .pp-night-go{font-weight:700; color:#B7C3FF; white-space:nowrap;}
+  .pp-night.done{background:var(--surface-2); color:var(--text); cursor:default;} .pp-night.done div span{opacity:1; color:var(--text-muted);}
+  /* ===== "Otto has questions" (build .44) ===== */
+  .pp-ask{all:unset; box-sizing:border-box; display:flex; align-items:center; gap:12px; width:100%; margin-top:18px; padding:13px 14px; border-radius:var(--radius); background:var(--accent-soft); cursor:pointer;}
+  .pp-ask-dot{min-width:30px; height:30px; padding:0 6px; box-sizing:border-box; border-radius:15px; background:var(--accent); color:#fff; font-weight:800; font-size:0.95rem; display:grid; place-items:center; flex-shrink:0;}
+  .pp-ask div{flex:1; min-width:0; display:flex; flex-direction:column; gap:2px;} .pp-ask b{font-size:0.98rem; color:var(--text);}
+  .pp-ask div span{font-size:0.8rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .pp-ask-go{font-weight:700; color:var(--accent); white-space:nowrap; font-size:0.9rem;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -1774,7 +1793,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-18.42';
+const APP_BUILD = '2026-10-18.44';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4467,7 +4486,7 @@ function renderBriefing(){
   else if(lpAge < 6*H){ mv = 'On the move'; ms = `updated ${timeAgo(lp.recorded_at)}`; }
   else { mv = lastV ? esc(lastV.place) : 'No location'; ms = lp ? `Location paused ${timeAgo(lp.recorded_at).replace(' ago','')}` : 'Location not set up'; mAlert = true; }
   cells += cell('assets','Map', mv, ms, mAlert);
-  grid.innerHTML = `<div class="pp-grid">${cells}</div>` + syncWarningHtml();
+  grid.innerHTML = nightlyCardHtml() + `<div class="pp-grid">${cells}</div>` + syncWarningHtml();
   const brief = document.getElementById('homeBrief');
   if(brief.classList.contains('loading') || brief.dataset.source !== 'ai'){ brief.textContent = homeFallbackText(); brief.classList.remove('loading'); brief.dataset.source = 'local'; }
   loadAiBriefing();
@@ -4591,8 +4610,9 @@ document.getElementById('composer').addEventListener('submit', async e=>{
   input.value = ''; chatBusy = true;
   const pending = thread.lastElementChild; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30);
   try{
-    const r = await callFn('otto-chat', { messages: chatHistory });
+    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode });
     pending.classList.remove('typing'); pending.textContent = r.text || "I didn't get an answer back.";
+    renderChatActions(pending, r.actions);
     if(r.sources && r.sources.length){
       pending.insertAdjacentHTML('beforeend', `<div class="msg-sources">${r.sources.map((x,i)=>`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${i+1}. ${esc(x.title || new URL(x.url).hostname)}</a>`).join('')}</div>`);
     }
@@ -4604,6 +4624,65 @@ document.getElementById('composer').addEventListener('submit', async e=>{
     pending.textContent = /ANTHROPIC_API_KEY/.test(err.message) ? "I'm not switched on yet: the AI key still needs to be added in Supabase (secret ANTHROPIC_API_KEY)." : `Couldn't answer: ${err.message}`;
   } finally { chatBusy = false; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30); }
 });
+// ---------- chat actions (changes the chat made, each with Undo) + nightly check-in ----------
+let chatMode = 'chat', todayCheckin = null;
+function renderChatActions(el, actions){
+  if(!actions || !actions.length) return;
+  el.insertAdjacentHTML('beforeend', `<div class="msg-actions">${actions.map(a=>`<div class="msg-action" data-action="${a.id}"><span class="ma-check">✓</span><span class="ma-text">${esc(a.summary)}</span><button type="button" class="ma-undo" data-undo="${a.id}">Undo</button></div>`).join('')}</div>`);
+  setTimeout(()=>refreshEverything().catch(()=>{}), 300);   // show the change everywhere in the app (and shrink the question count)
+}
+document.addEventListener('click', async e=>{
+  const b = e.target.closest('[data-undo]'); if(!b) return;
+  b.disabled = true; b.textContent = 'Undoing…';
+  try{
+    const r = await callFn('otto-chat', { undo: Number(b.dataset.undo) });
+    if(!r || r.ok === false) throw new Error((r && r.error) || 'failed');
+    const row = b.closest('.msg-action'); row.classList.add('undone'); b.remove(); row.insertAdjacentHTML('beforeend', '<span class="ma-undone">Undone</span>');
+    chatHistory.push({ role:'user', content:`(I undid: ${row.querySelector('.ma-text').textContent})` }, { role:'assistant', content:'Okay, undone.' });
+    refreshEverything().catch(()=>{});
+  } catch(err){ b.disabled = false; b.textContent = 'Undo'; showNotice(`Couldn't undo: ${err.message}`); }
+});
+async function refreshCheckin(){
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/daily_checkins?select=checkin_date,mood,energy,highlight&checkin_date=eq.${localToday()}`, { headers: authHeaders() });
+    todayCheckin = r.ok ? ((await r.json())[0] || null) : null;
+  } catch(e){ todayCheckin = null; }
+}
+let clarifications = [];
+async function refreshClarifications(){
+  try{
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/v_clarifications?select=kind,ref_id,title&order=priority.asc`, { headers: authHeaders() });
+    clarifications = r.ok ? await r.json() : [];
+  } catch(e){ clarifications = []; }
+}
+const CLARIFY_NOUN = { transaction:['purchase','purchases'], place:['place','places'], todo:['overdue todo','overdue todos'], meal:['meal','meals'], checkin:['check-in','check-in'] };
+function nightlyCardHtml(){   // now: "Otto has questions" — whatever Otto needs clarified, any time of day
+  const n = clarifications.length;
+  if(!n) return '';
+  const by = {}; clarifications.forEach(c=>{ by[c.kind] = (by[c.kind]||0) + 1; });
+  const parts = Object.keys(CLARIFY_NOUN).filter(k=>by[k]).map(k=>`${by[k]} ${CLARIFY_NOUN[k][by[k]===1?0:1]}`);
+  return `<button class="pp-ask" type="button" id="clarifyStart"><span class="pp-ask-dot" aria-hidden="true">${n}</span><div><b>Otto has ${n} question${n===1?'':'s'}</b><span>${esc(parts.join(' · '))}</span></div><span class="pp-ask-go">Answer ›</span></button>`;
+}
+async function startNightly(mode){
+  if(chatBusy) return;
+  chatMode = mode || 'clarify'; chatHistory.length = 0;
+  const thread = document.getElementById('chatThread');
+  document.querySelectorAll('#chatThread > .msg:not(.intro)').forEach(m=>m.remove());
+  document.body.classList.add('chatting'); window.scrollTo({ top:0 });
+  chatHistory.push({ role:'user', content:'What do you need to ask me about?' });
+  thread.insertAdjacentHTML('beforeend', `<div class="msg otto typing">Looking at what needs your input…</div>`);
+  const pending = thread.lastElementChild; chatBusy = true;
+  try{
+    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode });
+    pending.classList.remove('typing'); pending.textContent = r.text || "Let's start.";
+    renderChatActions(pending, r.actions);
+    chatHistory.push({ role:'assistant', content: r.text || '' });
+    if(voice.active){ try{ voice.speak(r.text || ''); } catch(e){ voice.stop(); } }
+  } catch(err){ pending.classList.remove('typing'); pending.classList.add('err'); pending.textContent = `Couldn't start: ${err.message}`; chatMode = 'chat'; }
+  finally{ chatBusy = false; document.getElementById('askInput').focus(); }
+}
+document.addEventListener('click', e=>{ if(e.target.closest('#clarifyStart')) startNightly('clarify'); });
+
 // ---------- voice: talk to Otto (on-device speech recognition + speech synthesis) ----------
 const voice = (()=>{
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -4645,7 +4724,7 @@ const voice = (()=>{
   input.addEventListener('keydown', ()=>{ if(st.active && !st.listening) stopAll(); });   // typing ends voice mode
   return { get active(){ return st.active; }, speak, stop: stopAll };
 })();
-document.getElementById('chatDone').addEventListener('click', ()=>voice.stop());
+document.getElementById('chatDone').addEventListener('click', ()=>{ voice.stop(); chatMode = 'chat'; });
 
 renderGreeting();
 
@@ -4977,7 +5056,7 @@ async function bootApp(){
   }
   // categories first (budget + transaction views need them), everything else in parallel
   await Promise.allSettled([refresh(false), refreshAccounts(), refreshCredit(), (async()=>{ try{ allCategories = await fetchCategories(); } catch(e){ /* form will just show no categories */ } })()]);
-  await Promise.allSettled([refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar()]);
+  await Promise.allSettled([refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar(), refreshCheckin(), refreshClarifications()]);
   renderBriefing();
   resumePlaidOAuth();
 }
@@ -5023,7 +5102,7 @@ document.getElementById('signOutBtn').addEventListener('click', ()=>{
 async function refreshEverything(){
   await ensureValidSession();
   // independent areas load in parallel; each catches its own errors and shows its own banner
-  await Promise.allSettled([refresh(true), refreshAccounts(), refreshCredit(), refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar()]);
+  await Promise.allSettled([refresh(true), refreshAccounts(), refreshCredit(), refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar(), refreshCheckin(), refreshClarifications()]);
   renderBriefing();
 }
 
