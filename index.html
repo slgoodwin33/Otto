@@ -1528,6 +1528,14 @@ body.chatting .otto-chat-starters{display:none}
   .triage-skip{display:block; margin:16px auto 0;}
   .triage-done{display:flex; flex-direction:column; gap:8px; align-items:flex-start; padding:24px 0 8px;} .triage-done b{font-size:1.3rem;} .triage-done span{color:var(--text-muted);}
   body.triaging{overflow:hidden;}
+  /* ===== Voice + sources (build .42) ===== */
+  .composer .composer-inner .mic-btn{background:var(--surface-2) !important; color:var(--text) !important; box-shadow:none !important;}
+  .composer .composer-inner .mic-btn.on{background:var(--alert) !important; color:#fff !important; animation:micPulse 1.4s ease-in-out infinite;}
+  .composer .composer-inner .mic-btn.voice{color:var(--accent) !important; background:var(--accent-soft) !important;}
+  @keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(180,68,28,.45) !important;} 50%{box-shadow:0 0 0 10px rgba(180,68,28,0) !important;}}
+  @media (prefers-reduced-motion: reduce){ .mic-btn.on{animation:none;} }
+  .msg-sources{display:flex; flex-direction:column; gap:4px; margin-top:10px; padding-top:8px; border-top:1px solid var(--border); font-size:0.8rem;}
+  .msg-sources a{color:var(--accent); text-decoration:none; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -1583,7 +1591,8 @@ body.chatting .otto-chat-starters{display:none}
   <form class="composer" id="composer" autocomplete="off">
     <div class="composer-inner">
       <label for="askInput" class="sr-only">Ask Otto</label>
-      <input id="askInput" type="text" placeholder="Ask about your week, money, food…" enterkeyhint="send">
+      <input id="askInput" type="text" placeholder="Ask Otto anything…" enterkeyhint="send">
+      <button type="button" id="micBtn" class="mic-btn" aria-label="Talk to Otto" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       <button type="submit" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></button>
     </div>
   </form>
@@ -1765,7 +1774,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-17.41';
+const APP_BUILD = '2026-10-18.42';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4578,19 +4587,66 @@ document.getElementById('composer').addEventListener('submit', async e=>{
   const thread = document.getElementById('chatThread');
   chatHistory.push({ role:'user', content:text });
   if(!document.body.classList.contains('chatting')){ document.body.classList.add('chatting'); window.scrollTo({ top:0 }); }
-  thread.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(text)}</div><div class="msg otto typing">Looking at your data…</div>`);
+  thread.insertAdjacentHTML('beforeend', `<div class="msg me">${esc(text)}</div><div class="msg otto typing">Thinking…</div>`);
   input.value = ''; chatBusy = true;
   const pending = thread.lastElementChild; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30);
   try{
     const r = await callFn('otto-chat', { messages: chatHistory });
     pending.classList.remove('typing'); pending.textContent = r.text || "I didn't get an answer back.";
+    if(r.sources && r.sources.length){
+      pending.insertAdjacentHTML('beforeend', `<div class="msg-sources">${r.sources.map((x,i)=>`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${i+1}. ${esc(x.title || new URL(x.url).hostname)}</a>`).join('')}</div>`);
+    }
     chatHistory.push({ role:'assistant', content: r.text || '' });
+    if(voice.active){ try{ voice.speak(r.text || ''); } catch(e){ voice.stop(); } }   // speech trouble never hides the answer
   } catch(err){
     chatHistory.pop();
     pending.classList.remove('typing'); pending.classList.add('err');
     pending.textContent = /ANTHROPIC_API_KEY/.test(err.message) ? "I'm not switched on yet: the AI key still needs to be added in Supabase (secret ANTHROPIC_API_KEY)." : `Couldn't answer: ${err.message}`;
   } finally { chatBusy = false; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30); }
 });
+// ---------- voice: talk to Otto (on-device speech recognition + speech synthesis) ----------
+const voice = (()=>{
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const btn = document.getElementById('micBtn'), input = document.getElementById('askInput'), form = document.getElementById('composer');
+  const st = { active:false, listening:false, rec:null, misses:0 };
+  function setUi(){ btn.classList.toggle('on', st.listening); btn.classList.toggle('voice', st.active && !st.listening); btn.setAttribute('aria-pressed', String(st.active)); input.placeholder = st.listening ? 'Listening…' : 'Ask Otto anything…'; }
+  function stopAll(){ st.active = false; st.listening = false; try{ st.rec && st.rec.abort(); }catch(e){} try{ speechSynthesis.cancel(); }catch(e){} setUi(); }
+  function listen(){
+    if(!SR){ showNotice("Voice input isn't available here. Tap the text box and use your keyboard's mic to dictate."); stopAll(); return; }
+    try{ speechSynthesis.cancel(); }catch(e){}
+    const rec = new SR(); st.rec = rec; rec.lang = 'en-US'; rec.interimResults = true; rec.continuous = false;
+    let finalText = '';
+    rec.onresult = ev => { let interim = ''; for(let i=ev.resultIndex;i<ev.results.length;i++){ const t = ev.results[i][0].transcript; if(ev.results[i].isFinal) finalText += t; else interim += t; } input.value = (finalText + interim).trim(); };
+    rec.onerror = ev => { if(ev.error === 'not-allowed' || ev.error === 'service-not-allowed'){ showNotice('Allow microphone and speech recognition for Otto in Settings to talk to it.'); stopAll(); } };
+    rec.onend = () => {
+      st.listening = false; setUi();
+      const text = (finalText || input.value).trim();
+      if(text){ st.misses = 0; input.value = text; form.requestSubmit(); }
+      else if(st.active && ++st.misses < 2) listen();     // one retry on silence, then stop
+      else stopAll();
+    };
+    st.listening = true; setUi();
+    try{ rec.start(); } catch(e){ stopAll(); }
+  }
+  function speak(text){
+    if(!('speechSynthesis' in window) || !text){ if(st.active) listen(); return; }
+    const u = new SpeechSynthesisUtterance(text.replace(/https?:\/\/\S+/g, '').replace(/\([^)]*cut short[^)]*\)/i, ''));
+    u.lang = 'en-US'; u.rate = 1.04;
+    const v = speechSynthesis.getVoices().find(v=>/en-US/.test(v.lang) && /Samantha|Ava|Siri|Premium|Enhanced/i.test(v.name)); if(v) u.voice = v;
+    u.onend = () => { if(st.active) setTimeout(listen, 250); };   // hands-free: listen again after Otto finishes talking
+    speechSynthesis.speak(u);
+  }
+  btn.addEventListener('click', ()=>{
+    if(st.active || st.listening){ stopAll(); return; }
+    st.active = true; st.misses = 0;
+    try{ speechSynthesis.speak(new SpeechSynthesisUtterance('')); }catch(e){}   // unlock audio on iOS inside the tap
+    listen();
+  });
+  input.addEventListener('keydown', ()=>{ if(st.active && !st.listening) stopAll(); });   // typing ends voice mode
+  return { get active(){ return st.active; }, speak, stop: stopAll };
+})();
+document.getElementById('chatDone').addEventListener('click', ()=>voice.stop());
+
 renderGreeting();
 
 
