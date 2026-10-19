@@ -1885,7 +1885,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-19.46';
+const APP_BUILD = '2026-10-19.47';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2918,19 +2918,23 @@ function symIcon(svg, bg, size, shape, label){
   return L.divIcon({ className:'', iconSize:[s2, s2], iconAnchor:[s2/2, s2/2], popupAnchor:[0, -s2/2],
     html:`<div style="position:relative;width:${s2}px;height:${s2}px;border-radius:${r}px;background:${bg};color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35)"><svg viewBox="0 0 24 24" width="${Math.round(s2*0.62)}" height="${Math.round(s2*0.62)}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>${label ? `<span style="position:absolute;left:50%;top:100%;transform:translate(-50%,2px);background:#fff;color:${bg};font:700 9px var(--sans);padding:0 4px;border-radius:5px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.25)">${label}</span>` : ''}</div>` });
 }
+const ESRI = 'https://services.arcgisonline.com/arcgis/rest/services/';
 const BASEMAPS = {
-  light: { name:'Light', url:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', sub:'abcd', max:20, attr:'© OpenStreetMap contributors © CARTO' },
-  dark:  { name:'Dark',  url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  sub:'abcd', max:20, attr:'© OpenStreetMap contributors © CARTO' },
-  satellite: { name:'Satellite', url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', sub:'', max:19, attr:'Tiles © Esri — Esri, Maxar, Earthstar Geographics, GIS User Community' }
+  light: { name:'Light', layers:[ESRI+'Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', ESRI+'Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'], native:16, attr:'Esri, HERE, Garmin, © OpenStreetMap contributors' },
+  dark:  { name:'Dark',  layers:[ESRI+'Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',  ESRI+'Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'],  native:16, attr:'Esri, HERE, Garmin, © OpenStreetMap contributors' },
+  satellite: { name:'Satellite', layers:[ESRI+'World_Imagery/MapServer/tile/{z}/{y}/{x}', ESRI+'Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}'], native:19, attr:'Esri, Maxar, Earthstar Geographics, GIS User Community' }
 };
 const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
 function basemapChoice(){ try{ return localStorage.getItem('otto.basemap') || 'auto'; } catch(e){ return 'auto'; } }
 function basemapKey(){ const c = basemapChoice(); return c === 'auto' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : c; }
-function makeBaseLayer(){ const b = BASEMAPS[basemapKey()] || BASEMAPS.light; return L.tileLayer(b.url, { subdomains: b.sub || 'abc', maxZoom: b.max, attribution: b.attr, detectRetina: true }); }
+function makeBaseLayer(){
+  const b = BASEMAPS[basemapKey()] || BASEMAPS.light;
+  return L.layerGroup(b.layers.map((u,i)=>L.tileLayer(u, { maxNativeZoom: b.native, maxZoom: 19, attribution: i === 0 ? b.attr : '', zIndex: i })));
+}
 let assetBaseLayer = null, homeBaseLayer = null;
 function applyBasemap(){
   if(homeMap){ if(homeBaseLayer) homeMap.removeLayer(homeBaseLayer); homeBaseLayer = makeBaseLayer().addTo(homeMap); }
-  if(typeof assetMapInstance !== 'undefined' && assetMapInstance){ if(assetBaseLayer) assetMapInstance.removeLayer(assetBaseLayer); assetBaseLayer = makeBaseLayer().addTo(assetMapInstance); assetBaseLayer.bringToBack(); }
+  if(typeof assetMapInstance !== 'undefined' && assetMapInstance){ if(assetBaseLayer) assetMapInstance.removeLayer(assetBaseLayer); assetBaseLayer = makeBaseLayer().addTo(assetMapInstance); }
   document.body.dataset.basemap = basemapKey();
   renderBasemapSetting();
 }
@@ -4577,7 +4581,7 @@ function renderHomeMap(){
   initHomeMap(); if(!homeMap) return;
   homeLayers.clearLayers();
   const today = localToday(), pts = (mapData.points||[]).filter(p=>isoOf(p.recorded_at)===today).sort((a,b)=>a.recorded_at.localeCompare(b.recorded_at));
-  const lp = mapData.lastPoint || (mapData.points||[]).slice(-1)[0];
+  const fx = lastFix(), lp = fx.pos ? { ...fx.pos, recorded_at: fx.at } : null;
   const visits = (mapData.visits||[]).filter(v=>v.arrived_at && (isoOf(v.arrived_at)===today || v.is_open) && v.status !== 'declined' && v.lat != null);
   const dark = basemapKey() !== 'light', route = dark ? '#7FA2FF' : '#2448C9';
   if(pts.length > 1) L.polyline(simplifyPts(pts, 10), { color: route, weight: 4, opacity: 0.9, lineCap:'round', lineJoin:'round', interactive:false }).addTo(homeLayers);
@@ -4585,7 +4589,7 @@ function renderHomeMap(){
     .bindTooltip(`${esc(v.place)} · ${clockTime(v.arrived_at)}`, { direction:'top', offset:[0,-6] }).addTo(homeLayers));
   const chip = document.getElementById('homeMapChip');
   if(lp){
-    const ageMin = (Date.now() - Date.parse(lp.recorded_at)) / 60000, fresh = ageMin < 360;
+    const fresh = fx.fresh;
     homeCenter = L.latLng(lp.lat, lp.lon);
     if(lp.accuracy_m) L.circle(homeCenter, { radius: Math.min(Number(lp.accuracy_m), 300), color: route, weight: 1, opacity: 0.4, fillColor: route, fillOpacity: 0.1, interactive:false }).addTo(homeLayers);
     L.marker(homeCenter, { zIndexOffset: 900, interactive:false, icon: L.divIcon({ className:'', iconSize:[22,22], iconAnchor:[11,11], html:`<div class="me-dot ${fresh?'live':'stale'}"></div>` }) }).addTo(homeLayers);
@@ -4596,8 +4600,19 @@ function renderHomeMap(){
       : `<span class="hm-stale" aria-hidden="true"></span><span>Last seen${lastV ? ' at ' + esc(lastV.place) : ''} · ${timeAgo(lp.recorded_at)}</span><button type="button" data-area="assets">Map ›</button>`;
     if(!homeMap._ottoCentered){ homeMap.setView(homeCenter, 15, { animate:false }); homeMap._ottoCentered = true; }
     centerHomeMap();
-  } else { chip.hidden = false; chip.innerHTML = `<span class="hm-stale" aria-hidden="true"></span><span>No location yet</span><button type="button" data-area="assets">Map ›</button>`; }
+  } else {
+    const lastV = (mapData.visits||[]).filter(v=>v.lat != null && v.status !== 'declined').sort((a,b)=>(b.arrived_at||'').localeCompare(a.arrived_at||''))[0];
+    if(lastV){ homeCenter = L.latLng(lastV.lat, lastV.lon); if(!homeMap._ottoCentered){ homeMap.setView(homeCenter, 15, { animate:false }); homeMap._ottoCentered = true; } centerHomeMap(); }
+    chip.hidden = false; chip.innerHTML = `<span class="hm-stale" aria-hidden="true"></span><span>${lastV ? 'Last seen at ' + esc(lastV.place) + (fx.at ? ' · ' + timeAgo(fx.at) : '') : 'No location yet'}</span><button type="button" data-area="assets">Map ›</button>`;
+  }
   setTimeout(()=>homeMap.invalidateSize(), 50);
+}
+// where you are: the newest point that has coordinates; how fresh: the newest report time
+function lastFix(){
+  const pts = (mapData.points||[]).filter(p=>p.lat != null && p.lon != null);
+  const pos = pts.length ? pts.reduce((a,b)=>a.recorded_at > b.recorded_at ? a : b) : null;
+  const t = [mapData.lastPoint && mapData.lastPoint.recorded_at, pos && pos.recorded_at].filter(Boolean).sort().pop() || null;
+  return { pos, at: t, fresh: !!t && (Date.now() - Date.parse(t)) < 6*3600000 };
 }
 function dayLineRow(time, dot, title, sub, extra){
   return `<div class="dl-row"><span class="dl-time">${time}</span><span class="dl-dot ${dot}"></span><div class="dl-main"><span class="dl-title">${title}</span>${sub ? `<span class="dl-sub">${sub}</span>` : ''}${extra||''}</div></div>`;
@@ -4605,7 +4620,7 @@ function dayLineRow(time, dot, title, sub, extra){
 function renderDaySheet(){
   const top = document.getElementById('dsTop'), body = document.getElementById('dsBody'); if(!top || !body) return;
   const today = localToday(), H = 3600000, now = new Date();
-  const lp = mapData.lastPoint || (mapData.points||[]).slice(-1)[0], fresh = lp && (Date.now() - Date.parse(lp.recorded_at)) < 6*H;
+  const fx = lastFix(), lp = fx.at ? { recorded_at: fx.at } : null, fresh = fx.fresh;
   const visits = (mapData.visits||[]).filter(v=>v.arrived_at && v.status !== 'declined' && (isoOf(v.arrived_at)===today || v.is_open)).sort((a,b)=>a.arrived_at.localeCompare(b.arrived_at));
   const openV = visits.find(v=>v.is_open), lastV = (mapData.visits||[]).filter(v=>v.status!=='declined').slice().sort((a,b)=>(b.arrived_at||'').localeCompare(a.arrived_at||''))[0];
   // headline: where you are + the money that matters
@@ -4666,7 +4681,7 @@ function renderDaySheet(){
 function renderHomeDock(m){
   const el = document.getElementById('homeDock'); if(!el) return;
   const today = localToday(), its = planItemsFor(today);
-  const lp = mapData.lastPoint, fresh = lp && (Date.now() - Date.parse(lp.recorded_at)) < 6*3600000;
+  const fresh = lastFix().fresh;
   const openV = (mapData.visits||[]).find(v=>v.is_open && v.arrived_at);
   let food = '—'; if(foodData && foodData.plan) food = foodData.plan.started_on ? 'on plan' : 'not started';
   let steps = '—'; if(lastHealthData && lastHealthData.daily){ const Sx = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); if(Sx.todayRow && Sx.todayRow.steps != null) steps = Sx.todayRow.steps >= 1000 ? (Sx.todayRow.steps/1000).toFixed(1)+'k' : String(Sx.todayRow.steps); }
@@ -4697,12 +4712,18 @@ function renderHomeDock(m){
     setSnap(snap); if(navigator.vibrate) navigator.vibrate(8);
   });
 })();
-document.addEventListener('click', e=>{ if(e.target.closest('[data-ask-place]')) startNightly('clarify'); });
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-ask-place]')){ startNightly('clarify'); return; }
+  const b = e.target.closest('#homeDock [data-area], #daySheet [data-area], #homeMapChip [data-area]');
+  if(b){ if(navigator.vibrate) navigator.vibrate(6); openSheet(b.dataset.area); }
+});
 window.addEventListener('resize', ()=>{ setSnap(homeSnap, false); if(homeMap) homeMap.invalidateSize(); });
 
 function renderBriefing(){
   renderPageHead();
-  try{ renderHomeMap(); renderDaySheet(); setSnap(homeSnap, false); renderBasemapSetting(); } catch(e){ console.error('home', e); }
+  try{ renderDaySheet(); } catch(e){ console.error('day sheet', e); }
+  try{ renderHomeMap(); } catch(e){ console.error('home map', e); }
+  try{ setSnap(homeSnap, false); renderBasemapSetting(); } catch(e){}
   // Plan pulls from todos, meals, bills and events — redraw once everything has loaded
   if(allTodos && document.getElementById('planWeekDays')){ try{ renderPlanWeek(allTodos); } catch(e){} }
   const grid = document.getElementById('homeTiles'), hero = document.getElementById('homeHero'); if(!grid) return;
