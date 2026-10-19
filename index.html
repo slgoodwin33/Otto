@@ -1578,10 +1578,69 @@ body.chatting .otto-chat-starters{display:none}
   #moneySeg#moneySeg#moneySeg > button, #foodSubTabs#foodSubTabs#foodSubTabs > button, #todoSeg#todoSeg#todoSeg > button,
   #moneySeg#moneySeg#moneySeg > button.active, #foodSubTabs#foodSubTabs#foodSubTabs > button.active, #todoSeg#todoSeg#todoSeg > button.active{background:none !important; border:none !important; box-shadow:none !important; border-radius:0 !important;}
   #healthRangeFilters#healthRangeFilters#healthRangeFilters > button.active, .plan-view-switch.plan-view-switch.plan-view-switch > button.active, .map-ranges.map-ranges.map-ranges > button.active{color:var(--text) !important;}
+
+  /* ===== Home v2: live map + day sheet + dock (build .46) ===== */
+  body.home-v2 .otto-greet, body.home-v2 #briefCard, body.home-v2 .otto-chat-starters, body.home-v2 .dock-wrap{display:none !important;}
+  .home-map{position:fixed; inset:0; z-index:0; background:#E8E6E0;}
+  body[data-basemap="dark"] .home-map, body[data-basemap="satellite"] .home-map{background:#1B1D22;}
+  .home-map .leaflet-control-attribution{font-size:9px; background:rgba(255,255,255,.7); position:fixed; top:calc(env(safe-area-inset-top,0px) + 4px); right:4px;}
+  body.home-v2 .otto-top{position:fixed; top:0; left:0; right:0; z-index:30; padding:calc(env(safe-area-inset-top,0px) + 8px) 14px 0 !important; background:none !important; pointer-events:none;}
+  body.home-v2 .otto-top > *{pointer-events:auto;}
+  body.home-v2 .otto-top .icon-btn, body.home-v2 .otto-top .sync-chip{background:color-mix(in srgb, var(--surface) 88%, transparent) !important; backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 2px 10px rgba(0,0,0,.15) !important;}
+  .home-map-chip{position:fixed; z-index:25; left:14px; top:calc(env(safe-area-inset-top,0px) + 62px); display:flex; align-items:center; gap:8px; max-width:calc(100vw - 28px);
+    padding:6px 6px 6px 12px; border-radius:20px; background:color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); box-shadow:0 2px 10px rgba(0,0,0,.15); font-size:12.5px; color:var(--text);}
+  .home-map-chip span:nth-child(2){white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;}
+  .home-map-chip button{all:unset; cursor:pointer; padding:5px 10px; border-radius:14px; background:var(--text); color:var(--bg); font-weight:700; font-size:12px; flex-shrink:0;}
+  .hm-live, .hm-stale{width:8px; height:8px; border-radius:4px; flex-shrink:0; background:#2E9B5F;} .hm-live{animation:hmPulse 2s ease-out infinite;} .hm-stale{background:var(--alert);}
+  @keyframes hmPulse{0%{box-shadow:0 0 0 0 rgba(46,155,95,.6);}100%{box-shadow:0 0 0 8px rgba(46,155,95,0);}}
+  .ds-clip{position:fixed; left:0; right:0; z-index:15; top:0; bottom:calc(env(safe-area-inset-bottom,0px) + 146px); overflow:hidden; pointer-events:none;}
+  .day-sheet{position:absolute; left:0; right:0; bottom:0; pointer-events:auto; height:calc(100dvh - env(safe-area-inset-top,0px) - 256px);
+    background:color-mix(in srgb, var(--bg) 95%, transparent); backdrop-filter:blur(20px) saturate(1.2); -webkit-backdrop-filter:blur(20px) saturate(1.2);
+    border-radius:22px 22px 0 0; box-shadow:0 -6px 30px rgba(0,0,0,.18); display:flex; flex-direction:column; transition:transform .34s cubic-bezier(.2,.85,.25,1); will-change:transform;}
+  .ds-head{padding:8px 20px 4px; cursor:grab; touch-action:none; user-select:none; -webkit-user-select:none;}
+  .ds-grab{width:38px; height:5px; border-radius:3px; background:var(--border); margin:0 auto 10px;}
+  .ds-date{font-size:12.5px; font-weight:600; color:var(--text-muted); letter-spacing:.01em;}
+  .ds-headline{margin:6px 0 0; font-family:var(--display); font-size:22px; line-height:1.22; font-weight:700; letter-spacing:-0.02em; color:var(--text);}
+  .hl-acc{color:var(--accent);} .hl-neg{color:var(--alert);}
+  .ds-meter{margin:10px 0 4px; display:flex; flex-direction:column; gap:5px; font-size:12.5px; color:var(--text-muted);}
+  .ds-bar{height:5px; border-radius:3px; background:var(--surface-2); overflow:hidden;} .ds-bar i{display:block; height:100%; background:var(--accent); border-radius:3px;} .ds-bar i.over{background:var(--alert);}
+  .ds-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:4px 20px 18px; overscroll-behavior:contain;}
+  .day-sheet[data-snap="peek"] .ds-body{overflow:hidden;}
+  .ds-askchip{all:unset; cursor:pointer; display:inline-flex; align-items:center; gap:8px; margin:8px 0 2px; padding:6px 12px 6px 6px; border-radius:18px; background:var(--accent-soft); color:var(--accent); font-weight:700; font-size:13px;}
+  .ds-askchip span{min-width:22px; height:22px; border-radius:11px; background:var(--accent); color:#fff; display:grid; place-items:center; font-size:12px;}
+  .ds-sec{display:flex; justify-content:space-between; align-items:baseline; margin-top:18px; padding-bottom:7px; border-bottom:1.5px solid var(--text);}
+  .ds-sec > span{font-size:11.5px; font-weight:800; letter-spacing:.1em; text-transform:uppercase;} .ds-sec em{font-style:normal; font-size:12.5px; color:var(--text-muted);}
+  .ds-link{all:unset; cursor:pointer; font-size:13px; font-weight:700; color:var(--accent);}
+  .dl-row{display:grid; grid-template-columns:52px 16px minmax(0,1fr); align-items:start; padding:12px 0; border-bottom:1px solid var(--border);}
+  .dl-time{font:500 11.5px var(--mono); color:var(--text-muted); padding-top:3px; font-variant-numeric:tabular-nums;}
+  .dl-dot{width:9px; height:9px; border-radius:5px; margin-top:5px; background:var(--text);} .dl-dot.open{background:var(--accent); box-shadow:0 0 0 3px var(--accent-soft);} .dl-dot.money{border-radius:2px; background:#1F7A45;}
+  .dl-main{display:flex; flex-direction:column; gap:2px; min-width:0;} .dl-title{font-size:16px; font-weight:650; font-weight:600;} .dl-sub{font-size:12.5px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis;}
+  .dl-ask{margin-top:8px; display:flex; align-items:center; justify-content:space-between; gap:8px; padding:9px 10px 9px 12px; border-radius:12px; background:var(--accent-soft); font-size:13px;}
+  .dl-ask b{color:var(--accent);} .dl-ask button{all:unset; cursor:pointer; padding:6px 12px; border-radius:14px; background:var(--accent); color:#fff; font-weight:700; font-size:12.5px; flex-shrink:0;}
+  .dl-empty{padding:14px 0; font-size:14px; color:var(--text-muted);}
+  .dl-now{display:flex; align-items:center; gap:10px; margin:10px 0 2px;} .dl-now span{font:600 11.5px var(--mono); color:var(--alert); letter-spacing:.04em;} .dl-now i{flex:1; height:2px; background:var(--alert); border-radius:1px;}
+  .nx-row{display:grid; grid-template-columns:52px minmax(0,1fr) auto; align-items:baseline; gap:6px; padding:11px 0; border-bottom:1px solid var(--border);}
+  .nx-row:last-child{border-bottom:none;} .nx-title{font-size:14.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;} .nx-title em{font-style:normal; font-weight:400; color:var(--text-muted);} .nx-right{font-size:14.5px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .ds-vitals{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); margin-top:16px; border-top:1px solid var(--border); border-bottom:1px solid var(--border);}
+  .ds-vitals button{all:unset; cursor:pointer; display:flex; flex-direction:column; gap:2px; padding:11px 8px 11px 0; border-right:1px solid var(--border); min-width:0;}
+  .ds-vitals button:nth-child(2){padding-left:10px;} .ds-vitals button:last-child{border-right:none; padding-left:10px;}
+  .ds-vitals span{font-size:10.5px; font-weight:800; letter-spacing:.09em; text-transform:uppercase; color:var(--text-muted);} .ds-vitals b{font-size:15px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;} .ds-vitals b.alert{color:var(--alert); font-size:13px;} .ds-vitals em{font-style:normal; font-size:11.5px; color:var(--text-muted);}
+  .home-dock{position:fixed; left:10px; right:10px; z-index:22; bottom:calc(env(safe-area-inset-bottom,0px) + 76px); display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:4px;
+    padding:6px; border-radius:18px; background:color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow:0 4px 18px rgba(0,0,0,.14);}
+  .hd-btn{all:unset; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:1px; padding:5px 2px; border-radius:12px; min-height:52px; justify-content:center; min-width:0;}
+  .hd-btn:active{background:var(--surface-2);} .hd-ico svg{width:19px; height:19px; display:block; color:var(--text);}
+  .hd-label{font-size:10.5px; font-weight:700; color:var(--text-muted); letter-spacing:.02em;} .hd-val{font:600 11px var(--mono); color:var(--text); max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;} .hd-val.alert{color:var(--alert);}
+  body.home-v2 .composer{background:color-mix(in srgb, var(--surface) 94%, transparent) !important; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);}
+  body.chatting .home-map, body.chatting .ds-clip, body.chatting .home-dock, body.chatting .home-map-chip{display:none !important;}
+  /* 2) let the map run under the status bar on Home; keep a soft fade so the clock stays readable */
+  body.home-v2:not(.chatting)::before{background:linear-gradient(to bottom, color-mix(in srgb, var(--bg) 75%, transparent), transparent) !important;}
+  body.home-v2 .otto-top .sync-chip{border-radius:16px !important; padding:6px 12px !important;}
+  body.chatting.home-v2 .otto-top{position:static; pointer-events:auto;}
+  @media (prefers-reduced-motion: reduce){ .day-sheet{transition:none;} .hm-live{animation:none;} }
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="home-v2">
 <div class="pull-indicator" id="pullIndicator"></div>
 <div id="loginScreen" class="login-screen">
   <form id="loginForm" class="login-card">
@@ -1597,6 +1656,13 @@ body.chatting .otto-chat-starters{display:none}
   </form>
 </div>
 <div class="wrap" id="appWrap" style="display:none;">
+  <div id="homeMap" class="home-map" aria-label="Map of where you are"></div>
+  <div id="homeMapChip" class="home-map-chip" hidden></div>
+  <div class="ds-clip"><section id="daySheet" class="day-sheet" data-snap="half" aria-label="Your day">
+    <div class="ds-head" id="dsHead"><div class="ds-grab" aria-hidden="true"></div><div id="dsTop"></div></div>
+    <div class="ds-body" id="dsBody"></div>
+  </section></div>
+  <nav id="homeDock" class="home-dock" aria-label="Areas"></nav>
   <div class="otto-top">
     <div class="dock-wrap">
     <button class="icon-btn" id="areasBtn" type="button" aria-label="Show areas" aria-expanded="false" aria-controls="areaDock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6"/></svg></button>
@@ -1788,6 +1854,9 @@ body.chatting .otto-chat-starters{display:none}
     </div>
     <div class="tab-panel" id="panelAccount">
       <div class="studio-page-head"><div class="studio-kicker">YOUR SPACE <span class="studio-dot"></span> OTTO</div><h2>Make Otto<br><span>yours.</span></h2><p>Connections, sync status, and account controls.</p></div>
+      <div class="section-title" style="margin-top:4px">Map style<span>Home and Places</span></div>
+      <div class="map-ranges basemap-setting" id="basemapSetting" role="group" aria-label="Map style"></div>
+      <div class="suggest-note" style="margin:6px 0 18px">Auto follows your phone: light by day, dark at night.</div>
       <div class="section-title" style="margin-top:4px">Data sources<span>is everything flowing in?</span></div>
       <div id="syncHealth" class="gcard" style="padding:0;margin-bottom:16px"><div class="grow static"><div class="grow-sub">Checking…</div></div></div>
       <div class="budget-cat" style="padding:0;">
@@ -1816,7 +1885,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-18.45';
+const APP_BUILD = '2026-10-19.46';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2726,7 +2795,7 @@ function renderAssetMap(){
   const mapEl = document.getElementById('assetMap'); if(!mapEl || typeof L === 'undefined') return;
   if(!assetMapInstance){
     assetMapInstance = L.map('assetMap', { zoomControl:false, attributionControl:true });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:19, attribution:'© OpenStreetMap' }).addTo(assetMapInstance);
+    assetBaseLayer = makeBaseLayer().addTo(assetMapInstance);
     L.Popup.prototype.options.autoPanPaddingTopLeft = L.point(12, 96);
     L.Popup.prototype.options.autoPanPaddingBottomRight = L.point(12, 150);
     mapGroups = { visits: L.layerGroup().addTo(assetMapInstance), places: L.layerGroup().addTo(assetMapInstance), purchases: L.layerGroup().addTo(assetMapInstance), assets: L.layerGroup().addTo(assetMapInstance) };
@@ -2849,6 +2918,29 @@ function symIcon(svg, bg, size, shape, label){
   return L.divIcon({ className:'', iconSize:[s2, s2], iconAnchor:[s2/2, s2/2], popupAnchor:[0, -s2/2],
     html:`<div style="position:relative;width:${s2}px;height:${s2}px;border-radius:${r}px;background:${bg};color:#fff;display:grid;place-items:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.35)"><svg viewBox="0 0 24 24" width="${Math.round(s2*0.62)}" height="${Math.round(s2*0.62)}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">${svg}</svg>${label ? `<span style="position:absolute;left:50%;top:100%;transform:translate(-50%,2px);background:#fff;color:${bg};font:700 9px var(--sans);padding:0 4px;border-radius:5px;white-space:nowrap;box-shadow:0 1px 2px rgba(0,0,0,.25)">${label}</span>` : ''}</div>` });
 }
+const BASEMAPS = {
+  light: { name:'Light', url:'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', sub:'abcd', max:20, attr:'© OpenStreetMap contributors © CARTO' },
+  dark:  { name:'Dark',  url:'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',  sub:'abcd', max:20, attr:'© OpenStreetMap contributors © CARTO' },
+  satellite: { name:'Satellite', url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', sub:'', max:19, attr:'Tiles © Esri — Esri, Maxar, Earthstar Geographics, GIS User Community' }
+};
+const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+function basemapChoice(){ try{ return localStorage.getItem('otto.basemap') || 'auto'; } catch(e){ return 'auto'; } }
+function basemapKey(){ const c = basemapChoice(); return c === 'auto' ? (darkQuery && darkQuery.matches ? 'dark' : 'light') : c; }
+function makeBaseLayer(){ const b = BASEMAPS[basemapKey()] || BASEMAPS.light; return L.tileLayer(b.url, { subdomains: b.sub || 'abc', maxZoom: b.max, attribution: b.attr, detectRetina: true }); }
+let assetBaseLayer = null, homeBaseLayer = null;
+function applyBasemap(){
+  if(homeMap){ if(homeBaseLayer) homeMap.removeLayer(homeBaseLayer); homeBaseLayer = makeBaseLayer().addTo(homeMap); }
+  if(typeof assetMapInstance !== 'undefined' && assetMapInstance){ if(assetBaseLayer) assetMapInstance.removeLayer(assetBaseLayer); assetBaseLayer = makeBaseLayer().addTo(assetMapInstance); assetBaseLayer.bringToBack(); }
+  document.body.dataset.basemap = basemapKey();
+  renderBasemapSetting();
+}
+function renderBasemapSetting(){
+  const el = document.getElementById('basemapSetting'); if(!el) return;
+  const c = basemapChoice();
+  el.innerHTML = [['auto','Auto'],['light','Light'],['dark','Dark'],['satellite','Satellite']].map(([k,l])=>`<button type="button" data-basemap="${k}" class="${k===c?'active':''}" aria-pressed="${k===c}">${l}</button>`).join('');
+}
+document.addEventListener('click', e=>{ const b = e.target.closest('[data-basemap]'); if(!b) return; try{ localStorage.setItem('otto.basemap', b.dataset.basemap); }catch(err){} applyBasemap(); });
+if(darkQuery && darkQuery.addEventListener) darkQuery.addEventListener('change', ()=>{ if(basemapChoice() === 'auto') applyBasemap(); });
 function radarLabel(i){ const back = Number((RADAR_FRAMES[i].match(/\d+/)||['0'])[0]); return back ? `${back} min ago` : 'Now'; }
 function showRadarFrame(i){ radarIdx = i; radarLayers.forEach((l,j)=>l.setOpacity(j===i ? 0.65 : 0)); const el = document.getElementById('radarTime'); if(el) el.textContent = radarLabel(i); }
 function syncLiveLayers(){
@@ -4448,8 +4540,169 @@ function syncWarningHtml(){
   const names = bad.map(src=>src.name.split(' (')[0].replace('Apple ','')).join(' and ');
   return `<button class="pp-warn" type="button" data-area="account">${esc(names)} ${bad.length === 1 ? "isn't" : "aren't"} updating. How to fix it</button>`;
 }
+let homeMap = null, homeLayers = null, homeSnap = 'half';
+function homeSheetOffsets(){
+  const sh = document.getElementById('daySheet'); const H = sh ? sh.offsetHeight : 600;
+  return { full: 0, half: Math.round(H * 0.42), peek: Math.max(0, H - 132) };
+}
+function setSnap(snap, animate){
+  const sh = document.getElementById('daySheet'); if(!sh) return;
+  homeSnap = snap; sh.dataset.snap = snap;
+  sh.style.transition = animate === false ? 'none' : '';
+  sh.style.transform = `translateY(${homeSheetOffsets()[snap]}px)`;
+  centerHomeMap();
+}
+function homeVisibleCenterOffset(){
+  // shift the map so "you" sits in the middle of the part of the map you can actually see
+  const sh = document.getElementById('daySheet'); if(!sh) return 0;
+  const covered = sh.offsetHeight - homeSheetOffsets()[homeSnap] + 150;   // sheet + dock + composer
+  return Math.round(covered / 2) - 40;
+}
+let homeCenter = null;
+function centerHomeMap(){
+  if(!homeMap || !homeCenter) return;
+  const z = homeMap.getZoom() || 15, pt = homeMap.project(homeCenter, z).add([0, homeVisibleCenterOffset()]);
+  homeMap.setView(homeMap.unproject(pt, z), z, { animate: true });
+}
+function initHomeMap(){
+  if(homeMap || typeof L === 'undefined' || !document.getElementById('homeMap')) return;
+  homeMap = L.map('homeMap', { zoomControl:false, attributionControl:true, tap:true }).setView([42.5584, -70.8800], 14);
+  homeMap.attributionControl.setPrefix(false);
+  homeBaseLayer = makeBaseLayer().addTo(homeMap);
+  homeLayers = L.layerGroup().addTo(homeMap);
+  homeMap.on('click', ()=>{ if(homeSnap !== 'peek') setSnap('peek'); });
+  document.body.dataset.basemap = basemapKey();
+}
+function renderHomeMap(){
+  initHomeMap(); if(!homeMap) return;
+  homeLayers.clearLayers();
+  const today = localToday(), pts = (mapData.points||[]).filter(p=>isoOf(p.recorded_at)===today).sort((a,b)=>a.recorded_at.localeCompare(b.recorded_at));
+  const lp = mapData.lastPoint || (mapData.points||[]).slice(-1)[0];
+  const visits = (mapData.visits||[]).filter(v=>v.arrived_at && (isoOf(v.arrived_at)===today || v.is_open) && v.status !== 'declined' && v.lat != null);
+  const dark = basemapKey() !== 'light', route = dark ? '#7FA2FF' : '#2448C9';
+  if(pts.length > 1) L.polyline(simplifyPts(pts, 10), { color: route, weight: 4, opacity: 0.9, lineCap:'round', lineJoin:'round', interactive:false }).addTo(homeLayers);
+  visits.forEach((v,i)=>L.circleMarker([v.lat, v.lon], { radius: 7, color: '#fff', weight: 2.5, fillColor: dark ? '#E8EAF2' : '#15161A', fillOpacity: 1 })
+    .bindTooltip(`${esc(v.place)} · ${clockTime(v.arrived_at)}`, { direction:'top', offset:[0,-6] }).addTo(homeLayers));
+  const chip = document.getElementById('homeMapChip');
+  if(lp){
+    const ageMin = (Date.now() - Date.parse(lp.recorded_at)) / 60000, fresh = ageMin < 360;
+    homeCenter = L.latLng(lp.lat, lp.lon);
+    if(lp.accuracy_m) L.circle(homeCenter, { radius: Math.min(Number(lp.accuracy_m), 300), color: route, weight: 1, opacity: 0.4, fillColor: route, fillOpacity: 0.1, interactive:false }).addTo(homeLayers);
+    L.marker(homeCenter, { zIndexOffset: 900, interactive:false, icon: L.divIcon({ className:'', iconSize:[22,22], iconAnchor:[11,11], html:`<div class="me-dot ${fresh?'live':'stale'}"></div>` }) }).addTo(homeLayers);
+    const openV = (mapData.visits||[]).find(v=>v.is_open && v.arrived_at), lastV = (mapData.visits||[]).slice().sort((a,b)=>(b.arrived_at||'').localeCompare(a.arrived_at||''))[0];
+    chip.hidden = false;
+    chip.innerHTML = fresh
+      ? `<span class="hm-live" aria-hidden="true"></span><span>${openV ? esc(openV.place) : 'On the move'} · updated ${timeAgo(lp.recorded_at)}</span><button type="button" data-area="assets">Map ›</button>`
+      : `<span class="hm-stale" aria-hidden="true"></span><span>Last seen${lastV ? ' at ' + esc(lastV.place) : ''} · ${timeAgo(lp.recorded_at)}</span><button type="button" data-area="assets">Map ›</button>`;
+    if(!homeMap._ottoCentered){ homeMap.setView(homeCenter, 15, { animate:false }); homeMap._ottoCentered = true; }
+    centerHomeMap();
+  } else { chip.hidden = false; chip.innerHTML = `<span class="hm-stale" aria-hidden="true"></span><span>No location yet</span><button type="button" data-area="assets">Map ›</button>`; }
+  setTimeout(()=>homeMap.invalidateSize(), 50);
+}
+function dayLineRow(time, dot, title, sub, extra){
+  return `<div class="dl-row"><span class="dl-time">${time}</span><span class="dl-dot ${dot}"></span><div class="dl-main"><span class="dl-title">${title}</span>${sub ? `<span class="dl-sub">${sub}</span>` : ''}${extra||''}</div></div>`;
+}
+function renderDaySheet(){
+  const top = document.getElementById('dsTop'), body = document.getElementById('dsBody'); if(!top || !body) return;
+  const today = localToday(), H = 3600000, now = new Date();
+  const lp = mapData.lastPoint || (mapData.points||[]).slice(-1)[0], fresh = lp && (Date.now() - Date.parse(lp.recorded_at)) < 6*H;
+  const visits = (mapData.visits||[]).filter(v=>v.arrived_at && v.status !== 'declined' && (isoOf(v.arrived_at)===today || v.is_open)).sort((a,b)=>a.arrived_at.localeCompare(b.arrived_at));
+  const openV = visits.find(v=>v.is_open), lastV = (mapData.visits||[]).filter(v=>v.status!=='declined').slice().sort((a,b)=>(b.arrived_at||'').localeCompare(a.arrived_at||''))[0];
+  // headline: where you are + the money that matters
+  let where = fresh ? (openV ? `You’re at ${esc(openV.place)}.` : 'On the move.') : (lastV ? `Last seen at ${esc(lastV.place)}, ${timeAgo(lp ? lp.recorded_at : lastV.arrived_at)}.` : '');
+  const m = homeMoney(); let moneyLine = '', meter = '';
+  if(m){
+    const S = lastBudgetData && lastBudgetData.summary, lastDay = S && S.week_end === today;
+    moneyLine = m.left >= 0 ? `<span class="hl-acc">${money(m.left)} left</span> this week${lastDay ? ', and it resets at midnight.' : '.'}` : `<span class="hl-neg">${money(-m.left)} over</span> this week.`;
+    const pct = m.planned ? Math.min(100, Math.round(100*m.spent/m.planned)) : 0;
+    meter = `<div class="ds-meter"><div class="ds-bar"><i class="${m.left<0?'over':''}" style="width:${Math.max(pct,1)}%"></i></div><span>${money(m.spent)} spent of ${money(m.planned)}${S && S.week_end ? ` · through ${new Date(S.week_end+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}` : ''}</span></div>`;
+  }
+  top.innerHTML = `<div class="ds-date">${now.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric'})}</div><h2 class="ds-headline">${where} ${moneyLine}</h2>${meter}`;
+  // TODAY
+  const spentToday = (allTxns||[]).filter(t=>t.transaction_date===today && Number(t.amount_cents) < 0 && !t.exclude_from_budget);
+  const spentSum = spentToday.reduce((a,t)=>a - Number(t.amount_cents), 0);
+  const asks = (clarifications||[]).filter(c=>c.kind==='place');
+  let rows = visits.map(v=>{
+    const mins = v.minutes || Math.round(((v.left_at ? Date.parse(v.left_at) : Date.now()) - Date.parse(v.arrived_at))/60000);
+    const ask = v.status === 'suggested' ? `<div class="dl-ask"><span><b>Otto asks</b> · What is this place?</span><button type="button" data-ask-place="${v.id}">Name it</button></div>` : '';
+    return dayLineRow(clockTime(v.arrived_at).replace(' AM','a').replace(' PM','p'), v.is_open ? 'open' : 'solid', esc(v.place), v.is_open ? `${fmtMinutes(mins)} so far` : fmtMinutes(mins), ask);
+  }).join('');
+  if(spentToday.length) rows += dayLineRow('today', 'money', `${money(spentSum)} spent`, esc(spentToday.slice(0,3).map(t=>`${t.merchant || t.description} ${money(-Number(t.amount_cents))}`).join(' · ')));
+  if(!rows) rows = `<div class="dl-empty">${lp ? 'Nothing recorded yet today.' : 'Turn on location to see your day here.'}</div>`;
+  const others = (clarifications||[]).length - asks.filter(a=>visits.some(v=>String(v.id)===String(a.ref_id) && v.status==='suggested')).length;
+  const askChip = others > 0 ? `<button type="button" class="ds-askchip" id="clarifyStart"><span>${others}</span> Otto has ${others} question${others===1?'':'s'} ›</button>` : '';
+  const nowRow = `<div class="dl-now"><span>NOW ${now.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'}).replace(/ (AM|PM)/,'')}</span><i></i></div>`;
+  // NEXT: tomorrow onward — events, dated todos, bills, the new budget week
+  const next = [];
+  for(let d=1; d<=10 && next.length < 6; d++){
+    const date = isoAddDays(today, d);
+    planItemsFor(date).filter(x=>x.kind !== 'meal').forEach(x=>{
+      if(x.kind === 'bill'){ const [nm, amt] = x.title.split(' · '); next.push({ date, title: nm, right: amt || '', sub: (x.sub||'').toLowerCase() }); }
+      else next.push({ date, title: x.title, right: '', sub: x.kind==='event' ? x.time : 'todo' });
+    });
+  }
+  const S = lastBudgetData && lastBudgetData.summary;
+  if(S && S.week_end === today && m) next.unshift({ date: isoAddDays(today,1), title: 'New budget week starts', right: money(m.planned), sub: '' });
+  ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.due_day && Number(b.amount_cents)>0).forEach(b=>{ const d = nextOccurrenceFromDueDay(b.due_day); if(d > isoAddDays(today,10) && d <= isoAddDays(today,31)) next.push({ date: d, title: b.name, right: money(b.amount_cents), sub: b.autopay ? 'autopay' : 'pay yourself' }); });
+  next.sort((a,b)=>a.date.localeCompare(b.date));
+  const nextRows = next.slice(0,4).map(x=>`<div class="nx-row"><span class="dl-time">${x.date === isoAddDays(today,1) ? 'Tmrw' : new Date(x.date+'T12:00').toLocaleDateString('en-US',{month:'short', day:'numeric'})}</span><span class="nx-title">${esc(x.title)}${x.sub ? ` <em>· ${esc(x.sub)}</em>` : ''}</span><span class="nx-right">${esc(x.right)}</span></div>`).join('') || `<div class="dl-empty">Nothing scheduled in the next few days.</div>`;
+  // vitals
+  let steps = '—', stepsSub = 'not synced', sleep = '—', sleepAlert = false;
+  if(lastHealthData && lastHealthData.daily){
+    const Sx = healthSummary(lastHealthData.daily, lastHealthData.workouts || []);
+    const freshH = Sx.synced && (Date.now() - new Date(Sx.synced).getTime()) < 6*H;
+    if(Sx.todayRow && Sx.todayRow.steps != null && freshH){ steps = Sx.todayRow.steps.toLocaleString(); stepsSub = Sx.avg30 ? `usual ${Sx.avg30.toLocaleString()}` : 'today'; }
+    else if(Sx.todayRow && Sx.todayRow.steps != null){ steps = Sx.todayRow.steps.toLocaleString(); stepsSub = `as of ${timeAgo(Sx.synced)}`; }
+    const sl = lastHealthData.sleep && lastHealthData.sleep[0];
+    if(sl && sl.asleep_min && sl.sleep_date >= isoAddDays(today,-1)) sleep = hm(sl.asleep_min); else { sleep = sl ? `Not since ${new Date(sl.sleep_date+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}` : 'No data'; sleepAlert = true; }
+  }
+  let food = 'No plan';
+  if(foodData && foodData.plan){ const T = groceryTotals(foodData.plan); food = foodData.plan.started_on && foodData.pace ? `${Number(foodData.pace.mains_left||0)} meals left` : (T.buy.length ? 'Not shopped' : 'Stocked'); }
+  body.innerHTML = `${askChip}<div class="ds-sec"><span>Today</span><em>${visits.length} place${visits.length===1?'':'s'}${spentToday.length ? ` · ${money(spentSum)}` : ''}</em></div><div class="dl">${rows}</div>${nowRow}
+    <div class="ds-sec"><span>Next</span><button type="button" class="ds-link" data-area="todos">Plan ›</button></div><div class="nx">${nextRows}</div>
+    <div class="ds-vitals"><button type="button" data-area="health"><span>Steps</span><b>${steps}</b><em>${stepsSub}</em></button><button type="button" data-area="health"><span>Sleep</span><b class="${sleepAlert?'alert':''}">${sleep}</b><em>last night</em></button><button type="button" data-area="food"><span>Food</span><b>${food}</b><em>&nbsp;</em></button></div>`;
+  renderHomeDock(m);
+}
+function renderHomeDock(m){
+  const el = document.getElementById('homeDock'); if(!el) return;
+  const today = localToday(), its = planItemsFor(today);
+  const lp = mapData.lastPoint, fresh = lp && (Date.now() - Date.parse(lp.recorded_at)) < 6*3600000;
+  const openV = (mapData.visits||[]).find(v=>v.is_open && v.arrived_at);
+  let food = '—'; if(foodData && foodData.plan) food = foodData.plan.started_on ? 'on plan' : 'not started';
+  let steps = '—'; if(lastHealthData && lastHealthData.daily){ const Sx = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); if(Sx.todayRow && Sx.todayRow.steps != null) steps = Sx.todayRow.steps >= 1000 ? (Sx.todayRow.steps/1000).toFixed(1)+'k' : String(Sx.todayRow.steps); }
+  const items = [
+    ['money','Money', m ? (m.left >= 0 ? money(m.left) : '−' + money(-m.left)) : '—', m && m.left < 0],
+    ['todos','Plan', its.length ? `${its.length} today` : 'clear', false],
+    ['food','Food', food, false],
+    ['health','Health', steps === '—' ? '—' : `${steps} steps`, false],
+    ['assets','Places', fresh ? (openV ? openV.place.split(/[ ,’']/)[0] : 'moving') : 'paused', !fresh]
+  ];
+  el.innerHTML = items.map(([a,l,v,alert])=>`<button type="button" data-area="${a}" class="hd-btn"><span class="hd-ico">${svgIcon(a)}</span><span class="hd-label">${l}</span><span class="hd-val ${alert?'alert':''}">${esc(String(v))}</span></button>`).join('');
+}
+// drag the sheet between peek / half / full
+(function(){
+  let startY = 0, startOff = 0, dragging = false;
+  const sheet = () => document.getElementById('daySheet');
+  document.addEventListener('pointerdown', e=>{
+    const head = e.target.closest('#dsHead'); if(!head || e.target.closest('button,a')) return;
+    dragging = true; startY = e.clientY; startOff = homeSheetOffsets()[homeSnap]; sheet().style.transition = 'none'; head.setPointerCapture && head.setPointerCapture(e.pointerId);
+  });
+  document.addEventListener('pointermove', e=>{ if(!dragging) return; const off = Math.max(0, Math.min(homeSheetOffsets().peek, startOff + (e.clientY - startY))); sheet().style.transform = `translateY(${off}px)`; });
+  document.addEventListener('pointerup', e=>{
+    if(!dragging) return; dragging = false;
+    const dy = e.clientY - startY, offs = homeSheetOffsets(), cur = startOff + dy;
+    let snap;
+    if(Math.abs(dy) < 6){ snap = homeSnap === 'peek' ? 'half' : homeSnap === 'half' ? 'full' : 'half'; }   // a tap cycles
+    else snap = Object.keys(offs).sort((a,b)=>Math.abs(offs[a]-cur) - Math.abs(offs[b]-cur))[0];
+    setSnap(snap); if(navigator.vibrate) navigator.vibrate(8);
+  });
+})();
+document.addEventListener('click', e=>{ if(e.target.closest('[data-ask-place]')) startNightly('clarify'); });
+window.addEventListener('resize', ()=>{ setSnap(homeSnap, false); if(homeMap) homeMap.invalidateSize(); });
+
 function renderBriefing(){
   renderPageHead();
+  try{ renderHomeMap(); renderDaySheet(); setSnap(homeSnap, false); renderBasemapSetting(); } catch(e){ console.error('home', e); }
   // Plan pulls from todos, meals, bills and events — redraw once everything has loaded
   if(allTodos && document.getElementById('planWeekDays')){ try{ renderPlanWeek(allTodos); } catch(e){} }
   const grid = document.getElementById('homeTiles'), hero = document.getElementById('homeHero'); if(!grid) return;
