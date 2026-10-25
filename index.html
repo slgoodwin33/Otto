@@ -1657,7 +1657,7 @@ body.chatting .otto-chat-starters{display:none}
   .kt-list{padding:2px 14px !important;} .kt-loc{font-size:0.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); padding:10px 0 2px;}
   .kt-item{display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:0.92rem;} .kt-item:last-child{border-bottom:none;} .kt-qty{color:var(--text-muted); font-size:0.84rem; text-align:right;} .kt-qty.low{color:var(--alert); font-weight:700;}
   .composer .composer-inner .photo-btn{background:transparent !important; color:var(--text-muted) !important;}
-  .photo-chip{display:flex; align-items:center; gap:8px; margin:0 6px 6px; padding:6px 8px; border-radius:12px; background:var(--surface-2); font-size:0.82rem;} .photo-chip img{width:34px; height:34px; object-fit:cover; border-radius:6px;} .photo-chip span{flex:1;} .photo-chip button{all:unset; cursor:pointer; padding:4px 8px; font-weight:700;}
+  .photo-chip{display:flex; align-items:center; gap:8px; margin:0 6px 6px; padding:6px 8px; border-radius:12px; background:var(--surface-2); font-size:0.82rem;} .photo-chip img{width:34px; height:34px; object-fit:cover; border-radius:6px; flex-shrink:0;} .photo-chip{flex-wrap:nowrap; overflow-x:auto;} .photo-chip span{flex:1;} .photo-chip button{all:unset; cursor:pointer; padding:4px 8px; font-weight:700;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -1722,7 +1722,7 @@ body.chatting .otto-chat-starters{display:none}
       <label for="askInput" class="sr-only">Ask Otto</label>
       <input id="askInput" type="text" placeholder="Ask Otto anything…" enterkeyhint="send">
       <button type="button" id="photoBtn" class="mic-btn photo-btn" aria-label="Add a photo (receipts and more)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
-      <input type="file" id="photoInput" accept="image/*" hidden>
+      <input type="file" id="photoInput" accept="image/*" multiple hidden>
       <button type="button" id="micBtn" class="mic-btn" aria-label="Talk to Otto" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       <button type="submit" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></button>
     </div>
@@ -1910,7 +1910,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-24.48';
+const APP_BUILD = '2026-10-24.49';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4936,12 +4936,12 @@ document.getElementById('composer').addEventListener('submit', async e=>{
   input.value = ''; chatBusy = true;
   const pending = thread.lastElementChild; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30);
   try{
-    const img = pendingImage; pendingImage = null; window.__receiptMode = false;
+    const imgs = pendingImages.slice(); pendingImages = []; pendingImage = null; window.__receiptMode = false;
     const chipEl = document.getElementById('photoChip'); if(chipEl){ chipEl.hidden = true; chipEl.innerHTML = ''; }
-    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode, ...(img ? { image: { media_type: img.media_type, data: img.data } } : {}) });
+    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode, ...(imgs.length ? { images: imgs.map(im=>({ media_type: im.media_type, data: im.data })) } : {}) });
     pending.classList.remove('typing'); pending.textContent = r.text || "I didn't get an answer back.";
     renderChatActions(pending, r.actions);
-    if(img || (r.actions||[]).some(a=>/trip|Added to|wear|Laundry/.test(a.summary))){ kitchenData = null; lifeRows = {}; }
+    if(imgs.length || (r.actions||[]).some(a=>/trip|receipt|Added to|wear|Laundry/.test(a.summary))){ kitchenData = null; lifeRows = {}; }
     if(r.sources && r.sources.length){
       pending.insertAdjacentHTML('beforeend', `<div class="msg-sources">${r.sources.map((x,i)=>`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${i+1}. ${esc(x.title || new URL(x.url).hostname)}</a>`).join('')}</div>`);
     }
@@ -5096,14 +5096,14 @@ function renderKitchen(){
   const ready = K.canMake.filter(r=>r.required && r.have >= r.required), close = K.canMake.filter(r=>r.required && r.have < r.required && r.have > 0).sort((a,b)=>(b.have/b.required)-(a.have/a.required)).slice(0,3);
   const make = (ready.length || close.length) ? ready.map(r=>`<div class="kt-item"><span>${r.emoji||''} ${esc(r.name)}</span><span class="lf-badge ok">ready</span></div>`).join('') + close.map(r=>`<div class="kt-item"><span>${r.emoji||''} ${esc(r.name)}</span><span class="kt-qty">need ${esc(r.missing||'')}</span></div>`).join('') : '<div class="empty">Nothing you can make yet with what\u2019s recorded.</div>';
   const trips = K.trips.length ? K.trips.map(t=>`<div class="kt-item"><span>${esc(t.store || 'Grocery trip')} · ${shortDate(t.trip_date)}</span><span class="kt-qty">${t.total_cents ? money(t.total_cents) : 'no receipt yet'}${t.transaction_id ? ' · ✓ bank' : ''}</span></div>`).join('') : '<div class="empty">No trips yet.</div>';
-  return `<div class="kt-receipt"><b>After shopping</b><span>Snap or paste your receipt. Otto reads every line, updates what's at home, and matches the bank charge.</span><div><button type="button" class="save-btn" data-receipt="photo">📷 Photo of receipt</button><button type="button" class="link-btn" data-receipt="paste">Paste receipt text</button></div></div>
+  return `<div class="kt-receipt"><b>Add receipts</b><span>Any store, up to 5 photos at a time. Groceries go to what's at home, clothes can go to your closet, everything else is kept and matched to its bank charge.</span><div><button type="button" class="save-btn" data-receipt="photo">📷 Photos of receipts</button><button type="button" class="link-btn" data-receipt="paste">Paste receipt text</button></div></div>
     <div class="section-title">At home<span>${K.pantry.length || ''}</span></div><div class="gcard kt-list">${home}</div>
     <div class="section-title">You can make</div><div class="gcard kt-list">${make}</div>
     <div class="section-title">Grocery trips</div><div class="gcard kt-list">${trips}</div>`;
 }
 
 // ===================== Photos in chat (receipts and anything else) =====================
-let pendingImage = null;
+let pendingImage = null, pendingImages = [];
 function openChatWith(text){
   document.body.classList.add('chatting'); closeSheet && closeSheet();
   const input = document.getElementById('askInput'); input.value = text || ''; setTimeout(()=>input.focus(), 50);
@@ -5116,16 +5116,18 @@ async function imageToJpeg(file){
 }
 document.getElementById('photoBtn').addEventListener('click', ()=>document.getElementById('photoInput').click());
 document.getElementById('photoInput').addEventListener('change', async e=>{
-  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
-  try{ pendingImage = await imageToJpeg(f); } catch(err){ showNotice("Couldn't read that photo."); return; }
-  const chip = document.getElementById('photoChip'); chip.hidden = false; chip.innerHTML = `<img src="${pendingImage.preview}" alt="Attached photo"><span>Photo attached</span><button type="button" aria-label="Remove photo" data-unphoto>✕</button>`;
-  const input = document.getElementById('askInput'); if(!input.value) input.value = window.__receiptMode ? "Here's my grocery receipt." : ''; input.focus();
+  const files = Array.from(e.target.files || []).slice(0, 5 - pendingImages.length); e.target.value = ''; if(!files.length) return;
+  for(const f of files){ try{ pendingImages.push(await imageToJpeg(f)); } catch(err){ showNotice("Couldn't read one of those photos."); } }
+  pendingImage = pendingImages[0] || null;
+  const chip = document.getElementById('photoChip'); chip.hidden = !pendingImages.length;
+  chip.innerHTML = pendingImages.map(im=>`<img src="${im.preview}" alt="">`).join('') + `<span>${pendingImages.length} photo${pendingImages.length===1?'':'s'} attached${pendingImages.length < 5 ? ' · tap 📷 to add more' : ''}</span><button type="button" aria-label="Remove photos" data-unphoto>✕</button>`;
+  const input = document.getElementById('askInput'); if(!input.value) input.value = window.__receiptMode ? (pendingImages.length > 1 ? "Here are my receipts." : "Here's my receipt.") : ''; input.focus();
 });
 document.addEventListener('click', e=>{
-  if(e.target.closest('[data-unphoto]')){ pendingImage = null; const chip = document.getElementById('photoChip'); chip.hidden = true; chip.innerHTML = ''; return; }
+  if(e.target.closest('[data-unphoto]')){ pendingImage = null; pendingImages = []; const chip = document.getElementById('photoChip'); chip.hidden = true; chip.innerHTML = ''; return; }
   const rc = e.target.closest('[data-receipt]'); if(!rc) return;
-  if(rc.dataset.receipt === 'photo'){ window.__receiptMode = true; openChatWith("Here's my grocery receipt."); setTimeout(()=>document.getElementById('photoInput').click(), 80); }
-  else openChatWith("Here's my grocery receipt:\n");
+  if(rc.dataset.receipt === 'photo'){ window.__receiptMode = true; openChatWith(''); setTimeout(()=>document.getElementById('photoInput').click(), 80); }
+  else openChatWith("Here's my receipt:\n");
 });
 
 // ---------- chat actions (changes the chat made, each with Undo) + nightly check-in ----------
