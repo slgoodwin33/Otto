@@ -1637,6 +1637,27 @@ body.chatting .otto-chat-starters{display:none}
   body.home-v2 .otto-top .sync-chip{border-radius:16px !important; padding:6px 12px !important;}
   body.chatting.home-v2 .otto-top{position:static; pointer-events:auto;}
   @media (prefers-reduced-motion: reduce){ .day-sheet{transition:none;} .hm-live{animation:none;} }
+
+  /* ===== Life + Kitchen + photos (build .48) ===== */
+  .home-dock{grid-template-columns:repeat(6, minmax(0,1fr)) !important;}
+  .lf-grid{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-top:6px;}
+  .lf-card{all:unset; box-sizing:border-box; cursor:pointer; display:flex; flex-direction:column; gap:3px; padding:14px; min-height:104px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--border);}
+  .lf-card:active{background:var(--surface-2);} .lf-emoji{font-size:1.4rem;} .lf-card b{font-size:0.98rem;} .lf-card span:last-child{font-size:0.78rem; color:var(--text-muted); line-height:1.3;}
+  .lf-back{all:unset; cursor:pointer; color:var(--accent); font-weight:700; padding:6px 0; display:inline-block;}
+  .lf-title{margin:4px 0 2px; font-size:1.35rem;} .lf-sum{color:var(--text-muted); font-size:0.88rem; margin-bottom:6px;}
+  .lf-list{padding:0 !important;} .lf-row{display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:12px 14px; border-top:1px solid var(--border); cursor:pointer;} .lf-row:first-child{border-top:none;}
+  .lf-row .grow-main{flex:1; min-width:0;} .lf-right{font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .lf-actions{flex-basis:100%; display:flex; gap:8px; padding-top:4px;} .lf-actions button{border:1px solid var(--border); background:var(--surface); border-radius:999px; padding:7px 14px; font:inherit; font-size:0.84rem; font-weight:600; cursor:pointer; min-height:36px;} .lf-actions .danger{color:var(--alert);}
+  .lf-badge{font-size:0.72rem; font-weight:700; padding:3px 8px; border-radius:999px; background:var(--surface-2); color:var(--text-muted); white-space:nowrap;} .lf-badge.rust{background:rgba(180,68,28,.1); color:var(--alert);} .lf-badge.ok{background:rgba(31,122,69,.1); color:var(--ok);}
+  .lf-add{all:unset; cursor:pointer; display:block; margin:8px 0 4px; padding:11px 14px; border-radius:12px; border:1px dashed var(--border); color:var(--accent); font-weight:700; font-size:0.9rem;} .lf-add.strong{border-style:solid; background:var(--accent-soft); margin:10px 0;}
+  .lf-form{display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; margin:8px 0 6px; padding:14px; border-radius:var(--radius); background:var(--surface); border:1px solid var(--border);}
+  .lf-form label{display:flex; flex-direction:column; gap:4px; font-size:0.74rem; font-weight:700; color:var(--text-muted);} .lf-form input, .lf-form select{font:inherit; font-size:16px; padding:9px 10px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); min-height:40px;}
+  .lf-form-actions{grid-column:1/-1; display:flex; gap:12px; align-items:center;}
+  .kt-receipt{display:flex; flex-direction:column; gap:6px; padding:14px; border-radius:var(--radius); background:var(--accent-soft); margin:4px 0 8px;} .kt-receipt span{font-size:0.86rem; color:var(--text-muted);} .kt-receipt div{display:flex; gap:12px; align-items:center; margin-top:4px; flex-wrap:wrap;}
+  .kt-list{padding:2px 14px !important;} .kt-loc{font-size:0.7rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--text-muted); padding:10px 0 2px;}
+  .kt-item{display:flex; justify-content:space-between; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); font-size:0.92rem;} .kt-item:last-child{border-bottom:none;} .kt-qty{color:var(--text-muted); font-size:0.84rem; text-align:right;} .kt-qty.low{color:var(--alert); font-weight:700;}
+  .composer .composer-inner .photo-btn{background:transparent !important; color:var(--text-muted) !important;}
+  .photo-chip{display:flex; align-items:center; gap:8px; margin:0 6px 6px; padding:6px 8px; border-radius:12px; background:var(--surface-2); font-size:0.82rem;} .photo-chip img{width:34px; height:34px; object-fit:cover; border-radius:6px;} .photo-chip span{flex:1;} .photo-chip button{all:unset; cursor:pointer; padding:4px 8px; font-weight:700;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 </head>
@@ -1697,9 +1718,11 @@ body.chatting .otto-chat-starters{display:none}
     </div>
   </div>
   <form class="composer" id="composer" autocomplete="off">
-    <div class="composer-inner">
+    <div id="photoChip" class="photo-chip" hidden></div><div class="composer-inner">
       <label for="askInput" class="sr-only">Ask Otto</label>
       <input id="askInput" type="text" placeholder="Ask Otto anything…" enterkeyhint="send">
+      <button type="button" id="photoBtn" class="mic-btn photo-btn" aria-label="Add a photo (receipts and more)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
+      <input type="file" id="photoInput" accept="image/*" hidden>
       <button type="button" id="micBtn" class="mic-btn" aria-label="Talk to Otto" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       <button type="submit" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></button>
     </div>
@@ -1845,6 +1868,7 @@ body.chatting .otto-chat-starters{display:none}
       <div class="studio-page-head food-head"><div class="studio-kicker">YOUR KITCHEN <span class="studio-dot"></span> FOOD & PLANNING</div><h2>Eat well.<br><span>Plan easy.</span></h2><p>Everything from your fridge to the week ahead.</p></div>
       <div id="foodErrorBanner"></div>
       <div class="food-sub" id="foodSubTabs">
+        <button class="chip" data-food="kitchen" type="button">Kitchen</button>
         <button class="chip active" data-food="fridge" type="button">Fridge</button>
         <button class="chip" data-food="list" type="button">Groceries</button>
         <button class="chip" data-food="meals" type="button">Meals</button>
@@ -1852,6 +1876,7 @@ body.chatting .otto-chat-starters{display:none}
       </div>
       <div id="foodContent"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
+    <div class="tab-panel" id="panelLife"><div id="lifeContent"></div></div>
     <div class="tab-panel" id="panelAccount">
       <div class="studio-page-head"><div class="studio-kicker">YOUR SPACE <span class="studio-dot"></span> OTTO</div><h2>Make Otto<br><span>yours.</span></h2><p>Connections, sync status, and account controls.</p></div>
       <div class="section-title" style="margin-top:4px">Map style<span>Home and Places</span></div>
@@ -1885,7 +1910,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-19.47';
+const APP_BUILD = '2026-10-24.48';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4322,6 +4347,7 @@ function renderFood(){
   const el = document.getElementById('foodContent');
   if(!foodData) return;
   if(foodView === 'recipes'){ el.innerHTML = renderFoodRecipes(foodData.recipes); return; }
+  if(foodView === 'kitchen'){ el.innerHTML = renderKitchen(); return; }
   if(foodView === 'fridge'){ el.innerHTML = renderFoodFridge(foodData); return; }
   if(!foodData.plan){ el.innerHTML = '<div class="empty">No meal plan yet. Ask Claude to build this week\'s plan.</div>'; return; }
   el.innerHTML = foodView === 'meals' ? renderFoodMeals(foodData.plan) : renderFoodList(foodData.plan);
@@ -4423,7 +4449,8 @@ const AREAS = {
   health:  { title:'Health',  icon:'health', panels:['panelHealth'] },
   assets:  { title:'Map',     icon:'map',    panels:['panelAssets'] },
   account: { title:'Account', icon:null,     panels:['panelAccount'] },
-  wardrobe: { title:'Wardrobe', icon:'food', panels:[] }
+  wardrobe: { title:'Wardrobe', icon:'food', panels:[] },
+  life:    { title:'Life',    icon:'life',   panels:['panelLife'] }
 };
 function svgIcon(name){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${OTTO_ICONS[name]||''}</svg>`; }
 const CHEV = '<svg class="chev" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M2 2l6 6-6 6"/></svg>';
@@ -4690,7 +4717,8 @@ function renderHomeDock(m){
     ['todos','Plan', its.length ? `${its.length} today` : 'clear', false],
     ['food','Food', food, false],
     ['health','Health', steps === '—' ? '—' : `${steps} steps`, false],
-    ['assets','Places', fresh ? (openV ? openV.place.split(/[ ,’']/)[0] : 'moving') : 'paused', !fresh]
+    ['assets','Places', fresh ? (openV ? openV.place.split(/[ ,’']/)[0] : 'moving') : 'paused', !fresh],
+    ['life','Life', 'all areas', false]
   ];
   el.innerHTML = items.map(([a,l,v,alert])=>`<button type="button" data-area="${a}" class="hd-btn"><span class="hd-ico">${svgIcon(a)}</span><span class="hd-label">${l}</span><span class="hd-val ${alert?'alert':''}">${esc(String(v))}</span></button>`).join('');
 }
@@ -4822,6 +4850,7 @@ function areaListHtml(){
     <span class="brief-icon">${svgIcon(AREAS[k].icon)}</span><span class="brief-text"><span class="brief-title" style="display:block">${AREAS[k].title}</span><span class="brief-sub" style="display:block">${esc(subs[k])}</span></span>${CHEV}</button>`).join('')}</div>`;
 }
 function openSheet(area){
+  if(area === 'life') setTimeout(()=>renderLife(), 30);
   if(area === 'assets' && !tlUserClosed) setTimeout(()=>{ if(sheetArea === 'assets') openTimeline(); }, 350);
   const sheet = document.getElementById('sheet'), backdrop = document.getElementById('sheetBackdrop'), body = document.getElementById('sheetBody');
   if(!sheetArea) sheetReturnFocus = document.activeElement;
@@ -4907,9 +4936,12 @@ document.getElementById('composer').addEventListener('submit', async e=>{
   input.value = ''; chatBusy = true;
   const pending = thread.lastElementChild; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30);
   try{
-    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode });
+    const img = pendingImage; pendingImage = null; window.__receiptMode = false;
+    const chipEl = document.getElementById('photoChip'); if(chipEl){ chipEl.hidden = true; chipEl.innerHTML = ''; }
+    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode, ...(img ? { image: { media_type: img.media_type, data: img.data } } : {}) });
     pending.classList.remove('typing'); pending.textContent = r.text || "I didn't get an answer back.";
     renderChatActions(pending, r.actions);
+    if(img || (r.actions||[]).some(a=>/trip|Added to|wear|Laundry/.test(a.summary))){ kitchenData = null; lifeRows = {}; }
     if(r.sources && r.sources.length){
       pending.insertAdjacentHTML('beforeend', `<div class="msg-sources">${r.sources.map((x,i)=>`<a href="${esc(x.url)}" target="_blank" rel="noopener noreferrer">${i+1}. ${esc(x.title || new URL(x.url).hostname)}</a>`).join('')}</div>`);
     }
@@ -4921,6 +4953,181 @@ document.getElementById('composer').addEventListener('submit', async e=>{
     pending.textContent = /ANTHROPIC_API_KEY/.test(err.message) ? "I'm not switched on yet: the AI key still needs to be added in Supabase (secret ANTHROPIC_API_KEY)." : `Couldn't answer: ${err.message}`;
   } finally { chatBusy = false; setTimeout(()=>window.scrollTo({ top: document.documentElement.scrollHeight, behavior:'smooth' }), 30); }
 });
+
+// ===================== Life areas (config-driven) =====================
+OTTO_ICONS.life = '<rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/>';
+const dollars = c => c == null ? '' : money(c);
+const daysTo = d => d ? Math.round((new Date(d+'T12:00') - new Date(localToday()+'T12:00'))/86400000) : null;
+const sel = (opts) => ({ type:'select', options: opts });
+const LIFE = {
+  closet: { title:'Closet', emoji:'👕', sections:[
+    { table:'wardrobe_items', title:'Clothes', query:'retired=eq.false&order=category.asc,name.asc', closet:true,
+      row: r => ({ t: r.name, s: [r.category, r.color, r.brand, r.size].filter(Boolean).join(' · '), right: r.laundry_status === 'worn' ? '<span class="lf-badge rust">needs a wash</span>' : `<span class="lf-badge">${esc(r.laundry_status || 'clean')}</span>` }),
+      fields:[['name','Name','text',true],['category','Type',sel(['top','bottom','outerwear','shoes','accessory','other'])],['color','Color'],['brand','Brand'],['size','Size'],
+              ['wears_before_wash','Wears before washing','number'],['purchase_price_cents','Paid','money'],['purchased_on','Bought','date']] } ],
+    summary: rows => { const c = rows.wardrobe_items || []; const w = c.filter(x=>x.laundry_status==='worn').length; return c.length ? `${c.length} items${w ? ` · ${w} need a wash` : ''}` : 'Add your clothes'; } },
+  subscriptions: { title:'Subscriptions', emoji:'🔁', sections:[
+    { table:'subscriptions', title:'Recurring charges', query:'order=amount_cents.desc',
+      row: r => ({ t: r.name, s: [r.cadence, r.next_charge_on ? `next ${shortDate(r.next_charge_on)}` : '', r.status !== 'active' ? r.status : '', r.detected ? 'found in your bank' : ''].filter(Boolean).join(' · '), right: dollars(r.amount_cents) }),
+      fields:[['name','Name','text',true],['amount_cents','Amount','money'],['cadence','How often',sel(['monthly','yearly','weekly','quarterly'])],['next_charge_on','Next charge','date'],['status','Status',sel(['active','trial','paused','cancelled'])]] } ],
+    summary: rows => { const a = (rows.subscriptions||[]).filter(x=>x.status!=='cancelled'); const per = {weekly:52/12, monthly:1, quarterly:1/3, yearly:1/12}; const mo = a.reduce((t,x)=>t + (x.amount_cents||0)*(per[x.cadence]||1), 0); return a.length ? `${a.length} · ${money(Math.round(mo))}/mo` : 'None yet'; } },
+  documents: { title:'Documents', emoji:'🪪', sections:[
+    { table:'documents', title:'Documents', query:'order=expires_on.asc.nullslast',
+      row: r => { const d = daysTo(r.expires_on); return { t: r.name, s: [r.kind, r.issuer, r.number_last4 ? `ends ${r.number_last4}` : ''].filter(Boolean).join(' · '), right: r.expires_on ? `<span class="lf-badge ${d < 60 ? 'rust' : ''}">${d < 0 ? 'expired' : d < 60 ? `${d}d left` : 'exp ' + shortDate(r.expires_on)}</span>` : '' }; },
+      fields:[['name','Name','text',true],['kind','Kind',sel(['license','registration','insurance','passport','id','warranty','lease','certificate','medical','other'])],['issuer','Issued by'],['number_last4','Last 4 of the number only','text'],['expires_on','Expires','date']] } ],
+    summary: rows => { const d = (rows.documents||[]).filter(x=>x.expires_on && daysTo(x.expires_on) < 60); return (rows.documents||[]).length ? `${rows.documents.length} saved${d.length ? ` · ${d.length} expiring soon` : ''}` : 'License, registration, warranties'; } },
+  car: { title:'Car', emoji:'🚗', sections:[
+    { table:'vehicles', title:'Vehicles', query:'order=id.asc', row: r => ({ t: `${r.year||''} ${r.make||''} ${r.model||r.name}`.trim(), s: r.odometer_miles ? `${r.odometer_miles.toLocaleString()} mi` : 'add an odometer reading when you log a service' }),
+      fields:[['name','Name','text',true],['make','Make'],['model','Model'],['year','Year','number'],['plate','Plate']] },
+    { table:'vehicle_services', title:'Maintenance', query:'order=service_on.desc', row: r => ({ t: `${r.kind}${r.description ? ' — ' + r.description : ''}`, s: [shortDate(r.service_on), r.odometer_miles ? r.odometer_miles.toLocaleString() + ' mi' : '', r.shop].filter(Boolean).join(' · '), right: dollars(r.cost_cents) }),
+      fields:[['vehicle_id','Vehicle','fk:vehicles',true],['service_on','Date','date',true],['kind','Type',sel(['oil','tires','brakes','battery','inspection','registration','repair','wash','other'])],['odometer_miles','Odometer','number'],['cost_cents','Cost','money'],['shop','Shop'],['description','Notes'],['next_due_on','Next due','date']] },
+    { table:'fuel_logs', title:'Gas', query:'order=filled_on.desc', row: r => ({ t: `${r.gallons ? r.gallons + ' gal' : 'Fill-up'}${r.station ? ' · ' + r.station : ''}`, s: [shortDate(r.filled_on), r.odometer_miles ? r.odometer_miles.toLocaleString() + ' mi' : ''].filter(Boolean).join(' · '), right: dollars(r.total_cents) }),
+      fields:[['vehicle_id','Vehicle','fk:vehicles',true],['filled_on','Date','date',true],['gallons','Gallons','number'],['total_cents','Total','money'],['odometer_miles','Odometer','number'],['station','Station']] } ],
+    summary: rows => { const v = (rows.vehicles||[])[0]; const s = (rows.vehicle_services||[])[0]; return v ? `${v.year||''} ${v.model||v.name} · ${s ? 'last ' + s.kind + ' ' + shortDate(s.service_on) : 'no services logged'}` : 'Add your car'; } },
+  people: { title:'People', emoji:'🫶', sections:[
+    { table:'people', title:'People', query:'order=name.asc', row: r => { let next = ''; if(r.birthday){ const b = new Date(r.birthday+'T12:00'), n = new Date(); b.setFullYear(n.getFullYear()); if(b < n) b.setFullYear(n.getFullYear()+1); const d = Math.round((b-n)/86400000); next = `birthday in ${d}d`; } return { t: r.name, s: [r.relationship, next, r.last_seen_on ? 'seen ' + shortDate(r.last_seen_on) : ''].filter(Boolean).join(' · ') }; },
+      fields:[['name','Name','text',true],['relationship','Relationship'],['birthday','Birthday','date'],['gift_ideas','Gift ideas'],['notes','Notes']] } ],
+    summary: rows => { const n = (rows.people||[]).length; return n ? `${n} ${n === 1 ? 'person' : 'people'}` : 'Birthdays, gift ideas'; } },
+  trips: { title:'Trips', emoji:'🧳', sections:[
+    { table:'trips', title:'Trips', query:'order=start_on.asc.nullslast', row: r => ({ t: r.name, s: [r.destination, r.start_on ? shortDate(r.start_on) + (r.end_on ? '–' + shortDate(r.end_on) : '') : '', r.status].filter(Boolean).join(' · '), right: dollars(r.budget_cents) }),
+      fields:[['name','Trip','text',true],['destination','Where'],['start_on','From','date'],['end_on','To','date'],['status','Status',sel(['idea','planned','booked','done','cancelled'])],['budget_cents','Budget','money']] } ],
+    summary: rows => { const up = (rows.trips||[]).filter(x=>x.status!=='done' && x.status!=='cancelled'); return up.length ? `${up.length} upcoming` : 'Plan a trip'; } },
+  school: { title:'School', emoji:'🎓', sections:[
+    { table:'courses', title:'Courses', query:'order=term.desc.nullslast,code.asc', row: r => ({ t: [r.code, r.title].filter(Boolean).join(' '), s: [r.school, r.term, r.credits ? r.credits + ' cr' : '', r.status].filter(Boolean).join(' · '), right: r.grade || '' }),
+      fields:[['title','Course','text',true],['school','School'],['code','Code'],['term','Term'],['credits','Credits','number'],['status','Status',sel(['planned','enrolled','completed','transferred','dropped'])]] },
+    { table:'assignments', title:'Due', query:'done=eq.false&order=due_at.asc.nullslast', row: r => ({ t: r.title, s: [r.kind, r.due_at ? 'due ' + new Date(r.due_at).toLocaleDateString('en-US',{month:'short', day:'numeric'}) : ''].filter(Boolean).join(' · ') }),
+      fields:[['title','What','text',true],['course_id','Course','fk:courses'],['kind','Type',sel(['homework','exam','project','reading','admin'])],['due_at','Due','datetime-local']] } ],
+    summary: rows => { const a = (rows.assignments||[]).length, c = (rows.courses||[]).length; return c || a ? `${c} courses · ${a} due` : 'Courses and deadlines'; } },
+  apartments: { title:'Apartments', emoji:'🏠', sections:[
+    { table:'apartment_listings', title:'Listings', query:'order=created_at.desc', row: r => ({ t: r.title, s: [r.address, r.beds ? r.beds + ' bd' : '', r.baths ? r.baths + ' ba' : '', r.status].filter(Boolean).join(' · '), right: r.rent_cents ? money(r.rent_cents) + '/mo' : '' }),
+      fields:[['title','Listing','text',true],['address','Address'],['rent_cents','Rent','money'],['beds','Beds','number'],['baths','Baths','number'],['url','Link'],['status','Status',sel(['saved','contacted','toured','applied','rejected','signed'])],['pros','Pros'],['cons','Cons']] } ],
+    summary: rows => (rows.apartment_listings||[]).length ? `${rows.apartment_listings.length} saved` : 'Track listings' },
+  drone: { title:'Drone business', emoji:'🛩️', sections:[
+    { table:'drone_flights', title:'Flights', query:'order=flown_on.desc', row: r => ({ t: r.location_name || 'Flight', s: [shortDate(r.flown_on), r.aircraft, r.duration_min ? r.duration_min + ' min' : '', r.purpose].filter(Boolean).join(' · ') }),
+      fields:[['flown_on','Date','date',true],['location_name','Where'],['aircraft','Aircraft'],['duration_min','Minutes','number'],['purpose','Purpose'],['airspace_auth','Airspace / LAANC'],['client_id','Client','fk:drone_clients']] },
+    { table:'drone_invoices', title:'Invoices', query:'order=issued_on.desc', row: r => ({ t: r.number || 'Invoice', s: [shortDate(r.issued_on), r.due_on ? 'due ' + shortDate(r.due_on) : '', r.status].filter(Boolean).join(' · '), right: dollars(r.amount_cents) }),
+      fields:[['client_id','Client','fk:drone_clients'],['number','Invoice #'],['amount_cents','Amount','money',true],['issued_on','Issued','date'],['due_on','Due','date'],['status','Status',sel(['draft','sent','paid','void'])]] },
+    { table:'drone_clients', title:'Clients', query:'order=name.asc', row: r => ({ t: r.name, s: [r.contact, r.email].filter(Boolean).join(' · ') }), fields:[['name','Client','text',true],['contact','Contact'],['email','Email'],['phone','Phone']] } ],
+    summary: rows => { const open = (rows.drone_invoices||[]).filter(x=>x.status==='sent' || x.status==='draft'); return (rows.drone_flights||[]).length || open.length ? `${(rows.drone_flights||[]).length} flights · ${open.length} open invoices` : 'Flights, clients, invoices'; } },
+};
+const LIFE_ONE = { wardrobe_items:'clothing item', subscriptions:'subscription', documents:'document', vehicles:'vehicle', vehicle_services:'service', fuel_logs:'fill-up',
+  people:'person', trips:'trip', courses:'course', assignments:'deadline', apartment_listings:'listing', drone_flights:'flight', drone_invoices:'invoice', drone_clients:'client' };
+let lifeArea = null, lifeRows = {}, lifeAdding = null, lifeOpenRow = null;
+async function lifeLoad(tables){
+  await Promise.all(tables.map(async t => {
+    const sec = Object.values(LIFE).flatMap(a=>a.sections).find(x=>x.table===t);
+    try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}?select=*&${sec ? sec.query : 'order=id.asc'}`, { headers: authHeaders() }); lifeRows[t] = r.ok ? await r.json() : []; } catch(e){ lifeRows[t] = []; }
+  }));
+}
+async function renderLife(){
+  const el = document.getElementById('lifeContent'); if(!el) return;
+  if(!lifeArea){
+    if(!lifeRows._loaded){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>'; await lifeLoad([...new Set(Object.values(LIFE).flatMap(a=>a.sections.map(x=>x.table)))]); lifeRows._loaded = true; }
+    el.innerHTML = `<div class="lf-grid">${Object.entries(LIFE).map(([k,a])=>`<button type="button" class="lf-card" data-life="${k}"><span class="lf-emoji">${a.emoji}</span><b>${a.title}</b><span>${esc(a.summary(lifeRows))}</span></button>`).join('')}</div>
+      <div class="suggest-note">Tip: you can also just tell Otto, e.g. “oil change today at 98,450, $65” or “add my license, expires March 2028”.</div>`;
+    return;
+  }
+  const a = LIFE[lifeArea];
+  const secs = a.sections.map(sec=>{
+    const rows = lifeRows[sec.table] || [];
+    const list = rows.map(r=>{ const v = sec.row(r); const open = lifeOpenRow === sec.table + ':' + r.id;
+      return `<div class="lf-row ${open?'open':''}" data-lrow="${sec.table}:${r.id}"><div class="grow-main"><div class="grow-title">${esc(v.t || '')}</div>${v.s ? `<div class="grow-sub">${esc(v.s)}</div>` : ''}</div>${v.right ? `<div class="lf-right">${v.right}</div>` : ''}
+        ${open ? `<div class="lf-actions">${sec.closet ? `<button type="button" data-wore="${r.id}">Wore it today</button>` : ''}<button type="button" class="danger" data-ldel="${sec.table}:${r.id}">Delete</button></div>` : ''}</div>`; }).join('');
+    const form = lifeAdding === sec.table ? `<form class="lf-form" data-lform="${sec.table}">${sec.fields.map(([k,label,type,req])=>{
+        type = type || 'text';
+        if(typeof type === 'object') return `<label>${label}<select name="${k}">${type.options.map(o=>`<option>${o}</option>`).join('')}</select></label>`;
+        if(String(type).startsWith('fk:')){ const t = type.slice(3); return `<label>${label}<select name="${k}" ${req?'required':''}>${req?'':'<option value="">—</option>'}${(lifeRows[t]||[]).map(o=>`<option value="${o.id}">${esc(o.name || o.title || o.code || ('#'+o.id))}</option>`).join('')}</select></label>`; }
+        return `<label>${label}<input name="${k}" type="${type==='money'?'text':type}" ${type==='money'?'inputmode="decimal" placeholder="$0.00"':''} ${type==='number'?'inputmode="decimal" step="any"':''} ${req?'required':''}></label>`; }).join('')}
+        <div class="lf-form-actions"><button type="submit" class="save-btn">Save</button><button type="button" class="link-btn" data-lcancel>Cancel</button></div></form>`
+      : `<button type="button" class="lf-add" data-ladd="${sec.table}">+ Add ${LIFE_ONE[sec.table] || 'item'}</button>`;
+    return `<div class="section-title">${sec.title}<span>${rows.length || ''}</span></div>${rows.length ? `<div class="gcard lf-list">${list}</div>` : ''}${form}`;
+  }).join('');
+  const extra = lifeArea === 'closet' && (lifeRows.wardrobe_items||[]).some(x=>x.laundry_status==='worn') ? `<button type="button" class="lf-add strong" data-laundry>🧺 Laundry done: mark everything clean</button>` : '';
+  el.innerHTML = `<button type="button" class="page-back lf-back" data-lback>‹ Life</button><h3 class="lf-title">${a.emoji} ${a.title}</h3><div class="lf-sum">${esc(a.summary(lifeRows))}</div>${extra}${secs}`;
+}
+document.addEventListener('click', async e=>{
+  const c = e.target.closest('[data-life]'); if(c){ lifeArea = c.dataset.life; lifeAdding = null; lifeOpenRow = null; renderLife(); document.getElementById('sheetBody')?.scrollTo({ top:0 }); return; }
+  if(e.target.closest('[data-lback]')){ lifeArea = null; renderLife(); return; }
+  const ad = e.target.closest('[data-ladd]'); if(ad){ lifeAdding = ad.dataset.ladd; renderLife(); return; }
+  if(e.target.closest('[data-lcancel]')){ lifeAdding = null; renderLife(); return; }
+  const del = e.target.closest('[data-ldel]');
+  if(del){ const [t,id] = del.dataset.ldel.split(':'); if(!confirm('Delete this?')) return;
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}?id=eq.${id}`, { method:'DELETE', headers: authHeaders() });
+    if(!r.ok){ showNotice(`Couldn't delete (${r.status})`); return; } lifeRows[t] = (lifeRows[t]||[]).filter(x=>String(x.id)!==id); lifeOpenRow = null; renderLife(); return; }
+  const wore = e.target.closest('[data-wore]');
+  if(wore){ const it = (lifeRows.wardrobe_items||[]).find(x=>String(x.id)===wore.dataset.wore); if(!it) return;
+    const since = (it.wears_since_wash||0) + 1, status = since >= Math.max(1, it.wears_before_wash||1) ? 'worn' : (it.laundry_status || 'clean');
+    await fetch(`${SUPABASE_URL}/rest/v1/wear_log`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wardrobe_item_id: it.id, worn_on: localToday() }) });
+    await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${it.id}`, { method:'PATCH', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wears_since_wash: since, laundry_status: status, last_worn_on: localToday() }) });
+    Object.assign(it, { wears_since_wash: since, laundry_status: status, last_worn_on: localToday() }); hapticPulse(); renderLife(); return; }
+  if(e.target.closest('[data-laundry]')){ const worn = (lifeRows.wardrobe_items||[]).filter(x=>x.laundry_status==='worn' || (x.wears_since_wash||0) > 0);
+    await fetch(`${SUPABASE_URL}/rest/v1/laundry_loads`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ washed_on: localToday(), item_ids: worn.map(x=>x.id) }) });
+    await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=in.(${worn.map(x=>x.id).join(',')})`, { method:'PATCH', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wears_since_wash: 0, laundry_status: 'clean' }) });
+    worn.forEach(x=>{ x.wears_since_wash = 0; x.laundry_status = 'clean'; }); hapticPulse(); renderLife(); return; }
+  const row = e.target.closest('[data-lrow]'); if(row && !e.target.closest('button')){ lifeOpenRow = lifeOpenRow === row.dataset.lrow ? null : row.dataset.lrow; renderLife(); }
+});
+document.addEventListener('submit', async e=>{
+  const f = e.target.closest('[data-lform]'); if(!f) return; e.preventDefault();
+  const t = f.dataset.lform, sec = Object.values(LIFE).flatMap(a=>a.sections).find(x=>x.table===t), body = {};
+  for(const [k,label,type] of sec.fields){ const v = f.elements[k] && f.elements[k].value.trim(); if(v === '' || v == null) continue;
+    body[k] = type === 'money' ? Math.round(parseFloat(v.replace(/[$,]/g,''))*100) : type === 'number' ? Number(v) : String(type||'').startsWith('fk:') ? Number(v) : type === 'datetime-local' ? new Date(v).toISOString() : v; }
+  if(t === 'documents' && body.number_last4) body.number_last4 = String(body.number_last4).replace(/\W/g,'').slice(-4);
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=representation' }, body: JSON.stringify(body) });
+  if(!r.ok){ showNotice(`Couldn't save: ${(await r.text()).slice(0,140)}`); return; }
+  const [row] = await r.json(); (lifeRows[t] = lifeRows[t] || []).unshift(row); lifeAdding = null; hapticPulse(); renderLife();
+});
+
+// ===================== Food: Kitchen (at home, can make, trips, receipts) =====================
+let kitchenData = null;
+async function loadKitchen(){
+  const H = authHeaders();
+  const [p, c, t] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/pantry_items?select=quantity,unit,location,status,last_purchased_on,food:food_items(name,emoji)&status=neq.out&order=location.asc`, { headers: H }).then(r=>r.ok?r.json():[]).catch(()=>[]),
+    fetch(`${SUPABASE_URL}/rest/v1/v_can_make?select=recipe_id,name,emoji,have,required,missing`, { headers: H }).then(r=>r.ok?r.json():[]).catch(()=>[]),
+    fetch(`${SUPABASE_URL}/rest/v1/grocery_trips?select=code,store,trip_date,total_cents,transaction_id,source,grocery_trip_items(count)&order=trip_date.desc&limit=12`, { headers: H }).then(r=>r.ok?r.json():[]).catch(()=>[]) ]);
+  kitchenData = { pantry: p, canMake: c, trips: t };
+}
+function renderKitchen(){
+  if(!kitchenData){ loadKitchen().then(()=>{ if(foodView === 'kitchen') renderFood(); }); return '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>'; }
+  const K = kitchenData, LOC = { fridge:'Fridge', freezer:'Freezer', pantry:'Pantry', counter:'Counter' };
+  const by = {}; K.pantry.forEach(p=>{ const k = p.location || 'other'; (by[k] = by[k] || []).push(p); });
+  const home = K.pantry.length ? Object.keys(by).map(k=>`<div class="kt-loc">${LOC[k] || 'Other'}</div>${by[k].map(p=>`<div class="kt-item"><span>${p.food && p.food.emoji ? p.food.emoji + ' ' : ''}${esc(p.food ? p.food.name : '')}</span><span class="kt-qty ${p.status==='low'?'low':''}">${p.status==='low' ? 'running low' : `${Number(p.quantity)} ${esc(p.unit||'')}`}</span></div>`).join('')}`).join('')
+    : '<div class="empty">Nothing recorded yet. Add a receipt after your next trip.</div>';
+  const ready = K.canMake.filter(r=>r.required && r.have >= r.required), close = K.canMake.filter(r=>r.required && r.have < r.required && r.have > 0).sort((a,b)=>(b.have/b.required)-(a.have/a.required)).slice(0,3);
+  const make = (ready.length || close.length) ? ready.map(r=>`<div class="kt-item"><span>${r.emoji||''} ${esc(r.name)}</span><span class="lf-badge ok">ready</span></div>`).join('') + close.map(r=>`<div class="kt-item"><span>${r.emoji||''} ${esc(r.name)}</span><span class="kt-qty">need ${esc(r.missing||'')}</span></div>`).join('') : '<div class="empty">Nothing you can make yet with what\u2019s recorded.</div>';
+  const trips = K.trips.length ? K.trips.map(t=>`<div class="kt-item"><span>${esc(t.store || 'Grocery trip')} · ${shortDate(t.trip_date)}</span><span class="kt-qty">${t.total_cents ? money(t.total_cents) : 'no receipt yet'}${t.transaction_id ? ' · ✓ bank' : ''}</span></div>`).join('') : '<div class="empty">No trips yet.</div>';
+  return `<div class="kt-receipt"><b>After shopping</b><span>Snap or paste your receipt. Otto reads every line, updates what's at home, and matches the bank charge.</span><div><button type="button" class="save-btn" data-receipt="photo">📷 Photo of receipt</button><button type="button" class="link-btn" data-receipt="paste">Paste receipt text</button></div></div>
+    <div class="section-title">At home<span>${K.pantry.length || ''}</span></div><div class="gcard kt-list">${home}</div>
+    <div class="section-title">You can make</div><div class="gcard kt-list">${make}</div>
+    <div class="section-title">Grocery trips</div><div class="gcard kt-list">${trips}</div>`;
+}
+
+// ===================== Photos in chat (receipts and anything else) =====================
+let pendingImage = null;
+function openChatWith(text){
+  document.body.classList.add('chatting'); closeSheet && closeSheet();
+  const input = document.getElementById('askInput'); input.value = text || ''; setTimeout(()=>input.focus(), 50);
+}
+async function imageToJpeg(file){
+  const url = URL.createObjectURL(file); const img = new Image(); await new Promise((res, rej)=>{ img.onload = res; img.onerror = rej; img.src = url; });
+  const scale = Math.min(1, 1600 / Math.max(img.width, img.height)); const c = document.createElement('canvas'); c.width = Math.round(img.width*scale); c.height = Math.round(img.height*scale);
+  c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+  const data = c.toDataURL('image/jpeg', 0.85); return { media_type:'image/jpeg', data: data.split(',')[1], preview: data };
+}
+document.getElementById('photoBtn').addEventListener('click', ()=>document.getElementById('photoInput').click());
+document.getElementById('photoInput').addEventListener('change', async e=>{
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{ pendingImage = await imageToJpeg(f); } catch(err){ showNotice("Couldn't read that photo."); return; }
+  const chip = document.getElementById('photoChip'); chip.hidden = false; chip.innerHTML = `<img src="${pendingImage.preview}" alt="Attached photo"><span>Photo attached</span><button type="button" aria-label="Remove photo" data-unphoto>✕</button>`;
+  const input = document.getElementById('askInput'); if(!input.value) input.value = window.__receiptMode ? "Here's my grocery receipt." : ''; input.focus();
+});
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-unphoto]')){ pendingImage = null; const chip = document.getElementById('photoChip'); chip.hidden = true; chip.innerHTML = ''; return; }
+  const rc = e.target.closest('[data-receipt]'); if(!rc) return;
+  if(rc.dataset.receipt === 'photo'){ window.__receiptMode = true; openChatWith("Here's my grocery receipt."); setTimeout(()=>document.getElementById('photoInput').click(), 80); }
+  else openChatWith("Here's my grocery receipt:\n");
+});
+
 // ---------- chat actions (changes the chat made, each with Undo) + nightly check-in ----------
 let chatMode = 'chat', todayCheckin = null;
 function renderChatActions(el, actions){
