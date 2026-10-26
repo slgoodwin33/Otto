@@ -1660,6 +1660,18 @@ body.chatting .otto-chat-starters{display:none}
   .photo-chip{display:flex; align-items:center; gap:8px; margin:0 6px 6px; padding:6px 8px; border-radius:12px; background:var(--surface-2); font-size:0.82rem;} .photo-chip img{width:34px; height:34px; object-fit:cover; border-radius:6px; flex-shrink:0;} .photo-chip{flex-wrap:nowrap; overflow-x:auto;} .photo-chip span{flex:1;} .photo-chip button{all:unset; cursor:pointer; padding:4px 8px; font-weight:700;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Otto integrated command center — build 020 */
+#ottoCommandLauncher{position:fixed;right:18px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:1100;width:54px;height:54px;border:0;border-radius:19px;background:#2448c9;color:#fff;box-shadow:0 12px 28px #13245a44;font-size:27px;cursor:pointer;display:grid;place-items:center}
+#ottoCommandLauncher:focus-visible,.oc-button:focus-visible{outline:3px solid #87aaff;outline-offset:3px}
+#ottoCommandLayer{position:fixed;inset:0;z-index:4000;background:#10162799;display:none;align-items:flex-end;justify-content:center;padding:0}
+#ottoCommandLayer.oc-open{display:flex}
+.oc-panel{box-sizing:border-box;width:min(100%,620px);max-height:min(88dvh,850px);overflow:auto;background:var(--surface,#fff);color:var(--text,#16191f);border-radius:25px 25px 0 0;padding:22px 20px calc(25px + env(safe-area-inset-bottom));box-shadow:0 -18px 60px #0003}
+.oc-top{display:flex;align-items:center;justify-content:space-between;gap:12px}.oc-top h2{margin:0;font-size:22px}.oc-muted{color:var(--text-muted,#62666f);font-size:13px}.oc-button{border:1px solid var(--border,#d7d9df);background:var(--surface-2,#f3f3f4);color:inherit;border-radius:12px;padding:10px 13px;cursor:pointer;font:inherit}
+.oc-primary{background:#2448c9;border-color:#2448c9;color:white}.oc-tabs{display:flex;gap:8px;margin:20px 0 14px}.oc-tabs button{flex:1}.oc-tabs .selected{background:#2448c9;color:white;border-color:#2448c9}.oc-input,.oc-textarea{width:100%;box-sizing:border-box;border:1px solid var(--border,#d7d9df);border-radius:14px;padding:14px;background:var(--surface,#fff);color:inherit;font:inherit;font-size:16px}.oc-textarea{min-height:100px;resize:vertical}.oc-row{display:flex;gap:8px;align-items:center}.oc-row>*:first-child{flex:1}.oc-list{display:grid;gap:9px;margin-top:16px}.oc-item{border:1px solid var(--border,#d7d9df);border-radius:14px;padding:13px;display:flex;gap:12px;align-items:flex-start;justify-content:space-between;overflow-wrap:anywhere}.oc-item strong{display:block;font-size:14px}.oc-item small{color:var(--text-muted,#62666f)}.oc-shortcuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:15px}.oc-shortcuts button{min-height:56px}.oc-empty{padding:22px;text-align:center;color:var(--text-muted,#62666f)}.oc-check{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--border,#ddd)}.oc-check input{width:19px;height:19px;accent-color:#2448c9}.oc-hidden{display:none!important}
+@media(min-width:700px){#ottoCommandLayer{align-items:center;padding:24px}.oc-panel{border-radius:25px;max-height:85dvh}#ottoCommandLauncher{bottom:105px}}
+@media(prefers-reduced-motion:no-preference){.oc-panel{animation:ocUp .22s ease-out}@keyframes ocUp{from{transform:translateY(18px);opacity:.7}to{transform:translateY(0);opacity:1}}}
+</style>
 </head>
 <body class="home-v2">
 <div class="pull-indicator" id="pullIndicator"></div>
@@ -5781,6 +5793,46 @@ document.addEventListener('submit',async e=>{
     if(mapBtn)mapBtn.addEventListener('click',()=>{if(!sheet.hidden){size='collapsed';apply();}});
   };
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
+})();
+</script>
+<script>
+/* Otto command center: client-side inbox, search and customizable quick access.
+   Data captured here stays on this device; no new Supabase schema is assumed. */
+(function(){
+'use strict';
+const KEY='otto.command.v1', PINKEY='otto.command.pins.v1';
+const areas=[['home','Today'],['todos','Plan'],['money','Money'],['health','Body'],['food','Food'],['wardrobe','Wardrobe'],['assets','Map'],['account','Account']];
+const defaultPins=['todos','money','health','wardrobe'];
+function safeRead(k,fallback){try{const v=JSON.parse(localStorage.getItem(k));return Array.isArray(v)?v:fallback}catch(e){return fallback}}
+let items=safeRead(KEY,[]),pins=safeRead(PINKEY,defaultPins),tab='inbox',query='';
+const escapeHtml=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const launcher=document.createElement('button');launcher.id='ottoCommandLauncher';launcher.type='button';launcher.title='Search, inbox and quick add';launcher.setAttribute('aria-label','Open Otto command center');launcher.textContent='+';
+const layer=document.createElement('div');layer.id='ottoCommandLayer';layer.setAttribute('aria-hidden','true');
+layer.innerHTML='<section class="oc-panel" role="dialog" aria-modal="true" aria-label="Otto command center"><div class="oc-top"><div><h2>Otto command center</h2><div class="oc-muted">Capture, find and jump to what matters</div></div><button type="button" class="oc-button" data-action="close" aria-label="Close">✕</button></div><div class="oc-tabs" role="tablist"><button type="button" class="oc-button selected" data-tab="inbox">Inbox</button><button type="button" class="oc-button" data-tab="search">Search</button><button type="button" class="oc-button" data-tab="customize">Customize</button></div><div id="ocContent"></div></section>';
+document.body.append(launcher,layer);
+const content=layer.querySelector('#ocContent');
+function save(){try{localStorage.setItem(KEY,JSON.stringify(items))}catch(e){alert('Unable to save on this device. Check available browser storage.')}}
+function render(){layer.querySelectorAll('[data-tab]').forEach(b=>{const active=b.dataset.tab===tab;b.classList.toggle('selected',active);b.setAttribute('aria-selected',String(active))});
+if(tab==='inbox'){
+ content.innerHTML='<label for="ocCapture" class="oc-muted">Quick capture</label><textarea id="ocCapture" class="oc-textarea" maxlength="2000" placeholder="A thought, reminder, task, or idea…"></textarea><div class="oc-row" style="margin-top:9px"><span class="oc-muted">Saved locally on this device</span><button class="oc-button oc-primary" type="button" data-action="add">Add to inbox</button></div><div class="oc-list">'+(items.length?items.map(x=>'<div class="oc-item"><div><strong>'+escapeHtml(x.text)+'</strong><small>'+escapeHtml(new Date(x.created).toLocaleString())+'</small></div><button class="oc-button" type="button" data-remove="'+escapeHtml(x.id)+'" aria-label="Remove item">✕</button></div>').join(''):'<div class="oc-empty">Your inbox is empty. Capture anything you want to revisit.</div>')+'</div>';
+}else if(tab==='search'){
+ const found=areas.filter(a=>a[1].toLowerCase().includes(query.toLowerCase()));const matched=items.filter(x=>x.text.toLowerCase().includes(query.toLowerCase()));
+ content.innerHTML='<input class="oc-input" id="ocSearch" type="search" autocomplete="off" placeholder="Search workspaces and inbox" value="'+escapeHtml(query)+'" aria-label="Search Otto"><div class="oc-shortcuts">'+found.map(a=>'<button type="button" class="oc-button" data-area="'+a[0]+'">'+a[1]+'</button>').join('')+'</div><div class="oc-list">'+matched.map(x=>'<div class="oc-item"><div><strong>'+escapeHtml(x.text)+'</strong><small>Inbox note</small></div></div>').join('')+(!found.length&&!matched.length?'<div class="oc-empty">No matches</div>':'')+'</div>';
+ const input=content.querySelector('#ocSearch');input.focus();input.setSelectionRange(query.length,query.length);
+}else{
+ content.innerHTML='<p class="oc-muted">Choose the shortcuts displayed in your command center. Preferences are saved on this device.</p>'+areas.map(a=>'<label class="oc-check"><input type="checkbox" data-pin="'+a[0]+'" '+(pins.includes(a[0])?'checked':'')+'><span>'+a[1]+'</span></label>').join('')+'<div class="oc-shortcuts">'+pins.map(p=>{const a=areas.find(x=>x[0]===p);return a?'<button type="button" class="oc-button" data-area="'+p+'">'+a[1]+'</button>':''}).join('')+'</div>';
+}}
+function open(){layer.classList.add('oc-open');layer.setAttribute('aria-hidden','false');tab='inbox';render();setTimeout(()=>content.querySelector('#ocCapture')?.focus(),0)}
+function close(){layer.classList.remove('oc-open');layer.setAttribute('aria-hidden','true');launcher.focus()}
+function go(area){close();if(area==='home'){if(typeof closeSheet==='function'&&typeof sheetArea!=='undefined'&&sheetArea)closeSheet();window.scrollTo({top:0,behavior:'smooth'});return}if(typeof openSheet==='function')openSheet(area)}
+launcher.addEventListener('click',open);
+layer.addEventListener('click',e=>{if(e.target===layer){close();return}const b=e.target.closest('button');if(!b)return;
+if(b.dataset.tab){tab=b.dataset.tab;render();return}if(b.dataset.area){go(b.dataset.area);return}
+if(b.dataset.action==='close'){close();return}if(b.dataset.action==='add'){const input=content.querySelector('#ocCapture');const value=input?.value.trim();if(!value){input?.focus();return}items.unshift({id:String(Date.now())+'-'+Math.random().toString(36).slice(2),text:value,created:new Date().toISOString()});save();render();return}
+if(b.dataset.remove){items=items.filter(x=>x.id!==b.dataset.remove);save();render()}});
+layer.addEventListener('input',e=>{if(e.target.id==='ocSearch'){query=e.target.value;const pos=e.target.selectionStart;render();const input=content.querySelector('#ocSearch');input?.setSelectionRange(pos,pos)}});
+layer.addEventListener('change',e=>{const p=e.target.dataset.pin;if(!p)return;pins=e.target.checked?[...new Set([...pins,p])]:pins.filter(x=>x!==p);try{localStorage.setItem(PINKEY,JSON.stringify(pins))}catch(e){}render()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&layer.classList.contains('oc-open'))close();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();open();tab='search';render()}});
 })();
 </script>
 </body>
