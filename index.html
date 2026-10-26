@@ -1711,6 +1711,47 @@ body.chatting .otto-chat-starters{display:none}
   .ed-preview{display:flex; gap:6px; padding:6px; margin:10px 0 14px; background:var(--surface); border:1px solid var(--border); border-radius:22px;}
   .ed-preview span{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; padding:8px 0; border-radius:14px; border:1px dashed var(--accent); color:var(--accent);} .ed-preview b{font:500 10px var(--sans); color:var(--text);}
   .ed-ico{color:var(--text);} .ed-pin{border:1px solid var(--border); background:transparent; color:var(--text); border-radius:17px; min-height:34px; padding:0 14px; font:600 12.5px var(--sans); cursor:pointer;} .ed-pin.on{background:var(--accent); border-color:var(--accent); color:var(--on-accent);}
+
+  /* ===== Documents vault (build .51) ===== */
+  .doc-lock{display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding:34px 18px; margin-top:12px; background:var(--surface); border:1px solid var(--border); border-radius:18px; color:var(--accent);}
+  .doc-lock b{font:600 17px var(--sans); color:var(--text);} .doc-lock span{font:13px var(--sans); color:var(--text-muted); max-width:280px;}
+  .doc-search{display:flex; align-items:center; gap:8px; margin:8px 0; padding:0 12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; color:var(--text-muted);}
+  .doc-search input{flex:1; min-width:0; min-height:44px; border:none; outline:none; background:transparent; color:var(--text); font:16px var(--sans);}
+  .sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+  .doc-chips{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;} .doc-chip{border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:16px; min-height:34px; padding:0 12px; font:600 12.5px var(--sans); cursor:pointer;} .doc-chip em{font-style:normal; color:var(--text-muted); font-family:var(--mono);} .doc-chip.on{border-color:var(--accent); color:var(--accent);}
+  .doc-pending{display:flex; align-items:center; gap:12px; padding:12px; margin:8px 0; background:var(--surface); border:1px solid var(--border); border-radius:14px;} .doc-pending b{display:block; font:600 14px var(--sans);} .doc-pending span{font:12.5px var(--sans); color:var(--text-muted);}
+  .doc-pending img, .doc-form-head img{width:48px; height:48px; object-fit:cover; border-radius:8px;} .doc-pdf{width:48px; height:48px; border-radius:8px; display:grid; place-items:center; background:var(--surface-2); font:600 12px var(--mono); color:var(--text-muted);}
+  .doc-form-head{grid-column:1/-1; display:flex; align-items:center; gap:10px; font:13px var(--sans); color:var(--text-muted);} .doc-form-head b{color:var(--text);} .doc-form-head .neg{color:var(--alert);}
+  .doc-tags{grid-column:1/-1; border:none; padding:0; margin:0; display:flex; flex-wrap:wrap; gap:6px;} .doc-tags legend{font:700 0.74rem var(--sans); color:var(--text-muted); margin-bottom:4px;}
+  .doc-tag{display:inline-flex !important; flex-direction:row !important; align-items:center; gap:6px; min-height:34px; padding:0 10px; border:1px solid var(--border); border-radius:16px; font:600 12.5px var(--sans) !important; color:var(--text) !important;} .doc-tag input{min-height:0 !important; accent-color:var(--accent);}
+
+  /* ===== Build .51 part 2 ===== */
+  body[data-moneyseg="recurring"] [data-mseg="recurring"]{display:block !important;}
+  .cl-meta{font:500 12px var(--mono); color:var(--text-muted); letter-spacing:.04em; margin:8px 0;}
+  .flatlay{position:relative; height:320px; border-radius:18px; background:radial-gradient(ellipse at 50% 40%, #ECE9E3 0%, #D9D5CD 100%); overflow:hidden;}
+  .fl-piece{position:absolute; margin:0; display:flex; flex-direction:column; align-items:center;} .fl-piece img{width:100%; height:100%; object-fit:contain; filter:drop-shadow(0 8px 10px rgba(0,0,0,.28));}
+  .fl-piece figcaption{position:absolute; bottom:-2px; font:600 10px var(--mono); color:#5d5a54; background:rgba(255,255,255,.6); padding:1px 6px; border-radius:6px; white-space:nowrap;}
+  .fl-ph{width:100%; height:100%; display:grid; place-items:center; text-align:center; padding:8px; border-radius:14px; background:rgba(255,255,255,.55); color:#3b3a37; font:600 12px var(--sans); box-shadow:0 8px 14px rgba(0,0,0,.18);}
+  .fl-outer{left:4%; top:5%; width:44%; height:52%;} .fl-top{right:6%; top:4%; width:40%; height:42%;} .fl-bottom{right:12%; top:44%; width:34%; height:54%;} .fl-shoes{left:8%; bottom:5%; width:40%; height:30%;}
+  .fl-empty{position:absolute; inset:0; display:grid; place-items:center; color:#5d5a54; font:500 14px var(--sans); padding:24px; text-align:center;}
+  .cl-actions{display:flex; gap:12px; align-items:center; margin-top:10px;}
+  .cl-grid{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:8px; margin-top:8px;}
+  .cl-item{display:flex; flex-direction:column; gap:3px; padding:8px; background:var(--surface); border:1px solid var(--border); border-radius:14px; min-width:0;} .cl-item.worn{border-color:var(--alert);}
+  .cl-img{aspect-ratio:1; border-radius:10px; background:#E6E3DD; display:grid; place-items:center; overflow:hidden; color:#6b6760; font:600 22px var(--sans);} .cl-img img{width:100%; height:100%; object-fit:contain;}
+  .cl-item b{font:600 12.5px var(--sans); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;} .cl-item span:last-child{font:11px var(--sans); color:var(--text-muted);}
+  .cl-hamper{display:flex; align-items:baseline; gap:10px; margin:10px 0; font:13px var(--sans); color:var(--text-muted);}
+  .ia2-input{min-height:40px; padding:0 10px; border-radius:10px; border:1px solid var(--border); background:var(--bg); color:var(--text); font:16px var(--sans); flex:1; min-width:0;} .ia2-input.short{flex:0 0 84px;}
+  .cz rect{fill-opacity:.18; stroke-width:1.5; cursor:pointer;} .cz text{font:11px var(--sans); fill:var(--text); pointer-events:none;} .cz-body{fill:var(--surface); stroke:var(--border); stroke-width:2;}
+  .cz-none rect{fill:var(--text-muted); stroke:var(--text-muted);} .cz-ok rect{fill:var(--ok); stroke:var(--ok);} .cz-due rect{fill:var(--amber); stroke:var(--amber);} .cz-over rect{fill:var(--alert); stroke:var(--alert);}
+  .cz-legend{display:flex; gap:14px; font:12px var(--sans); color:var(--text-muted); margin-top:4px;} .cz-legend span::before{content:'■ ';} .cz-legend .ok::before{color:var(--ok);} .cz-legend .due::before{color:var(--amber);} .cz-legend .over::before{color:var(--alert);}
+  .apt-map{height:300px; border-radius:16px; overflow:hidden; margin-top:8px; background:#111419;}
+  .apt-cols{display:flex; gap:6px; margin:8px 0;} .apt-cols span{flex:1; text-align:center; padding:8px 4px; background:var(--surface); border:1px solid var(--border); border-radius:12px;} .apt-cols em{display:block; font:600 9.5px var(--mono); font-style:normal; color:var(--text-muted); letter-spacing:.06em;} .apt-cols b{font:600 17px var(--mono);}
+  .apt-table{display:grid; grid-template-columns:1.6fr 1fr .6fr .8fr .8fr; gap:8px 6px; margin-top:10px; font:13px var(--sans); align-items:baseline;} .apt-table b{font:600 10.5px var(--mono); color:var(--text-muted);}
+  .pace{padding:12px !important; margin-bottom:12px;}
+  .ins-btn{top:116px;} .ins-work{font:13px var(--sans); color:var(--text-muted); margin:6px 0 10px;} .ins-work b{font:600 18px var(--mono); color:var(--text);}
+  .ins-row{display:grid; grid-template-columns:1fr 90px auto; gap:8px; align-items:center; padding:6px 0; font:13.5px var(--sans);} .ins-row i{height:6px; border-radius:3px; background:var(--accent); display:block;} .ins-row em{font:500 12px var(--mono); font-style:normal; color:var(--text-muted);}
+
+  .lf-form{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;} .lf-form > label{min-width:0;} .lf-form input:not([type=checkbox]), .lf-form select{width:100%; box-sizing:border-box; min-width:0;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -1779,6 +1820,8 @@ body.chatting .otto-chat-starters{display:none}
       <input id="askInput" type="text" placeholder="Ask Otto anything…" enterkeyhint="send">
       <button type="button" id="photoBtn" class="mic-btn photo-btn" aria-label="Add a photo (receipts and more)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
       <input type="file" id="photoInput" accept="image/*" multiple hidden>
+      <input type="file" id="docInput" accept="image/*,application/pdf" multiple hidden>
+      <input type="file" id="closetInput" accept="image/*" multiple hidden>
       <button type="button" id="micBtn" class="mic-btn" aria-label="Talk to Otto" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
       <button type="submit" aria-label="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M6 11l6-6 6 6"/></svg></button>
     </div>
@@ -1827,7 +1870,7 @@ body.chatting .otto-chat-starters{display:none}
       <div id="accountsErrorBanner"></div>
       <div id="moneyOverview"></div>
       <div class="acct-strip" id="moneyAccounts"></div>
-      <div class="seg" id="moneySeg" role="tablist"><button type="button" data-mseg-btn="week" class="active">This week</button><button type="button" data-mseg-btn="txns">Transactions</button><button type="button" data-mseg-btn="accounts">Accounts</button></div>
+      <div class="seg" id="moneySeg" role="tablist"><button type="button" data-mseg-btn="week" class="active">This week</button><button type="button" data-mseg-btn="txns">Transactions</button><button type="button" data-mseg-btn="recurring">Recurring</button><button type="button" data-mseg-btn="accounts">Accounts</button></div>
       <div id="netWorthReadout" data-mseg="accounts"></div>
       <div class="health-section-label" data-mseg="accounts">Bank connections</div>
       <div id="bankCard" class="budget-cat" style="padding:0;" data-mseg="accounts"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
@@ -1865,6 +1908,7 @@ body.chatting .otto-chat-starters{display:none}
       </div>
       <div class="txn-search-count" id="txnSearchCount" data-mseg="txns" role="status" aria-live="polite" hidden></div>
       <div id="txnList" class="budget-cat" style="padding:0;" data-mseg="txns"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
+      <div id="recurringContent" data-mseg="recurring"></div>
       <div id="budgetContent" data-mseg="week"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
 
@@ -1875,6 +1919,8 @@ body.chatting .otto-chat-starters{display:none}
       <div class="tl-sheet" id="tlSheet" hidden></div>
       <button class="map-btn wx-btn" id="wxBtn" type="button" aria-label="Weather and tides"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-7.96A5 5 0 0 1 16 8.5a3.5 3.5 0 0 1 1 6.86"/><path d="M8 21l1-2M12 21l1-2M16 21l1-2"/></svg></button>
       <div class="tl-sheet" id="wxSheet" hidden></div>
+      <button class="map-btn ins-btn" id="insBtn" type="button" aria-label="Place insights"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></button>
+      <div class="tl-sheet" id="insSheet" hidden></div>
       <button class="map-btn" id="mapMenuBtn" type="button" aria-label="Map layers and settings" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></button>
       <div class="map-panel" id="mapPanel" hidden>
         <div id="assetsErrorBanner"></div>
@@ -1966,7 +2012,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-26.50';
+const APP_BUILD = '2026-10-26.51';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2390,7 +2436,8 @@ async function fetchBudget(){
   return { summary: summary[0], categories, bills, income, goals };
 }
 
-function renderBudget(data){
+function renderBudget(data){ renderBudget0(data); try{ insertPace(); }catch(e){ console.error('pace', e); } }
+function renderBudget0(data){
   const el = document.getElementById('budgetContent');
   if(!data.summary){ el.innerHTML = '<div class="empty">No budget period set up yet.</div>'; return; }
   const s = data.summary;
@@ -3465,7 +3512,8 @@ function healthSummary(daily, workouts){
   return { today, todayRow: byDate[today] || null, avg30, thisWeek, lastWeek, daysIn, wkMonth, wkWeek, synced };
 }
 
-function renderHealth(data){
+function renderHealth(data){ renderHealth0(data); try{ healthTabs(); }catch(e){ console.error('health tabs', e); } }
+function renderHealth0(data){
   const el = document.getElementById('healthContent');
   const hero = document.getElementById('healthHero');
   const { daily, workouts } = data;
@@ -5069,7 +5117,7 @@ const LIFE = {
 };
 const LIFE_ONE = { wardrobe_items:'clothing item', subscriptions:'subscription', documents:'document', vehicles:'vehicle', vehicle_services:'service', fuel_logs:'fill-up',
   people:'person', trips:'trip', courses:'course', assignments:'deadline', apartment_listings:'listing', drone_flights:'flight', drone_invoices:'invoice', drone_clients:'client' };
-let lifeArea = null, lifeRows = {}, lifeAdding = null, lifeOpenRow = null, lifeSection = 0;
+let lifeArea = null, lifeRows = {}, lifeAdding = null, lifeOpenRow = null, lifeSection = 0, lifePrefill = {};
 async function lifeLoad(tables){
   await Promise.all(tables.map(async t => {
     const sec = Object.values(LIFE).flatMap(a=>a.sections).find(x=>x.table===t);
@@ -5079,6 +5127,7 @@ async function lifeLoad(tables){
 async function renderLife(){
   const el = document.getElementById('lifeContent'); if(!el) return;
   if(lifeArea === '__dock'){ el.innerHTML = renderEditDock(); return; }
+  if(lifeArea === 'documents'){ el.innerHTML = renderDocs(); if(!docLocked() && docs.rows === null){ await docLoad(); if(lifeArea === 'documents') el.innerHTML = renderDocs(); } return; }
   if(!lifeArea){
     if(!lifeRows._loaded){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>'; await lifeLoad([...new Set(Object.values(LIFE).flatMap(a=>a.sections.map(x=>x.table)))]); lifeRows._loaded = true; }
     el.innerHTML = renderLauncher(); return;
@@ -5089,17 +5138,21 @@ async function renderLife(){
       <div class="suggest-note">Tip: you can also just tell Otto, e.g. “oil change today at 98,450, $65” or “add my license, expires March 2028”.</div>`;
     return;
   }
+  if(!lifeRows._loaded){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>'; await lifeLoad([...new Set(Object.values(LIFE).flatMap(x=>x.sections.map(y=>y.table)))]); lifeRows._loaded = true; if(!lifeArea || !LIFE[lifeArea]) return renderLife(); }
   const a = LIFE[lifeArea];
-  if(lifeSection >= a.sections.length) lifeSection = 0;
-  const secTabs = a.sections.length > 1 ? `<div class="ia2-subtabs" role="tablist">${a.sections.map((x,i)=>`<button type="button" role="tab" aria-selected="${i===lifeSection}" class="${i===lifeSection?'on':''}" data-lsec="${i}">${esc(x.title)}</button>`).join('')}</div>` : '';
-  const secs = secTabs + a.sections.filter((x,i)=> a.sections.length < 2 || i === lifeSection).map(sec=>{
+  const T = a.tabs || a.sections.map((x,i)=>({ title:x.title, section:i }));
+  if(lifeSection >= T.length) lifeSection = 0;
+  const tab = T[lifeSection];
+  const secTabs = T.length > 1 ? `<div class="ia2-subtabs" role="tablist">${T.map((x,i)=>`<button type="button" role="tab" aria-selected="${i===lifeSection}" class="${i===lifeSection?'on':''}" data-lsec="${i}">${esc(x.title)}</button>`).join('')}</div>` : '';
+  let tabHtml = ''; try{ tabHtml = (tab.render ? tab.render() : '') + (tab.pre ? tab.pre() : ''); }catch(err){ console.error(err); tabHtml = '<div class="empty">Something went wrong here.</div>'; }
+  const secs = secTabs + tabHtml + (tab.render ? [] : [a.sections[tab.section]]).map(sec=>{
     const rows = lifeRows[sec.table] || [];
     const list = rows.map(r=>{ const v = sec.row(r); const open = lifeOpenRow === sec.table + ':' + r.id;
       return `<div class="lf-row ${open?'open':''}" data-lrow="${sec.table}:${r.id}"><div class="grow-main"><div class="grow-title">${esc(v.t || '')}</div>${v.s ? `<div class="grow-sub">${esc(v.s)}</div>` : ''}</div>${v.right ? `<div class="lf-right">${v.right}</div>` : ''}
         ${open ? `<div class="lf-actions">${sec.closet ? `<button type="button" data-wore="${r.id}">Wore it today</button>` : ''}<button type="button" class="danger" data-ldel="${sec.table}:${r.id}">Delete</button></div>` : ''}</div>`; }).join('');
     const form = lifeAdding === sec.table ? `<form class="lf-form" data-lform="${sec.table}">${sec.fields.map(([k,label,type,req])=>{
         type = type || 'text';
-        if(typeof type === 'object') return `<label>${label}<select name="${k}">${type.options.map(o=>`<option>${o}</option>`).join('')}</select></label>`;
+        if(typeof type === 'object') return `<label>${label}<select name="${k}">${type.options.map(o=>`<option ${lifePrefill[k]===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
         if(String(type).startsWith('fk:')){ const t = type.slice(3); return `<label>${label}<select name="${k}" ${req?'required':''}>${req?'':'<option value="">—</option>'}${(lifeRows[t]||[]).map(o=>`<option value="${o.id}">${esc(o.name || o.title || o.code || ('#'+o.id))}</option>`).join('')}</select></label>`; }
         return `<label>${label}<input name="${k}" type="${type==='money'?'text':type}" ${type==='money'?'inputmode="decimal" placeholder="$0.00"':''} ${type==='number'?'inputmode="decimal" step="any"':''} ${req?'required':''}></label>`; }).join('')}
         <div class="lf-form-actions"><button type="submit" class="save-btn">Save</button><button type="button" class="link-btn" data-lcancel>Cancel</button></div></form>`
@@ -5113,7 +5166,7 @@ document.addEventListener('click', async e=>{
   const ls = e.target.closest('[data-lsec]'); if(ls){ lifeSection = Number(ls.dataset.lsec); lifeAdding = null; lifeOpenRow = null; renderLife(); return; }
   const c = e.target.closest('[data-life]'); if(c){ lifeArea = c.dataset.life; lifeSection = 0; lifeAdding = null; lifeOpenRow = null; renderLife(); document.getElementById('sheetBody')?.scrollTo({ top:0 }); return; }
   if(e.target.closest('[data-lback]')){ lifeArea = null; renderLife(); return; }
-  const ad = e.target.closest('[data-ladd]'); if(ad){ lifeAdding = ad.dataset.ladd; renderLife(); return; }
+  const ad = e.target.closest('[data-ladd]'); if(ad){ lifeAdding = ad.dataset.ladd; lifePrefill = ad.dataset.prefill ? JSON.parse(ad.dataset.prefill) : {}; if(ad.dataset.gotab) lifeSection = Number(ad.dataset.gotab); renderLife(); return; }
   if(e.target.closest('[data-lcancel]')){ lifeAdding = null; renderLife(); return; }
   const del = e.target.closest('[data-ldel]');
   if(del){ const [t,id] = del.dataset.ldel.split(':'); if(!confirm('Delete this?')) return;
@@ -5365,6 +5418,478 @@ function renderEditDock(){
     <div class="ed-preview">${['today',...pins,'all'].map(k=>`<span>${ico2(AREAS2[k].icon,20)}<b>${AREAS2[k].label}</b></span>`).join('')}</div>
     <div class="gcard lf-list">${opts.map(k=>`<div class="lf-row"><span class="ed-ico">${ico2(AREAS2[k].icon,20)}</span><div class="grow-main"><div class="grow-title">${AREAS2[k].label}</div></div><button type="button" class="ed-pin ${pins.includes(k)?'on':''}" data-pin="${k}">${pins.includes(k)?'Pinned':'Pin'}</button></div>`).join('')}</div>`;
 }
+
+
+// ===================== Documents vault (build .51) =====================
+const DOC_TAGS = ['IDs','Car','Home','Health','Money & taxes','School','Warranties & manuals','Work','Drone'];
+const DOC_KINDS = ['license','registration','insurance','passport','id','warranty','lease','certificate','medical','other'];
+let docs = { unlocked:false, lastActive:0, tab:0, q:'', tag:null, rows:null, pending:[], open:null };
+const docLocked = () => !docs.unlocked || (Date.now() - docs.lastActive > 120000);
+function docTouch(){ docs.lastActive = Date.now(); }
+function docLock(){ if(!docs.unlocked) return; docs.unlocked = false; docs.rows = null; if(lifeArea === 'documents') renderLife(); }
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) docLock(); });
+setInterval(()=>{ if(docs.unlocked && Date.now() - docs.lastActive > 120000) docLock(); }, 10000);
+document.addEventListener('pointerdown', e=>{ if(docs.unlocked && e.target.closest('#lifeContent')) docTouch(); }, true);
+const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const fromB64u = str => Uint8Array.from(atob(str.replace(/-/g,'+').replace(/_/g,'/')), c=>c.charCodeAt(0));
+async function docUnlock(){
+  // Face ID / Touch ID / passcode through a passkey on this device. A privacy curtain on top of your sign-in, private storage and 2-minute links.
+  if(!window.PublicKeyCredential || !navigator.credentials){ docs.unlocked = true; docTouch(); showNotice("This browser can't use Face ID here; unlocked with your sign-in."); renderLife(); return; }
+  const challenge = crypto.getRandomValues(new Uint8Array(32)); const id = localStorage.getItem('otto.passkey');
+  try{
+    if(!id){
+      const cred = await navigator.credentials.create({ publicKey:{ challenge, rp:{ name:'Otto' }, user:{ id: crypto.getRandomValues(new Uint8Array(16)), name:'samuel', displayName:'Samuel' },
+        pubKeyCredParams:[{ type:'public-key', alg:-7 }, { type:'public-key', alg:-257 }], authenticatorSelection:{ authenticatorAttachment:'platform', userVerification:'required', residentKey:'preferred' }, timeout:60000 } });
+      localStorage.setItem('otto.passkey', b64u(cred.rawId));
+    } else {
+      await navigator.credentials.get({ publicKey:{ challenge, allowCredentials:[{ type:'public-key', id: fromB64u(id) }], userVerification:'required', timeout:60000 } });
+    }
+    docs.unlocked = true; docTouch(); docs.rows = null; renderLife();
+  }catch(e){ showNotice(e && e.name === 'NotAllowedError' ? 'Unlock was cancelled.' : `Face ID unlock failed: ${(e && e.message) || e}`); }
+}
+async function docLoad(){
+  let url = `${SUPABASE_URL}/rest/v1/documents?select=id,name,kind,issuer,issued_on,expires_on,number_last4,tags,file_path,mime_type,file_size,created_at`;
+  if(docs.q.trim()) url += `&search=wfts(english).${encodeURIComponent(docs.q.trim())}`;
+  if(docs.tag) url += `&tags=cs.${encodeURIComponent('{"' + docs.tag + '"}')}`;
+  url += docs.tab === 1 ? '&expires_on=not.is.null&order=expires_on.asc' : '&order=created_at.desc&limit=200';
+  try{ const r = await fetch(url, { headers: authHeaders() }); docs.rows = r.ok ? await r.json() : []; }catch(e){ docs.rows = []; }
+}
+function docBadge(d){ if(!d.expires_on) return ''; const n = daysTo(d.expires_on); return `<span class="lf-badge ${n < 60 ? 'rust' : ''}">${n < 0 ? 'expired' : n < 60 ? `${n}d left` : 'exp ' + shortDate(d.expires_on)}</span>`; }
+function docRow(d){
+  const open = docs.open === d.id;
+  return `<div class="lf-row ${open?'open':''}" data-docrow="${d.id}"><div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${esc([d.kind, d.issuer, d.number_last4 ? 'ends ' + d.number_last4 : '', (d.tags||[]).join(', ')].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${docBadge(d)}</div>
+    ${open ? `<div class="lf-actions">${d.file_path ? `<button type="button" data-docopen="${d.id}">View</button>` : ''}<button type="button" class="danger" data-docdel="${d.id}">Delete</button></div>` : ''}</div>`;
+}
+function docResults(){
+  const rows = docs.rows || [];
+  if(docs.rows === null) return '<div class="skeleton"><div class="skeleton-row"></div></div>';
+  if(!rows.length) return `<div class="empty">${docs.q ? `Nothing matches “${esc(docs.q)}”.` : docs.tab === 1 ? 'Nothing with an expiration date yet.' : 'No documents yet. Use Scan to add your first.'}</div>`;
+  return `<div class="gcard lf-list">${rows.map(docRow).join('')}</div>`;
+}
+function docPendingCard(it){
+  if(it.status === 'reading') return `<div class="doc-pending">${it.preview ? `<img src="${it.preview}" alt="">` : '<span class="doc-pdf">PDF</span>'}<div><b>Reading ${esc(it.file.name)}…</b><span>Otto is filling in the details</span></div></div>`;
+  const f = it.fields || {};
+  return `<form class="lf-form doc-form" data-docform="${it.id}">
+    <div class="doc-form-head">${it.preview ? `<img src="${it.preview}" alt="">` : '<span class="doc-pdf">PDF</span>'}<span>${it.status === 'error' ? `<b class="neg">Couldn't read it</b> · fill in by hand` : '<b>Check the details</b> · then save'}</span></div>
+    <label>Name<input name="name" value="${esc(f.name || '')}" required></label>
+    <label>Kind<select name="kind">${DOC_KINDS.map(k=>`<option ${k===f.kind?'selected':''}>${k}</option>`).join('')}</select></label>
+    <label>Issued by<input name="issuer" value="${esc(f.issuer || '')}"></label>
+    <label>Last 4 only<input name="number_last4" value="${esc(f.number_last4 || '')}" maxlength="4"></label>
+    <label>Issued<input name="issued_on" type="date" value="${f.issued_on || ''}"></label>
+    <label>Expires<input name="expires_on" type="date" value="${f.expires_on || ''}"></label>
+    <fieldset class="doc-tags"><legend>Folders</legend>${DOC_TAGS.map(t=>`<label class="doc-tag"><input type="checkbox" name="tag" value="${esc(t)}" ${(f.tags||[]).includes(t)?'checked':''}>${esc(t)}</label>`).join('')}</fieldset>
+    <div class="lf-form-actions"><button type="submit" class="save-btn">Save to vault</button><button type="button" class="link-btn" data-docdiscard="${it.id}">Discard</button></div></form>`;
+}
+function renderDocs(){
+  const head = `<button type="button" class="page-back lf-back" data-lback>‹ All areas</button><h3 class="lf-title">🪪 Documents</h3>`;
+  if(docLocked()){
+    const setup = !localStorage.getItem('otto.passkey');
+    return head + `<div class="doc-lock"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
+      <b>${setup ? 'Set up Face ID for your documents' : 'Unlock with Face ID'}</b><span>Scans are stored privately and open only after Face ID or your passcode. Locks again after 2 minutes.</span>
+      <button type="button" class="save-btn" data-docunlock>${setup ? 'Set up Face ID' : 'Unlock'}</button></div>`;
+  }
+  const tabs = ['Search','Expiring','Folders','Scan'];
+  const bar = `<div class="ia2-subtabs" role="tablist">${tabs.map((t,i)=>`<button type="button" role="tab" aria-selected="${i===docs.tab}" class="${i===docs.tab?'on':''}" data-doctab="${i}">${t}${i===3 && docs.pending.length ? ` · ${docs.pending.length}` : ''}</button>`).join('')}</div>`;
+  let body = '';
+  if(docs.tab === 0) body = `<label class="doc-search">${ico2('search',18)}<span class="sr-only">Search documents</span><input type="search" data-docq value="${esc(docs.q)}" placeholder="Search inside every document"></label><div id="docResults">${docResults()}</div>`;
+  if(docs.tab === 1) body = `<div id="docResults">${docResults()}</div>`;
+  if(docs.tab === 2){ const counts = {}; (docs.rows||[]).forEach(d=>(d.tags||[]).forEach(t=>counts[t] = (counts[t]||0) + 1));
+    body = `<div class="doc-chips">${DOC_TAGS.map(t=>`<button type="button" class="doc-chip ${docs.tag===t?'on':''}" data-dtag="${esc(t)}">${esc(t)} <em>${counts[t]||0}</em></button>`).join('')}</div><div id="docResults">${docResults()}</div>`; }
+  if(docs.tab === 3) body = `<div class="kt-receipt"><b>Scan documents</b><span>Photos or PDFs, several at a time. Otto reads each one; you check the details before it's saved.</span><div><button type="button" class="save-btn" data-docpick>📷 Add photos or PDFs</button></div></div>${docs.pending.map(docPendingCard).join('')}`;
+  return head + bar + body;
+}
+const fileB64 = f => new Promise((res, rej)=>{ const r = new FileReader(); r.onload = () => res(String(r.result).split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
+async function docAddFiles(files){
+  for(const f of files){
+    const ext = (f.name.split('.').pop() || 'bin').toLowerCase(), mt = f.type || (ext === 'pdf' ? 'application/pdf' : 'image/jpeg');
+    const it = { id: crypto.randomUUID(), file: f, ext, mt, status:'reading', fields:null, preview: mt.startsWith('image/') ? URL.createObjectURL(f) : null };
+    docs.pending.push(it); renderLife();
+    try{
+      let send; if(mt.startsWith('image/')){ try{ const j = await imageToJpeg(f); send = { media_type: j.media_type, data: j.data }; }catch(e){ send = { media_type: mt, data: await fileB64(f) }; } }
+      else send = { media_type: mt, data: await fileB64(f) };
+      const r = await callFn('doc-extract', send); if(!r || r.error) throw new Error((r && r.error) || 'no answer');
+      it.fields = r; it.status = 'review';
+    }catch(e){ it.fields = { name: f.name.replace(/\.[^.]+$/, ''), kind:'other', tags:[] }; it.status = 'error'; }
+    docTouch(); renderLife();
+  }
+}
+async function docSave(form){
+  const it = docs.pending.find(x=>x.id === form.dataset.docform); if(!it) return;
+  const v = n => (form.elements[n] && form.elements[n].value.trim()) || null;
+  const path = `${new Date().getFullYear()}/${it.id}.${it.ext}`;
+  const up = await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${path}`, { method:'POST', headers: { ...authHeaders(), 'Content-Type': it.mt }, body: it.file });
+  if(!up.ok){ showNotice(`Upload failed (${up.status})`); return; }
+  const row = { name: v('name') || 'Document', kind: v('kind') || 'other', issuer: v('issuer'), issued_on: v('issued_on'), expires_on: v('expires_on'),
+    number_last4: (v('number_last4') || '').replace(/[^A-Za-z0-9]/g,'').slice(-4) || null, tags: [...form.querySelectorAll('input[name="tag"]:checked')].map(x=>x.value),
+    content: (it.fields && it.fields.content) || null, file_path: path, mime_type: it.mt, file_size: it.file.size };
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/documents`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify(row) });
+  if(!r.ok){ await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${path}`, { method:'DELETE', headers: authHeaders() }); showNotice(`Couldn't save: ${(await r.text()).slice(0,120)}`); return; }
+  docs.pending = docs.pending.filter(x=>x !== it); docs.rows = null; lifeRows.documents = null; hapticPulse(); showNotice('Saved to your vault.');
+  if(!docs.pending.length) docs.tab = 0; renderLife();
+}
+async function docOpen(id){
+  const d = (docs.rows||[]).find(x=>String(x.id) === String(id)); if(!d || !d.file_path) return;
+  const r = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/documents/${d.file_path}`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json' }, body: JSON.stringify({ expiresIn: 120 }) });
+  const j = r.ok ? await r.json() : null; if(!j || !j.signedURL){ showNotice("Couldn't open that file."); return; }
+  window.open(`${SUPABASE_URL}/storage/v1${j.signedURL}`, '_blank', 'noopener');
+}
+async function docDelete(id){
+  const d = (docs.rows||[]).find(x=>String(x.id) === String(id)); if(!d || !confirm(`Delete “${d.name}”? The file is removed too.`)) return;
+  if(d.file_path) await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${d.file_path}`, { method:'DELETE', headers: authHeaders() });
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/documents?id=eq.${d.id}`, { method:'DELETE', headers: authHeaders() });
+  if(!r.ok){ showNotice(`Couldn't delete (${r.status})`); return; } docs.rows = docs.rows.filter(x=>x !== d); docs.open = null; renderLife();
+}
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-docunlock]')){ docUnlock(); return; }
+  const tb = e.target.closest('[data-doctab]'); if(tb){ docs.tab = Number(tb.dataset.doctab); docs.tag = null; docs.rows = null; if(docs.tab === 1 || docs.tab === 2) docs.q = ''; renderLife(); return; }
+  const tg = e.target.closest('[data-dtag]'); if(tg){ docs.tag = docs.tag === tg.dataset.dtag ? null : tg.dataset.dtag; docs.rows = null; renderLife(); return; }
+  if(e.target.closest('[data-docpick]')){ document.getElementById('docInput').click(); return; }
+  const dd = e.target.closest('[data-docdiscard]'); if(dd){ docs.pending = docs.pending.filter(x=>x.id !== dd.dataset.docdiscard); renderLife(); return; }
+  const op = e.target.closest('[data-docopen]'); if(op){ docOpen(op.dataset.docopen); return; }
+  const dl = e.target.closest('[data-docdel]'); if(dl){ docDelete(dl.dataset.docdel); return; }
+  const rw = e.target.closest('[data-docrow]'); if(rw && !e.target.closest('button')){ docs.open = docs.open === Number(rw.dataset.docrow) ? null : Number(rw.dataset.docrow); renderLife(); }
+});
+document.getElementById('docInput').addEventListener('change', e=>{ const f = Array.from(e.target.files || []); e.target.value = ''; if(f.length) docAddFiles(f); });
+document.addEventListener('submit', e=>{ const f = e.target.closest('[data-docform]'); if(!f) return; e.preventDefault(); docSave(f); });
+let docQTimer = null;
+document.addEventListener('input', e=>{ const q = e.target.closest('[data-docq]'); if(!q) return; docTouch(); clearTimeout(docQTimer);
+  docQTimer = setTimeout(async ()=>{ docs.q = q.value; docs.rows = null; const box = document.getElementById('docResults'); if(box) box.innerHTML = docResults(); await docLoad(); const b2 = document.getElementById('docResults'); if(b2) b2.innerHTML = docResults(); }, 300); });
+
+
+// ===================== Build .51 part 2: area tabs =====================
+async function signPaths(bucket, paths){
+  if(!paths.length) return {};
+  try{ const r = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${bucket}`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'application/json' }, body: JSON.stringify({ expiresIn: 3600, paths }) });
+    const j = r.ok ? await r.json() : []; const out = {}; (j||[]).forEach(x=>{ if(x.signedURL) out[x.path] = `${SUPABASE_URL}/storage/v1${x.signedURL}`; }); return out; }catch(e){ return {}; }
+}
+const tools = (body) => callFn('otto-tools', body);
+
+// ---------- CLOSET: Today (flat-lay outfit from clean clothes + weather) · Wardrobe · Laundry · Insights ----------
+let closet = { urls:{}, signed:false, temp:null, tempAt:0, seed:0, pending:[], wears:null };
+async function closetPrep(){
+  const items = lifeRows.wardrobe_items || [];
+  const need = items.filter(x=>x.image_url && !closet.urls[x.image_url]).map(x=>x.image_url);
+  if(need.length){ Object.assign(closet.urls, await signPaths('closet', need)); }
+  if(closet.wears === null){ try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/wear_log?select=wardrobe_item_id,worn_on&order=worn_on.desc&limit=2000`, { headers: authHeaders() }); closet.wears = r.ok ? await r.json() : []; }catch(e){ closet.wears = []; } }
+  if(closet.temp === null || Date.now() - closet.tempAt > 3600000){
+    try{ const pos = (lastFix().pos) || { lat:42.5584, lon:-70.8800 };
+      const pt = await (await fetch(`https://api.weather.gov/points/${pos.lat.toFixed(4)},${pos.lon.toFixed(4)}`)).json();
+      const hr = await (await fetch(pt.properties.forecastHourly)).json(); const per = hr.properties.periods.slice(0, 12);
+      closet.temp = Math.round(per.reduce((a,x)=>a + x.temperature, 0) / per.length); closet.tempAt = Date.now();
+      closet.rain = per.some(x=>(x.probabilityOfPrecipitation && x.probabilityOfPrecipitation.value || 0) >= 50);
+    }catch(e){ closet.temp = closet.temp || null; }
+  }
+  if(lifeArea === 'closet') renderLife();
+}
+function pickOutfit(){
+  const items = (lifeRows.wardrobe_items || []).filter(x=>!x.retired && (x.laundry_status || 'clean') === 'clean');
+  const recent = new Set((closet.wears||[]).filter(w=>w.worn_on >= isoAddDays(localToday(), -4)).map(w=>w.wardrobe_item_id));
+  const t = closet.temp, want = t == null ? 3 : t < 35 ? 5 : t < 50 ? 4 : t < 62 ? 3 : t < 75 ? 2 : 1;
+  const choose = (cat, k) => { const c = items.filter(x=>x.category === cat).sort((a,b)=>(recent.has(a.id)-recent.has(b.id)) || (Math.abs((a.warmth||3)-want) - Math.abs((b.warmth||3)-want)));
+    return c.length ? c[(closet.seed + k) % Math.min(c.length, 3)] : null; };
+  return { top: choose('top',0), bottom: choose('bottom',1), shoes: choose('shoes',2), outer: t != null && t < 58 ? choose('outerwear',3) : null };
+}
+function garment(it, cls){
+  if(!it) return '';
+  const u = it.image_url && closet.urls[it.image_url];
+  return `<figure class="fl-piece ${cls}">${u ? `<img src="${u}" alt="${esc(it.name)}">` : `<span class="fl-ph">${esc(it.name)}</span>`}<figcaption>${esc(it.name)}</figcaption></figure>`;
+}
+function closetToday(){
+  if(!closet.signed){ closet.signed = true; closetPrep(); }
+  const items = lifeRows.wardrobe_items || [];
+  if(!items.length) return `<div class="kt-receipt"><b>Build your closet</b><span>Photograph each piece (on a bed or the floor works). Otto cuts out the background and names it, so outfits look clean.</span><div><button type="button" class="save-btn" data-closetadd>📷 Add clothes</button></div></div>`;
+  const o = pickOutfit(), d = new Date(), work = d.getDay() > 0 && d.getDay() < 6;
+  const pieces = [o.outer, o.top, o.bottom, o.shoes].filter(Boolean);
+  return `<div class="cl-meta">${d.toLocaleDateString('en-US',{weekday:'long'})} · ${closet.temp != null ? `${closet.temp}°F${closet.rain ? ' · rain likely' : ''}` : 'weather loading'} · ${work ? 'work day' : 'day off'}</div>
+    <div class="flatlay" role="img" aria-label="Suggested outfit: ${esc(pieces.map(x=>x.name).join(', ') || 'nothing clean')}">${garment(o.outer,'fl-outer')}${garment(o.top,'fl-top')}${garment(o.bottom,'fl-bottom')}${garment(o.shoes,'fl-shoes')}${pieces.length ? '' : '<span class="fl-empty">Nothing clean in the right categories. Time for laundry?</span>'}</div>
+    <div class="cl-actions"><button type="button" class="save-btn" data-wearoutfit ${pieces.length?'':'disabled'}>Wear this</button><button type="button" class="link-btn" data-shuffle>Shuffle</button></div>`;
+}
+function closetWardrobe(){
+  if(!closet.signed){ closet.signed = true; closetPrep(); }
+  const items = (lifeRows.wardrobe_items || []).filter(x=>!x.retired);
+  const pend = closet.pending.map(it=> it.status === 'working' ? `<div class="doc-pending">${it.preview ? `<img src="${it.preview}" alt="">` : ''}<div><b>${esc(it.step || 'Working…')}</b><span>${esc(it.file.name)}</span></div></div>` :
+    `<form class="lf-form" data-closetform="${it.id}"><div class="doc-form-head">${it.cut ? `<img src="${it.cut}" alt="" style="background:#E9E6E0">` : ''}<span><b>Check the details</b> · then save</span></div>
+      <label>Name<input name="name" value="${esc(it.f.name||'')}" required></label><label>Type<select name="category">${['top','bottom','outerwear','shoes','accessory','other'].map(c=>`<option ${c===it.f.category?'selected':''}>${c}</option>`).join('')}</select></label>
+      <label>Color<input name="color" value="${esc(it.f.color||'')}"></label><label>Brand<input name="brand" value="${esc(it.f.brand||'')}"></label>
+      <label>Warmth 1–5<input name="warmth" type="number" min="1" max="5" value="${it.f.warmth||3}"></label><label>Wears before washing<input name="wears_before_wash" type="number" min="1" max="10" value="${it.f.wears_before_wash||1}"></label>
+      <div class="lf-form-actions"><button type="submit" class="save-btn">Save to closet</button><button type="button" class="link-btn" data-closetdiscard="${it.id}">Discard</button></div></form>`).join('');
+  return `<div class="lt-top"><span>${items.length} items</span><button type="button" class="link-btn" data-closetadd>📷 Add clothes</button></div>${pend}
+    <div class="cl-grid">${items.map(x=>{ const u = x.image_url && closet.urls[x.image_url]; return `<div class="cl-item ${x.laundry_status==='worn'?'worn':''}"><span class="cl-img">${u ? `<img src="${u}" alt="">` : esc((x.name||'?')[0])}</span><b>${esc(x.name)}</b><span>${esc([x.category, x.color].filter(Boolean).join(' · '))}${x.laundry_status==='worn'?' · needs a wash':''}</span></div>`; }).join('')}</div>`;
+}
+function closetLaundry(){
+  const items = (lifeRows.wardrobe_items || []).filter(x=>!x.retired), worn = items.filter(x=>x.laundry_status === 'worn');
+  const cleanBy = c => items.filter(x=>x.category===c && (x.laundry_status||'clean')==='clean').length;
+  const low = ['top','bottom'].filter(c=>items.some(x=>x.category===c) && cleanBy(c) <= 1);
+  return `<div class="cl-hamper"><b class="wdg-big ${worn.length>=8?'neg':''}">${worn.length}</b><span>in the hamper${low.length ? ` · only ${low.map(c=>`${cleanBy(c)} clean ${c}${cleanBy(c)===1?'':'s'}`).join(', ')} left` : ''}</span></div>
+    ${worn.length ? `<button type="button" class="lf-add strong" data-laundry>🧺 Laundry done: mark everything clean</button>` : ''}
+    <div class="gcard lf-list">${worn.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div><div class="grow-sub">${esc(x.category||'')} · worn ${x.wears_since_wash||1}×</div></div></div>`).join('') || '<div class="empty">Nothing needs a wash.</div>'}</div>`;
+}
+function closetInsights(){
+  const items = (lifeRows.wardrobe_items || []).filter(x=>!x.retired), wears = {}; (closet.wears||[]).forEach(w=>{ wears[w.wardrobe_item_id] = (wears[w.wardrobe_item_id]||0) + 1; });
+  const cpw = items.filter(x=>x.purchase_price_cents).map(x=>({ x, c: Math.round(x.purchase_price_cents / Math.max(1, wears[x.id]||0)), n: wears[x.id]||0 })).sort((a,b)=>b.c-a.c);
+  const never = items.filter(x=>!wears[x.id]);
+  return `<div class="section-title">Cost per wear<span>price ÷ times worn</span></div><div class="gcard lf-list">${cpw.map(r=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(r.x.name)}</div><div class="grow-sub">worn ${r.n}×</div></div><div class="lf-right">${money(r.c)}</div></div>`).join('') || '<div class="empty">Add prices (or snap clothing receipts) to see this.</div>'}</div>
+    <div class="section-title">Never worn<span>${never.length}</span></div><div class="gcard lf-list">${never.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div></div></div>`).join('') || '<div class="empty">Everything has been worn.</div>'}</div>`;
+}
+async function cutout(file){
+  // 1) remove the background in the browser (first use downloads the model), 2) trim, center and scale onto a square
+  let blob = file;
+  try{ const m = await import('https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.5/+esm'); blob = await m.removeBackground(file); }catch(e){ console.warn('background removal unavailable', e); }
+  const url = URL.createObjectURL(blob), img = new Image(); await new Promise((res, rej)=>{ img.onload = res; img.onerror = rej; img.src = url; });
+  const w = img.width, h = img.height, c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.drawImage(img, 0, 0);
+  let minX = w, minY = h, maxX = 0, maxY = 0; const d = g.getImageData(0, 0, w, h).data;
+  for(let y=0; y<h; y+=2) for(let x=0; x<w; x+=2) if(d[(y*w + x)*4 + 3] > 16){ if(x<minX) minX=x; if(x>maxX) maxX=x; if(y<minY) minY=y; if(y>maxY) maxY=y; }
+  if(maxX <= minX){ minX = 0; minY = 0; maxX = w; maxY = h; }
+  const bw = maxX - minX, bh = maxY - minY, S = 800, sc = (S * 0.88) / Math.max(bw, bh), out = document.createElement('canvas'); out.width = S; out.height = S;
+  out.getContext('2d').drawImage(c, minX, minY, bw, bh, (S - bw*sc)/2, (S - bh*sc)/2, bw*sc, bh*sc); URL.revokeObjectURL(url);
+  return await new Promise(res=>out.toBlob(res, 'image/png'));
+}
+async function closetAddFiles(files){
+  for(const f of files){
+    const it = { id: crypto.randomUUID(), file: f, status:'working', step:'Removing background…', preview: URL.createObjectURL(f), f:{} };
+    closet.pending.push(it); renderLife();
+    try{ it.png = await cutout(f); it.cut = URL.createObjectURL(it.png); it.step = 'Identifying…'; renderLife();
+      const j = await imageToJpeg(f); const r = await tools({ action:'clothing', media_type: j.media_type, data: j.data }); if(r && !r.error) it.f = r;
+    }catch(e){ console.warn(e); }
+    it.status = 'review'; renderLife();
+  }
+}
+async function closetSave(form){
+  const it = closet.pending.find(x=>x.id === form.dataset.closetform); if(!it) return;
+  const v = n => (form.elements[n] && form.elements[n].value.trim()) || null; let path = null;
+  if(it.png){ path = `items/${it.id}.png`; const up = await fetch(`${SUPABASE_URL}/storage/v1/object/closet/${path}`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'image/png' }, body: it.png }); if(!up.ok){ showNotice(`Photo upload failed (${up.status})`); return; } }
+  const row = { name: v('name') || 'Item', category: v('category'), color: v('color'), brand: v('brand'), warmth: Number(v('warmth')) || null, wears_before_wash: Number(v('wears_before_wash')) || 1, image_url: path, laundry_status:'clean' };
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=representation' }, body: JSON.stringify(row) });
+  if(!r.ok){ showNotice(`Couldn't save: ${(await r.text()).slice(0,120)}`); return; }
+  const [saved] = await r.json(); (lifeRows.wardrobe_items = lifeRows.wardrobe_items || []).push(saved); if(path) closet.urls[path] = it.cut;
+  closet.pending = closet.pending.filter(x=>x !== it); hapticPulse(); renderLife();
+}
+async function wearOutfit(){
+  const o = pickOutfit(), ids = [o.outer, o.top, o.bottom, o.shoes].filter(Boolean);
+  for(const it of ids){ const since = (it.wears_since_wash||0) + 1, status = since >= Math.max(1, it.wears_before_wash||1) ? 'worn' : 'clean';
+    await fetch(`${SUPABASE_URL}/rest/v1/wear_log`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wardrobe_item_id: it.id, worn_on: localToday() }) });
+    await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${it.id}`, { method:'PATCH', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wears_since_wash: since, laundry_status: status, last_worn_on: localToday() }) });
+    Object.assign(it, { wears_since_wash: since, laundry_status: status, last_worn_on: localToday() }); (closet.wears = closet.wears || []).unshift({ wardrobe_item_id: it.id, worn_on: localToday() }); }
+  hapticPulse(); showNotice(`Logged: ${ids.map(x=>x.name).join(', ')}`); renderLife();
+}
+
+// ---------- CAR: Model (zone diagram) · Service · Fuel · Costs · Records ----------
+const CAR_RULES = { oil:{ mi:10000, mo:12, label:'Oil · engine' }, rotation:{ mi:7500, mo:6, label:'Tire rotation' }, tires:{ mi:50000, mo:72, label:'Tires' }, brakes:{ mi:30000, mo:24, label:'Brakes' },
+  battery:{ mi:0, mo:48, label:'Battery' }, wipers:{ mi:0, mo:12, label:'Wipers' }, filter:{ mi:15000, mo:12, label:'Air filter' }, inspection:{ mi:0, mo:12, label:'Inspection' } };
+let car = { recalls:null, vinBusy:false };
+function carStatus(kind){
+  const v = (lifeRows.vehicles||[])[0], svc = (lifeRows.vehicle_services||[]).filter(x=>x.kind === kind || (kind==='tires' && x.kind==='rotation')).sort((a,b)=>b.service_on.localeCompare(a.service_on))[0];
+  const rule = CAR_RULES[kind]; if(!svc) return { st:'none', text:'No record yet' };
+  let due = 0; const months = (Date.now() - new Date(svc.service_on+'T12:00')) / (30.4*86400000); due = Math.max(due, months / rule.mo);
+  if(rule.mi && v && v.odometer_miles && svc.odometer_miles) due = Math.max(due, (v.odometer_miles - svc.odometer_miles) / rule.mi);
+  return { st: due >= 1 ? 'over' : due >= 0.85 ? 'due' : 'ok', text: `${shortDate(svc.service_on)}${svc.odometer_miles ? ' · ' + svc.odometer_miles.toLocaleString() + ' mi' : ''}` };
+}
+function carModel(){
+  const v = (lifeRows.vehicles||[])[0];
+  const zone = (x,y,w,h,kind,label) => { const s2 = carStatus(kind); return `<g class="cz cz-${s2.st}" data-ladd="vehicle_services" data-gotab="1" data-prefill='${JSON.stringify({kind})}' role="button" tabindex="0" aria-label="${label}: ${s2.text}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/><text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle">${label}</text></g>`; };
+  const svg = `<svg viewBox="0 0 354 270" width="100%" role="img" aria-label="Car service diagram"><path d="M120 20 Q177 4 234 20 L250 70 L254 210 L238 254 Q177 268 116 254 L100 210 L104 70 Z" class="cz-body"/>
+    ${zone(140,28,74,40,'oil','Oil')}${zone(60,52,52,40,'tires','Tire FL')}${zone(242,52,52,40,'tires','Tire FR')}${zone(60,182,52,40,'tires','Tire RL')}${zone(242,182,52,40,'tires','Tire RR')}
+    ${zone(150,132,54,40,'battery','Battery')}${zone(6,118,92,40,'brakes','Brakes')}${zone(256,118,92,40,'wipers','Wipers')}${zone(140,214,74,30,'filter','Filter')}</svg>`;
+  const vinBox = v && v.vin ? `<div class="lf-sum">${esc([v.specs && v.specs.trim, v.specs && v.specs.engine].filter(Boolean).join(' · ') || v.vin)}</div>` :
+    `<form class="kt-receipt" data-vinform><b>Start here: your VIN and mileage</b><span>The VIN is on the driver's door jamb or your registration. Otto fills in specs and checks open recalls (NHTSA).</span>
+      <div><input name="vin" placeholder="17-character VIN" maxlength="17" class="ia2-input" autocomplete="off"><input name="miles" placeholder="Miles" inputmode="numeric" class="ia2-input short"><button type="submit" class="save-btn">${car.vinBusy?'Checking…':'Save'}</button></div></form>`;
+  if(v && v.specs && car.recalls === null){ car.recalls = []; tools({ action:'recalls', make: v.specs.make || v.make, model: v.specs.model || v.model, year: v.specs.year || v.year }).then(r=>{ car.recalls = (r && r.recalls) || []; if(lifeArea==='car') renderLife(); }); }
+  const rec = (car.recalls||[]).length ? `<div class="section-title">Recalls on this model<span>${car.recalls.length}</span></div><div class="gcard lf-list">${car.recalls.map(r=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(r.component||'Recall')}</div><div class="grow-sub">${esc((r.summary||'').slice(0,140))}… · #${esc(r.campaign||'')}</div></div></div>`).join('')}</div><div class="suggest-note">A dealer can tell you if your VIN's recalls were already fixed.</div>` : '';
+  return `${vinBox}${svg}<div class="cz-legend"><span class="ok">Good</span><span class="due">Due soon</span><span class="over">Overdue</span><span class="none">No record</span></div><div class="suggest-note">Tap a zone to log it. Intervals are typical; check your owner's manual.</div>${rec}`;
+}
+function carCosts(){
+  const sv = lifeRows.vehicle_services||[], fu = lifeRows.fuel_logs||[], since = isoAddDays(localToday(), -365);
+  const s12 = sv.filter(x=>x.service_on >= since).reduce((a,x)=>a+(x.cost_cents||0),0), f12 = fu.filter(x=>x.filled_on >= since).reduce((a,x)=>a+(x.total_cents||0),0);
+  const odo = fu.concat(sv).map(x=>x.odometer_miles).filter(Boolean).sort((a,b)=>a-b), miles = odo.length > 1 ? odo[odo.length-1] - odo[0] : 0;
+  const mpg = (()=>{ const f = fu.filter(x=>x.full_tank && x.odometer_miles && x.gallons).sort((a,b)=>a.odometer_miles-b.odometer_miles); if(f.length<2) return null; const g = f.slice(1).reduce((a,x)=>a+Number(x.gallons),0); return (f[f.length-1].odometer_miles - f[0].odometer_miles)/g; })();
+  return `<div class="wdg-grid" style="margin-top:8px">${[['LAST 12 MONTHS', money(s12+f12), `${money(s12)} service · ${money(f12)} gas`],['PER MONTH', money(Math.round((s12+f12)/12)), 'average'],['PER MILE', miles ? money(Math.round((s12+f12)/miles)) : '—', miles ? `${miles.toLocaleString()} mi logged` : 'log odometer readings'],['MPG', mpg ? mpg.toFixed(1) : '—', mpg ? 'from full fill-ups' : 'log 2+ full fill-ups']].map(([l,v,s3])=>`<div class="wdg"><span class="wdg-head"><span>${l}</span></span><b class="wdg-mid">${v}</b><span class="wdg-sub">${s3}</span></div>`).join('')}</div>`;
+}
+function carRecords(){ return `<div class="kt-receipt"><b>Registration, insurance, inspection</b><span>Car documents live in your private vault, tagged Car.</span><div><button type="button" class="save-btn" data-opendocs="Car">Open car documents</button></div></div>`; }
+
+// ---------- APARTMENTS: Map · Board · Compare · Afford · Move ----------
+let apt = { map:null, busy:false };
+function aptAnchors(){
+  const locs = (mapData.locations || mapData.places || []).concat((mapData.visits||[]).map(v=>({ name:v.place, lat:v.lat, lon:v.lon })));
+  const find = re => locs.find(l=>l && l.name && re.test(l.name) && l.lat != null);
+  return { work: find(/\b(work|city hall)\b/i), partner: find(/hannah/i) };
+}
+function aptMapTab(){
+  setTimeout(()=>{ const el = document.getElementById('aptMap'); if(!el || typeof L === 'undefined') return; if(apt.map){ apt.map.remove(); apt.map = null; }
+    const A = aptAnchors(), pts = [];
+    apt.map = L.map(el, { zoomControl:false, attributionControl:false }).setView([42.56, -70.88], 12); makeBaseLayer().addTo(apt.map);
+    [['partner', A.partner, '#C9A0FF', "Hannah's"], ['work', A.work, '#E8AC45', 'Work']].forEach(([k, a, col, lbl])=>{ if(!a) return; pts.push([a.lat, a.lon]); L.circleMarker([a.lat, a.lon], { radius:8, color:'#0D0F12', weight:3, fillColor:col, fillOpacity:1 }).bindTooltip(lbl, { permanent:true, direction:'top', offset:[0,-8] }).addTo(apt.map); });
+    (lifeRows.apartment_listings||[]).filter(x=>x.lat != null).forEach(x=>{ pts.push([x.lat, x.lon]); L.circleMarker([x.lat, x.lon], { radius:7, color:'#0D0F12', weight:2, fillColor:'#6AA6FF', fillOpacity:1 }).bindTooltip(`${x.title}${x.rent_cents ? ' · ' + money(x.rent_cents) : ''}`).addTo(apt.map); });
+    if(pts.length > 1) apt.map.fitBounds(pts, { padding:[30,30] }); else if(pts.length) apt.map.setView(pts[0], 13);
+  }, 30);
+  const A = aptAnchors();
+  return `<div id="aptMap" class="apt-map"></div><div class="suggest-note">${A.work ? '' : 'Name your work stop in the Inbox so the map knows where work is. '}${A.partner ? '' : "Hannah's place isn't saved with a location yet. "}Listings appear once added on the Board.</div>`;
+}
+function aptBoardPre(){
+  const L2 = lifeRows.apartment_listings||[], n = st => L2.filter(x=>x.status===st).length;
+  return `<form class="doc-search" data-aptlink><span class="sr-only">Paste a listing link</span><input name="url" placeholder="Paste a Zillow / Apartments.com link" inputmode="url"><button type="submit" class="save-btn">${apt.busy?'Reading…':'Add'}</button></form>
+    <div class="apt-cols">${['saved','toured','applied','signed'].map(s3=>`<span><em>${s3.toUpperCase()}</em><b>${n(s3)}</b></span>`).join('')}</div>`;
+}
+function aptCompare(){
+  const L2 = (lifeRows.apartment_listings||[]).filter(x=>x.status!=='rejected');
+  if(!L2.length) return '<div class="empty">Add listings on the Board to compare them.</div>';
+  return `<div class="apt-table" role="table">${['','Rent','Beds','Work','Hannah'].map(h=>`<b role="columnheader">${h}</b>`).join('')}${L2.map(x=>`<span role="cell">${esc(x.title)}</span><span role="cell">${x.rent_cents?money(x.rent_cents):'—'}</span><span role="cell">${x.beds??'—'}</span><span role="cell">${x.commute_work_min!=null?x.commute_work_min+' min':'—'}</span><span role="cell">${x.commute_partner_min!=null?x.commute_partner_min+' min':'—'}</span>`).join('')}</div><div class="suggest-note">Drive times are estimates from OpenStreetMap routing, no traffic.</div>`;
+}
+function aptAfford(){
+  const since = isoAddDays(localToday(), -90), inc = (allTxns||[]).filter(t=>t.transaction_date >= since && Number(t.amount_cents) > 0 && !t.exclude_from_budget).reduce((a,t)=>a+Number(t.amount_cents),0);
+  const mo = Math.round(inc/3), max30 = Math.round(mo*0.30);
+  return `<div class="wdg-grid" style="margin-top:8px"><div class="wdg"><span class="wdg-head"><span>INCOME / MONTH</span></span><b class="wdg-mid">${mo?money(mo):'—'}</b><span class="wdg-sub">last 90 days, from your bank</span></div>
+    <div class="wdg"><span class="wdg-head"><span>30% RULE</span></span><b class="wdg-mid">${mo?money(max30):'—'}</b><span class="wdg-sub">rent at or under this</span></div></div>
+    <div class="gcard lf-list" style="margin-top:10px">${(lifeRows.apartment_listings||[]).filter(x=>x.rent_cents).map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.title)}</div><div class="grow-sub">${mo ? Math.round(100*x.rent_cents/mo) + '% of income' : ''}</div></div><div class="lf-right"><span class="lf-badge ${mo && x.rent_cents > max30 ? 'rust' : 'ok'}">${money(x.rent_cents)}</span></div></div>`).join('') || '<div class="empty">No listings with rent yet.</div>'}</div>
+    <div class="suggest-note">Income counts deposits that aren't transfers. The 30% rule is a common guideline, not a rule.</div>`;
+}
+const MOVE_STEPS = ['Give notice / tell your mom the move date','Book movers or a truck','Set up electricity (and gas if needed)','Set up internet','Renters insurance','Change address (USPS, bank, RMV, work)','Update car registration address','Buy basics: bed, kitchen, cleaning'];
+function aptMove(){ return `<div class="gcard lf-list">${MOVE_STEPS.map(t=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(t)}</div></div></div>`).join('')}</div><button type="button" class="lf-add strong" data-movechecklist>Add this checklist to Plan</button>`; }
+async function aptGeoCommute(row){
+  try{ const g = await (await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(row.address)}`)).json(); if(g[0]){ row.lat = Number(g[0].lat); row.lon = Number(g[0].lon); } }catch(e){}
+  const A = aptAnchors();
+  for(const [k, a] of [['commute_work_min', A.work], ['commute_partner_min', A.partner]]){
+    if(row.lat == null || !a) continue;
+    try{ const r = await (await fetch(`https://router.project-osrm.org/route/v1/driving/${row.lon},${row.lat};${a.lon},${a.lat}?overview=false`)).json(); if(r.routes && r.routes[0]) row[k] = Math.round(r.routes[0].duration/60); }catch(e){}
+  }
+  return row;
+}
+
+// ---------- SCHOOL: Transfer · Courses · Deadlines · Progress ----------
+const TRANSFER_STEPS = [['application','Submit the Salem State transfer application'],['transcript','Send official transcripts (UNH and any others)'],['residency','Settle in-state residency status'],['evaluation','Get the transfer credit evaluation'],['advisor','Meet an advisor'],['register','Register for classes']];
+function schoolTransfer(){
+  const rel = (allTodos||[]).filter(t=>/salem state|transfer|transcript|residency/i.test(t.title));
+  const covered = k => rel.some(t=>new RegExp(k,'i').test(t.title));
+  return `<div class="section-title">Your transfer todos<span>${rel.length}</span></div><div class="gcard lf-list">${rel.map(t=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(t.title)}</div><div class="grow-sub">${t.status==='done'?'done':t.due_date?'due '+shortDate(t.due_date):'no date'}</div></div><div class="lf-right">${t.status==='done'?'<span class="lf-badge ok">done</span>':t.due_date && t.due_date < localToday()?'<span class="lf-badge rust">overdue</span>':''}</div></div>`).join('') || '<div class="empty">No transfer todos yet.</div>'}</div>
+    <div class="section-title">Usual transfer steps</div><div class="gcard lf-list">${TRANSFER_STEPS.map(([k,t])=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(t)}</div></div><div class="lf-right">${covered(k)?'<span class="lf-badge ok">in your todos</span>':`<button type="button" class="ed-pin" data-addtodo="${esc(t)}">Add</button>`}</div></div>`).join('')}</div>`;
+}
+function schoolProgress(){
+  const cs = lifeRows.courses||[], done = cs.filter(c=>['completed','transferred'].includes(c.status)).reduce((a,c)=>a+Number(c.credits||0),0), now = cs.filter(c=>c.status==='enrolled').reduce((a,c)=>a+Number(c.credits||0),0);
+  const pct = Math.min(100, Math.round(100*done/120));
+  return `<div class="wdg wide" style="margin-top:8px"><span class="wdg-head"><span>CREDITS</span><em>typical bachelor's: 120</em></span><b class="wdg-big acc">${done}</b><span class="wdg-sub">earned or transferred${now ? ` · ${now} in progress` : ''}</span><div class="ds-bar" style="margin-top:8px"><i style="width:${pct}%"></i></div></div><div class="suggest-note">Add courses (status completed or transferred, with credits) to fill this in.</div>`;
+}
+
+// ---------- DRONE (light): Flights · Compliance ----------
+let droneDocs = null;
+function droneCompliance(){
+  if(droneDocs === null){ droneDocs = []; fetch(`${SUPABASE_URL}/rest/v1/documents?select=id,name,kind,issued_on,expires_on&tags=cs.%7B%22Drone%22%7D&order=expires_on.asc.nullslast`, { headers: authHeaders() }).then(r=>r.ok?r.json():[]).then(j=>{ droneDocs = j; if(lifeArea==='drone') renderLife(); }); }
+  const cert = droneDocs.find(d=>d.kind==='certificate');
+  let recur = 'Add your Part 107 certificate (or last recurrent training) to your vault with the Drone folder.';
+  if(cert && cert.issued_on){ const d = new Date(cert.issued_on+'T12:00'); d.setMonth(d.getMonth()+25, 0); recur = `Recurrent training due by ${d.toLocaleDateString('en-US',{month:'long', year:'numeric'})} (24 calendar months).`; }
+  return `<div class="kt-receipt"><b>Part 107</b><span>${esc(recur)}</span></div><div class="section-title">Drone documents<span>${droneDocs.length}</span></div>
+    <div class="gcard lf-list">${droneDocs.map(d=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${esc(d.kind)}</div></div><div class="lf-right">${docBadge(d)}</div></div>`).join('') || '<div class="empty">Registration (renews every 3 years), certificate, insurance, airspace authorizations.</div>'}</div>
+    <button type="button" class="lf-add" data-opendocs="Drone">Add in Documents (tag: Drone)</button>`;
+}
+
+// tab declarations on the existing areas
+Object.assign(LIFE.closet, { tabs:[ { title:'Today', render: closetToday }, { title:'Wardrobe', render: closetWardrobe }, { title:'Laundry', render: closetLaundry }, { title:'Insights', render: closetInsights } ] });
+Object.assign(LIFE.car, { tabs:[ { title:'Model', render: carModel }, { title:'Service', section:1 }, { title:'Gas', section:2 }, { title:'Costs', render: carCosts }, { title:'Records', render: carRecords } ] });
+Object.assign(LIFE.apartments, { tabs:[ { title:'Map', render: aptMapTab }, { title:'Board', section:0, pre: aptBoardPre }, { title:'Compare', render: aptCompare }, { title:'Afford', render: aptAfford }, { title:'Move', render: aptMove } ] });
+Object.assign(LIFE.school, { tabs:[ { title:'Transfer', render: schoolTransfer }, { title:'Courses', section:0 }, { title:'Deadlines', section:1 }, { title:'Progress', render: schoolProgress } ] });
+Object.assign(LIFE.drone, { tabs:[ { title:'Flights', section:0 }, { title:'Compliance', render: droneCompliance } ] });
+LIFE.closet.sections[0].fields = LIFE.closet.sections[0].fields.concat([['warmth','Warmth 1–5','number']]);
+
+document.addEventListener('click', async e=>{
+  if(e.target.closest('[data-closetadd]')){ document.getElementById('closetInput').click(); return; }
+  if(e.target.closest('[data-shuffle]')){ closet.seed++; renderLife(); return; }
+  if(e.target.closest('[data-wearoutfit]')){ wearOutfit(); return; }
+  const cd = e.target.closest('[data-closetdiscard]'); if(cd){ closet.pending = closet.pending.filter(x=>x.id !== cd.dataset.closetdiscard); renderLife(); return; }
+  const od = e.target.closest('[data-opendocs]'); if(od){ docs.tab = 2; docs.tag = od.dataset.opendocs; docs.rows = null; openArea('documents'); return; }
+  const at = e.target.closest('[data-addtodo]'); if(at){ openChatWith(`Add a todo: ${at.dataset.addtodo}`); return; }
+  if(e.target.closest('[data-movechecklist]')){ openChatWith(`Add these moving todos (no dates yet): ${MOVE_STEPS.join('; ')}`); return; }
+});
+document.getElementById('closetInput').addEventListener('change', e=>{ const f = Array.from(e.target.files||[]); e.target.value = ''; if(f.length) closetAddFiles(f); });
+document.addEventListener('submit', async e=>{
+  const cf = e.target.closest('[data-closetform]'); if(cf){ e.preventDefault(); closetSave(cf); return; }
+  const vf = e.target.closest('[data-vinform]'); if(vf){ e.preventDefault(); const v = (lifeRows.vehicles||[])[0]; if(!v) return; car.vinBusy = true; renderLife();
+    const r = await tools({ action:'vin', vin: vf.elements.vin.value }); car.vinBusy = false;
+    if(!r || r.error){ showNotice((r && r.error) || 'VIN lookup failed'); renderLife(); return; }
+    const patch = { vin: r.vin, specs: r, odometer_miles: Number(vf.elements.miles.value.replace(/\D/g,'')) || v.odometer_miles || null, odometer_on: localToday() };
+    const p2 = await fetch(`${SUPABASE_URL}/rest/v1/vehicles?id=eq.${v.id}`, { method:'PATCH', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify(patch) });
+    if(!p2.ok){ showNotice(`Couldn't save: ${(await p2.text()).slice(0,100)}`); return; } Object.assign(v, patch); car.recalls = null; renderLife(); return; }
+  const lf = e.target.closest('[data-aptlink]'); if(lf){ e.preventDefault(); const url = lf.elements.url.value.trim(); if(!url) return; apt.busy = true; renderLife();
+    const r = await tools({ action:'listing', url }); apt.busy = false;
+    if(!r || r.error || r.blocked){ showNotice(r && r.blocked ? `${r.source} wouldn't let Otto read it. Fill in the basics below.` : ((r && r.error) || "Couldn't read that link")); lifeAdding = 'apartment_listings'; lifePrefill = {}; renderLife();
+      setTimeout(()=>{ const f = document.querySelector('[data-lform="apartment_listings"]'); if(f){ f.elements.url.value = url; f.elements.title.focus(); } }, 50); return; }
+    let row = { title: r.title || 'Listing', address: r.address || null, rent_cents: r.rent_cents, beds: r.beds || null, baths: r.baths || null, sqft: r.sqft || null, available_on: r.available_on || null, url: r.url, source: r.source, pros: r.pros || null, status:'saved' };
+    if(row.address) row = await aptGeoCommute(row);
+    const ins = await fetch(`${SUPABASE_URL}/rest/v1/apartment_listings`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=representation' }, body: JSON.stringify(row) });
+    if(!ins.ok){ showNotice(`Couldn't save: ${(await ins.text()).slice(0,100)}`); renderLife(); return; }
+    const [saved] = await ins.json(); (lifeRows.apartment_listings = lifeRows.apartment_listings || []).unshift(saved); hapticPulse(); showNotice(`Added: ${saved.title}`); renderLife(); return; }
+}, true);
+
+// ---------- MONEY: Recurring (bills + subscriptions, one list) and the pace chart ----------
+async function renderRecurring(){
+  const el = document.getElementById('recurringContent'); if(!el) return;
+  if(!lifeRows.subscriptions){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div></div>'; await lifeLoad(['subscriptions']); }
+  const bills = ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.active !== false);
+  const subs = (lifeRows.subscriptions||[]).filter(x=>x.status !== 'cancelled');
+  const billIds = new Set(subs.map(x=>x.recurring_bill_id).filter(Boolean));
+  const items = subs.map(x=>({ name:x.name, amt:x.amount_cents, next:x.next_charge_on, how: x.cadence, tag: x.detected ? 'found in your bank' : 'subscription', sub:true }))
+    .concat(bills.filter(b=>!billIds.has(b.id)).map(b=>({ name:b.name, amt:b.amount_cents, next: b.due_day ? nextOccurrenceFromDueDay(b.due_day) : null, how: b.frequency || 'monthly', tag: b.autopay ? 'autopay' : 'pay yourself' })))
+    .sort((a,b)=>(a.next||'9999').localeCompare(b.next||'9999'));
+  const per = { weekly:52/12, monthly:1, quarterly:1/3, yearly:1/12 }, mo = items.reduce((t,x)=>t + (x.amt||0)*(per[x.how]||1), 0);
+  el.innerHTML = `<div class="wdg wide hero" style="margin:6px 0 12px"><span class="wdg-head"><span>RECURRING</span><em>bills + subscriptions</em></span><b class="wdg-big acc">${money(Math.round(mo))}<small style="font-size:14px;color:var(--text-muted)">/mo</small></b><span class="wdg-sub">${items.length} charges · ${money(Math.round(mo*12))} a year</span></div>
+    <div class="gcard lf-list">${items.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div><div class="grow-sub">${esc([x.next ? 'next ' + shortDate(x.next) : '', x.how, x.tag].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${money(x.amt||0)}</div></div>`).join('') || '<div class="empty">No recurring charges found yet.</div>'}</div>`;
+}
+function insertPace(){
+  const host = document.getElementById('budgetContent'); if(!host || !lastBudgetData || !lastBudgetData.summary) return;
+  const S = lastBudgetData.summary, start = S.week_start, today = localToday(); if(!start) return;
+  const days = [...Array(7)].map((_,i)=>isoAddDays(start, i)), planned = Number(S.planned_cents||0); if(!planned) return;
+  let cum = 0; const pts = days.map(d=>{ if(d > today) return null; cum += (allTxns||[]).filter(t=>t.transaction_date===d && Number(t.amount_cents) < 0 && !t.exclude_from_budget).reduce((a,t)=>a - Number(t.amount_cents), 0); return cum; });
+  const mx = Math.max(planned, cum) * 1.08, X = i => 16 + i*52, Y = v => 112 - Math.round(96*v/mx);
+  const line = pts.map((v,i)=>v==null?null:`${X(i)},${Y(v)}`).filter(Boolean).join(' '), last = pts.filter(v=>v!=null).length - 1;
+  const over = cum > planned * (last+1) / 7;
+  document.getElementById('paceCard')?.remove();
+  host.insertAdjacentHTML('afterbegin', `<div class="gcard pace" id="paceCard"><div class="wdg-head"><span>PACE</span><em>${over ? 'ahead of an even pace' : 'on or under pace'}</em></div>
+    <svg viewBox="0 0 354 130" width="100%" role="img" aria-label="Cumulative spending this week against an even pace"><line x1="${X(0)}" y1="${Y(0)}" x2="${X(6)}" y2="${Y(planned)}" stroke="var(--text-muted)" stroke-dasharray="4 4"/>
+    <polyline points="${line}" fill="none" stroke="${over?'var(--alert)':'var(--accent)'}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${last>=0?`<circle cx="${X(last)}" cy="${Y(pts[last])}" r="5" fill="${over?'var(--alert)':'var(--accent)'}"/>`:''}
+    ${days.map((d,i)=>`<text x="${X(i)}" y="127" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--text-muted)">${'MTWTFSS'[(new Date(d+'T12:00').getDay()+6)%7]}</text>`).join('')}</svg>
+    <div class="wdg-sub">Solid: what you've spent so far (all spending). Dashed: an even pace to ${money(planned)}.</div></div>`);
+}
+
+// ---------- BODY: section tabs built from the sections the page actually has ----------
+let healthTab = 0;
+function healthTabs(){
+  const host = document.getElementById('healthContent'); if(!host) return;
+  const groups = [{ name:'Overview', els:[] }, { name:'Activity', els:[] }, { name:'Sleep', els:[] }, { name:'Heart', els:[] }];
+  const pick = t => /sleep|bed|asleep|rem|deep/i.test(t) ? 2 : /heart|hrv|resting|bpm|pulse/i.test(t) ? 3 : 1;
+  let cur = null;
+  [...host.children].forEach((ch, i)=>{ const title = (ch.querySelector && ch.querySelector('.viz-title span') || {}).textContent || ch.textContent || '';
+    if(ch.classList && ch.classList.contains('viz-card')){ cur = groups[pick(title)]; cur.els.push(ch); if(!groups[0].els.length) groups[0].first = ch; } else (cur || groups[1]).els.push(ch); });
+  const used = groups.filter((g,i)=>i===0 || g.els.length); used.push({ name:'Mood', els:[], mood:true });
+  document.getElementById('healthTabsBar')?.remove(); document.getElementById('moodBox')?.remove();
+  if(healthTab >= used.length) healthTab = 0;
+  host.insertAdjacentHTML('beforebegin', `<div class="ia2-subtabs" id="healthTabsBar" role="tablist">${used.map((g,i)=>`<button type="button" role="tab" class="${i===healthTab?'on':''}" aria-selected="${i===healthTab}" data-htab="${i}">${esc(g.name)}</button>`).join('')}</div>`);
+  const sel = used[healthTab];
+  groups.slice(1).forEach(g=>g.els.forEach(el=>{ el.style.display = (healthTab === 0 ? el === groups[0].first : sel === g) ? '' : 'none'; }));
+  const hero = document.getElementById('healthHero'); if(hero) hero.style.display = healthTab === 0 ? '' : 'none';
+  if(sel.mood){ host.insertAdjacentHTML('beforeend', '<div id="moodBox"><div class="skeleton"><div class="skeleton-row"></div></div></div>');
+    fetch(`${SUPABASE_URL}/rest/v1/daily_checkins?select=checkin_date,mood,energy,highlight&order=checkin_date.desc&limit=30`, { headers: authHeaders() }).then(r=>r.ok?r.json():[]).then(rows=>{ const b = document.getElementById('moodBox'); if(!b) return;
+      b.innerHTML = rows.length ? `<div class="gcard lf-list">${rows.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${shortDate(x.checkin_date)} · mood ${x.mood??'—'}/5 · energy ${x.energy??'—'}/5</div><div class="grow-sub">${esc(x.highlight||'')}</div></div></div>`).join('')}</div>` : '<div class="empty">No check-ins yet. Tell Otto “mood 4, energy 3” any evening.</div>'; }); }
+}
+document.addEventListener('click', e=>{ const h = e.target.closest('[data-htab]'); if(h){ healthTab = Number(h.dataset.htab); healthTabs(); } });
+
+// ---------- PLACES: Insights (time by place, work hours, GeoJSON export) ----------
+function renderInsights(){
+  const el = document.getElementById('insSheet'); if(!el) return;
+  const since = isoAddDays(localToday(), -6), vs = (mapData.visits||[]).filter(v=>v.arrived_at && isoOf(v.arrived_at) >= since && v.status !== 'declined');
+  const by = {}; vs.forEach(v=>{ const m = v.minutes || Math.round(((v.left_at ? Date.parse(v.left_at) : Date.now()) - Date.parse(v.arrived_at))/60000); by[v.place] = (by[v.place]||0) + m; });
+  const top = Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,6), work = Object.entries(by).filter(([k])=>/\b(work|city hall)\b/i.test(k)).reduce((a,[,m])=>a+m,0);
+  el.innerHTML = `<div class="tl-head"><div><b>Last 7 days</b><span>${vs.length} stops</span></div><button class="tl-close" type="button" data-insclose aria-label="Close">✕</button></div>
+    <div class="ins-work">${work ? `<b>${fmtMinutes(work)}</b> at work` : 'Name your work stop in the Inbox to see time at work.'}</div>
+    ${top.map(([k,m])=>`<div class="ins-row"><span>${esc(k)}</span><i style="width:${Math.max(4, Math.round(100*m/(top[0][1]||1)))}%"></i><em>${fmtMinutes(m)}</em></div>`).join('') || '<div class="empty">No stops recorded this week.</div>'}
+    <button type="button" class="lf-add" data-geojson>Export GeoJSON (stops + points)</button>`;
+}
+document.addEventListener('click', e=>{
+  if(e.target.closest('#insBtn')){ const sh = document.getElementById('insSheet'); sh.hidden = !sh.hidden; ['tlSheet','wxSheet'].forEach(id=>{ const x = document.getElementById(id); if(x) x.hidden = true; }); if(!sh.hidden) renderInsights(); return; }
+  if(e.target.closest('[data-insclose]')){ document.getElementById('insSheet').hidden = true; return; }
+  if(e.target.closest('[data-geojson]')){
+    const feats = (mapData.visits||[]).filter(v=>v.lat != null).map(v=>({ type:'Feature', geometry:{ type:'Point', coordinates:[v.lon, v.lat] }, properties:{ kind:'stop', place:v.place, arrived_at:v.arrived_at, left_at:v.left_at, minutes:v.minutes, status:v.status } }))
+      .concat((mapData.points||[]).filter(p=>p.lat != null).map(p=>({ type:'Feature', geometry:{ type:'Point', coordinates:[p.lon, p.lat] }, properties:{ kind:'point', recorded_at:p.recorded_at, accuracy_m:p.accuracy_m } })));
+    const blob = new Blob([JSON.stringify({ type:'FeatureCollection', features: feats })], { type:'application/geo+json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `otto-places-${localToday()}.geojson`; document.body.appendChild(a); a.click(); a.remove(); showNotice(`Exported ${feats.length} features`);
+  }
+});
 
 // ---------- chat actions (changes the chat made, each with Undo) + nightly check-in ----------
 let chatMode = 'chat', todayCheckin = null;
@@ -5899,7 +6424,7 @@ document.addEventListener('pointerdown', e=>{
   if(navChooser && !e.target.closest('.otto-nav-chooser') && !e.target.closest('[data-tab="life"]') && !e.target.closest('[data-tab="more"]')) closeNavChooser();
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeNavChooser(); });
-function setMoneySeg(k){ document.body.dataset.moneyseg = k; document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.classList.toggle('active', b.dataset.msegBtn === k)); const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
+function setMoneySeg(k){ if(k === 'recurring') setTimeout(renderRecurring, 0); document.body.dataset.moneyseg = k; document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.classList.toggle('active', b.dataset.msegBtn === k)); const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
 setMoneySeg('week');
 document.getElementById('moneySeg').addEventListener('click', e=>{ const b = e.target.closest('[data-mseg-btn]'); if(b) setMoneySeg(b.dataset.msegBtn); });
 
