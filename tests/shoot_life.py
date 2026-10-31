@@ -1,0 +1,65 @@
+import json, re, asyncio
+from playwright.async_api import async_playwright
+K='/mnt/user-data/outputs/otto-paper-wip/testkit'
+fx=json.load(open(K+'/fixtures.json'))
+html=open('/home/claude/paper/index.html').read()
+html=re.sub(r'env\(safe-area-inset-top(?:,\s*0px)?\)','47px',html); html=re.sub(r'env\(safe-area-inset-bottom(?:,\s*0px)?\)','34px',html)
+html=html.replace('<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>','')
+open('/tmp/paper_test.html','w').write(html)
+posts=[]
+async def route(r):
+    u=r.request.url
+    if u.startswith('file:') or u.startswith('data:') or u.startswith('http://localhost:8765'): return await r.continue_()
+    if 'unpkg.com/leaflet' in u:
+        f='/tmp/lf/package/dist/'+u.split('/dist/')[1]; return await r.fulfill(path=f, content_type='text/css' if f.endswith('.css') else 'application/javascript')
+    if 'arcgisonline' in u: return await r.fulfill(path='/tmp/tile.png', content_type='image/png')
+    if 'supabase.co' not in u: return await r.abort()
+    if '/functions/v1/' in u: return await r.fulfill(status=200, content_type='application/json', body=json.dumps({"text":"Briefing."}))
+    m=re.search(r'/rest/v1/([a-z_]+)',u); t=m.group(1) if m else ''
+    if r.request.method=='POST':
+        body=json.loads(r.request.post_data or '{}'); posts.append((t, body)); row={**body, "id": 900+len(posts)}
+        return await r.fulfill(status=201, content_type='application/json', body=json.dumps([row]))
+    if r.request.method!='GET': return await r.fulfill(status=204, body='')
+    await r.fulfill(status=200, content_type='application/json', body=json.dumps(fx.get(t,[])))
+async def main():
+    async with async_playwright() as p:
+        b=await p.chromium.launch(executable_path='/opt/pw-browsers/chromium-1194/chrome-linux/chrome')
+        page=await (await b.new_context(viewport={'width':390,'height':844}, device_scale_factor=2, is_mobile=True, has_touch=True, timezone_id='America/New_York')).new_page()
+        errs=[]; page.on('pageerror', lambda e: errs.append(str(e)[:200])); page.on('dialog', lambda d: asyncio.ensure_future(d.accept()))
+        await page.route('**/*', route); await page.goto('file:///tmp/paper_test.html')
+        await page.evaluate("session = { access_token:'t', refresh_token:'r', expires_at: Math.floor(Date.now()/1000)+3600, user:{email:'slgoodwin33@gmail.com'} }; showApp();")
+        await page.wait_for_timeout(2200)
+        print('dock:', await page.eval_on_selector_all('.hd-btn','els=>els.map(e=>e.innerText.split("\\n")[0])'))
+        await page.click('#homeDock [data-area="life"]'); await page.wait_for_timeout(900)
+        print('page:', await page.text_content('#sheetTitle'))
+        print('cards:', await page.eval_on_selector_all('.lf-card','els=>els.map(e=>e.innerText.replace(/\\n/g," | "))'))
+        await page.screenshot(path='/home/claude/paper/l_grid.png')
+        await page.click('[data-life="closet"]'); await page.wait_for_timeout(300)
+        print('closet rows:', await page.eval_on_selector_all('.lf-row','els=>els.map(e=>e.innerText.replace(/\\n/g," | "))'))
+        await page.click('[data-lrow="wardrobe_items:1"]'); await page.wait_for_timeout(150); await page.click('[data-wore="1"]'); await page.wait_for_timeout(300)
+        print('after "wore it" hoodie:', await page.eval_on_selector('[data-lrow="wardrobe_items:1"]','e=>e.innerText.replace(/\\n/g," | ")'))
+        await page.screenshot(path='/home/claude/paper/l_closet.png')
+        await page.click('[data-laundry]'); await page.wait_for_timeout(300)
+        print('after laundry:', await page.eval_on_selector_all('.lf-row','els=>els.map(e=>e.innerText.replace(/\\n/g," | "))'))
+        await page.click('[data-lback]'); await page.wait_for_timeout(200); await page.click('[data-life="car"]'); await page.wait_for_timeout(250)
+        await page.click('[data-ladd="vehicle_services"]'); await page.wait_for_timeout(200)
+        await page.fill('[data-lform="vehicle_services"] [name="service_on"]', '2026-10-24'); await page.select_option('[data-lform="vehicle_services"] [name="kind"]', 'oil')
+        await page.fill('[data-lform="vehicle_services"] [name="odometer_miles"]', '98450'); await page.fill('[data-lform="vehicle_services"] [name="cost_cents"]', '$64.99')
+        await page.screenshot(path='/home/claude/paper/l_carform.png')
+        await page.click('[data-lform="vehicle_services"] button[type=submit]'); await page.wait_for_timeout(300)
+        print('car rows after save:', await page.eval_on_selector_all('.lf-row','els=>els.map(e=>e.innerText.replace(/\\n/g," | "))'))
+        await page.click('[data-lback]'); await page.wait_for_timeout(200); await page.click('[data-life="documents"]'); await page.wait_for_timeout(200)
+        await page.click('[data-ladd="documents"]'); await page.fill('[data-lform="documents"] [name="name"]','Driver license'); await page.fill('[data-lform="documents"] [name="number_last4"]','S12345678'); await page.fill('[data-lform="documents"] [name="expires_on"]','2026-12-01')
+        await page.click('[data-lform="documents"] button[type=submit]'); await page.wait_for_timeout(300)
+        print('posts:', json.dumps(posts)[:600])
+        await page.evaluate("closeSheet()"); await page.wait_for_timeout(300)
+        await page.click('#homeDock [data-area="food"]'); await page.wait_for_timeout(600); await page.click('[data-food="kitchen"]'); await page.wait_for_timeout(700)
+        print('kitchen:', (await page.inner_text('#foodContent')).replace('\n',' | ')[:500])
+        await page.screenshot(path='/home/claude/paper/l_kitchen.png')
+        await page.click('[data-receipt="paste"]'); await page.wait_for_timeout(300)
+        print('chat opened with:', repr(await page.input_value('#askInput')), '| chatting:', await page.evaluate("document.body.classList.contains('chatting')"))
+        await page.set_input_files('#photoInput', {'name':'r.png','mimeType':'image/png','buffer':open('/tmp/tile.png','rb').read()}); await page.wait_for_timeout(500)
+        print('photo chip:', await page.eval_on_selector('#photoChip','e=>!e.hidden && e.innerText'))
+        await page.screenshot(path='/home/claude/paper/l_photo.png')
+        print('errors:', errs or 'none'); await b.close()
+asyncio.run(main())

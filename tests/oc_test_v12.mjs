@@ -1,0 +1,15 @@
+const calls=[]; let n=0;
+globalThis.Deno={ env:{ get:(k)=>({ANTHROPIC_API_KEY:'k',SUPABASE_URL:'https://x.supabase.co',SUPABASE_SERVICE_ROLE_KEY:'sr'})[k] }, serve:(h)=>{ globalThis.handler=h; } };
+const R=(b,s=200)=>new Response(JSON.stringify(b),{status:s,headers:{'content-type':'application/json'}});
+globalThis.fetch=async (url,opt={})=>{ if(String(url).includes('anthropic')){ const b=JSON.parse(opt.body); calls.push(b); n++;
+   if(n===1) return R({stop_reason:'tool_use',content:[{type:'thinking',thinking:'He sent a receipt from The Gavel. Check if it is already saved.',signature:'sig'},{type:'tool_use',id:'t1',name:'record_receipt',input:{store:'Gavel',kind:'dining',items:[{name:'x'}]}}]});
+   return R({stop_reason:'end_turn',content:[{type:'thinking',thinking:'Saved; now summarize.',signature:'s2'},{type:'text',text:'Saved The Gavel receipt.'}]}); } return R([]); };
+await import('/tmp/oc.js');
+const res=await handler(new Request('https://f',{method:'POST',headers:{Authorization:'Bearer t','content-type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:'receipt'}], stream:true})}));
+console.log('content-type:', res.headers.get('content-type'));
+const txt=await res.text(); const ev=txt.trim().split('\n').map(l=>JSON.parse(l));
+console.log('events:', ev.map(e=>e.t+(e.s?':'+e.s.slice(0,40):'')+(e.summary?':'+e.summary:'')+(e.text?':'+e.text:'')).join(' → '));
+console.log('thinking requested:', JSON.stringify(calls[0].thinking), '| thinking passed back on turn 2:', calls[1].messages[1].content.some(c=>c.type==='thinking'));
+console.log('rules in prompt:', calls[0].system.includes('exactly the N'), calls[0].system.includes('## Saved places'));
+n=0; const r2=await handler(new Request('https://f',{method:'POST',headers:{Authorization:'Bearer t','content-type':'application/json'},body:JSON.stringify({messages:[{role:'user',content:'hi'}]})}));
+console.log('non-stream still JSON:', (await r2.json()).text);
