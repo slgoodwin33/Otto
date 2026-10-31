@@ -17,3 +17,7 @@
 - Buttons: primary (filled sage, dark text `#0E1F16`), secondary (sage tint), plain (sage text), destructive (coral text); 44 pt minimum; press feedback.
 - Radii: cards 22, buttons/fields 14, chips round. Large titles collapsing on scroll, edge-swipe back, one sheet style (grabber, drag, snap, dim), shimmer skeletons, ring empty states, haptics.
 - Accessibility: WCAG 2.2 AA (contrast ≥ 4.5:1, 44 pt targets, labels, reduced motion respected).
+
+## Glass (build .61)
+- Glass is tied to the Background setting: off on Solid, on for Glow / Your map / Photo. Cards: white 10%→5% fill, 1px white 12% edge (22% on top), blur 20px + saturate 1.5, soft drop shadow. Dock and page header: darker glass (blur 24–26px).
+- A dim layer (user-set, 0–80%) sits between the background and the glass so text keeps WCAG AA contrast. Without backdrop-filter support, cards fall back to solid surface.

@@ -1,5 +1,8 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .61 (Oct 31)
+- Background setting (Account → Background, or Home edit → Background): Solid · Glow · Your map (blurred basemap around your last location) · Photo (shrunk, saved on this phone), with a Dim slider. Any choice but Solid turns on glass cards, a frosted dock and page header. Stored in localStorage `otto.bg` (per device, not synced).
+
 ## Just shipped — builds .56–.60 (Oct 31), from docs/APP-REVIEW.md
 - .56 Removed the three hidden Home generations (map, day sheet, old dock, Paper tiles) and the unseen AI briefing call; chart labels no longer render in Times.
 - .57 One page header from the dock names (Kitchen / Body / Places); no second header in life areas; "‹ Home" gone; page addresses (#/money, #/car/2) so reloads return to the same page; ‹ and left-edge swipe go back.

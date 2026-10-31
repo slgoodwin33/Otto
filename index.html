@@ -1803,6 +1803,42 @@ body.chatting .otto-chat-starters{display:none}
   #quickAddInput{flex:1 1 auto !important; min-width:0 !important; width:auto !important;}
   #quickAddWhen{flex:0 0 auto !important; width:auto !important; max-width:118px;}
   @media (prefers-reduced-motion: reduce){ .mini-bars i{animation:none;} .lt, .lf-row, .lf-card, .grow, .chip{transition:none;} }
+
+  /* ===== Build .61: your background + glass ===== */
+  #ottoBg{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden; isolation:isolate; display:none; background:#0A0D0C;}
+  body.glass #ottoBg{display:block;}
+  .bg-media, #bgMapEl{position:absolute; inset:-40px;}
+  .bg-media{background-size:cover; background-position:center;}
+  #bgMapEl{inset:0; background:#0A0D0C;}
+  body[data-bg="map"] .bg-media{filter:blur(3px) saturate(1.15);}
+  body[data-bg="glow"] .bg-media{background:
+      radial-gradient(40% 32% at 15% 12%, rgba(139,188,161,.75), transparent 70%),
+      radial-gradient(34% 30% at 92% 28%, rgba(233,179,92,.45), transparent 70%),
+      radial-gradient(46% 40% at 72% 86%, rgba(143,180,232,.45), transparent 70%),
+      radial-gradient(40% 36% at 8% 78%, rgba(108,157,130,.55), transparent 70%);
+    filter:blur(28px); animation:bgDrift 40s ease-in-out infinite alternate;}
+  @keyframes bgDrift{to{transform:translate(-4%, 3%) rotate(6deg) scale(1.06);}}
+  .bg-shade{position:absolute; inset:0; background:linear-gradient(180deg, rgba(8,10,9,calc(var(--bg-dim) + .1)), rgba(8,10,9,var(--bg-dim)) 35%, rgba(8,10,9,calc(var(--bg-dim) + .2)));}
+  html.glass, body.glass{background:#0A0D0C !important;}
+  body.glass #appWrap{position:relative; z-index:1;}
+  body.glass #appWrap, body.glass .wrap, body.glass .ia2-home, body.glass #panelHolder{background:transparent !important;}
+  body.glass.ia2:not(.chatting)::before, body.glass::before{background:linear-gradient(rgba(8,10,9,.55), transparent) !important;}
+  body.glass .sheet, body.glass #sheet, body.glass .sheet-backdrop{background:transparent !important;}
+  body.glass .sheet-head{background:rgba(10,13,12,.35) !important; backdrop-filter:blur(24px) saturate(1.4); -webkit-backdrop-filter:blur(24px) saturate(1.4); border-bottom:1px solid rgba(255,255,255,.10) !important;}
+  body.glass :is(.wdg, .lt, .gcard, .viz-card, .mo-card, .plan-week, .lf-list, .kt-list, .he-row, .acct-strip > *, .budget-cat){
+    background:linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05)) !important;
+    border:1px solid rgba(255,255,255,.12) !important; border-top-color:rgba(255,255,255,.22) !important;
+    backdrop-filter:blur(20px) saturate(1.5); -webkit-backdrop-filter:blur(20px) saturate(1.5);
+    box-shadow:0 10px 30px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.06) !important;}
+  body.glass :is(.ia2-tabs, .ia2-pill){background:rgba(14,18,16,.45) !important; border:1px solid rgba(255,255,255,.12) !important; backdrop-filter:blur(26px) saturate(1.6); -webkit-backdrop-filter:blur(26px) saturate(1.6);}
+  body.glass .ia2-inbox{background:rgba(255,255,255,.08) !important; border:1px solid rgba(255,255,255,.14) !important; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);}
+  body.glass .wdg:active, body.glass .lt:active{transform:translateY(-2px) scale(.99);}
+  .bg-dim{display:flex; align-items:center; gap:12px; margin:10px 2px 0; font:600 14px var(--sans); color:var(--text-muted);} .bg-dim[hidden]{display:none;}
+  .bg-dim input{flex:1; accent-color:var(--accent); min-height:44px;} .bg-dim output{min-width:40px; text-align:right; font-variant-numeric:tabular-nums; color:var(--text);}
+  .he-bg{all:unset; box-sizing:border-box; cursor:pointer; display:flex !important; justify-content:space-between; align-items:center; gap:10px; padding:12px 14px !important;}
+  .he-bg b{display:block; font:600 14.5px var(--sans);} .he-bg span{font:12.5px var(--sans); color:var(--text-muted);} .he-bg > span{font-size:20px;}
+  @media (prefers-reduced-motion: reduce){ body[data-bg="glow"] .bg-media{animation:none;} }
+  @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ body.glass :is(.wdg, .lt, .gcard, .viz-card, .mo-card){background:rgba(21,26,24,.92) !important;} }
 </style>
 </head>
 <body class="home-v2">
@@ -2022,6 +2058,11 @@ body.chatting .otto-chat-starters{display:none}
     <div class="tab-panel" id="panelLife"><div id="lifeContent"></div></div>
     <div class="tab-panel" id="panelAccount">
       <div class="studio-page-head"><div class="studio-kicker">YOUR SPACE <span class="studio-dot"></span> OTTO</div><h2>Make Otto<br><span>yours.</span></h2><p>Connections, sync status, and account controls.</p></div>
+      <div class="section-title" style="margin-top:4px" id="bgTitle">Background<span>behind Home and every page</span></div>
+      <div class="map-ranges basemap-setting" id="bgSetting" role="group" aria-label="Background"></div>
+      <div class="bg-dim" id="bgDimRow"><label for="bgDim">Dim</label><input type="range" id="bgDim" min="0" max="80" step="5"><output id="bgDimVal" for="bgDim"></output></div>
+      <input type="file" id="bgPhotoInput" accept="image/*" hidden>
+      <div class="suggest-note" style="margin:6px 0 18px">Any background except Solid turns on glass cards. Saved on this phone.</div>
       <div class="section-title" style="margin-top:4px">Map style<span>Home and Places</span></div>
       <div class="map-ranges basemap-setting" id="basemapSetting" role="group" aria-label="Map style"></div>
       <div class="suggest-note" style="margin:6px 0 18px">Auto follows your phone: light by day, dark at night.</div>
@@ -2053,7 +2094,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-31.60';
+const APP_BUILD = '2026-10-31.61';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -3111,6 +3152,7 @@ function makeBaseLayer(){
 let assetBaseLayer = null;
 function applyBasemap(){
   if(ia2MiniMap){ if(ia2MiniBase) ia2MiniMap.removeLayer(ia2MiniBase); ia2MiniBase = makeBaseLayer().addTo(ia2MiniMap); }
+  if(typeof bgMap !== 'undefined' && bgMap){ if(bgMapBase) bgMap.removeLayer(bgMapBase); bgMapBase = makeBaseLayer().addTo(bgMap); }
   if(typeof assetMapInstance !== 'undefined' && assetMapInstance){ if(assetBaseLayer) assetMapInstance.removeLayer(assetBaseLayer); assetBaseLayer = makeBaseLayer().addTo(assetMapInstance); }
   document.body.dataset.basemap = basemapKey();
   renderBasemapSetting();
@@ -5198,6 +5240,7 @@ function renderIa2HomeNow(){
     ${grid}`;
   if(ia2FirstPaint && !homeEditing){ ia2FirstPaint = false; countUp(el); }
   if(!homeCachedAt) saveHomeCache();
+  if(bgMap){ try{ bgMap.setView(bgCenter(), 15, { animate:false }); }catch(e){} }
   // live mini map for the last stop
   const mm = document.getElementById('ia2Mini'); const pos = fx.pos || (lastV && lastV.lat != null ? { lat:lastV.lat, lon:lastV.lon } : null);
   if(mm && pos && typeof L !== 'undefined'){
@@ -5730,7 +5773,7 @@ function homeOrder(c){
 }
 function renderHomeEdit(c){
   const order = homeOrder(c);
-  return `<div class="he-wrap"><div class="he-row he-sort"><div><b>Sort by what I use most</b><span>Widgets you open often move up${c.byUse ? '' : '. Off: your order below'}.</span></div><button type="button" role="switch" aria-checked="${c.byUse}" aria-label="Sort by use" class="he-switch ${c.byUse?'on':''}" data-hebyuse><i></i></button></div>
+  return `<div class="he-wrap"><button type="button" class="he-row he-bg" data-bgopen><div><b>Background</b><span>${(BG_KINDS.find(x=>x[0]===bgCfg().kind)||[])[1]} · tap to change</span></div><span aria-hidden="true">›</span></button><div class="he-row he-sort"><div><b>Sort by what I use most</b><span>Widgets you open often move up${c.byUse ? '' : '. Off: your order below'}.</span></div><button type="button" role="switch" aria-checked="${c.byUse}" aria-label="Sort by use" class="he-switch ${c.byUse?'on':''}" data-hebyuse><i></i></button></div>
     <div class="he-note">The top card always stays first.</div>
     ${order.map((k,i)=>{ const on = !c.hidden.includes(k), wide = c.wide[k] === true;
       return `<div class="he-row ${on?'':'off'}"><div class="he-move">${c.byUse ? '' : `<button type="button" aria-label="Move ${HOME_LABEL[k]} up" data-heup="${k}" ${i===0?'disabled':''}>↑</button><button type="button" aria-label="Move ${HOME_LABEL[k]} down" data-hedown="${k}" ${i===order.length-1?'disabled':''}>↓</button>`}</div>
@@ -6358,6 +6401,62 @@ function stageBar(sl){
   return `<span class="stage-bar" role="img" aria-label="${parts.map(x=>`${x[2]} ${hm(x[1])}`).join(', ')}">${parts.map(x=>`<i class="st-${x[0]}" style="flex:${x[1]}"></i>`).join('')}</span>`;
 }
 
+// ---------- background: solid · glow · your map · your photo (saved on this phone) ----------
+const BG_KINDS = [['solid','Solid'], ['glow','Glow'], ['map','Your map'], ['photo','Photo']];
+function bgCfg(){ try{ const c = JSON.parse(localStorage.getItem('otto.bg') || 'null'); if(c && BG_KINDS.some(k=>k[0] === c.kind)) return { dim:45, ...c }; }catch(e){} return { kind:'solid', dim:45 }; }
+function saveBg(c){ try{ localStorage.setItem('otto.bg', JSON.stringify(c)); return true; }catch(e){ return false; } }
+let bgMap = null, bgMapBase = null;
+function bgCenter(){
+  try{ const fx = lastFix(); if(fx.pos) return [fx.pos.lat, fx.pos.lon];
+    const v = (mapData.visits||[]).filter(x=>x.lat != null).sort((a,b)=>(b.arrived_at||'').localeCompare(a.arrived_at||''))[0]; if(v) return [v.lat, v.lon]; }catch(e){}
+  return [42.5584, -70.8800];   // Beverly
+}
+function applyBg(){
+  const c = bgCfg(); let layer = document.getElementById('ottoBg');
+  if(!layer){ layer = document.createElement('div'); layer.id = 'ottoBg'; layer.setAttribute('aria-hidden', 'true'); layer.innerHTML = '<div class="bg-media" id="bgMedia"></div><div class="bg-shade"></div>'; document.body.prepend(layer); }
+  const glass = c.kind !== 'solid';
+  document.body.classList.toggle('glass', glass); document.documentElement.classList.toggle('glass', glass); document.body.dataset.bg = c.kind;
+  layer.style.setProperty('--bg-dim', (Math.min(80, Math.max(0, Number(c.dim)||0)) / 100).toFixed(2));
+  const media = document.getElementById('bgMedia');
+  media.style.backgroundImage = c.kind === 'photo' && c.photo ? `url("${c.photo}")` : '';
+  if(c.kind === 'map' && typeof L !== 'undefined'){
+    if(!bgMap){ const el = document.createElement('div'); el.id = 'bgMapEl'; media.appendChild(el);
+      bgMap = L.map(el, { zoomControl:false, attributionControl:false, dragging:false, touchZoom:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, tap:false, fadeAnimation:false, zoomAnimation:false }).setView(bgCenter(), 15);
+      bgMapBase = makeBaseLayer().addTo(bgMap); }
+    else bgMap.setView(bgCenter(), 15, { animate:false });
+  } else if(bgMap){ bgMap.remove(); bgMap = null; bgMapBase = null; const el = document.getElementById('bgMapEl'); if(el) el.remove(); }
+  renderBgSetting();
+}
+function renderBgSetting(){
+  const el = document.getElementById('bgSetting'); if(!el) return; const c = bgCfg();
+  el.innerHTML = BG_KINDS.map(([k,l])=>`<button type="button" data-bgkind="${k}" class="${k===c.kind?'active':''}" aria-pressed="${k===c.kind}">${l}</button>`).join('')
+    + (c.kind === 'photo' ? '<button type="button" data-bgphoto>Change photo…</button>' : '');
+  const row = document.getElementById('bgDimRow'); row.hidden = c.kind === 'solid';
+  const r = document.getElementById('bgDim'); r.value = c.dim; document.getElementById('bgDimVal').textContent = c.dim + '%';
+}
+function shrinkPhoto(file, max, q){
+  return new Promise((res, rej)=>{ const img = new Image(), u = URL.createObjectURL(file);
+    img.onload = ()=>{ const k = Math.min(1, max / Math.max(img.width, img.height)), cv = document.createElement('canvas'); cv.width = Math.round(img.width*k); cv.height = Math.round(img.height*k);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height); URL.revokeObjectURL(u); res(cv.toDataURL('image/jpeg', q)); };
+    img.onerror = ()=>{ URL.revokeObjectURL(u); rej(new Error("Couldn't read that photo.")); }; img.src = u; });
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest('button[data-bgkind]');
+  if(b){ const c = bgCfg(); if(b.dataset.bgkind === 'photo' && !c.photo){ document.getElementById('bgPhotoInput').click(); return; } c.kind = b.dataset.bgkind; saveBg(c); applyBg(); hapticPulse(); return; }
+  if(e.target.closest('[data-bgphoto]')){ document.getElementById('bgPhotoInput').click(); return; }
+  if(e.target.closest('[data-bgopen]')){ homeEditing = false; openSheet('account'); setTimeout(()=>{ const t = document.getElementById('bgTitle'); if(t) t.scrollIntoView({ block:'start', behavior:'smooth' }); }, 120); }
+});
+document.getElementById('bgPhotoInput').addEventListener('change', async e=>{
+  const f = e.target.files && e.target.files[0]; e.target.value = ''; if(!f) return;
+  try{
+    const c = bgCfg(); c.kind = 'photo'; c.photo = await shrinkPhoto(f, 1600, 0.82);
+    if(!saveBg(c)){ c.photo = await shrinkPhoto(f, 1000, 0.7); if(!saveBg(c)){ alert("That photo is too big to save on this phone. Try a different one."); return; } }
+    applyBg();
+  }catch(err){ alert(err.message); }
+});
+document.getElementById('bgDim').addEventListener('input', e=>{ const c = bgCfg(); c.dim = Number(e.target.value); saveBg(c);
+  const l = document.getElementById('ottoBg'); if(l) l.style.setProperty('--bg-dim', (c.dim/100).toFixed(2)); document.getElementById('bgDimVal').textContent = c.dim + '%'; });
+
 // ---------- motion: sliding tab underline, directional tab + page changes ----------
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
@@ -6447,6 +6546,7 @@ function showApp(){
   document.getElementById('appWrap').style.display = '';
   document.getElementById('tabbar').hidden = false; lastRefreshAt = Date.now(); renderSyncChips();
   try{ if(paintFromCache()) setTimeout(()=>{ if(homeCachedAt){ homeCachedAt = null; window.__freshData = true; try{ renderIa2Home(); }catch(e){} } }, 15000); }catch(e){}
+  try{ applyBg(); }catch(e){ console.error('background', e); }
   bootApp();
   try{ history.replaceState({ otto:0 }, '', location.hash || '#/today'); if(location.hash && location.hash !== '#/today') applyRoute(location.hash); }catch(e){}
 }
