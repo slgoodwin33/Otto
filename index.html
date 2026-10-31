@@ -1839,6 +1839,28 @@ body.chatting .otto-chat-starters{display:none}
   .he-bg b{display:block; font:600 14.5px var(--sans);} .he-bg span{font:12.5px var(--sans); color:var(--text-muted);} .he-bg > span{font-size:20px;}
   @media (prefers-reduced-motion: reduce){ body[data-bg="glow"] .bg-media{animation:none;} }
   @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ body.glass :is(.wdg, .lt, .gcard, .viz-card, .mo-card){background:rgba(21,26,24,.92) !important;} }
+
+  /* ===== Build .62: All groups, Body history ===== */
+  .lt-pin{position:absolute; top:12px; right:12px; width:7px; height:7px; border-radius:50%; background:var(--accent) !important; padding:0 !important;}
+  .lt-idle{margin-top:18px; border-top:1px solid var(--border); padding-top:6px;}
+  .lt-idle summary{list-style:none; cursor:pointer; display:flex; flex-direction:column; gap:2px; padding:10px 2px; min-height:44px; justify-content:center;}
+  .lt-idle summary::-webkit-details-marker{display:none;}
+  .lt-idle summary span{font:700 12px var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);} .lt-idle summary span::after{content:' ›'; display:inline-block; transition:transform .2s;}
+  .lt-idle[open] summary span::after{transform:rotate(90deg);}
+  .lt-idle summary em{font:13px var(--sans); font-style:normal; color:var(--text-faint);}
+  .lt-idle .lt{opacity:.75;}
+  .hist-records{display:grid !important; grid-template-columns:1fr 1fr; gap:14px 12px;}
+  .hr{display:flex; flex-direction:column; gap:2px; min-width:0;} .hr span{font:600 12.5px var(--sans); color:var(--text-muted);} .hr b{font:700 22px var(--sans); font-variant-numeric:tabular-nums;} .hr b small{font:500 13px var(--sans); color:var(--text-muted);} .hr em{font:12px var(--sans); font-style:normal; color:var(--text-faint);}
+  .otd{display:flex; gap:8px; overflow-x:auto; scrollbar-width:none; padding-top:6px;} .otd > div{flex:0 0 auto; min-width:72px; padding:8px 10px; border-radius:12px; background:var(--surface-2); display:flex; flex-direction:column;} .otd span{font:12px var(--sans); color:var(--text-muted);} .otd b{font:700 16px var(--sans); font-variant-numeric:tabular-nums;}
+  .hist-years{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; margin:8px 0 10px;} .hist-years button{all:unset; cursor:pointer; padding:6px 11px; min-height:32px; box-sizing:border-box; display:flex; align-items:center; border-radius:16px; font:600 13px var(--sans); color:var(--text-muted); background:var(--surface-2);} .hist-years button.on{background:var(--accent); color:var(--on-accent);}
+  .heat{display:grid; grid-template-rows:repeat(7, 9px); grid-auto-flow:column; grid-auto-columns:9px; gap:2px; overflow-x:auto; scrollbar-width:none; padding:2px 0 4px;}
+  .hm{display:block; width:9px; height:9px; border-radius:2px; background:var(--surface-2); cursor:pointer;} .hm-pad{display:block; width:9px; height:9px;}
+  .hm.l1{background:rgba(139,188,161,.22);} .hm.l2{background:rgba(139,188,161,.42);} .hm.l3{background:rgba(139,188,161,.62);} .hm.l4{background:rgba(139,188,161,.82);} .hm.l5{background:#B8E0C8;}
+  .hm.pick{outline:2px solid var(--text); outline-offset:1px;}
+  .heat-foot{display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; font:12.5px var(--sans); color:var(--text-muted);} .heat-foot b{color:var(--text);}
+  .heat-key{display:inline-flex; align-items:center; gap:3px; font-size:11px; color:var(--text-faint); flex-shrink:0;} .heat-key .hm{cursor:default;}
+  .yr-row{display:grid; grid-template-columns:40px 1fr 62px; align-items:center; gap:10px; padding:5px 0; font:13px var(--sans); color:var(--text-muted);}
+  .yr-row i{display:block; height:8px; width:var(--w); min-width:4px; border-radius:4px; background:rgba(139,188,161,.4);} .yr-row i.on{background:var(--accent);} .yr-row b{text-align:right; color:var(--text); font-variant-numeric:tabular-nums;}
 </style>
 </head>
 <body class="home-v2">
@@ -2094,7 +2116,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-31.61';
+const APP_BUILD = '2026-11-01.62';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5269,14 +5291,21 @@ function areaReadout(k){
   const d = AREAS2[k]; if(d && d.life && LIFE[d.life]) return LIFE[d.life].summary(lifeRows);
   return '';
 }
+function areaStarted(k){
+  const d = AREAS2[k]; if(!d || !d.life || !LIFE[d.life]) return true;   // core areas always count
+  if(k === 'school' && (allTodos||[]).some(t=>/salem|transfer|school|course/i.test(t.title + ' ' + (t.domain_tag||'')))) return true;
+  return LIFE[d.life].sections.some(sec=>(lifeRows[sec.table]||[]).length > 0);
+}
 function renderLauncher(){
   const pins = ['today', ...dockPins(), 'all'];
-  const tile = k => `<button type="button" class="lt" data-tile="${k}">${ico2(k==='inbox'?'inbox':AREAS2[k].icon,22)}<b>${k==='inbox'?'Inbox':AREAS2[k].label}</b><span>${esc(areaReadout(k))}</span>${pins.includes(k)?'<em>IN DOCK</em>':''}</button>`;
-  const grp = (t, ks) => `<div class="lt-grp">${t}</div><div class="lt-grid">${ks.map(tile).join('')}</div>`;
-  return `<div class="lt-top"><span>Every part of Otto. Pin your favorites to the dock.</span><button type="button" class="link-btn" data-editdock>Edit dock</button></div>
-    ${grp('DAILY', ['today','todos','money','health','inbox','assets'])}
-    ${grp('HOME & THINGS', ['food','closet','car','documents','people','subscriptions'])}
-    ${grp('PROJECTS', ['apartments','school','trips','drone'])}`;
+  const tile = k => `<button type="button" class="lt" data-tile="${k}">${ico2(k==='inbox'?'inbox':AREAS2[k].icon,22)}<b>${k==='inbox'?'Inbox':AREAS2[k].label}</b><span>${esc(areaReadout(k))}</span>${pins.includes(k)?'<em class="lt-pin"><span class="sr-only">In dock</span></em>':''}</button>`;
+  const groups = [['Daily', ['today','todos','money','health','food','assets','inbox']], ['Life admin', ['closet','car','documents','people','subscriptions']], ['Projects', ['apartments','school','trips','drone']]];
+  const idle = [];
+  const grp = (t, ks) => { const on = ks.filter(k=>k === 'inbox' || areaStarted(k)); ks.filter(k=>!on.includes(k)).forEach(k=>idle.push(k)); return on.length ? `<div class="lt-grp">${t}</div><div class="lt-grid">${on.map(tile).join('')}</div>` : ''; };
+  const body = groups.map(([t, ks])=>grp(t, ks)).join('');
+  return `<div class="lt-top"><span>Pinned areas show a dot. Areas you haven't used yet are folded below.</span><button type="button" class="link-btn" data-editdock>Edit dock</button></div>
+    ${body}
+    ${idle.length ? `<details class="lt-idle"><summary><span>Not started</span><em>${idle.length} · ${idle.map(k=>AREAS2[k].label).join(', ')}</em></summary><div class="lt-grid">${idle.map(tile).join('')}</div></details>` : ''}`;
 }
 function renderEditDock(){
   const pins = dockPins(), opts = ['todos','money','health','food','assets','closet','car','documents','people','subscriptions','apartments','school','trips','drone'];
@@ -5723,18 +5752,83 @@ function healthTabs(){
   let cur = null;
   [...host.children].forEach((ch, i)=>{ const title = (ch.querySelector && ch.querySelector('.viz-title span') || {}).textContent || ch.textContent || '';
     if(ch.classList && ch.classList.contains('viz-card')){ cur = groups[pick(title)]; cur.els.push(ch); if(!groups[0].els.length) groups[0].first = ch; } else (cur || groups[1]).els.push(ch); });
-  const used = groups.filter((g,i)=>i===0 || g.els.length); used.push({ name:'Mood', els:[], mood:true });
-  document.getElementById('healthTabsBar')?.remove(); document.getElementById('moodBox')?.remove();
+  const used = groups.filter((g,i)=>i===0 || g.els.length); used.push({ name:'History', els:[], history:true }); used.push({ name:'Mood', els:[], mood:true });
+  document.getElementById('healthTabsBar')?.remove(); document.getElementById('moodBox')?.remove(); document.getElementById('histBox')?.remove();
   if(healthTab >= used.length) healthTab = 0;
   host.insertAdjacentHTML('beforebegin', `<div class="ia2-subtabs" id="healthTabsBar" role="tablist">${used.map((g,i)=>`<button type="button" role="tab" class="${i===healthTab?'on':''}" aria-selected="${i===healthTab}" data-htab="${i}">${esc(g.name)}</button>`).join('')}</div>`);
   const sel = used[healthTab];
   groups.slice(1).forEach(g=>g.els.forEach(el=>{ el.style.display = (healthTab === 0 ? el === groups[0].first : sel === g) ? '' : 'none'; }));
   const hero = document.getElementById('healthHero'); if(hero) hero.style.display = healthTab === 0 ? '' : 'none';
+  if(sel.history){ host.insertAdjacentHTML('beforeend', '<div id="histBox"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>'); loadStepHistory().then(renderStepHistory).catch(err=>{ const b = document.getElementById('histBox'); if(b) b.innerHTML = `<div class="empty">Couldn't load your step history. ${esc(err.message||'')}</div>`; }); }
   if(sel.mood){ host.insertAdjacentHTML('beforeend', '<div id="moodBox"><div class="skeleton"><div class="skeleton-row"></div></div></div>');
     fetch(`${SUPABASE_URL}/rest/v1/daily_checkins?select=checkin_date,mood,energy,highlight&order=checkin_date.desc&limit=30`, { headers: authHeaders() }).then(r=>r.ok?r.json():[]).then(rows=>{ const b = document.getElementById('moodBox'); if(!b) return;
       b.innerHTML = rows.length ? `<div class="gcard lf-list">${rows.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${shortDate(x.checkin_date)} · mood ${x.mood??'—'}/5 · energy ${x.energy??'—'}/5</div><div class="grow-sub">${esc(x.highlight||'')}</div></div></div>`).join('')}</div>` : '<div class="empty">No check-ins yet. Tell Otto “mood 4, energy 3” any evening.</div>'; }); }
 }
 document.addEventListener('click', e=>{ const h = e.target.closest('[data-htab]'); if(h){ healthTab = Number(h.dataset.htab); healthTabs(); } });
+
+// ---------- BODY · History: every day since 2018 — heatmap, records, on this day ----------
+let stepHistory = null, histYear = null, histPick = null;
+async function loadStepHistory(){
+  if(stepHistory) return stepHistory;
+  const rows = []; let from = 0;
+  for(;;){   // the API returns at most 1000 rows per request
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/daily_activity?select=activity_date,steps&order=activity_date.asc`, { headers: authHeaders({ Range: `${from}-${from+999}`, 'Range-Unit':'items' }) });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const page = await r.json(); rows.push(...page); if(page.length < 1000) break; from += 1000; if(from > 20000) break;
+  }
+  const by = new Map(); rows.forEach(x=>{ if(x.activity_date && x.steps != null) by.set(x.activity_date, Math.max(by.get(x.activity_date)||0, Number(x.steps)||0)); });
+  stepHistory = by; return by;
+}
+function stepLevel(n){ return !n ? 0 : n < 3000 ? 1 : n < 6000 ? 2 : n < 9000 ? 3 : n < 12000 ? 4 : 5; }
+function renderStepHistory(){
+  const box = document.getElementById('histBox'); if(!box || !stepHistory) return;
+  const by = stepHistory, dates = [...by.keys()].sort();
+  if(!dates.length){ box.innerHTML = '<div class="empty">No step history yet.</div>'; return; }
+  const years = [...new Set(dates.map(d=>d.slice(0,4)))]; if(!histYear || !years.includes(histYear)) histYear = years[years.length-1];
+  // records
+  let best = dates[0]; dates.forEach(d=>{ if(by.get(d) > by.get(best)) best = d; });
+  const months = {}; dates.forEach(d=>{ const m = d.slice(0,7); (months[m] = months[m] || []).push(by.get(d)); });
+  const bestM = Object.entries(months).filter(([,v])=>v.length >= 20).map(([m,v])=>[m, v.reduce((a,b)=>a+b,0)/v.length]).sort((a,b)=>b[1]-a[1])[0];
+  let streak = 0, run = 0, prev = null, streakEnd = null;
+  dates.forEach(d=>{ const ok = by.get(d) >= 10000, cont = prev && isoAddDays(prev, 1) === d; run = ok ? (cont ? run + 1 : 1) : 0; if(run > streak){ streak = run; streakEnd = d; } prev = ok ? d : null; });
+  const total = dates.reduce((a,d)=>a+by.get(d),0);
+  // on this day
+  const today = localToday(), md = today.slice(5);
+  const otd = years.filter(y=>y !== today.slice(0,4)).map(y=>[y, by.get(`${y}-${md}`)]).filter(x=>x[1] != null).reverse();
+  // heatmap for one year: columns are weeks (Sun-Sat)
+  const y = histYear, start = `${y}-01-01`, jan1 = new Date(`${y}-01-01T12:00`), lead = jan1.getDay();
+  const daysIn = (Number(y) % 4 === 0 && (Number(y) % 100 !== 0 || Number(y) % 400 === 0)) ? 366 : 365;
+  let cells = ''; for(let i=0;i<lead;i++) cells += '<i class="hm-pad"></i>';
+  for(let i=0;i<daysIn;i++){ const d = isoAddDays(start, i); if(d > today) { cells += '<i class="hm-pad"></i>'; continue; } const n = by.get(d);
+    cells += `<i class="hm l${stepLevel(n)} ${d===histPick?'pick':''}" data-hd="${d}"></i>`; }
+  const yv = dates.filter(d=>d.startsWith(y)).map(d=>by.get(d)), yAvg = yv.length ? Math.round(yv.reduce((a,b)=>a+b,0)/yv.length) : 0;
+  const perYear = years.map(yy=>{ const v = dates.filter(d=>d.startsWith(yy)).map(d=>by.get(d)); return [yy, v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : 0]; });
+  const maxY = Math.max(...perYear.map(x=>x[1]), 1);
+  const pickLine = histPick ? `${dayLong(histPick)} · <b>${by.get(histPick) != null ? by.get(histPick).toLocaleString() + ' steps' : 'no data'}</b>` : 'Tap a day';
+  const mName = m => new Date(m + '-15T12:00').toLocaleDateString('en-US', { month:'long', year:'numeric' });
+  box.innerHTML = `
+    <div class="viz-card hist-records">
+      <div class="hr"><span>Best day</span><b>${by.get(best).toLocaleString()}</b><em>${dayLong(best)}, ${best.slice(0,4)}</em></div>
+      <div class="hr"><span>Best month</span><b>${bestM ? Math.round(bestM[1]).toLocaleString() : '—'}<small>/day</small></b><em>${bestM ? mName(bestM[0]) : ''}</em></div>
+      <div class="hr"><span>Longest 10k streak</span><b>${streak} day${streak===1?'':'s'}</b><em>${streakEnd ? 'ended ' + shortDate(streakEnd) + ', ' + streakEnd.slice(0,4) : 'not yet'}</em></div>
+      <div class="hr"><span>Since ${dates[0].slice(0,4)}</span><b>${(total/1e6).toFixed(1)}M</b><em>steps · about ${Math.round(total/2100).toLocaleString()} miles</em></div>
+    </div>
+    ${otd.length ? `<div class="viz-card"><div class="viz-title"><span>On this day</span><em>${new Date(today+'T12:00').toLocaleDateString('en-US',{month:'long', day:'numeric'})}</em></div><div class="otd" tabindex="0" role="group" aria-label="Steps on this day in past years">${otd.map(([yy,n])=>`<div><span>${yy}</span><b>${n.toLocaleString()}</b></div>`).join('')}</div></div>` : ''}
+    <div class="viz-card">
+      <div class="viz-title"><span>${y}</span><em>${yAvg.toLocaleString()} a day</em></div>
+      <div class="hist-years" role="group" aria-label="Year">${years.map(yy=>`<button type="button" data-hy="${yy}" class="${yy===y?'on':''}" aria-pressed="${yy===y}">${yy}</button>`).join('')}</div>
+      <div class="heat" role="img" tabindex="0" aria-label="Steps per day in ${y}: ${yv.length} days recorded, ${yAvg.toLocaleString()} a day on average. Darker means more steps.">${cells}</div>
+      <div class="heat-foot"><span id="histPick">${pickLine}</span><span class="heat-key" aria-hidden="true">less <i class="hm l1"></i><i class="hm l2"></i><i class="hm l3"></i><i class="hm l4"></i><i class="hm l5"></i> more</span></div>
+    </div>
+    <div class="viz-card"><div class="viz-title"><span>Every year</span><em>average steps a day</em></div>
+      ${perYear.map(([yy,v])=>`<div class="yr-row"><span>${yy}</span><i style="--w:${Math.round(100*v/maxY)}%" class="${yy===y?'on':''}"></i><b>${v.toLocaleString()}</b></div>`).join('')}</div>`;
+  const sc = box.querySelector('.heat'); if(sc && !histPick) sc.scrollLeft = sc.scrollWidth;
+}
+document.addEventListener('click', e=>{
+  const hy = e.target.closest('[data-hy]'); if(hy){ histYear = hy.dataset.hy; histPick = null; renderStepHistory(); return; }
+  const hd = e.target.closest('[data-hd]'); if(hd){ histPick = hd.dataset.hd; document.querySelectorAll('.heat .pick').forEach(x=>x.classList.remove('pick')); hd.classList.add('pick');
+    const n = stepHistory && stepHistory.get(histPick); const el = document.getElementById('histPick'); if(el) el.innerHTML = `${dayLong(histPick)} · <b>${n != null ? n.toLocaleString() + ' steps' : 'no data'}</b>`; }
+});
 
 // ---------- PLACES: Insights (time by place, work hours, GeoJSON export) ----------
 function renderInsights(){
@@ -6492,7 +6586,7 @@ function tabsEdge(bar){ const end = bar.scrollLeft + bar.clientWidth >= bar.scro
 document.addEventListener('scroll', e=>{ const t = e.target; if(t && t.classList && t.classList.contains('tabs-ui')) tabsEdge(t); }, true);
 let tabsRaf = 0;
 new MutationObserver(()=>{ if(!tabsRaf) tabsRaf = requestAnimationFrame(()=>{ tabsRaf = 0; tabsTick(); }); }).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','aria-selected','hidden','style'] });
-window.addEventListener('resize', ()=>{ tabPos = new Map(); document.querySelectorAll('.tab-ind').forEach(i=>i.remove()); tabsTick(); });
+window.addEventListener('resize', ()=>{ document.querySelectorAll('.tab-ind').forEach(i=>{ i.style.transition = 'none'; }); tabPos = new Map(); tabsTick(); requestAnimationFrame(()=>document.querySelectorAll('.tab-ind').forEach(i=>{ i.style.transition = ''; })); });
 // pages: slide by dock order; back slides the other way; Home settles in
 let navDir = 0;
 const dockOrder = () => ['today', ...dockPins(), 'all'];

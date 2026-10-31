@@ -1,5 +1,14 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .62 (Nov 1)
+- docs/PRODUCT-REVIEW.md: full crawl (49 screens) + real-data review, 24 ideas, redesign table, order of work (.62–.67).
+- All: Daily · Life admin · Projects; areas with no data fold into "Not started"; pinned areas show a dot.
+- Body › History: every day since 2018 (paged past the 1,000-row API limit): best day / best month / longest 10k streak / total, On this day, year heatmap you can tap, every-year averages.
+
+## Next — from docs/PRODUCT-REVIEW.md §6
+- .63 Money: Subscriptions merged into Recurring; This week condensed; weekday spend by authorized_date.
+- .64 Inbox as swipe cards + "always file as" rules. · .65 Kitchen → Cook · Shop · Plan + food-spend widget. · .66 Day pages / Life log. · .67 Sunday reset; Plan → Today · Upcoming · Backlog.
+
 ## Just shipped — build .61 (Oct 31)
 - Background setting (Account → Background, or Home edit → Background): Solid · Glow · Your map (blurred basemap around your last location) · Photo (shrunk, saved on this phone), with a Dim slider. Any choice but Solid turns on glass cards, a frosted dock and page header. Stored in localStorage `otto.bg` (per device, not synced).
 
