@@ -1786,6 +1786,19 @@ body.chatting .otto-chat-starters{display:none}
   /* ===== Build .56: cleanup ===== */
   svg text{font-family:var(--sans);}   /* chart labels fell back to Times */
 
+  /* ===== Build .58: one tab style + motion ===== */
+  .tabs-ui{position:relative; display:flex !important; gap:20px !important; padding:0 !important; margin:6px 0 10px !important; background:none !important; border:none !important; border-bottom:1px solid var(--border) !important; border-radius:0 !important; overflow-x:auto; scrollbar-width:none; flex-wrap:nowrap !important; box-shadow:none !important;}
+  .tabs-ui::-webkit-scrollbar{display:none;}
+  .tabs-ui > button{all:unset; cursor:pointer; flex:0 0 auto; padding:10px 0 11px !important; font:600 15px var(--sans) !important; color:var(--text-muted) !important; background:none !important; border:none !important; white-space:nowrap; transition:color .2s ease;}
+  .tabs-ui > button:is(.on, .active, [aria-selected="true"]){color:var(--text) !important; background:none !important;}
+  .tabs-ui > button:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+  .tabs-ui.overflow{-webkit-mask-image:linear-gradient(90deg, #000 85%, transparent); mask-image:linear-gradient(90deg, #000 85%, transparent);}
+  .tabs-ui.overflow.at-end{-webkit-mask-image:linear-gradient(90deg, transparent, #000 15%); mask-image:linear-gradient(90deg, transparent, #000 15%);}
+  .tabs-ui.overflow.at-mid{-webkit-mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image:linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);}
+  .tab-ind{position:absolute; left:0; bottom:0; height:2px; border-radius:2px; background:var(--accent); pointer-events:none; transition:translate .32s cubic-bezier(.2,.8,.2,1), width .32s cubic-bezier(.2,.8,.2,1);}
+  .sheet{transition:opacity .22s ease !important;}
+  @media (prefers-reduced-motion: reduce){ .tab-ind, .tabs-ui > button{transition:none;} }
+
   /* ===== Build .57: one page header ===== */
   .sheet-head .sync-chip.quiet{display:none;}
   .page-back:not(.show){display:none !important;}
@@ -2063,7 +2076,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-31.57';
+const APP_BUILD = '2026-10-31.58';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -3112,6 +3125,7 @@ function makeBaseLayer(){
 }
 let assetBaseLayer = null;
 function applyBasemap(){
+  if(ia2MiniMap){ if(ia2MiniBase) ia2MiniMap.removeLayer(ia2MiniBase); ia2MiniBase = makeBaseLayer().addTo(ia2MiniMap); }
   if(typeof assetMapInstance !== 'undefined' && assetMapInstance){ if(assetBaseLayer) assetMapInstance.removeLayer(assetBaseLayer); assetBaseLayer = makeBaseLayer().addTo(assetMapInstance); }
   document.body.dataset.basemap = basemapKey();
   renderBasemapSetting();
@@ -5132,8 +5146,11 @@ function ia2Gauge(pct){
 }
 function ia2Ring(pct){ const c = 2*Math.PI*30, f = Math.min(1, pct); return `<svg width="64" height="64" viewBox="0 0 76 76" role="img" aria-label="${Math.round(pct*100)} percent of your usual steps"><circle cx="38" cy="38" r="30" fill="none" stroke="var(--surface-2)" stroke-width="9"/><circle cx="38" cy="38" r="30" fill="none" stroke="var(--ok)" stroke-width="9" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 38 38)"/><text x="38" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" font-weight="600" fill="var(--text)">${Math.round(pct*100)}%</text></svg>`; }
 const wdg = (key, label, inner, opts={}) => `<button type="button" class="wdg ${opts.wide?'wide':''} ${opts.hero?'hero':''}" data-w="${key}"><span class="wdg-head"><span>${label}</span><em>${opts.right||''}</em></span>${inner}</button>`;
-let ia2MiniMap = null;
-function renderIa2Home(){
+let ia2MiniMap = null, ia2MiniEl = null, ia2MiniBase = null, ia2MiniDot = null;
+// many loaders finish within the same moment; draw Home once per frame instead of once per loader
+let ia2HomeRaf = 0;
+function renderIa2Home(){ if(ia2HomeRaf) return; ia2HomeRaf = requestAnimationFrame(()=>{ ia2HomeRaf = 0; renderIa2HomeNow(); }); }
+function renderIa2HomeNow(){
   const el = document.getElementById('ia2Home'); if(!el) return;
   const today = localToday(), now = new Date(), h = now.getHours();
   const m = homeMoney(), S = lastBudgetData && lastBudgetData.summary;
@@ -5194,10 +5211,14 @@ function renderIa2Home(){
   // live mini map for the last stop
   const mm = document.getElementById('ia2Mini'); const pos = fx.pos || (lastV && lastV.lat != null ? { lat:lastV.lat, lon:lastV.lon } : null);
   if(mm && pos && typeof L !== 'undefined'){
-    try{ if(ia2MiniMap){ ia2MiniMap.remove(); ia2MiniMap = null; }
-      ia2MiniMap = L.map(mm, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, touchZoom:false, tap:false }).setView([pos.lat, pos.lon], 14);
-      makeBaseLayer().addTo(ia2MiniMap);
-      L.circleMarker([pos.lat, pos.lon], { radius:6, color:'#0D0F12', weight:3, fillColor:'#8BBCA1', fillOpacity:1 }).addTo(ia2MiniMap);
+    try{   // one map for the life of the app: move it into the fresh widget instead of rebuilding it
+      if(!ia2MiniEl){ ia2MiniEl = document.createElement('span'); ia2MiniEl.className = 'wdg-map'; }
+      mm.replaceWith(ia2MiniEl); ia2MiniEl.id = 'ia2Mini';
+      if(!ia2MiniMap){
+        ia2MiniMap = L.map(ia2MiniEl, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, touchZoom:false, tap:false, fadeAnimation:false }).setView([pos.lat, pos.lon], 14);
+        ia2MiniBase = makeBaseLayer().addTo(ia2MiniMap);
+        ia2MiniDot = L.circleMarker([pos.lat, pos.lon], { radius:6, color:'#0D0F12', weight:3, fillColor:'#8BBCA1', fillOpacity:1 }).addTo(ia2MiniMap);
+      } else { ia2MiniMap.invalidateSize(); ia2MiniMap.setView([pos.lat, pos.lon], 14, { animate:false }); ia2MiniDot.setLatLng([pos.lat, pos.lon]); }
     }catch(err){}
   }
 }
@@ -6327,6 +6348,57 @@ async function bootApp(){
   resumePlaidOAuth();
 }
 
+// ---------- motion: sliding tab underline, directional tab + page changes ----------
+const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+const EASE = 'cubic-bezier(.2,.8,.2,1)';
+function slideIn(el, dx, dy, ms){ if(!el || reduceMotion() || !el.animate) return; el.animate([{ opacity:0, translate:`${dx}px ${dy}px` }, { opacity:1, translate:'0 0' }], { duration: ms || 260, easing: EASE }); }
+const TABLISTS = '.ia2-subtabs, #moneySeg, #foodSubTabs, #todoSeg';
+const tabSel = el => el.querySelector('.on, .active, [aria-selected="true"]');
+let tabPos = new Map(), tabMove = null;
+function tabsTick(){
+  document.querySelectorAll(TABLISTS).forEach(bar=>{
+    if(!bar.offsetParent) return;
+    const b = tabSel(bar); if(!b) return;
+    bar.classList.add('tabs-ui');
+    const key = bar.id || ('life:' + (lifeArea || ''));
+    let ind = bar.querySelector(':scope > .tab-ind'), fresh = false;
+    if(!ind){ ind = document.createElement('i'); ind.className = 'tab-ind'; ind.setAttribute('aria-hidden', 'true'); bar.appendChild(ind); fresh = true; }
+    const x = b.offsetLeft, w = b.offsetWidth, prev = tabPos.get(key);
+    if(prev && prev.x === x && prev.w === w && !fresh) return;
+    if(fresh && prev && !reduceMotion()){ ind.style.transition = 'none'; ind.style.translate = prev.x + 'px 0'; ind.style.width = prev.w + 'px'; ind.offsetWidth; ind.style.transition = ''; }
+    ind.style.translate = x + 'px 0'; ind.style.width = w + 'px'; tabPos.set(key, { x, w });
+    if(bar.scrollWidth > bar.clientWidth + 2){ bar.classList.add('overflow'); const want = x - (bar.clientWidth - w) / 2; bar.scrollTo({ left: Math.max(0, want), behavior: reduceMotion() ? 'auto' : 'smooth' }); }
+    if(tabMove && tabMove.key === key && Date.now() - tabMove.at < 600){
+      const dir = tabMove.dir; tabMove = null; let n = bar.nextElementSibling, c = 0;
+      while(n && c < 6){ if(n.offsetParent) slideIn(n, dir * 18, 0, 240); n = n.nextElementSibling; c++; }
+    }
+  });
+}
+document.addEventListener('click', e=>{   // remember which way a tab tap moved, so the content slides with it
+  const t = e.target.closest('button'); const bar = t && t.closest(TABLISTS); if(!bar) return;
+  const btns = [...bar.querySelectorAll('button')], cur = tabSel(bar);
+  tabMove = { key: bar.id || ('life:' + (lifeArea || '')), dir: btns.indexOf(t) >= btns.indexOf(cur) ? 1 : -1, at: Date.now() };
+}, true);
+function tabsEdge(bar){ const end = bar.scrollLeft + bar.clientWidth >= bar.scrollWidth - 2, start = bar.scrollLeft <= 2; bar.classList.toggle('at-end', end && !start); bar.classList.toggle('at-mid', !end && !start); }
+document.addEventListener('scroll', e=>{ const t = e.target; if(t && t.classList && t.classList.contains('tabs-ui')) tabsEdge(t); }, true);
+let tabsRaf = 0;
+new MutationObserver(()=>{ if(!tabsRaf) tabsRaf = requestAnimationFrame(()=>{ tabsRaf = 0; tabsTick(); }); }).observe(document.body, { childList:true, subtree:true, attributes:true, attributeFilter:['class','aria-selected','hidden','style'] });
+window.addEventListener('resize', ()=>{ tabPos = new Map(); document.querySelectorAll('.tab-ind').forEach(i=>i.remove()); tabsTick(); });
+// pages: slide by dock order; back slides the other way; Home settles in
+let navDir = 0;
+const dockOrder = () => ['today', ...dockPins(), 'all'];
+const _openArea = openArea;
+openArea = function(k){
+  const prev = ia2Active, wasOpen = !!sheetArea, o = dockOrder();
+  let dir = navDir || (o.includes(prev) && o.includes(k) ? Math.sign(o.indexOf(k) - o.indexOf(prev)) : 1); navDir = 0;
+  _openArea(k);
+  if(k === 'today'){ const g = document.querySelector('#ia2Home .wdg-grid'); if(wasOpen && g && !reduceMotion()) g.animate([{ opacity:.4, transform:'scale(.985)' }, { opacity:1, transform:'none' }], { duration:280, easing:EASE }); return; }
+  if(prev === k && wasOpen) return;
+  const body = document.getElementById('sheetBody'), head = document.querySelector('#sheet .head-left');
+  if(!wasOpen){ slideIn(body, 0, 16, 300); return; }
+  slideIn(body, dir * 28, 0, 280); slideIn(head, dir * 14, 0, 240);
+};
+
 // ---------- routes (#/money, #/car/2): reload lands where you were; edge-swipe and ‹ go back ----------
 let navDepth = 0, routing = false;
 function currentRoute(){
@@ -6347,8 +6419,8 @@ function applyRoute(hash){
     else openArea('today');
   } finally { routing = false; }
 }
-function goBack(){ if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
-window.addEventListener('popstate', e=>{ navDepth = (e.state && e.state.otto) || 0; applyRoute(location.hash); });
+function goBack(){ navDir = -1; if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
+window.addEventListener('popstate', e=>{ const d = (e.state && e.state.otto) || 0; navDir = d < navDepth ? -1 : 1; navDepth = d; applyRoute(location.hash); });
 (function(){   // swipe right from the left edge = back; the page follows your finger
   let sx = 0, sy = 0, dx = 0, on = false;
   const sheet = () => document.getElementById('sheet');
