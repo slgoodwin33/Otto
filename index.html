@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="theme-color" content="#F6F5F1">
+<meta name="theme-color" content="#0D0F12">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
@@ -1672,8 +1672,6 @@ body.chatting .otto-chat-starters{display:none}
   body.ia2:not(.chatting) .composer{display:none !important;}
   body.ia2.chatting .ia2-home, body.ia2.chatting .ia2-dock{display:none !important;}
   body.ia2:not(.chatting)::before{background:var(--bg) !important;}
-  /* Home stays rendered under open pages; hide it so iOS can't composite its map layers on top */
-  body.sheet-open #ia2Home{visibility:hidden;}
   .ia2-home{padding:calc(env(safe-area-inset-top,0px) + 10px) 2px calc(env(safe-area-inset-bottom,0px) + 110px);}
   body.ia2:not(.chatting) .otto-top{display:none !important;}
   .ia2-btns{display:flex; gap:8px;}
@@ -1691,9 +1689,7 @@ body.chatting .otto-chat-starters{display:none}
   .wdg-mid{font:600 17px var(--mono);} .wdg-mid small{font:12px var(--sans); color:var(--text-muted);}
   .wdg-sub{font:12.5px var(--sans); color:var(--text-muted); overflow:hidden; text-overflow:ellipsis;} .wdg-sub.mono{font-family:var(--mono); font-size:11.5px;} .wdg-sub.ok{color:var(--ok);}
   .wdg-li{font:500 14px var(--sans); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;} .wdg-li.warn{color:var(--amber);}
-  /* Leaflet panes use z-index 200-1000; isolate every map so they can't paint over sheets (Home mini map was bleeding onto other pages) */
-  .leaflet-container{isolation:isolate;}
-  .wdg-map{display:block; position:relative; z-index:0; isolation:isolate; height:76px; border-radius:10px; overflow:hidden; background:#111419; margin-bottom:6px; pointer-events:none;}
+  .wdg-map{display:block; height:76px; border-radius:10px; overflow:hidden; background:#111419; margin-bottom:6px; pointer-events:none;}
   .ia2-dock{position:fixed; left:14px; right:14px; bottom:calc(env(safe-area-inset-bottom,0px) + 14px); z-index:2147483000; display:flex; gap:10px; align-items:center; justify-content:space-between;}
   .ia2-tabs{flex:1; display:flex; padding:4px; border-radius:28px; background:rgba(28,32,39,.88); border:1px solid var(--border); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); box-shadow:0 8px 24px rgba(0,0,0,.45);}
   .ia2-tabs button{all:unset; cursor:pointer; flex:1; min-width:44px; height:50px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; border-radius:24px; color:var(--text-muted); font:500 10px var(--sans);}
@@ -1775,6 +1771,66 @@ body.chatting .otto-chat-starters{display:none}
   .he-switch{all:unset; cursor:pointer; flex-shrink:0; position:relative; width:46px; height:28px; border-radius:14px; background:var(--surface-2); border:1px solid var(--border);} .he-switch i{position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:10px; background:var(--text-muted); transition:left .15s ease, background .15s ease;}
   .he-switch.on{background:var(--accent);} .he-switch.on i{left:21px; background:#fff;}
   .wdg-sub.warn{color:var(--amber);}
+
+  /* ===== Build .53 ===== */
+  html.ia2, body.ia2{ --accent:#8BBCA1; --accent-text:#A9D6BD; --on-accent:#0E1F16; --accent-soft:rgba(139,188,161,.16); --teal:#8BBCA1; }
+  body.ia2 .save-btn, body.ia2 .ed-pin.on, body.ia2 .he-switch.on i{color:var(--on-accent);}
+  body.ia2 .msg.me{background:var(--accent) !important; color:var(--on-accent) !important;}
+  .ia2-status{position:fixed; top:0; left:0; right:0; height:env(safe-area-inset-top,0px); z-index:2147482900; background:rgba(13,15,18,.86); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); pointer-events:none;}
+  .ia2-search{background:linear-gradient(160deg,#8BBCA1 0%,#6C9D82 100%) !important; border-color:rgba(255,255,255,.18) !important;}
+  .otto-ring{width:24px; height:24px; border-radius:50%; border:5px solid #fff; box-sizing:border-box; box-shadow:0 1px 3px rgba(0,0,0,.25);}
+  .ia2-search.small .otto-ring{width:20px; height:20px; border-width:4px;}
+  .otto-mark{display:inline-block; width:15px; height:15px; border-radius:50%; border:3.5px solid var(--accent); box-sizing:border-box; margin-right:9px; vertical-align:2px;}
+  .ia2-pill svg:first-child, .ia2-tabs button.on{color:var(--accent) !important;}
+  /* composer: one outline, no stray bar */
+  .photo-chip[hidden]{display:none !important;}
+  body.ia2 #askInput{outline:none !important; border:none !important; box-shadow:none !important; background:transparent !important;}
+  body.ia2 .composer-inner{transition:box-shadow .15s ease, border-color .15s ease;} body.ia2 .composer-inner:focus-within{border-color:var(--accent) !important; box-shadow:0 0 0 1px var(--accent) !important;}
+  /* chat: header and conversation stay visible above the keyboard */
+  body.ia2.chatting .otto-top{position:fixed !important; top:var(--vvtop,0px); left:0; right:0; z-index:40; background:var(--bg) !important; padding:calc(env(safe-area-inset-top,0px) + 6px) 14px 8px !important;}
+  body.ia2.chatting #chatThread{position:fixed; left:0; right:0; top:calc(var(--vvtop,0px) + env(safe-area-inset-top,0px) + 64px); bottom:calc(var(--kb,0px) + var(--composer-h,96px)); overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding:8px 16px 16px; box-sizing:border-box;}
+  body.ia2.chatting .composer{bottom:var(--kb,0px) !important; transition:bottom .12s ease;}
+  /* thinking panel */
+  .think{margin:0 0 8px; border-left:2px solid var(--border); padding-left:10px;} .think summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px; font:600 12.5px var(--sans); color:var(--text-muted); min-height:28px;}
+  .think summary::-webkit-details-marker{display:none;} .think summary::after{content:'›'; transform:rotate(90deg); transition:transform .2s; font-size:14px;} .think:not([open]) summary::after{transform:none;}
+  .think-dot{width:8px; height:8px; border-radius:4px; background:var(--accent); animation:thinkPulse 1.1s ease-in-out infinite;} @keyframes thinkPulse{0%,100%{opacity:.35; transform:scale(.8);} 50%{opacity:1; transform:scale(1.1);}}
+  .think-steps{display:flex; flex-direction:column; gap:6px; padding:4px 0 6px;} .ts{font:13px/1.45 var(--sans); color:var(--text-muted);} .ts.th{font-style:italic; white-space:pre-wrap;} .ts.st{font:500 12px var(--mono);} .ts.ac{color:var(--ok); font-weight:600;}
+  .msg.streaming .ans:empty{display:none;}
+  @media (prefers-reduced-motion: reduce){ .think-dot{animation:none;} }
+  /* map timeline sheet: handle + spring, no size buttons */
+  .otto-map-sizebar{display:none !important;}
+  .tl-grab{display:flex; justify-content:center; padding:10px 0 4px; cursor:grab; touch-action:none;} .tl-grab i{width:40px; height:5px; border-radius:3px; background:var(--border);}
+  body.ia2 .tl-sheet .tl-head{touch-action:none;}
+  body.ia2 .tl-sheet{max-height:none !important; overflow:hidden; display:flex; flex-direction:column;} .tl-sheet[hidden]{display:none !important;} body.ia2 .tl-sheet > :last-child{overflow-y:auto; -webkit-overflow-scrolling:touch;}
+  /* map layers: bottom sheet */
+  body.ia2 #mapPanel.map-panel{position:fixed !important; left:0 !important; right:0 !important; top:auto !important; bottom:0 !important; width:auto !important; max-height:74vh !important; border-radius:22px 22px 0 0 !important; padding:0 18px calc(env(safe-area-inset-bottom,0px) + 130px) !important; z-index:2147483100 !important; background:var(--surface) !important; border:1px solid var(--border); box-shadow:0 -10px 40px rgba(0,0,0,.5) !important; animation:mpUp .32s cubic-bezier(.2,.9,.24,1.08) !important; transform-origin:bottom center !important;}
+  @keyframes mpUp{from{transform:translateY(40px); opacity:0;} to{transform:none; opacity:1;}}
+  .mp-head{position:sticky; top:0; z-index:2; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; padding:10px 0 12px; margin:0 -18px 6px; padding-left:18px; padding-right:18px; background:var(--surface); border-bottom:1px solid var(--border);}
+  .mp-head .mp-grab{grid-column:1/-1; justify-self:center; width:40px; height:5px; border-radius:3px; background:var(--border); margin-bottom:8px;}
+  .mp-head b{grid-column:2; font:600 16px var(--sans);} .mp-done{grid-column:3; justify-self:end; all:unset; cursor:pointer; color:var(--accent); font:600 15px var(--sans); padding:6px 4px;}
+  .mp-backdrop{position:fixed; inset:0; z-index:2147483050; background:rgba(0,0,0,.45);} .mp-backdrop[hidden]{display:none;}
+
+  /* ===== Build .54: one map sheet ===== */
+  body.ia2 #panelAssets .map-btn, body.ia2 #mapWeek, body.ia2 #mapSummary{display:none !important;}
+  .map-sheet{position:absolute; left:0; right:0; bottom:0; z-index:1004; height:86px; background:var(--surface); border-radius:22px 22px 0 0; border-top:1px solid var(--border); box-shadow:0 -10px 34px rgba(0,0,0,.45); display:flex; flex-direction:column; overflow:hidden;}
+  .ms-grab{display:flex; justify-content:center; padding:8px 0 2px; cursor:grab; touch-action:none;} .ms-grab i{width:38px; height:5px; border-radius:3px; background:var(--border);}
+  .ms-tabs{display:flex; gap:2px; margin:4px 14px 8px; padding:3px; border-radius:12px; background:var(--surface-2); touch-action:none;}
+  .ms-tabs button{all:unset; cursor:pointer; flex:1; text-align:center; min-height:36px; line-height:36px; border-radius:9px; font:600 13px var(--sans); color:var(--text-muted);}
+  .ms-tabs button[aria-selected="true"]{background:var(--surface); color:var(--text); box-shadow:0 1px 4px rgba(0,0,0,.35);}
+  .ms-tabs button:focus-visible{outline:2px solid var(--accent); outline-offset:1px;}
+  .ms-body{flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; padding-bottom:calc(env(safe-area-inset-bottom,0px) + 110px);}
+  .map-sheet[data-snap="peek"] .ms-body{visibility:hidden;}
+  /* panels inside the sheet: no own frames, grabbers, close buttons or backdrops */
+  .ms-body .tl-sheet, body.ia2 .ms-body #mapPanel.map-panel{position:static !important; inset:auto !important; height:auto !important; max-height:none !important; width:auto !important; box-shadow:none !important; border:none !important; border-radius:0 !important; animation:none !important; background:transparent !important; z-index:auto !important;}
+  body.ia2 .ms-body #mapPanel.map-panel{padding:0 16px !important;}
+  .ms-body .tl-grab, .ms-body .mp-head, .ms-body .tl-close, .ms-body #tlClose, .ms-body [data-insclose], .ms-body .tl-sheet > .tl-head .tl-x{display:none !important;}
+  .mp-backdrop{display:none !important;}
+  .ms-items{margin:14px 0 6px;} .ms-items summary{cursor:pointer; list-style:none; min-height:44px; display:flex; align-items:center; justify-content:space-between; font:600 15px var(--sans); color:var(--accent);} .ms-items summary::after{content:'›'; transition:transform .2s; font-size:18px;} .ms-items[open] summary::after{transform:rotate(90deg);}
+  /* no light/dark patchwork while tiles load: the map's own background matches the basemap */
+  body[data-basemap="light"] .leaflet-container{background:#E4E3DF !important;} body[data-basemap="dark"] .leaflet-container{background:#1B1D20 !important;} body[data-basemap="satellite"] .leaflet-container{background:#24282A !important;}
+  .leaflet-tile{transition:opacity .25s ease;}
+
+  .map-sheet{left:8px !important; right:8px !important; bottom:8px !important; padding:0 !important; margin:0 !important; border-radius:22px !important; border:1px solid var(--border) !important;} .ms-body{padding-bottom:16px !important;}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
@@ -1795,6 +1851,7 @@ body.chatting .otto-chat-starters{display:none}
   </form>
 </div>
 <div class="wrap" id="appWrap" style="display:none;">
+  <div class="ia2-status" aria-hidden="true"></div>
   <section id="ia2Home" class="ia2-home" aria-label="Today"></section>
   <div id="ia2Dock" class="ia2-dock" aria-label="Areas"></div>
   <div id="homeMap" class="home-map" aria-label="Map of where you are"></div>
@@ -1939,6 +1996,16 @@ body.chatting .otto-chat-starters{display:none}
       <div id="assetMap" class="asset-map"></div>
       <div class="map-summary" id="mapSummary">Loading map…</div>
       <div class="map-week" id="mapWeek"></div>
+      <section class="map-sheet" id="mapSheet" data-snap="peek" aria-label="Map tools">
+        <div class="ms-grab" aria-hidden="true"><i></i></div>
+        <div class="ms-tabs" role="tablist" aria-label="Map tools">
+          <button type="button" role="tab" data-mstab="timeline" aria-selected="false">Timeline</button>
+          <button type="button" role="tab" data-mstab="insights" aria-selected="false">Insights</button>
+          <button type="button" role="tab" data-mstab="weather" aria-selected="false">Weather</button>
+          <button type="button" role="tab" data-mstab="layers" aria-selected="false">Layers</button>
+        </div>
+        <div class="ms-body" id="msBody"></div>
+      </section>
       <div class="tl-sheet" id="tlSheet" hidden></div>
       <button class="map-btn wx-btn" id="wxBtn" type="button" aria-label="Weather and tides"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.6-7.96A5 5 0 0 1 16 8.5a3.5 3.5 0 0 1 1 6.86"/><path d="M8 21l1-2M12 21l1-2M16 21l1-2"/></svg></button>
       <div class="tl-sheet" id="wxSheet" hidden></div>
@@ -2035,7 +2102,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-26.52';
+const APP_BUILD = '2026-10-29.54';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2089,18 +2156,18 @@ async function signIn(email, password){
 
 async function refreshSession(){
   if(!session || !session.refresh_token) return false;
-  try{
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
-      method: 'POST',
-      headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: session.refresh_token })
-    });
-    const data = await res.json();
-    if(!res.ok) return false;
-    session = { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_at };
-    saveSession(session);
-    return true;
-  } catch(e){ return false; }
+  for(let attempt = 0; attempt < 3; attempt++){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+        method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: session.refresh_token })
+      });
+      const data = await res.json().catch(()=>({}));
+      if(res.ok && data.access_token){ session = { access_token: data.access_token, refresh_token: data.refresh_token, expires_at: data.expires_at }; saveSession(session); return true; }
+      if(res.status === 400 || res.status === 401 || res.status === 403) return false;   // the server really rejected it: sign in again
+    } catch(e){ /* iOS dropped the request (app switching, network blip): retry — Supabase accepts the same refresh token again for a few seconds */ }
+    await new Promise(r=>setTimeout(r, 600 * (attempt + 1)));
+  }
+  return true;   // couldn't reach the server at all: stay signed in; the next request retries
 }
 
 async function ensureValidSession(){
@@ -2248,7 +2315,7 @@ function renderAccountStrip(){
     if(credit){
       const lim = Number(a.credit_limit_cents || 0), pct = lim ? Math.min(100, Math.round(100*bal/lim)) : 0;
       const due = bills.find(b=>/discover/i.test(b.name) && /discover/i.test(a.name + (a.institution||'')));
-      sub = `${pct}% of ${money(lim)} used${due && due.due_day ? `, due ${shortDate(nextOccurrenceFromDueDay(due.due_day))}` : ''}`;
+      sub = (lim ? `${pct}% of ${money(lim)} used` : 'limit not on file') + (due && due.due_day ? `, due ${shortDate(nextOccurrenceFromDueDay(due.due_day))}` : '');
       return `<button class="acct-card credit" type="button" data-acctjump="1"><span class="acct-name">${esc(short)}</span><span class="acct-bal">${money(bal)}</span><span class="acct-sub">owed</span><span class="acct-bar"><i style="width:${pct}%"></i></span><span class="acct-sub">${esc(sub)}</span></button>`;
     }
     return `<button class="acct-card" type="button" data-acctjump="1"><span class="acct-name">${esc(short)}</span><span class="acct-bal">${money(bal)}</span><span class="acct-sub">${a.available_balance_cents != null ? `${money(a.available_balance_cents)} available` : esc(sub)}</span><span class="acct-sub">${a.balance_updated_at ? 'Updated ' + timeAgo(a.balance_updated_at) : ''}</span></button>`;
@@ -2392,7 +2459,7 @@ async function refreshAccounts(){
     renderNetWorth(accounts);
     renderAccountStrip();
   } catch(err){
-    banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${err.message}).</div>`;
+    banner.innerHTML = `<div class="error-banner">Couldn't refresh this just now${/load failed|network|fetch/i.test(err.message) ? ' (the connection dropped)' : ` (${esc(err.message)})`}. Reopen the page to try again.</div>`;
   }
 }
 
@@ -2565,7 +2632,7 @@ async function refreshBudget(){
     renderBudget(lastBudgetData);
     renderHomeKpis();
   } catch(err){
-    banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${err.message}).</div>`;
+    banner.innerHTML = `<div class="error-banner">Couldn't refresh this just now${/load failed|network|fetch/i.test(err.message) ? ' (the connection dropped)' : ` (${esc(err.message)})`}. Reopen the page to try again.</div>`;
   }
 }
 
@@ -3240,7 +3307,7 @@ function renderTimeline(){
     items.push({ t: v.arrived_at || day+'T00:00:00Z', html: `<div class="tl-stop ${sug?'sug':''}" data-tlvisit="${v.id}">
       <span class="tl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${PLACE_ICONS[sug ? 'pin' : kind]}</svg></span>
       <div class="grow-main"><div class="grow-title">${esc(v.place)}${sug ? ' <span class="tl-badge">new place?</span>' : ''}</div>
-        <div class="grow-sub">${v.arrived_at && isoOf(v.arrived_at)===day ? clockTime(v.arrived_at) : 'Earlier'} – ${v.is_open ? 'now' : v.left_at && isoOf(v.left_at)===day ? clockTime(v.left_at) : 'later'}</div>
+        <div class="grow-sub">${v.arrived_at && isoOf(v.arrived_at)===day ? clockTime(v.arrived_at) : 'Earlier'} – ${v.is_open ? 'now' : v.left_at && isoOf(v.left_at)===day ? clockTime(v.left_at) : v.left_at ? new Date(v.left_at).toLocaleDateString('en-US',{weekday:'short'}) + ' ' + clockTime(v.left_at) : 'later'}</div>
         ${sug ? (tlNaming === v.id ? `<div class="tl-name"><input type="text" id="tlNameInput" placeholder="Name this place, e.g. Hannah's" value="${esc(v.place === 'Unnamed stop' ? '' : v.place)}"><button class="save-btn" type="button" data-tlsave="${v.id}">Save</button></div>` : `<div class="tl-actions"><button class="link-btn" type="button" data-tlname="${v.id}">Name it</button><button class="link-btn" type="button" data-tldecline="${v.id}" style="color:var(--text-faint)">Not a stop</button></div>`) : ''}</div>
       <div class="visit-dur">${v.arrived_at ? fmtMinutes(v.minutes) : ''}</div></div>` });
     const next = vs[i+1]; if(v.left_at) leg(v.left_at, next ? next.arrived_at : null);
@@ -3400,7 +3467,7 @@ async function refreshAssets(){
     renderAssets(assets);
     await refreshLifeMap();
   } catch(err){
-    banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${err.message}).</div>`;
+    banner.innerHTML = `<div class="error-banner">Couldn't refresh this just now${/load failed|network|fetch/i.test(err.message) ? ' (the connection dropped)' : ` (${esc(err.message)})`}. Reopen the page to try again.</div>`;
   }
 }
 
@@ -3617,7 +3684,7 @@ async function refreshHealth(){
     renderHealth(lastHealthData);
     renderHomeKpis();
   } catch(err){
-    banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${err.message}).</div>`;
+    banner.innerHTML = `<div class="error-banner">Couldn't refresh this just now${/load failed|network|fetch/i.test(err.message) ? ' (the connection dropped)' : ` (${esc(err.message)})`}. Reopen the page to try again.</div>`;
   }
 }
 
@@ -4200,7 +4267,7 @@ async function refresh(showSpinner){
     eyebrow.textContent = 'Field Log · Live from Supabase';
     eyebrow.classList.add('live');
   } catch(err){
-    banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${err.message}). ${allTodos.length ? 'Showing last-known data.' : ''}</div>`;
+    banner.innerHTML = `<div class="error-banner">Couldn't refresh this just now${/load failed|network|fetch/i.test(err.message) ? ' (the connection dropped)' : ` (${esc(err.message)})`}. Reopen the page to try again. ${allTodos.length ? 'Showing last-known data.' : ''}</div>`;
     eyebrow.textContent = 'Field Log · offline';
     eyebrow.classList.remove('live');
     if(allTodos.length){ document.getElementById('syncNote').textContent = 'Last synced ' + timeAgo(window.__lastFetchedAt || new Date().toISOString()); }
@@ -4979,7 +5046,7 @@ function areaListHtml(){
 }
 function openSheet(area){
   if(area === 'life') setTimeout(()=>renderLife(), 30);
-  if(area === 'assets' && !tlUserClosed) setTimeout(()=>{ if(sheetArea === 'assets') openTimeline(); }, 350);
+
   const sheet = document.getElementById('sheet'), backdrop = document.getElementById('sheetBackdrop'), body = document.getElementById('sheetBody');
   if(!sheetArea) sheetReturnFocus = document.activeElement;
   returnPanels();
@@ -5066,8 +5133,8 @@ document.getElementById('composer').addEventListener('submit', async e=>{
   try{
     const imgs = pendingImages.slice(); pendingImages = []; pendingImage = null; window.__receiptMode = false;
     const chipEl = document.getElementById('photoChip'); if(chipEl){ chipEl.hidden = true; chipEl.innerHTML = ''; }
-    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode, ...(imgs.length ? { images: imgs.map(im=>({ media_type: im.media_type, data: im.data })) } : {}) });
-    pending.classList.remove('typing'); pending.textContent = r.text || "I didn't get an answer back.";
+    const r = await streamChat({ messages: chatHistory, mode: chatMode, ...(imgs.length ? { images: imgs.map(im=>({ media_type: im.media_type, data: im.data })) } : {}) }, pending);
+    pending.classList.remove('typing'); setAnswer(pending, r.text || "I didn't get an answer back.");
     renderChatActions(pending, r.actions);
     if(imgs.length || (r.actions||[]).some(a=>/trip|receipt|Added to|wear|Laundry/.test(a.summary))){ kitchenData = null; lifeRows = {}; }
     if(r.sources && r.sources.length){
@@ -5318,8 +5385,8 @@ function renderIa2Dock(){
   const cur = AREAS2[ia2Active] || AREAS2.today;
   el.classList.toggle('collapsed', ia2Collapsed);
   el.innerHTML = ia2Collapsed
-    ? `<button type="button" class="ia2-pill" data-expand aria-label="Switch area, currently ${cur.label}">${ico2(cur.icon,20)}<span>${cur.label}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button type="button" class="ia2-search small" data-ia2search aria-label="Search, ask, or add">${ico2('search',20)}</button>`
-    : `<nav class="ia2-tabs" aria-label="Areas">${keys.map(k=>`<button type="button" data-area2="${k}" class="${k===ia2Active?'on':''}" aria-current="${k===ia2Active?'page':'false'}">${ico2(AREAS2[k].icon,22)}<span>${AREAS2[k].label}</span></button>`).join('')}</nav><button type="button" class="ia2-search" data-ia2search aria-label="Search, ask, or add">${ico2('search',22)}</button>`;
+    ? `<button type="button" class="ia2-pill" data-expand aria-label="Switch area, currently ${cur.label}">${ico2(cur.icon,20)}<span>${cur.label}</span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button type="button" class="ia2-search small" data-ia2search aria-label="Ask Otto, search, or add"><span class="otto-ring" aria-hidden="true"></span></button>`
+    : `<nav class="ia2-tabs" aria-label="Areas">${keys.map(k=>`<button type="button" data-area2="${k}" class="${k===ia2Active?'on':''}" aria-current="${k===ia2Active?'page':'false'}">${ico2(AREAS2[k].icon,22)}<span>${AREAS2[k].label}</span></button>`).join('')}</nav><button type="button" class="ia2-search" data-ia2search aria-label="Ask Otto, search, or add"><span class="otto-ring" aria-hidden="true"></span></button>`;
 }
 document.addEventListener('click', e=>{
   const a = e.target.closest('[data-area2]'); if(a){ if(navigator.vibrate) navigator.vibrate(6); openArea(a.dataset.area2); return; }
@@ -5408,7 +5475,7 @@ function renderIa2Home(){
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));
   const sized = k => W[k].replace('class="wdg ', `class="wdg ${cfg.wide[k] ? 'wide ' : ''}`).replace(' wide wide', ' wide');
   const grid = (homeEditing ? renderHomeEdit(cfg) : `<div class="wdg-grid ${ia2FirstPaint ? 'enter' : ''}">${hero}${keys.map(k=>cfg.wide[k] === false ? W[k].replace('class="wdg wide', 'class="wdg') : sized(k)).join('')}</div>`);
-  el.innerHTML = `<div class="ia2-head"><div><span class="ia2-kicker">${now.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}).toUpperCase()} · ${homeCachedAt ? `cached ${timeAgo(homeCachedAt)} · updating` : now.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'})}</span><h2>Today</h2></div>
+  el.innerHTML = `<div class="ia2-head"><div><span class="ia2-kicker">${now.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}).toUpperCase()} · ${homeCachedAt ? `cached ${timeAgo(homeCachedAt)} · updating` : now.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'})}</span><h2><span class="otto-mark" aria-hidden="true"></span>Today</h2></div>
       <span class="ia2-btns"><button type="button" class="ia2-inbox" data-homeedit aria-label="${homeEditing ? 'Done editing widgets' : 'Edit widgets'}" aria-pressed="${homeEditing}">${homeEditing ? '<b class="ia2-done">Done</b>' : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'}</button><button type="button" class="ia2-inbox" data-w="inbox" aria-label="Inbox, ${q.length} to review">${ico2('inbox',20)}${q.length ? `<span>${q.length}</span>` : ''}</button><button type="button" class="ia2-inbox" data-acct aria-label="Account and settings">${ico2('people',20)}</button></span></div>
     ${grid}`;
   if(ia2FirstPaint && !homeEditing){ ia2FirstPaint = false; countUp(el); }
@@ -5419,7 +5486,7 @@ function renderIa2Home(){
     try{ if(ia2MiniMap){ ia2MiniMap.remove(); ia2MiniMap = null; }
       ia2MiniMap = L.map(mm, { zoomControl:false, attributionControl:false, dragging:false, scrollWheelZoom:false, doubleClickZoom:false, boxZoom:false, keyboard:false, touchZoom:false, tap:false }).setView([pos.lat, pos.lon], 14);
       makeBaseLayer().addTo(ia2MiniMap);
-      L.circleMarker([pos.lat, pos.lon], { radius:6, color:'#0D0F12', weight:3, fillColor:'#6AA6FF', fillOpacity:1 }).addTo(ia2MiniMap);
+      L.circleMarker([pos.lat, pos.lon], { radius:6, color:'#0D0F12', weight:3, fillColor:'#8BBCA1', fillOpacity:1 }).addTo(ia2MiniMap);
     }catch(err){}
   }
 }
@@ -5753,7 +5820,7 @@ function aptMapTab(){
     const A = aptAnchors(), pts = [];
     apt.map = L.map(el, { zoomControl:false, attributionControl:false }).setView([42.56, -70.88], 12); makeBaseLayer().addTo(apt.map);
     [['partner', A.partner, '#C9A0FF', "Hannah's"], ['work', A.work, '#E8AC45', 'Work']].forEach(([k, a, col, lbl])=>{ if(!a) return; pts.push([a.lat, a.lon]); L.circleMarker([a.lat, a.lon], { radius:8, color:'#0D0F12', weight:3, fillColor:col, fillOpacity:1 }).bindTooltip(lbl, { permanent:true, direction:'top', offset:[0,-8] }).addTo(apt.map); });
-    (lifeRows.apartment_listings||[]).filter(x=>x.lat != null).forEach(x=>{ pts.push([x.lat, x.lon]); L.circleMarker([x.lat, x.lon], { radius:7, color:'#0D0F12', weight:2, fillColor:'#6AA6FF', fillOpacity:1 }).bindTooltip(`${x.title}${x.rent_cents ? ' · ' + money(x.rent_cents) : ''}`).addTo(apt.map); });
+    (lifeRows.apartment_listings||[]).filter(x=>x.lat != null).forEach(x=>{ pts.push([x.lat, x.lon]); L.circleMarker([x.lat, x.lon], { radius:7, color:'#0D0F12', weight:2, fillColor:'#8BBCA1', fillOpacity:1 }).bindTooltip(`${x.title}${x.rent_cents ? ' · ' + money(x.rent_cents) : ''}`).addTo(apt.map); });
     if(pts.length > 1) apt.map.fitBounds(pts, { padding:[30,30] }); else if(pts.length) apt.map.setView(pts[0], 13);
   }, 30);
   const A = aptAnchors();
@@ -5992,6 +6059,126 @@ function paintFromCache(){
     homeCachedAt = c.at; renderIa2Home(); renderIa2Dock(); return true; }catch(e){ return false; }
 }
 
+
+// ===================== Build .53 =====================
+// retry a Supabase read once when iOS drops it mid-flight (app switched, network blip)
+(function(){ const of = window.fetch.bind(window);
+  window.fetch = async (input, init = {}) => { const url = typeof input === 'string' ? input : (input && input.url) || ''; const m = String((init && init.method) || 'GET').toUpperCase();
+    try{ return await of(input, init); }
+    catch(e){ if(m === 'GET' && String(url).indexOf(SUPABASE_URL) === 0){ if(document.hidden) await new Promise(r=>document.addEventListener('visibilitychange', r, { once:true })); await new Promise(r=>setTimeout(r, 900)); return await of(input, init); } throw e; } };
+})();
+// chat streams its progress: status lines, Otto's reasoning, actions — then folds into "Thought for Ns"
+function scrollChat(force){ const t = document.getElementById('chatThread'); if(!t) return; if(force || t.scrollHeight - t.scrollTop - t.clientHeight < 140) t.scrollTop = t.scrollHeight; }
+function setAnswer(pending, text){ const a = pending.querySelector('.ans'); if(a) a.textContent = text; else pending.textContent = text; scrollChat(true); }
+async function streamChat(body, pending){
+  await ensureValidSession();
+  const t0 = Date.now();
+  pending.classList.remove('typing'); pending.classList.add('streaming');
+  pending.innerHTML = `<details class="think" open><summary><span class="think-dot" aria-hidden="true"></span><span class="think-label">Thinking</span></summary><div class="think-steps" aria-live="polite"></div></details><div class="ans"></div>`;
+  const steps = pending.querySelector('.think-steps'), label = pending.querySelector('.think-label');
+  const add = (cls, txt) => { const d = document.createElement('div'); d.className = 'ts ' + cls; d.textContent = txt; steps.appendChild(d); scrollChat(); };
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/otto-chat`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify({ ...body, stream: true }) });
+  const ct = res.headers.get('content-type') || '';
+  if(!res.ok || !ct.includes('ndjson') || !res.body){ const j = await res.json().catch(()=>({})); pending.innerHTML = ''; if(!res.ok) throw new Error(j.error || `otto-chat returned ${res.status}`); return j; }
+  const rd = res.body.getReader(), dec = new TextDecoder(); let buf = '', done = null;
+  for(;;){ const { value, done: end } = await rd.read(); if(end) break; buf += dec.decode(value, { stream:true }); let i;
+    while((i = buf.indexOf('\n')) >= 0){ const line = buf.slice(0, i); buf = buf.slice(i+1); if(!line.trim()) continue; let ev; try{ ev = JSON.parse(line); }catch(e){ continue; }
+      if(ev.t === 'status'){ label.textContent = ev.s; if(ev.s !== 'Thinking' && ev.s !== 'Reading your data') add('st', ev.s); }
+      else if(ev.t === 'think'){ add('th', ev.s); }
+      else if(ev.t === 'action'){ add('ac', '✓ ' + ev.summary); }
+      else if(ev.t === 'done'){ done = ev; } } }
+  const det = pending.querySelector('.think'); pending.querySelector('.think-dot')?.remove();
+  if(steps.children.length){ det.open = false; label.textContent = `Thought for ${Math.max(1, Math.round((Date.now()-t0)/1000))}s`; } else det.remove();
+  pending.classList.remove('streaming');
+  if(!done) throw new Error('The answer was cut off. Try again.');
+  if(done.error) throw new Error(done.error);
+  return done;
+}
+new MutationObserver(()=>scrollChat()).observe(document.getElementById('chatThread'), { childList:true, subtree:true, characterData:true });
+// keyboard: keep the conversation and the composer above it
+(function(){
+  const root = document.documentElement, comp = document.querySelector('.composer');
+  const sync = () => { const vv = window.visualViewport; const kb = vv ? Math.max(0, window.innerHeight - vv.height - vv.offsetTop) : 0;
+    root.style.setProperty('--kb', kb + 'px'); root.style.setProperty('--vvtop', (vv ? vv.offsetTop : 0) + 'px'); if(comp) root.style.setProperty('--composer-h', comp.offsetHeight + 'px');
+    if(document.body.classList.contains('chatting')) scrollChat(true); };
+  if(window.visualViewport){ visualViewport.addEventListener('resize', sync); visualViewport.addEventListener('scroll', sync); }
+  document.getElementById('askInput').addEventListener('focus', ()=>setTimeout(sync, 60)); window.addEventListener('resize', sync); sync();
+})();
+// map Timeline: a real sheet — drag the handle, it springs to peek / half / full; drag below peek to close
+(function(){
+  const sh = document.getElementById('tlSheet'); if(!sh) return;
+  let snap = 'half', drag = null;
+  const host = () => sh.parentElement ? sh.parentElement.clientHeight : window.innerHeight;
+  const sizes = () => ({ peek: 132, half: Math.round(host() * 0.48), full: Math.round(host() * 0.86) });
+  const set = (h, anim) => { sh.style.transition = anim ? 'height .42s cubic-bezier(.2,.9,.24,1.12)' : 'none'; sh.style.height = h + 'px'; };
+  const ensure = () => { if(sh.hidden) return; if(!sh.querySelector('.tl-grab')){ const g = document.createElement('div'); g.className = 'tl-grab'; g.setAttribute('role','separator'); g.setAttribute('aria-label','Drag to resize the timeline'); g.innerHTML = '<i></i>'; sh.prepend(g); }
+    sh.style.maxHeight = 'none'; if(!sh.dataset.sized){ sh.dataset.sized = '1'; set(sizes()[snap], true); } };
+  new MutationObserver(()=>{ if(sh.hidden){ delete sh.dataset.sized; } ensure(); }).observe(sh, { attributes:true, attributeFilter:['hidden'], childList:true });
+  sh.addEventListener('pointerdown', e=>{ if(!e.target.closest('.tl-grab, .tl-head') || e.target.closest('button, input, a')) return; drag = { y: e.clientY, h: sh.getBoundingClientRect().height, id: e.pointerId }; sh.setPointerCapture(e.pointerId); set(drag.h, false); });
+  sh.addEventListener('pointermove', e=>{ if(!drag) return; const S = sizes(); set(Math.max(60, Math.min(S.full + 30, drag.h - (e.clientY - drag.y))), false); });
+  const end = e=>{ if(!drag) return; const h = sh.getBoundingClientRect().height, moved = Math.abs(e.clientY - drag.y), S = sizes(); drag = null;
+    if(moved < 6){ snap = snap === 'peek' ? 'half' : snap === 'half' ? 'full' : 'half'; }
+    else if(h < S.peek - 40){ sh.hidden = true; tlUserClosed = true; document.getElementById('mapWeek')?.classList.remove('tl-on'); return; }
+    else snap = Object.keys(S).sort((a,b)=>Math.abs(S[a]-h) - Math.abs(S[b]-h))[0];
+    set(S[snap], true); if(navigator.vibrate) navigator.vibrate(6); };
+  sh.addEventListener('pointerup', end); sh.addEventListener('pointercancel', end);
+})();
+// map layers: a proper bottom sheet with a title, Done, and a dimmed backdrop
+(function(){
+  const panel = document.getElementById('mapPanel'); if(!panel) return;
+  const bd = document.createElement('div'); bd.className = 'mp-backdrop'; bd.hidden = true; panel.parentElement.appendChild(bd);
+  const close = () => { panel.hidden = true; bd.hidden = true; const b = document.getElementById('mapMenuBtn'); b.classList.remove('on'); b.setAttribute('aria-expanded','false'); };
+  new MutationObserver(()=>{ bd.hidden = panel.hidden; if(!panel.hidden){ document.getElementById('tlSheet').hidden = true;
+    if(!panel.querySelector('.mp-head')){ const h = document.createElement('div'); h.className = 'mp-head'; h.innerHTML = '<i class="mp-grab"></i><b>Map layers</b><button type="button" class="mp-done">Done</button>'; panel.prepend(h); } panel.scrollTop = 0; } }).observe(panel, { attributes:true, attributeFilter:['hidden'] });
+  bd.addEventListener('click', close); panel.addEventListener('click', e=>{ if(e.target.closest('.mp-done')) close(); });
+})();
+
+
+// ===================== Build .54: one map sheet =====================
+(function(){
+  const sheet = document.getElementById('mapSheet'), body = document.getElementById('msBody'); if(!sheet) return;
+  const ids = { timeline:'tlSheet', insights:'insSheet', weather:'wxSheet', layers:'mapPanel' };
+  // the four panels live inside the one sheet now
+  Object.values(ids).forEach(id=>{ const el = document.getElementById(id); if(el) body.appendChild(el); });
+  // Layers: no date chips (the date lives in Timeline); belongings fold behind "See all items"
+  const panel = document.getElementById('mapPanel');
+  ['mapRanges','mapDays','mapHelp'].forEach(id=>{ const el = document.getElementById(id); if(el){ el.hidden = true; const h = el.previousElementSibling; if(h && h.tagName === 'H3') h.hidden = true; } });
+  const assetsH = [...panel.querySelectorAll('h3')].find(h=>/^assets$/i.test(h.textContent.trim()));
+  if(assetsH){ const det = document.createElement('details'); det.className = 'ms-items'; det.innerHTML = '<summary>Your stuff · See all items</summary>';
+    let n = assetsH.nextSibling; assetsH.replaceWith(det); while(n){ const next = n.nextSibling; det.appendChild(n); n = next; } }
+  let tab = null, snap = 'peek', drag = null;
+  const H = () => sheet.parentElement.clientHeight;
+  const sizes = () => ({ peek: 86, half: Math.round((H() - 96) * 0.55), full: Math.round((H() - 96) * 0.92) });
+  const set = (h, anim) => { sheet.style.transition = anim ? 'height .42s cubic-bezier(.2,.9,.24,1.12)' : 'none'; sheet.style.height = h + 'px'; };
+  const setSnap = (sn, anim=true) => { snap = sn; sheet.dataset.snap = sn; set(sizes()[sn], anim); if(sn === 'peek') sheet.querySelectorAll('[data-mstab]').forEach(b=>b.setAttribute('aria-selected', 'false')); };
+  function show(t){
+    tab = t; sheet.querySelectorAll('[data-mstab]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.mstab === t)));
+    Object.values(ids).forEach(id=>{ const el = document.getElementById(id); if(el) el.hidden = true; });
+    if(t === 'timeline'){ tlUserClosed = false; openTimeline(); }
+    if(t === 'insights'){ document.getElementById('insSheet').hidden = false; renderInsights(); }
+    if(t === 'weather'){ document.getElementById('wxSheet').hidden = false; renderWeather(); if(!wxData || Date.now() - wxAt > 10*60000) loadWeather(); }
+    if(t === 'layers'){ panel.hidden = false; }
+    body.scrollTop = 0; if(snap === 'peek') setSnap('half');
+  }
+  sheet.addEventListener('click', e=>{ const b = e.target.closest('[data-mstab]'); if(!b) return;
+    if(tab === b.dataset.mstab && snap !== 'peek'){ setSnap('peek'); tab = null; return; }   // tap the open tab again to fold away
+    if(navigator.vibrate) navigator.vibrate(6); show(b.dataset.mstab); });
+  // drag the grabber or the tab bar between peek / half / full
+  sheet.addEventListener('pointerdown', e=>{ if(!e.target.closest('.ms-grab, .ms-tabs') ) return; drag = { y:e.clientY, h: sheet.getBoundingClientRect().height, moved:false, id:e.pointerId }; });
+  sheet.addEventListener('pointermove', e=>{ if(!drag) return;
+    if(!drag.moved){ if(Math.abs(e.clientY - drag.y) <= 6) return; drag.moved = true; sheet.setPointerCapture(drag.id); }   // only a real drag takes the touch; taps still reach the tabs
+    const S = sizes(); set(Math.max(S.peek - 10, Math.min(S.full + 24, drag.h - (e.clientY - drag.y))), false); });
+  const end = e=>{ if(!drag) return; const h = sheet.getBoundingClientRect().height, moved = drag.moved, S = sizes(); drag = null;
+    if(!moved) return;
+    const sn = Object.keys(S).sort((a,b)=>Math.abs(S[a]-h) - Math.abs(S[b]-h))[0];
+    if(sn !== 'peek' && !tab) show('timeline'); setSnap(sn); if(sn === 'peek') tab = null; if(navigator.vibrate) navigator.vibrate(6); };
+  sheet.addEventListener('pointerup', end); sheet.addEventListener('pointercancel', end);
+  // old entry points now route through the sheet
+  document.addEventListener('click', e=>{ if(e.target.closest('#tlOpen')){ e.stopImmediatePropagation(); show('timeline'); } }, true);
+  window.addEventListener('resize', ()=>setSnap(snap, false));
+  setTimeout(()=>setSnap('peek', false), 0);
+})();
+
 // ---------- chat actions (changes the chat made, each with Undo) + nightly check-in ----------
 let chatMode = 'chat', todayCheckin = null;
 function renderChatActions(el, actions){
@@ -6041,8 +6228,8 @@ async function startNightly(mode){
   thread.insertAdjacentHTML('beforeend', `<div class="msg otto typing">Looking at what needs your input…</div>`);
   const pending = thread.lastElementChild; chatBusy = true;
   try{
-    const r = await callFn('otto-chat', { messages: chatHistory, mode: chatMode });
-    pending.classList.remove('typing'); pending.textContent = r.text || "Let's start.";
+    const r = await streamChat({ messages: chatHistory, mode: chatMode }, pending);
+    pending.classList.remove('typing'); setAnswer(pending, r.text || "Let's start.");
     renderChatActions(pending, r.actions);
     chatHistory.push({ role:'assistant', content: r.text || '' });
     if(voice.active){ try{ voice.speak(r.text || ''); } catch(e){ voice.stop(); } }
