@@ -5,7 +5,7 @@ Frontend: one file, `index.html` (vanilla JS + Leaflet), served by GitHub Pages 
 Backend: Supabase project **"Personal Database"**, ref **`qqsexwiqhaaimxuswsei`** (Postgres + RLS, Storage, Edge Functions, pg_cron).
 Owner: Samuel (`slgoodwin33@gmail.com`), GIS analyst for the City of Beverly, MA. He uses it daily on an iPhone as a home-screen web app.
 
-Current build: **2026-11-01.62** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
+Current build: **2026-11-01.63** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
 
 ## How to work with Samuel
 - He favors direct execution over explanation, scoped incremental steps, and **verification against real data** — never answer from memory or assumptions; query Supabase / read the code first.

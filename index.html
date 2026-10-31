@@ -1861,6 +1861,14 @@ body.chatting .otto-chat-starters{display:none}
   .heat-key{display:inline-flex; align-items:center; gap:3px; font-size:11px; color:var(--text-faint); flex-shrink:0;} .heat-key .hm{cursor:default;}
   .yr-row{display:grid; grid-template-columns:40px 1fr 62px; align-items:center; gap:10px; padding:5px 0; font:13px var(--sans); color:var(--text-muted);}
   .yr-row i{display:block; height:8px; width:var(--w); min-width:4px; border-radius:4px; background:rgba(139,188,161,.4);} .yr-row i.on{background:var(--accent);} .yr-row b{text-align:right; color:var(--text); font-variant-numeric:tabular-nums;}
+
+  /* ===== Build .63: Money ===== */
+  body[data-moneyseg="accounts"] #moneyAccounts{display:flex !important;}
+  #netWorthReadout .readout:not(:last-child){display:none;}   /* the account cards above already show cash and credit */
+  #netWorthReadout .readouts{display:block !important;}
+  .mo-card .pace-in{margin-top:16px; padding-top:14px; border-top:1px solid var(--border);}
+  .link-row{all:unset; box-sizing:border-box; cursor:pointer; display:block; width:100%; margin:10px 0 4px; padding:14px 16px; min-height:44px; border-radius:16px; background:var(--surface); border:1px solid var(--border); font:600 14px var(--sans); color:var(--accent-text);}
+  .rec-actions{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:10px 2px;}
 </style>
 </head>
 <body class="home-v2">
@@ -1957,9 +1965,9 @@ body.chatting .otto-chat-starters{display:none}
     <div class="tab-panel" id="panelAccounts">
       <div class="studio-page-head"><div class="studio-kicker">YOUR FINANCES <span class="studio-dot"></span> OTTO</div><h2>Know your<br><span>numbers.</span></h2><p>Spending, accounts, and bills in one clear view.</p></div>
       <div id="accountsErrorBanner"></div>
-      <div id="moneyOverview"></div>
-      <div class="acct-strip" id="moneyAccounts"></div>
+      <div id="moneyOverview" data-mseg="retired" hidden></div>
       <div class="seg" id="moneySeg" role="tablist"><button type="button" role="tab" aria-selected="true" data-mseg-btn="week" class="active">This week</button><button type="button" role="tab" aria-selected="false" data-mseg-btn="txns">Transactions</button><button type="button" role="tab" aria-selected="false" data-mseg-btn="recurring">Recurring</button><button type="button" role="tab" aria-selected="false" data-mseg-btn="accounts">Accounts</button></div>
+      <div class="acct-strip" id="moneyAccounts" data-mseg="accounts"></div>
       <div id="netWorthReadout" data-mseg="accounts"></div>
       <div class="health-section-label" data-mseg="accounts">Bank connections</div>
       <div id="bankCard" class="budget-cat" style="padding:0;" data-mseg="accounts"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
@@ -2116,7 +2124,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-01.62';
+const APP_BUILD = '2026-11-01.63';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2578,7 +2586,7 @@ function renderBudget0(data){
         <div class="viz-legend">${top.map(p=>`<div data-legendcat="${esc(p.name)}" style="cursor:pointer"><i style="background:${p.color}"></i><span>${esc(p.name)}</span><b>${money(p.v)}</b></div>`).join('')}${rest ? `<div><i style="background:var(--surface-2)"></i><span>Everything else</span><b>${money(rest)}</b></div>` : ''}</div></div></div>`;
     }
     const days = []; for(let i=0;i<7;i++) days.push(isoAddDays(s.week_start, i));
-    const per = {}; (allTxns||[]).forEach(t=>{ if(t.amount_cents < 0 && !t.exclude_from_budget && t.transaction_date >= s.week_start && t.transaction_date <= s.week_end){ const cat = (allCategories||[]).find(c=>c.id===t.category_id); if(!cat || cat.category_type === 'expense') per[t.transaction_date] = (per[t.transaction_date]||0) - t.amount_cents; } });
+    const per = {}; (allTxns||[]).forEach(t=>{ if(t.amount_cents < 0 && !t.exclude_from_budget && t.transaction_date >= s.week_start && t.transaction_date <= s.week_end){ const cat = (allCategories||[]).find(c=>c.id===t.category_id); if(!cat || cat.category_type === 'expense'){ const d = spentDay(t, s.week_start); per[d] = (per[d]||0) - t.amount_cents; } } });
     const mx = Math.max(1, ...days.map(d=>per[d]||0));
     html += `<div class="viz-card"><div class="viz-title"><span>Spending by day</span><span>${money(Math.round(spent/Math.max(1,dayN)))} a day so far</span></div><div class="bars7">${days.map(d=>{ const v = per[d]||0, fut = d > today; return `<div class="b ${d===today?'today':''} ${fut?'future':''}" data-barday="${d}" style="cursor:pointer"><em>${v ? '$'+Math.round(v/100) : ''}</em><i style="height:${fut ? 3 : Math.max(3, Math.round(100*v/mx))}%"></i><small>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</small></div>`; }).join('')}</div></div>`;
   }
@@ -2618,7 +2626,7 @@ function renderBudget0(data){
   html += `<div class="section-title">Spending by category<span>tap for details</span></div><div class="gcard" style="padding:0">${ordered.map(catRow).join('')}</div>`;
   if(sav.length) html += `<div class="section-title">Saving</div><div class="gcard" style="padding:0">${sav.map(catRow).join('')}</div>`;
   const unmatched = (data.bills || []).filter(b => !b.category || !data.categories.some(c=>c.category_code === b.category.code));
-  if(unmatched.length) html += `<div class="section-title">Other recurring bills</div><div class="gcard">${unmatched.map(b=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(b.name)}</div><div class="grow-sub">${b.autopay ? 'Autopay' : 'Manual'}</div></div><div class="grow-right">${money(b.amount_cents)}/${esc(b.frequency)}</div></div>`).join('')}</div>`;
+  if(unmatched.length) html += `<button type="button" class="link-row" data-mseg-jump="recurring">${unmatched.length} more recurring bill${unmatched.length===1?'':'s'} · see Recurring ›</button>`;
   if(data.goals && data.goals.length){
     html += `<div class="section-title">Savings goals</div><div class="gcard">${data.goals.map(g=>{
       const hasT = g.target_amount_cents != null && g.target_amount_cents > 0;
@@ -4713,8 +4721,8 @@ function lifeKeyFor(life){ return Object.keys(AREAS2).find(k=>AREAS2[k].life ===
 function pageMeta(){
   if(sheetArea === 'life'){
     if(lifeArea === '__dock') return { title:'Edit dock', icon:'all', sub:'', back:'All' };
-    if(lifeArea && LIFE[lifeArea]){ const k = lifeKeyFor(lifeArea); let sub = ''; try{ if(lifeRows._loaded) sub = LIFE[lifeArea].summary(lifeRows); }catch(e){}
-      return { title: k ? AREAS2[k].label : LIFE[lifeArea].title, icon: k ? AREAS2[k].icon : 'all', sub, back:'All' }; }
+    if(lifeArea && LIFE[lifeArea]){ const k = lifeKeyFor(lifeArea); let sub = ''; const backTo = lifeArea === 'subscriptions' ? 'Money' : 'All'; try{ if(lifeRows._loaded) sub = LIFE[lifeArea].summary(lifeRows); }catch(e){}
+      return { title: k ? AREAS2[k].label : LIFE[lifeArea].title, icon: k ? AREAS2[k].icon : 'all', sub, back: backTo }; }
     return { title:'All areas', icon:'all', sub:'', back:'' };
   }
   const d = AREAS2[sheetArea];
@@ -5299,7 +5307,7 @@ function areaStarted(k){
 function renderLauncher(){
   const pins = ['today', ...dockPins(), 'all'];
   const tile = k => `<button type="button" class="lt" data-tile="${k}">${ico2(k==='inbox'?'inbox':AREAS2[k].icon,22)}<b>${k==='inbox'?'Inbox':AREAS2[k].label}</b><span>${esc(areaReadout(k))}</span>${pins.includes(k)?'<em class="lt-pin"><span class="sr-only">In dock</span></em>':''}</button>`;
-  const groups = [['Daily', ['today','todos','money','health','food','assets','inbox']], ['Life admin', ['closet','car','documents','people','subscriptions']], ['Projects', ['apartments','school','trips','drone']]];
+  const groups = [['Daily', ['today','todos','money','health','food','assets','inbox']], ['Life admin', ['closet','car','documents','people']], ['Projects', ['apartments','school','trips','drone']]];
   const idle = [];
   const grp = (t, ks) => { const on = ks.filter(k=>k === 'inbox' || areaStarted(k)); ks.filter(k=>!on.includes(k)).forEach(k=>idle.push(k)); return on.length ? `<div class="lt-grp">${t}</div><div class="lt-grid">${on.map(tile).join('')}</div>` : ''; };
   const body = groups.map(([t, ks])=>grp(t, ks)).join('');
@@ -5719,28 +5727,31 @@ async function renderRecurring(){
   if(!lifeRows.subscriptions){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div></div>'; await lifeLoad(['subscriptions']); }
   const bills = ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.active !== false);
   const subs = (lifeRows.subscriptions||[]).filter(x=>x.status !== 'cancelled');
-  const billIds = new Set(subs.map(x=>x.recurring_bill_id).filter(Boolean));
+  const billIds = new Set(subs.map(x=>x.recurring_bill_id).filter(Boolean)), subNames = new Set(subs.map(x=>String(x.name||'').trim().toLowerCase()));
   const items = subs.map(x=>({ name:x.name, amt:x.amount_cents, next:x.next_charge_on, how: x.cadence, tag: x.detected ? 'found in your bank' : 'subscription', sub:true }))
-    .concat(bills.filter(b=>!billIds.has(b.id)).map(b=>({ name:b.name, amt:b.amount_cents, next: b.due_day ? nextOccurrenceFromDueDay(b.due_day) : null, how: b.frequency || 'monthly', tag: b.autopay ? 'autopay' : 'pay yourself' })))
+    .concat(bills.filter(b=>!billIds.has(b.id) && !subNames.has(String(b.name||'').trim().toLowerCase())).map(b=>({ name:b.name, amt:b.amount_cents, next: b.due_day ? nextOccurrenceFromDueDay(b.due_day) : null, how: b.frequency || 'monthly', tag: b.autopay ? 'autopay' : 'pay yourself' })))
     .sort((a,b)=>(a.next||'9999').localeCompare(b.next||'9999'));
   const per = { weekly:52/12, monthly:1, quarterly:1/3, yearly:1/12 }, mo = items.reduce((t,x)=>t + (x.amt||0)*(per[x.how]||1), 0);
   el.innerHTML = `<div class="wdg wide hero" style="margin:6px 0 12px"><span class="wdg-head"><span>RECURRING</span><em>bills + subscriptions</em></span><b class="wdg-big acc">${money(Math.round(mo))}<small style="font-size:14px;color:var(--text-muted)">/mo</small></b><span class="wdg-sub">${items.length} charges · ${money(Math.round(mo*12))} a year</span></div>
-    <div class="gcard lf-list">${items.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div><div class="grow-sub">${esc([x.next ? 'next ' + shortDate(x.next) : '', x.how, x.tag].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${money(x.amt||0)}</div></div>`).join('') || '<div class="empty">No recurring charges found yet.</div>'}</div>`;
+    <div class="gcard lf-list">${items.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div><div class="grow-sub">${esc([x.next ? 'next ' + shortDate(x.next) : '', x.how, x.tag].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${money(x.amt||0)}</div></div>`).join('') || '<div class="empty">No recurring charges found yet.</div>'}</div><div class="rec-actions"><button type="button" class="lf-add" data-subs-add>+ Add subscription</button><button type="button" class="link-btn" data-subs-manage>Edit or cancel subscriptions ›</button></div>`;
 }
+// the bank posts weekend purchases on Monday; place a purchase on the day it was made (still inside its budget week)
+function spentDay(t, weekStart){ const d = t.authorized_date && t.authorized_date <= t.transaction_date ? t.authorized_date : t.transaction_date; return weekStart && d < weekStart ? weekStart : d; }
 function insertPace(){
   const host = document.getElementById('budgetContent'); if(!host || !lastBudgetData || !lastBudgetData.summary) return;
   const S = lastBudgetData.summary, start = S.week_start, today = localToday(); if(!start) return;
   const days = [...Array(7)].map((_,i)=>isoAddDays(start, i)), planned = Number(S.planned_cents||0); if(!planned) return;
-  let cum = 0; const pts = days.map(d=>{ if(d > today) return null; cum += (allTxns||[]).filter(t=>t.transaction_date===d && Number(t.amount_cents) < 0 && !t.exclude_from_budget).reduce((a,t)=>a - Number(t.amount_cents), 0); return cum; });
+  let cum = 0; const pts = days.map(d=>{ if(d > today) return null; cum += (allTxns||[]).filter(t=>t.transaction_date >= start && t.transaction_date <= S.week_end && spentDay(t, start)===d && Number(t.amount_cents) < 0 && !t.exclude_from_budget).reduce((a,t)=>a - Number(t.amount_cents), 0); return cum; });
   const mx = Math.max(planned, cum) * 1.08, X = i => 16 + i*52, Y = v => 112 - Math.round(96*v/mx);
   const line = pts.map((v,i)=>v==null?null:`${X(i)},${Y(v)}`).filter(Boolean).join(' '), last = pts.filter(v=>v!=null).length - 1;
   const over = cum > planned * (last+1) / 7;
   document.getElementById('paceCard')?.remove();
-  host.insertAdjacentHTML('afterbegin', `<div class="gcard pace" id="paceCard"><div class="wdg-head"><span>PACE</span><em>${over ? 'ahead of an even pace' : 'on or under pace'}</em></div>
+  const hero = host.querySelector('.mo-card');
+  (hero || host).insertAdjacentHTML(hero ? 'beforeend' : 'afterbegin', `<div class="pace pace-in" id="paceCard"><div class="wdg-head"><span>Pace</span><em>${over ? 'ahead of an even pace' : 'on or under pace'}</em></div>
     <svg viewBox="0 0 354 130" width="100%" role="img" aria-label="Cumulative spending this week against an even pace"><line x1="${X(0)}" y1="${Y(0)}" x2="${X(6)}" y2="${Y(planned)}" stroke="var(--text-muted)" stroke-dasharray="4 4"/>
     <polyline points="${line}" fill="none" stroke="${over?'var(--alert)':'var(--accent)'}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>${last>=0?`<circle cx="${X(last)}" cy="${Y(pts[last])}" r="5" fill="${over?'var(--alert)':'var(--accent)'}"/>`:''}
     ${days.map((d,i)=>`<text x="${X(i)}" y="127" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="var(--text-muted)">${'MTWTFSS'[(new Date(d+'T12:00').getDay()+6)%7]}</text>`).join('')}</svg>
-    <div class="wdg-sub">Solid: what you've spent so far (all spending). Dashed: an even pace to ${money(planned)}.</div></div>`);
+    <div class="wdg-sub">Solid line: spent so far · dashed: an even pace to ${money(planned)}.</div></div>`);
 }
 
 // ---------- BODY: section tabs built from the sections the page actually has ----------
@@ -6315,7 +6326,7 @@ async function fetchBank(){
   const r = await fetch(`${SUPABASE_URL}/rest/v1/v_bank_connections?select=*&order=created_at.asc`, { headers: authHeaders() });
   if(!r.ok) throw new Error(`Supabase returned ${r.status}`);
   bankConnections = await r.json();
-  const t = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,description,merchant,amount_cents,pending,source,category_id,exclude_from_budget,plaid_category_primary,account:accounts(name)&removed_at=is.null&order=transaction_date.desc,id.desc&limit=${txnLimit}`, { headers: authHeaders() });
+  const t = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,authorized_date,description,merchant,amount_cents,pending,source,category_id,exclude_from_budget,plaid_category_primary,account:accounts(name)&removed_at=is.null&order=transaction_date.desc,id.desc&limit=${txnLimit}`, { headers: authHeaders() });
   if(!t.ok) throw new Error(`Supabase returned ${t.status}`);
   allTxns = await t.json();
 }
@@ -6551,6 +6562,13 @@ document.getElementById('bgPhotoInput').addEventListener('change', async e=>{
 document.getElementById('bgDim').addEventListener('input', e=>{ const c = bgCfg(); c.dim = Number(e.target.value); saveBg(c);
   const l = document.getElementById('ottoBg'); if(l) l.style.setProperty('--bg-dim', (c.dim/100).toFixed(2)); document.getElementById('bgDimVal').textContent = c.dim + '%'; });
 
+// Subscriptions live inside Money › Recurring now
+document.addEventListener('click', e=>{
+  const j = e.target.closest('[data-mseg-jump]'); if(j){ setMoneySeg(j.dataset.msegJump); return; }
+  if(e.target.closest('[data-subs-manage]') || e.target.closest('[data-subs-add]')){ const add = !!e.target.closest('[data-subs-add]'); openSubscriptionsList(); if(add){ lifeAdding = 'subscriptions'; renderLife(); } }
+});
+function openSubscriptionsList(){ ia2Active = 'money'; lifeArea = 'subscriptions'; lifeSection = 0; lifeAdding = null; lifeOpenRow = null; openSheet('life'); renderIa2Dock(); }
+
 // ---------- motion: sliding tab underline, directional tab + page changes ----------
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
@@ -6592,6 +6610,7 @@ let navDir = 0;
 const dockOrder = () => ['today', ...dockPins(), 'all'];
 const _openArea = openArea;
 openArea = function(k){
+  if(k === 'subscriptions'){ openArea('money'); setTimeout(()=>setMoneySeg('recurring'), 0); return; }
   const prev = ia2Active, wasOpen = !!sheetArea, o = dockOrder();
   let dir = navDir || (o.includes(prev) && o.includes(k) ? Math.sign(o.indexOf(k) - o.indexOf(prev)) : 1); navDir = 0;
   _openArea(k);
