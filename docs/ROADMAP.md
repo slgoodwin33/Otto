@@ -1,5 +1,13 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — builds .56–.60 (Oct 31), from docs/APP-REVIEW.md
+- .56 Removed the three hidden Home generations (map, day sheet, old dock, Paper tiles) and the unseen AI briefing call; chart labels no longer render in Times.
+- .57 One page header from the dock names (Kitchen / Body / Places); no second header in life areas; "‹ Home" gone; page addresses (#/money, #/car/2) so reloads return to the same page; ‹ and left-edge swipe go back.
+- .58 One tab bar everywhere with a sliding underline; tab content and pages slide by direction; Home draws once per frame (was 13× on load); mini map reused.
+- .59 Polish v1 tokens, SF Pro system font (no web fonts), sage page icons, sentence-case labels, red only for over/overdue; 130 dead CSS selectors removed.
+- .60 Home charts (week spend strip, 7-day steps, sleep stages), widgets deep-link (Steps → Body · Activity, Recurring → Money · Recurring), ring empty states, real iPhone haptics (iOS 18 switch trick), press feedback, Kitchen opens on Kitchen, roomier Plan add field.
+- Roadmap Next items 1, 2, 6, 7 and 9 are covered by these builds.
+
 ## Just shipped — build .55 (Oct 31)
 - Home "Last stop" mini map no longer shows through other pages on iPhone: every Leaflet map is isolated, and Home is hidden while a page is open.
 

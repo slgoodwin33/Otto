@@ -1781,6 +1781,28 @@ body.chatting .otto-chat-starters{display:none}
   .lt span{font-size:12.5px !important;} .lt-grp{font-size:12px !important; font-weight:700 !important; letter-spacing:.06em !important;} .lt em{font-size:10px !important; font-weight:700 !important;}
   .wdg, .lt, .gcard, .viz-card, .mo-card{border-radius:22px;}
   button, .chip{touch-action:manipulation;}
+
+  /* ===== Build .60: richness ===== */
+  .mini-bars{display:flex; align-items:flex-end; gap:4px; height:30px; margin-top:10px;}
+  .mini-bars .mb{flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:3px; height:100%;}
+  .mini-bars i{display:block; width:100%; max-width:22px; border-radius:3px; background:color-mix(in srgb, var(--accent) 35%, transparent); transform-origin:bottom; animation:barUp .5s cubic-bezier(.2,.8,.2,1) both;}
+  .mini-bars i.on{background:var(--accent);} .mini-bars i.zero{background:var(--surface-2);}
+  .mini-bars em{font:600 10px var(--sans); font-style:normal; color:var(--text-faint); line-height:1;}
+  .hero-week .mini-bars{height:42px; margin-top:12px;}
+  @keyframes barUp{from{transform:scaleY(.1); opacity:.3;} to{transform:none; opacity:1;}}
+  .stage-bar{display:flex; gap:2px; height:8px; margin-top:10px; border-radius:4px; overflow:hidden;}
+  .stage-bar i{display:block; min-width:3px;} .st-deep{background:#5B6CD9;} .st-core{background:#8FB4E8;} .st-rem{background:#7FD1D8;} .st-awake{background:#E9B35C;}
+  /* empty states: the Otto ring */
+  .empty{display:flex; flex-direction:column; align-items:center; gap:12px; padding:36px 12px !important; color:var(--text-muted) !important; font:500 14px var(--sans) !important; text-align:center; line-height:1.45;}
+  .empty::before{content:''; width:30px; height:30px; border-radius:50%; border:3px solid var(--accent); opacity:.85; box-shadow:0 0 0 6px var(--accent-soft);}
+  /* press feedback on everything tappable */
+  .lt, .lf-row, .lf-card, .lf-add, .grow:not(.static), .gcard > button, .chip, .save-btn, .ia2-inbox{transition:transform .14s cubic-bezier(.2,.8,.2,1), background .14s ease;}
+  .lt:active, .lf-row:active, .lf-card:active, .lf-add:active, .grow:not(.static):active, .gcard > button:active, .chip:active, .save-btn:active, .ia2-inbox:active{transform:scale(.975);}
+  /* Plan: the add field gets the room */
+  #quickAddForm{display:flex !important; gap:8px; align-items:stretch;}
+  #quickAddInput{flex:1 1 auto !important; min-width:0 !important; width:auto !important;}
+  #quickAddWhen{flex:0 0 auto !important; width:auto !important; max-width:118px;}
+  @media (prefers-reduced-motion: reduce){ .mini-bars i{animation:none;} .lt, .lf-row, .lf-card, .grow, .chip{transition:none;} }
 </style>
 </head>
 <body class="home-v2">
@@ -1989,8 +2011,8 @@ body.chatting .otto-chat-starters{display:none}
       <div class="studio-page-head food-head"><div class="studio-kicker">YOUR KITCHEN <span class="studio-dot"></span> FOOD & PLANNING</div><h2>Eat well.<br><span>Plan easy.</span></h2><p>Everything from your fridge to the week ahead.</p></div>
       <div id="foodErrorBanner"></div>
       <div class="food-sub" id="foodSubTabs">
-        <button class="chip" data-food="kitchen" type="button">Kitchen</button>
-        <button class="chip active" data-food="fridge" type="button">Fridge</button>
+        <button class="chip active" data-food="kitchen" type="button">Kitchen</button>
+        <button class="chip" data-food="fridge" type="button">Fridge</button>
         <button class="chip" data-food="list" type="button">Groceries</button>
         <button class="chip" data-food="meals" type="button">Meals</button>
         <button class="chip" data-food="recipes" type="button">Recipes</button>
@@ -2031,7 +2053,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-31.59';
+const APP_BUILD = '2026-10-31.60';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2118,8 +2140,16 @@ function authHeaders(extra){
 const STATUS_ORDER = { open: 0, done: 1, cancelled: 2 };
 const PRIORITY_ORDER = { high: 0, medium: 1, low: 2, null: 3 };
 
+// iPhone Safari has no vibrate(); since iOS 18, toggling a hidden switch control plays the system tap
+let hapticEl = null;
 function hapticPulse(){
-  try{ if(navigator.vibrate) navigator.vibrate(20); } catch(e){ /* not supported, ignore */ }
+  try{
+    if(navigator.vibrate){ navigator.vibrate(12); return; }
+    const a = document.activeElement; if(a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) return;   // never steal the keyboard
+    if(!hapticEl){ hapticEl = document.createElement('label'); hapticEl.setAttribute('aria-hidden', 'true'); hapticEl.style.cssText = 'position:fixed;left:-100px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+      const i = document.createElement('input'); i.type = 'checkbox'; i.setAttribute('switch', ''); i.tabIndex = -1; hapticEl.appendChild(i); document.body.appendChild(hapticEl); }
+    hapticEl.click();
+  } catch(e){ /* not supported, ignore */ }
 }
 
 function timeAgo(iso){
@@ -3874,7 +3904,7 @@ function triageQueue(todos){
 function renderTriageCard(todos){
   const el = document.getElementById('triageCard'); if(!el) return;
   const q = triageQueue(todos);
-  el.innerHTML = q.length ? `<button class="triage-card" type="button" id="triageStart"><b>${q.length} todo${q.length===1?'':'s'} need a decision</b><span>Date it, park it for someday, mark it done, or drop it. About ${Math.max(1, Math.round(q.length*5/60))} min.</span><span class="triage-cta">Start triage ›</span></button>` : '';
+  el.innerHTML = q.length ? `<button class="triage-card" type="button" id="triageStart"><b>${q.length} todo${q.length===1?' needs':'s need'} a decision</b><span>Date it, park it for someday, mark it done, or drop it. About ${Math.max(1, Math.round(q.length*5/60))} min.</span><span class="triage-cta">Start triage ›</span></button>` : '';
 }
 let triageList = [], triageIdx = 0;
 function renderTriage(){
@@ -4229,7 +4259,7 @@ document.querySelectorAll('#tabbar .tab-btn').forEach(btn=>{
 
 // ================= FOOD =================
 let foodData = null;
-let foodView = 'fridge';
+let foodView = 'kitchen';
 let expandedGroceryId = null;
 let expandedRecipeId = null;
 
@@ -5069,10 +5099,10 @@ function renderIa2Dock(){
     : `<nav class="ia2-tabs" aria-label="Areas">${keys.map(k=>`<button type="button" data-area2="${k}" class="${k===ia2Active?'on':''}" aria-current="${k===ia2Active?'page':'false'}">${ico2(AREAS2[k].icon,22)}<span>${AREAS2[k].label}</span></button>`).join('')}</nav><button type="button" class="ia2-search" data-ia2search aria-label="Ask Otto, search, or add"><span class="otto-ring" aria-hidden="true"></span></button>`;
 }
 document.addEventListener('click', e=>{
-  const a = e.target.closest('[data-area2]'); if(a){ if(navigator.vibrate) navigator.vibrate(6); openArea(a.dataset.area2); return; }
+  const a = e.target.closest('[data-area2]'); if(a){ hapticPulse(); openArea(a.dataset.area2); return; }
   if(e.target.closest('[data-expand]')){ ia2Collapsed = false; renderIa2Dock(); return; }
   if(e.target.closest('[data-ia2search]')){ openChatWith(''); return; }
-  const w = e.target.closest('[data-w]'); if(w){ const k = w.dataset.w; if(k === 'inbox') startNightly('clarify'); else openArea(k); return; }
+  const w = e.target.closest('[data-w]'); if(w){ const k = w.dataset.w; if(k === 'inbox') startNightly('clarify'); else openDeep(k, w.dataset.sub); return; }
   const t = e.target.closest('[data-tile]'); if(t){ const k = t.dataset.tile; if(k === 'inbox') startNightly('clarify'); else openArea(k); return; }
   if(e.target.closest('[data-acct]')){ openSheet('account'); return; }
   if(e.target.closest('[data-editdock]')){ lifeArea = '__dock'; renderLife(); return; }
@@ -5100,7 +5130,7 @@ function ia2Gauge(pct){
   return `<svg width="128" height="74" viewBox="0 0 150 86" role="img" aria-label="${Math.round(pct*100)} percent of the week's budget used"><path d="M15 78 A 60 60 0 0 1 135 78" fill="none" stroke="var(--surface-2)" stroke-width="12" stroke-linecap="round"/>${pct>0?`<path d="M15 78 A 60 60 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${pct>1?'var(--alert)':'var(--accent)'}" stroke-width="12" stroke-linecap="round"/>`:''}</svg>`;
 }
 function ia2Ring(pct){ const c = 2*Math.PI*30, f = Math.min(1, pct); return `<svg width="64" height="64" viewBox="0 0 76 76" role="img" aria-label="${Math.round(pct*100)} percent of your usual steps"><circle cx="38" cy="38" r="30" fill="none" stroke="var(--surface-2)" stroke-width="9"/><circle cx="38" cy="38" r="30" fill="none" stroke="var(--ok)" stroke-width="9" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 38 38)"/><text x="38" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" font-weight="600" fill="var(--text)">${Math.round(pct*100)}%</text></svg>`; }
-const wdg = (key, label, inner, opts={}) => `<button type="button" class="wdg ${opts.wide?'wide':''} ${opts.hero?'hero':''}" data-w="${key}"><span class="wdg-head"><span>${label}</span><em>${opts.right||''}</em></span>${inner}</button>`;
+const wdg = (key, label, inner, opts={}) => `<button type="button" class="wdg ${opts.wide?'wide':''} ${opts.hero?'hero':''}" data-w="${key}"${opts.sub ? ` data-sub="${opts.sub}"` : ''}><span class="wdg-head"><span>${label}</span><em>${opts.right||''}</em></span>${inner}</button>`;
 let ia2MiniMap = null, ia2MiniEl = null, ia2MiniBase = null, ia2MiniDot = null;
 // many loaders finish within the same moment; draw Home once per frame instead of once per loader
 let ia2HomeRaf = 0;
@@ -5116,8 +5146,11 @@ function renderIa2HomeNow(){
   let side = '';
   if(h < 11) side = its.slice(0,2).map(x=>`<span class="wdg-li">${esc(x.title)}</span>`).join('') || '<span class="wdg-sub">Nothing scheduled</span>';
   else side = `<span class="wdg-sub">${money(spentToday)} spent today</span>`;
-  const hero = m ? wdg('money', part, `<span class="wdg-row">${ia2Gauge(m.planned ? m.spent/m.planned : 0)}<span class="wdg-col"><b class="wdg-big ${m.left<0?'neg':'acc'}">${m.left>=0?money(m.left):'−'+money(-m.left)}</b><span class="wdg-sub">${m.left>=0?'left':'over'}${S && S.week_end===today ? ' · resets 12 AM' : ''}</span>${side}</span></span>`, { wide:true, hero:true, right:'tap for the week' })
+  let hero = m ? wdg('money', part, `<span class="wdg-row">${ia2Gauge(m.planned ? m.spent/m.planned : 0)}<span class="wdg-col"><b class="wdg-big ${m.left<0?'neg':'acc'}">${m.left>=0?money(m.left):'−'+money(-m.left)}</b><span class="wdg-sub">${m.left>=0?'left':'over'}${S && S.week_end===today ? ' · resets 12 AM' : ''}</span>${side}</span></span>`, { wide:true, hero:true, right:'tap for the week' })
                  : wdg('money', part, '<span class="wdg-sub">Budget loading…</span>', { wide:true, hero:true });
+  if(m && S && S.week_start){ const days = [...Array(7)].map((_,i)=>isoAddDays(S.week_start, i)), by = {};
+    (allTxns||[]).forEach(t=>{ if(Number(t.amount_cents) < 0 && !t.exclude_from_budget) by[t.transaction_date] = (by[t.transaction_date]||0) - Number(t.amount_cents); });
+    const ti = days.indexOf(today); hero = hero.replace(/<\/button>$/, `<span class="hero-week">${miniBars(days.map(d=>d > today ? 0 : (by[d]||0)), ti, days.map(d=>new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})))}</span></button>`); }
   // inbox
   const q = clarifications || [], kinds = {}; q.forEach(c=>{ kinds[c.kind] = (kinds[c.kind]||0) + 1; });
   const kname = { place:['place','places'], transaction:['buy','buys'], todo:['todo','todos'], meal:['meal','meals'], checkin:['check-in','check-ins'] };
@@ -5125,7 +5158,9 @@ function renderIa2HomeNow(){
   // steps
   let stepsW = wdg('health', 'STEPS', '<span class="wdg-sub">Not synced</span>');
   if(lastHealthData && lastHealthData.daily){ const Sx = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); const st = Sx.todayRow && Sx.todayRow.steps;
-    if(st != null) stepsW = wdg('health', 'STEPS', `<span class="wdg-row">${ia2Ring(Sx.avg30 ? st/Sx.avg30 : 0)}<span class="wdg-col"><b class="wdg-mid">${st.toLocaleString()}</b><span class="wdg-sub">usual ${Sx.avg30 ? Sx.avg30.toLocaleString() : '—'}</span></span></span>`); }
+    if(st != null){ const by = {}; lastHealthData.daily.forEach(r=>{ by[r.activity_date] = Number(r.steps)||0; });
+      const days = [...Array(7)].map((_,i)=>isoAddDays(today, i-6));
+      stepsW = wdg('health', 'STEPS', `<span class="wdg-row">${ia2Ring(Sx.avg30 ? st/Sx.avg30 : 0)}<span class="wdg-col"><b class="wdg-mid">${st.toLocaleString()}</b><span class="wdg-sub">usual ${Sx.avg30 ? Sx.avg30.toLocaleString() : '—'}</span></span></span>${miniBars(days.map(d=>by[d]||0), 6)}`, { sub:'Activity' }); } }
   // last stop (mini map)
   const fx = lastFix(); const lastV = (mapData.visits||[]).filter(v=>v.status!=='declined' && v.arrived_at).sort((a,b)=>b.arrived_at.localeCompare(a.arrived_at))[0];
   const hasPos = !!(fx.pos || (lastV && lastV.lat != null));
@@ -5141,12 +5176,12 @@ function renderIa2HomeNow(){
   // sleep
   let sleepW = wdg('health', 'SLEEP', '<span class="wdg-sub">No data</span>');
   const sl = lastHealthData && lastHealthData.sleep && lastHealthData.sleep[0];
-  if(sl){ const fresh = sl.sleep_date >= isoAddDays(today,-1); sleepW = wdg('health', 'SLEEP', fresh ? `<b class="wdg-mid">${hm(sl.asleep_min)}</b><span class="wdg-sub">last night</span>` : `<span class="wdg-li warn">Not since ${new Date(sl.sleep_date+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}</span><span class="wdg-sub">last ${hm(sl.asleep_min)}</span>`); }
+  if(sl){ const fresh = sl.sleep_date >= isoAddDays(today,-1); sleepW = wdg('health', 'SLEEP', fresh ? `<b class="wdg-mid">${hm(sl.asleep_min)}</b><span class="wdg-sub">last night</span>${stageBar(sl)}` : `<span class="wdg-li warn">Not since ${new Date(sl.sleep_date+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}</span><span class="wdg-sub">last ${hm(sl.asleep_min)}</span>`, { sub:'Sleep' }); }
   // recurring
   let recW = wdg('subscriptions', 'RECURRING', '<span class="wdg-sub">Loading…</span>');
   if(lifeRows.subscriptions){ const a = lifeRows.subscriptions.filter(x=>x.status!=='cancelled'); const per = {weekly:52/12, monthly:1, quarterly:1/3, yearly:1/12};
     const mo = a.reduce((t,x)=>t + (x.amount_cents||0)*(per[x.cadence]||1), 0); const nxt = a.filter(x=>x.next_charge_on).sort((x,y)=>x.next_charge_on.localeCompare(y.next_charge_on))[0];
-    recW = wdg('subscriptions', 'RECURRING', `<b class="wdg-mid">${money(Math.round(mo))}<small>/mo</small></b><span class="wdg-sub">${nxt ? `next ${shortDate(nxt.next_charge_on)} · ${money(nxt.amount_cents)}` : `${a.length} active`}</span>`); }
+    recW = wdg('subscriptions', 'RECURRING', `<b class="wdg-mid">${money(Math.round(mo))}<small>/mo</small></b><span class="wdg-sub">${nxt ? `next ${shortDate(nxt.next_charge_on)} · ${money(nxt.amount_cents)}` : `${a.length} active`}</span>`, { sub:'recurring' }); }
   else lifeLoad(['subscriptions']).then(()=>renderIa2Home());
   // optional widgets
   const cl = lifeRows.wardrobe_items || [], worn = cl.filter(x=>x.laundry_status==='worn').length;
@@ -5476,7 +5511,7 @@ function carStatus(kind){
 function carModel(){
   const v = (lifeRows.vehicles||[])[0];
   const zone = (x,y,w,h,kind,label) => { const s2 = carStatus(kind); return `<g class="cz cz-${s2.st}" data-ladd="vehicle_services" data-gotab="1" data-prefill='${JSON.stringify({kind})}' role="button" tabindex="0" aria-label="${label}: ${s2.text}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="6"/><text x="${x+w/2}" y="${y+h/2+4}" text-anchor="middle">${label}</text></g>`; };
-  const svg = `<svg viewBox="0 0 354 270" width="100%" role="img" aria-label="Car service diagram"><path d="M120 20 Q177 4 234 20 L250 70 L254 210 L238 254 Q177 268 116 254 L100 210 L104 70 Z" class="cz-body"/>
+  const svg = `<svg viewBox="0 0 354 270" width="100%" role="group" aria-label="Car service diagram"><path d="M120 20 Q177 4 234 20 L250 70 L254 210 L238 254 Q177 268 116 254 L100 210 L104 70 Z" class="cz-body"/>
     ${zone(140,28,74,40,'oil','Oil')}${zone(60,52,52,40,'tires','Tire FL')}${zone(242,52,52,40,'tires','Tire FR')}${zone(60,182,52,40,'tires','Tire RL')}${zone(242,182,52,40,'tires','Tire RR')}
     ${zone(150,132,54,40,'battery','Battery')}${zone(6,118,92,40,'brakes','Brakes')}${zone(256,118,92,40,'wipers','Wipers')}${zone(140,214,74,30,'filter','Filter')}</svg>`;
   const vinBox = v && v.vin ? `<div class="lf-sum">${esc([v.specs && v.specs.trim, v.specs && v.specs.engine].filter(Boolean).join(' · ') || v.vin)}</div>` :
@@ -5711,7 +5746,7 @@ document.addEventListener('click', e=>{
   const sz = e.target.closest('[data-hesize]'); if(sz){ const [k, v] = sz.dataset.hesize.split(':'); c.wide[k] = v === 'w'; hit = true; }
   const sh = e.target.closest('[data-heshow]'); if(sh){ const k = sh.dataset.heshow; c.hidden = c.hidden.includes(k) ? c.hidden.filter(x=>x!==k) : c.hidden.concat([k]); hit = true; }
   if(e.target.closest('[data-hebyuse]')){ c.byUse = !c.byUse; if(!c.byUse) c.order = homeOrder({ ...c, byUse:true }); hit = true; }
-  if(hit){ saveHomeCfg(c); if(navigator.vibrate) navigator.vibrate(5); renderIa2Home(); return; }
+  if(hit){ saveHomeCfg(c); hapticPulse(); renderIa2Home(); return; }
   const w = e.target.closest('[data-w]'); if(w && !homeEditing){ const k = { money:null, health:'steps', assets:'stop', todos:'next', food:'kitchen', subscriptions:'recurring', closet:'closet', car:'car', inbox:'inbox' }[w.dataset.w];
     if(k){ const u = homeUse(); u[k] = (u[k]||0) + 1; try{ localStorage.setItem('otto.wuse', JSON.stringify(u)); }catch(err){} } }
 }, true);
@@ -5807,7 +5842,7 @@ new MutationObserver(()=>scrollChat()).observe(document.getElementById('chatThre
     if(moved < 6){ snap = snap === 'peek' ? 'half' : snap === 'half' ? 'full' : 'half'; }
     else if(h < S.peek - 40){ sh.hidden = true; tlUserClosed = true; document.getElementById('mapWeek')?.classList.remove('tl-on'); return; }
     else snap = Object.keys(S).sort((a,b)=>Math.abs(S[a]-h) - Math.abs(S[b]-h))[0];
-    set(S[snap], true); if(navigator.vibrate) navigator.vibrate(6); };
+    set(S[snap], true); hapticPulse(); };
   sh.addEventListener('pointerup', end); sh.addEventListener('pointercancel', end);
 })();
 // map layers: a proper bottom sheet with a title, Done, and a dimmed backdrop
@@ -5849,7 +5884,7 @@ new MutationObserver(()=>scrollChat()).observe(document.getElementById('chatThre
   }
   sheet.addEventListener('click', e=>{ const b = e.target.closest('[data-mstab]'); if(!b) return;
     if(tab === b.dataset.mstab && snap !== 'peek'){ setSnap('peek'); tab = null; return; }   // tap the open tab again to fold away
-    if(navigator.vibrate) navigator.vibrate(6); show(b.dataset.mstab); });
+    hapticPulse(); show(b.dataset.mstab); });
   // drag the grabber or the tab bar between peek / half / full
   sheet.addEventListener('pointerdown', e=>{ if(!e.target.closest('.ms-grab, .ms-tabs') ) return; drag = { y:e.clientY, h: sheet.getBoundingClientRect().height, moved:false, id:e.pointerId }; });
   sheet.addEventListener('pointermove', e=>{ if(!drag) return;
@@ -5858,7 +5893,7 @@ new MutationObserver(()=>scrollChat()).observe(document.getElementById('chatThre
   const end = e=>{ if(!drag) return; const h = sheet.getBoundingClientRect().height, moved = drag.moved, S = sizes(); drag = null;
     if(!moved) return;
     const sn = Object.keys(S).sort((a,b)=>Math.abs(S[a]-h) - Math.abs(S[b]-h))[0];
-    if(sn !== 'peek' && !tab) show('timeline'); setSnap(sn); if(sn === 'peek') tab = null; if(navigator.vibrate) navigator.vibrate(6); };
+    if(sn !== 'peek' && !tab) show('timeline'); setSnap(sn); if(sn === 'peek') tab = null; hapticPulse(); };
   sheet.addEventListener('pointerup', end); sheet.addEventListener('pointercancel', end);
   // old entry points now route through the sheet
   document.addEventListener('click', e=>{ if(e.target.closest('#tlOpen')){ e.stopImmediatePropagation(); show('timeline'); } }, true);
@@ -6301,6 +6336,26 @@ async function bootApp(){
   await Promise.allSettled([refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar(), refreshCheckin(), refreshClarifications()]);
   renderBriefing();
   resumePlaidOAuth();
+}
+
+// widgets open the exact view: Steps → Body · Activity, Recurring → Money · Recurring
+function openDeep(k, sub){
+  if(sub === 'recurring') k = 'money';
+  openArea(k); if(!sub) return;
+  setTimeout(()=>{
+    if(k === 'money' && typeof setMoneySeg === 'function') setMoneySeg(sub);
+    else { const b = [...document.querySelectorAll('#healthTabsBar [data-htab], #sheet [data-lsec]')].find(x=>x.textContent.trim().toLowerCase() === String(sub).toLowerCase()); if(b) b.click(); }
+  }, 60);
+}
+// ---------- tiny charts for Home widgets ----------
+function miniBars(vals, onIdx, labels){
+  const max = Math.max(...vals, 1);
+  return `<span class="mini-bars" aria-hidden="true">${vals.map((v,i)=>`<span class="mb"><i class="${i===onIdx?'on':''} ${v?'':'zero'}" style="height:${Math.max(6, Math.round(100*v/max))}%"></i>${labels ? `<em>${labels[i]}</em>` : ''}</span>`).join('')}</span>`;
+}
+function stageBar(sl){
+  const parts = [['deep', sl.deep_min, 'Deep'], ['core', sl.core_min, 'Core'], ['rem', sl.rem_min, 'REM'], ['awake', sl.awake_min, 'Awake']].filter(x=>Number(x[1]) > 0);
+  const tot = parts.reduce((a,x)=>a+Number(x[1]),0); if(!tot) return '';
+  return `<span class="stage-bar" role="img" aria-label="${parts.map(x=>`${x[2]} ${hm(x[1])}`).join(', ')}">${parts.map(x=>`<i class="st-${x[0]}" style="flex:${x[1]}"></i>`).join('')}</span>`;
 }
 
 // ---------- motion: sliding tab underline, directional tab + page changes ----------

@@ -1,5 +1,7 @@
 # Otto app review — Oct 31, 2026 (build .55)
 
+> **Status:** builds .56–.60 shipped the plan below (see ROADMAP "Just shipped"). Two findings turned out wrong on closer checking: content is *not* hidden behind the dock (the dock collapses to a pill on scroll and pages already pad 110px), and Plan's Later/Someday/Done tabs filter the list below them, so they stay where they are. Not done yet: the remaining ~360 `!important` overrides (only provably dead CSS was removed), the Inbox/money de-duplication (1.6), and Places opening with its sheet at peek.
+
 Scope: information architecture, visual richness, motion, consolidation.
 Method: read `index.html`, rendered every area at iPhone size (390×844) with the test fixtures, and instrumented the load. Money numbers in the screenshots are fixture data, so "$0" values aren't bugs.
 
