@@ -1786,6 +1786,10 @@ body.chatting .otto-chat-starters{display:none}
   /* ===== Build .56: cleanup ===== */
   svg text{font-family:var(--sans);}   /* chart labels fell back to Times */
 
+  /* ===== Build .57: one page header ===== */
+  .sheet-head .sync-chip.quiet{display:none;}
+  .page-back:not(.show){display:none !important;}
+
   /* ===== Build .54: one map sheet ===== */
   body.ia2 #panelAssets .map-btn, body.ia2 #mapWeek, body.ia2 #mapSummary{display:none !important;}
   .map-sheet{position:absolute; left:0; right:0; bottom:0; z-index:1004; height:86px; background:var(--surface); border-radius:22px 22px 0 0; border-top:1px solid var(--border); box-shadow:0 -10px 34px rgba(0,0,0,.45); display:flex; flex-direction:column; overflow:hidden;}
@@ -2059,7 +2063,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-10-31.56';
+const APP_BUILD = '2026-10-31.57';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4641,13 +4645,27 @@ function pageSubtitle(area){
   } catch(e){}
   return '';
 }
+function lifeKeyFor(life){ return Object.keys(AREAS2).find(k=>AREAS2[k].life === life); }
+// one header for every page: dock name, dock icon, live summary, and a back link only where it means something
+function pageMeta(){
+  if(sheetArea === 'life'){
+    if(lifeArea === '__dock') return { title:'Edit dock', icon:'all', sub:'', back:'All' };
+    if(lifeArea && LIFE[lifeArea]){ const k = lifeKeyFor(lifeArea); let sub = ''; try{ if(lifeRows._loaded) sub = LIFE[lifeArea].summary(lifeRows); }catch(e){}
+      return { title: k ? AREAS2[k].label : LIFE[lifeArea].title, icon: k ? AREAS2[k].icon : 'all', sub, back:'All' }; }
+    return { title:'All areas', icon:'all', sub:'', back:'' };
+  }
+  const d = AREAS2[sheetArea];
+  let sub = ''; try{ sub = pageSubtitle(sheetArea); }catch(e){}
+  return { title: d ? d.label : (AREAS[sheetArea] ? AREAS[sheetArea].title : ''), icon: d ? d.icon : null, sub, back: d ? '' : 'Home' };
+}
 function renderPageHead(){
-  const sheet = document.getElementById('sheet'), area = sheet.dataset.area; if(!area || !sheetArea) return;
-  const color = AREA_COLORS[area] || 'var(--accent)';
-  sheet.style.setProperty('--area', color);
-  const icoName = area === 'assets' ? 'map' : area === 'account' ? 'user' : (AREAS[area] && AREAS[area].icon) || area;
-  document.getElementById('pageIco').innerHTML = svgIcon(icoName);
-  document.getElementById('pageSub').textContent = pageSubtitle(area);
+  const sheet = document.getElementById('sheet'); if(!sheetArea) return;
+  const m = pageMeta();
+  sheet.style.setProperty('--area', AREA_COLORS[sheetArea] || 'var(--accent)');
+  document.getElementById('sheetTitle').textContent = m.title;
+  document.getElementById('pageIco').innerHTML = m.icon ? ico2(m.icon, 19) : svgIcon(sheetArea === 'account' ? 'user' : sheetArea === 'assets' ? 'map' : sheetArea);
+  document.getElementById('pageSub').textContent = m.sub || '';
+  const back = document.getElementById('pageBack'); back.textContent = m.back ? '‹ ' + m.back : ''; back.classList.toggle('show', !!m.back);
 }
 function svgRing(pct, color, size, stroke, inner){
   const r = (size - stroke)/2, c = 2*Math.PI*r, p = Math.max(0, Math.min(1, pct||0));
@@ -4749,10 +4767,8 @@ function openSheet(area){
   sheetArea = area;
   sheet.classList.toggle('map-mode', area === 'assets');
   if(area === 'areas'){
-    document.getElementById('sheetTitle').textContent = 'Areas';
     body.innerHTML = areaListHtml();
   } else {
-    document.getElementById('sheetTitle').textContent = AREAS[area].title;
     sheet.dataset.area = area; renderPageHead();
     AREAS[area].panels.forEach(id=>{ const p = document.getElementById(id); p.classList.add('active'); body.appendChild(p); });
     if(area === 'wardrobe'){ body.innerHTML = wardrobeMarkup(); loadWardrobe(); }
@@ -4761,8 +4777,7 @@ function openSheet(area){
   body.scrollTop = 0;
   sheet.hidden = false; backdrop.hidden = false;
   requestAnimationFrame(()=> requestAnimationFrame(()=> document.body.classList.add('sheet-open')));
-  const sub = true;
-  document.getElementById('pageBack').classList.toggle('show', sub);
+  renderPageHead(); syncRoute();
   closeNavChooser(); setActiveTab(area);
   renderSyncChips();
 }
@@ -4775,7 +4790,7 @@ function closeSheet(){
     document.getElementById('sheet').hidden = true; document.getElementById('sheetBackdrop').hidden = true;
     returnPanels(); renderBriefing();
   }, 140);
-  setActiveTab('home');
+  setActiveTab('home'); syncRoute();
 }
 document.getElementById('sheetDone').addEventListener('click', closeSheet);
 document.getElementById('sheetBackdrop').addEventListener('click', closeSheet);
@@ -4909,7 +4924,8 @@ async function lifeLoad(tables){
     try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}?select=*&${sec ? sec.query : 'order=id.asc'}`, { headers: authHeaders() }); lifeRows[t] = r.ok ? await r.json() : []; } catch(e){ lifeRows[t] = []; }
   }));
 }
-async function renderLife(){
+async function renderLife(){ await renderLifeBody(); renderPageHead(); }
+async function renderLifeBody(){
   const el = document.getElementById('lifeContent'); if(!el) return;
   if(lifeArea === '__dock'){ el.innerHTML = renderEditDock(); return; }
   if(lifeArea === 'documents'){ el.innerHTML = renderDocs(); if(!docLocked() && docs.rows === null){ await docLoad(); if(lifeArea === 'documents') el.innerHTML = renderDocs(); } return; }
@@ -4945,10 +4961,10 @@ async function renderLife(){
     return `<div class="section-title">${sec.title}<span>${rows.length || ''}</span></div>${rows.length ? `<div class="gcard lf-list">${list}</div>` : ''}${form}`;
   }).join('');
   const extra = lifeArea === 'closet' && (lifeRows.wardrobe_items||[]).some(x=>x.laundry_status==='worn') ? `<button type="button" class="lf-add strong" data-laundry>🧺 Laundry done: mark everything clean</button>` : '';
-  el.innerHTML = `<button type="button" class="page-back lf-back" data-lback>‹ All areas</button><h3 class="lf-title">${a.emoji} ${a.title}</h3><div class="lf-sum">${esc(a.summary(lifeRows))}</div>${extra}${secs}`;
+  el.innerHTML = `${extra}${secs}`;
 }
 document.addEventListener('click', async e=>{
-  const ls = e.target.closest('[data-lsec]'); if(ls){ lifeSection = Number(ls.dataset.lsec); lifeAdding = null; lifeOpenRow = null; renderLife(); return; }
+  const ls = e.target.closest('[data-lsec]'); if(ls){ lifeSection = Number(ls.dataset.lsec); lifeAdding = null; lifeOpenRow = null; renderLife(); syncRoute(true); return; }
   const c = e.target.closest('[data-life]'); if(c){ lifeArea = c.dataset.life; lifeSection = 0; lifeAdding = null; lifeOpenRow = null; renderLife(); document.getElementById('sheetBody')?.scrollTo({ top:0 }); return; }
   if(e.target.closest('[data-lback]')){ lifeArea = null; renderLife(); return; }
   const ad = e.target.closest('[data-ladd]'); if(ad){ lifeAdding = ad.dataset.ladd; lifePrefill = ad.dataset.prefill ? JSON.parse(ad.dataset.prefill) : {}; if(ad.dataset.gotab) lifeSection = Number(ad.dataset.gotab); renderLife(); return; }
@@ -5107,7 +5123,7 @@ document.addEventListener('click', e=>{
   }, true);
 })();
 // the old close-sheet path returns to Today
-document.addEventListener('click', e=>{ if(e.target.closest('.page-back:not(.lf-back), [data-close-sheet], .sheet-close')){ ia2Active = 'today'; setTimeout(renderIa2Dock, 0); } }, true);
+document.addEventListener('click', e=>{ if(e.target.closest('[data-close-sheet], .sheet-close')){ ia2Active = 'today'; setTimeout(renderIa2Dock, 0); } }, true);
 
 // ---------- widget Home ----------
 function ia2Gauge(pct){
@@ -5210,7 +5226,7 @@ function renderLauncher(){
 }
 function renderEditDock(){
   const pins = dockPins(), opts = ['todos','money','health','food','assets','closet','car','documents','people','subscriptions','apartments','school','trips','drone'];
-  return `<button type="button" class="page-back lf-back" data-lback>‹ All areas</button><h3 class="lf-title">Edit dock</h3>
+  return `
     <div class="lf-sum">Today stays first and All stays last. Pin up to 3 in between (${pins.length} of 3 used).</div>
     <div class="ed-preview">${['today',...pins,'all'].map(k=>`<span>${ico2(AREAS2[k].icon,20)}<b>${AREAS2[k].label}</b></span>`).join('')}</div>
     <div class="gcard lf-list">${opts.map(k=>`<div class="lf-row"><span class="ed-ico">${ico2(AREAS2[k].icon,20)}</span><div class="grow-main"><div class="grow-title">${AREAS2[k].label}</div></div><button type="button" class="ed-pin ${pins.includes(k)?'on':''}" data-pin="${k}">${pins.includes(k)?'Pinned':'Pin'}</button></div>`).join('')}</div>`;
@@ -5278,7 +5294,7 @@ function docPendingCard(it){
     <div class="lf-form-actions"><button type="submit" class="save-btn">Save to vault</button><button type="button" class="link-btn" data-docdiscard="${it.id}">Discard</button></div></form>`;
 }
 function renderDocs(){
-  const head = `<button type="button" class="page-back lf-back" data-lback>‹ All areas</button><h3 class="lf-title">🪪 Documents</h3>`;
+  const head = '';
   if(docLocked()){
     const setup = !localStorage.getItem('otto.passkey');
     return head + `<div class="doc-lock"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg>
@@ -6311,12 +6327,46 @@ async function bootApp(){
   resumePlaidOAuth();
 }
 
+// ---------- routes (#/money, #/car/2): reload lands where you were; edge-swipe and ‹ go back ----------
+let navDepth = 0, routing = false;
+function currentRoute(){
+  if(!sheetArea) return '#/today';
+  if(sheetArea === 'life'){ const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : 'all'; return '#/' + (k || 'all') + (k !== 'all' && lifeSection ? '/' + lifeSection : ''); }
+  return '#/' + sheetArea;
+}
+function syncRoute(replace){
+  if(routing) return; const h = currentRoute(); if(location.hash === h) return;
+  try{ if(replace) history.replaceState({ otto:navDepth }, '', h); else { navDepth++; history.pushState({ otto:navDepth }, '', h); } }catch(e){}
+}
+function applyRoute(hash){
+  const [k, sec] = String(hash || '').replace(/^#\/?/, '').split('/');
+  routing = true;
+  try{
+    if(k && AREAS2[k] && k !== 'today'){ openArea(k); if(sec && AREAS2[k].life){ lifeSection = Number(sec) || 0; renderLife(); } }
+    else if(k && AREAS[k]) openSheet(k);
+    else openArea('today');
+  } finally { routing = false; }
+}
+function goBack(){ if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
+window.addEventListener('popstate', e=>{ navDepth = (e.state && e.state.otto) || 0; applyRoute(location.hash); });
+(function(){   // swipe right from the left edge = back; the page follows your finger
+  let sx = 0, sy = 0, dx = 0, on = false;
+  const sheet = () => document.getElementById('sheet');
+  document.addEventListener('touchstart', e=>{ const t = e.touches[0]; if(!sheetArea || e.touches.length > 1 || t.clientX > 22) return; on = true; sx = t.clientX; sy = t.clientY; dx = 0; }, { passive:true });
+  document.addEventListener('touchmove', e=>{ if(!on) return; const t = e.touches[0]; dx = t.clientX - sx;
+    if(Math.abs(t.clientY - sy) > 40 && dx < 30){ on = false; sheet().style.translate = ''; return; }
+    sheet().style.transition = 'none'; sheet().style.translate = Math.max(0, dx) + 'px 0'; }, { passive:true });
+  document.addEventListener('touchend', ()=>{ if(!on) return; on = false; const s = sheet(); s.style.transition = 'translate .2s cubic-bezier(.2,.8,.2,1)';
+    if(dx > 80){ s.style.translate = '100% 0'; setTimeout(()=>{ s.style.transition = 'none'; s.style.translate = ''; goBack(); requestAnimationFrame(()=>{ s.style.transition = ''; }); }, 190); }
+    else { s.style.translate = ''; setTimeout(()=>{ s.style.transition = ''; }, 220); } });
+})();
 function showApp(){
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appWrap').style.display = '';
   document.getElementById('tabbar').hidden = false; lastRefreshAt = Date.now(); renderSyncChips();
   try{ if(paintFromCache()) setTimeout(()=>{ if(homeCachedAt){ homeCachedAt = null; window.__freshData = true; try{ renderIa2Home(); }catch(e){} } }, 15000); }catch(e){}
   bootApp();
+  try{ history.replaceState({ otto:0 }, '', location.hash || '#/today'); if(location.hash && location.hash !== '#/today') applyRoute(location.hash); }catch(e){}
 }
 function showLogin(errorMsg){
   document.getElementById('loginScreen').style.display = 'flex';
@@ -6403,7 +6453,7 @@ function setActiveTab(k){ k = NAV_GROUP[k] || k; document.querySelectorAll('.tab
     else openSheet(k);
   });
 })();
-document.getElementById('pageBack').addEventListener('click', closeSheet);
+document.getElementById('pageBack').addEventListener('click', goBack);
 document.addEventListener('pointerdown', e=>{
   if(navChooser && !e.target.closest('.otto-nav-chooser') && !e.target.closest('[data-tab="life"]') && !e.target.closest('[data-tab="more"]')) closeNavChooser();
 });
@@ -6418,7 +6468,7 @@ function syncLabel(){
   const m = Math.round((Date.now() - lastRefreshAt)/60000);
   return m < 1 ? 'Updated just now' : m < 60 ? `Updated ${m}m ago` : `Updated ${Math.round(m/60)}h ago`;
 }
-function renderSyncChips(){ ['homeSync','pageSync'].forEach(id=>{ const el = document.getElementById(id); if(el){ el.textContent = syncLabel(); el.classList.toggle('busy', refreshing); } }); }
+function renderSyncChips(){ ['homeSync','pageSync'].forEach(id=>{ const el = document.getElementById(id); if(el){ el.textContent = syncLabel(); el.classList.toggle('busy', refreshing); el.classList.toggle('quiet', !refreshing && Date.now() - lastRefreshAt < 15*60000); } }); }
 async function autoRefresh(force){
   if(refreshing || !session) return;
   if(!force && Date.now() - lastRefreshAt < 60000) return;
