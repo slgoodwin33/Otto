@@ -1910,6 +1910,24 @@ body.chatting .otto-chat-starters{display:none}
   .plan-ask{margin-top:6px;}
   .food-split{display:flex; gap:2px; height:8px; border-radius:4px; overflow:hidden; margin:10px 0 6px;} .food-split i{display:block;} .food-split .fo{background:var(--amber);} .food-split .fg{background:var(--accent);}
   .wdg-sub b.warn{color:var(--amber);}
+
+  /* ===== Build .66: Day pages ===== */
+  .daypage{position:fixed; inset:0; z-index:2147483050; display:flex; flex-direction:column; background:var(--bg); padding-top:calc(env(safe-area-inset-top,0px) + 6px); animation:deckIn .28s cubic-bezier(.2,.8,.2,1);}
+  body.glass .daypage{background:rgba(10,13,12,.82); backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);}
+  .daypage[hidden]{display:none;}
+  .dp-head{display:flex; align-items:center; gap:8px; padding:4px 16px 10px;} .dp-when{flex:1; display:flex; flex-direction:column;} .dp-when b{font:700 22px var(--sans);} .dp-when span{font:13.5px var(--sans); color:var(--text-muted);}
+  .dp-nav{all:unset; cursor:pointer; width:44px; height:44px; display:grid; place-items:center; border-radius:22px; background:var(--surface); font:600 24px var(--sans); color:var(--text);} .dp-nav[disabled]{opacity:.3; cursor:default;}
+  .dp-nav:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .dp-body{flex:1; overflow-y:auto; padding:0 16px calc(env(safe-area-inset-bottom,0px) + 28px); -webkit-overflow-scrolling:touch;}
+  .dp-map{height:260px; border-radius:22px; overflow:hidden; background:var(--surface-2); isolation:isolate; border:1px solid var(--border);}
+  .dp-nomap{display:flex; flex-direction:column; align-items:flex-start; gap:6px; padding:18px; border-radius:22px; background:var(--surface); border:1px dashed var(--border); color:var(--text-muted); font:14px var(--sans);}
+  .dp-stats{display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; margin:12px 0 4px;}
+  .dp-stat{display:flex; flex-direction:column; gap:1px; padding:10px; border-radius:16px; background:var(--surface); border:1px solid var(--border); min-width:0;} .dp-stat span{font:600 11.5px var(--sans); color:var(--text-muted);} .dp-stat b{font:700 16px var(--sans); font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .dp-stat em{font:11px var(--sans); font-style:normal; color:var(--text-faint);}
+  .dp-list{padding:4px 14px !important;}
+  .dp-row{display:grid; grid-template-columns:44px 14px minmax(0,1fr); align-items:start; gap:6px; padding:11px 0; border-bottom:1px solid var(--border);} .dp-row:last-child{border-bottom:none;}
+  .dp-time{font:500 12px var(--mono); color:var(--text-muted); padding-top:2px;} .dp-row b{display:block; font:600 15px var(--sans);} .dp-row span{font:13px var(--sans); color:var(--text-muted);}
+  .dp-dot{width:10px; height:10px; border-radius:5px; margin-top:5px;} .dp-dot.place{background:var(--text);} .dp-dot.buy{background:var(--amber); border-radius:3px;} .dp-dot.todo{background:var(--accent);}
+  body.daying .ia2-dock{display:none !important;}
 </style>
 </head>
 <body class="home-v2">
@@ -2163,7 +2181,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-01.65';
+const APP_BUILD = '2026-11-01.66';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5227,7 +5245,7 @@ document.addEventListener('click', e=>{
   const a = e.target.closest('[data-area2]'); if(a){ hapticPulse(); openArea(a.dataset.area2); return; }
   if(e.target.closest('[data-expand]')){ ia2Collapsed = false; renderIa2Dock(); return; }
   if(e.target.closest('[data-ia2search]')){ openChatWith(''); return; }
-  const w = e.target.closest('[data-w]'); if(w){ const k = w.dataset.w; if(k === 'inbox') openInboxDeck(); else openDeep(k, w.dataset.sub); return; }
+  const w = e.target.closest('[data-w]'); if(w){ const k = w.dataset.w; if(k === 'inbox') openInboxDeck(); else if(k === 'day') openDayPage(localToday()); else openDeep(k, w.dataset.sub); return; }
   const t = e.target.closest('[data-tile]'); if(t){ const k = t.dataset.tile; if(k === 'inbox') openInboxDeck(); else openArea(k); return; }
   if(e.target.closest('[data-acct]')){ openSheet('account'); return; }
   if(e.target.closest('[data-editdock]')){ lifeArea = '__dock'; renderLife(); return; }
@@ -5289,7 +5307,7 @@ function renderIa2HomeNow(){
   // last stop (mini map)
   const fx = lastFix(); const lastV = (mapData.visits||[]).filter(v=>v.status!=='declined' && v.arrived_at).sort((a,b)=>b.arrived_at.localeCompare(a.arrived_at))[0];
   const hasPos = !!(fx.pos || (lastV && lastV.lat != null));
-  const stopW = wdg('assets', 'LAST STOP', `${hasPos ? '<span id="ia2Mini" class="wdg-map"></span>' : ''}<span class="wdg-sub">${lastV ? `${esc(lastV.place)} · ${clockTime(lastV.arrived_at)}` : 'No location yet · turn on OwnTracks'}${fx.at ? ` · ${fx.fresh ? 'live' : timeAgo(fx.at)}` : ''}</span>`, { wide:true, right:'open map' });
+  const stopW = wdg('day', 'YOUR DAY', `${hasPos ? '<span id="ia2Mini" class="wdg-map"></span>' : ''}<span class="wdg-sub">${lastV ? `${esc(lastV.place)} · ${clockTime(lastV.arrived_at)}` : 'No location yet · turn on OwnTracks'}${fx.at ? ` · ${fx.fresh ? 'live' : timeAgo(fx.at)}` : ''}</span>`, { wide:true, right:'open day' });
   // next
   const nx = []; for(let d=1; d<=10 && nx.length<2; d++){ const date = isoAddDays(today, d); planItemsFor(date).filter(x=>x.kind!=='meal').forEach(x=>{ if(nx.length<2) nx.push({ date, t: x.kind==='bill' ? x.title.split(' · ')[0] : x.title, r: x.kind==='bill' ? (x.title.split(' · ')[1]||'') : '' }); }); }
   if(S && S.week_end === today && m) nx.unshift({ date: isoAddDays(today,1), t:'New budget week', r: money(m.planned) });
@@ -5924,7 +5942,7 @@ document.addEventListener('click', e=>{
 
 // ===================== Build .52: widget editing, sort by use, motion, instant open =====================
 const HOME_KEYS = ['inbox','food','steps','stop','next','kitchen','sleep','recurring','closet','car'];
-const HOME_LABEL = { inbox:'Inbox', food:'Food spend', steps:'Steps', stop:'Last stop (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
+const HOME_LABEL = { inbox:'Inbox', food:'Food spend', steps:'Steps', stop:'Your day (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
 let homeEditing = false, ia2FirstPaint = true, homeCachedAt = null;
 function homeCfg(){ let c = {}; try{ c = JSON.parse(localStorage.getItem('otto.widgets') || '{}'); }catch(e){}
   return { order: Array.isArray(c.order) ? c.order.filter(k=>HOME_KEYS.includes(k)) : [], hidden: Array.isArray(c.hidden) ? c.hidden : ['closet','car'], wide: c.wide || { stop:true }, byUse: !!c.byUse }; }
@@ -5953,7 +5971,7 @@ document.addEventListener('click', e=>{
   const sh = e.target.closest('[data-heshow]'); if(sh){ const k = sh.dataset.heshow; c.hidden = c.hidden.includes(k) ? c.hidden.filter(x=>x!==k) : c.hidden.concat([k]); hit = true; }
   if(e.target.closest('[data-hebyuse]')){ c.byUse = !c.byUse; if(!c.byUse) c.order = homeOrder({ ...c, byUse:true }); hit = true; }
   if(hit){ saveHomeCfg(c); hapticPulse(); renderIa2Home(); return; }
-  const w = e.target.closest('[data-w]'); if(w && !homeEditing){ const k = { money:null, health:'steps', assets:'stop', todos:'next', food:'kitchen', subscriptions:'recurring', closet:'closet', car:'car', inbox:'inbox' }[w.dataset.w];
+  const w = e.target.closest('[data-w]'); if(w && !homeEditing){ const k = { money:null, health:'steps', assets:'stop', day:'stop', todos:'next', food:'kitchen', subscriptions:'recurring', closet:'closet', car:'car', inbox:'inbox' }[w.dataset.w];
     if(k){ const u = homeUse(); u[k] = (u[k]||0) + 1; try{ localStorage.setItem('otto.wuse', JSON.stringify(u)); }catch(err){} } }
 }, true);
 // numbers count up on the first paint (skipped when the phone asks for reduced motion)
@@ -6799,6 +6817,91 @@ function foodSpendWeek(){
   return { groc, out, total: groc + out, n };
 }
 
+
+// ---------- Day pages: one day on one page — route, stops, purchases, steps, sleep (#/day/2026-10-31) ----------
+const dayView = { open:false, d:null, map:null, cache:{} };
+function haversineKm(a, b){ const R = 6371, r = x=>x*Math.PI/180, dLat = r(b.lat-a.lat), dLon = r(b.lon-a.lon);
+  const h = Math.sin(dLat/2)**2 + Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(dLon/2)**2; return 2*R*Math.asin(Math.sqrt(h)); }
+async function dayPoints(d){
+  const loaded = (mapData.points||[]).filter(p=>p.lat != null && isoOf(p.recorded_at) === d);
+  if(loaded.length || d >= isoAddDays(localToday(), -6)) return loaded;
+  if(dayView.cache[d]) return dayView.cache[d];
+  try{ const a = new Date(d + 'T00:00').toISOString(), b = new Date(isoAddDays(d, 1) + 'T00:00').toISOString();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/location_points?select=recorded_at,lat,lon&recorded_at=gte.${encodeURIComponent(a)}&recorded_at=lt.${encodeURIComponent(b)}&order=recorded_at.asc&limit=5000`, { headers: authHeaders() });
+    return dayView.cache[d] = r.ok ? await r.json() : []; }catch(e){ return []; }
+}
+function lastDayWithPoints(before){
+  const days = [...new Set((mapData.points||[]).filter(p=>p.lat != null).map(p=>isoOf(p.recorded_at)))].filter(x=>x < before).sort();
+  return days.pop() || null;
+}
+async function openDayPage(d, fromRoute){
+  d = /^\d{4}-\d{2}-\d{2}$/.test(d || '') ? d : localToday();
+  if(d > localToday()) d = localToday();
+  let el = document.getElementById('dayPage');
+  if(!el){ el = document.createElement('div'); el.id = 'dayPage'; el.className = 'daypage'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Your day'); document.body.appendChild(el); }
+  const wasOpen = dayView.open, dir = wasOpen && dayView.d ? Math.sign(d.localeCompare(dayView.d)) : 0;
+  dayView.open = true; dayView.d = d; el.hidden = false; document.body.classList.add('daying');
+  if(!fromRoute) syncRoute(wasOpen);   // flipping days replaces the address, so ✕ closes the page instead of stepping back a day
+  await renderDayPage(dir);
+}
+function closeDayPage(){ const el = document.getElementById('dayPage'); if(el) el.hidden = true; dayView.open = false; document.body.classList.remove('daying'); if(dayView.map){ dayView.map.remove(); dayView.map = null; } }
+async function renderDayPage(dir){
+  const el = document.getElementById('dayPage'); if(!el || !dayView.open) return;
+  const d = dayView.d, today = localToday(), isToday = d === today;
+  if(dayView.map){ dayView.map.remove(); dayView.map = null; }
+  el.innerHTML = `<div class="dp-head"><button type="button" class="deck-x" data-day-close aria-label="Close day">✕</button><div class="dp-when"><b>${isToday ? 'Today' : d === isoAddDays(today,-1) ? 'Yesterday' : new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'long'})}</b><span>${new Date(d+'T12:00').toLocaleDateString('en-US',{month:'long', day:'numeric', year: d.slice(0,4) === today.slice(0,4) ? undefined : 'numeric'})}</span></div>
+    <button type="button" class="dp-nav" data-day-step="-1" aria-label="Previous day">‹</button><button type="button" class="dp-nav" data-day-step="1" aria-label="Next day" ${isToday ? 'disabled' : ''}>›</button></div>
+    <div class="dp-body" id="dpBody"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>`;
+  const pts = (await dayPoints(d)).filter(p=>p.lat != null).sort((a,b)=>String(a.recorded_at).localeCompare(String(b.recorded_at)));
+  if(!dayView.open || dayView.d !== d) return;
+  const visits = (mapData.visits||[]).filter(v=>v.arrived_at && isoOf(v.arrived_at) === d && v.status !== 'declined').sort((a,b)=>a.arrived_at.localeCompare(b.arrived_at));
+  const buys = (allTxns||[]).filter(t=>Number(t.amount_cents) < 0 && !t.exclude_from_budget && (t.authorized_date || t.transaction_date) === d);
+  const geoBuys = (mapData.txns||[]).filter(t=>t.location_lat != null && t.transaction_date === d);
+  const spent = buys.reduce((a,t)=>a - Number(t.amount_cents), 0);
+  let km = 0; for(let i=1;i<pts.length;i++){ const s1 = haversineKm(pts[i-1], pts[i]); if(s1 < 5) km += s1; }   // ignore GPS jumps
+  const act = ((lastHealthData && lastHealthData.daily) || []).find(r=>r.activity_date === d) || (stepHistory && stepHistory.has(d) ? { steps: stepHistory.get(d) } : null);
+  const sl = ((lastHealthData && lastHealthData.sleep) || []).find(r=>r.sleep_date === d);
+  const done = (allTodos||[]).filter(t=>t.completed_at && isoOf(t.completed_at) === d);
+  const stat = (label, val, sub) => `<div class="dp-stat"><span>${label}</span><b>${val}</b>${sub ? `<em>${sub}</em>` : ''}</div>`;
+  const stats = `<div class="dp-stats">${stat('Steps', act && act.steps != null ? Number(act.steps).toLocaleString() : '—')}${stat('Spent', money(spent), buys.length ? `${buys.length} purchase${buys.length===1?'':'s'}` : '')}${stat('Moved', pts.length > 1 ? `${(km*0.621).toFixed(1)} mi` : '—')}${stat('Slept', sl && sl.asleep_min ? hm(sl.asleep_min) : '—')}</div>`;
+  // one timeline: stops with times; purchases (the bank gives dates, not times) and finished todos after
+  const rows = visits.map(v=>`<div class="dp-row"><span class="dp-time">${clockTime(v.arrived_at).replace(' AM','a').replace(' PM','p')}</span><i class="dp-dot place" aria-hidden="true"></i><div><b>${esc(v.place || 'Stop')}</b><span>${v.is_open ? 'here now' : v.minutes ? fmtMinutes(v.minutes) : ''}${v.status === 'suggested' ? ' · not named yet' : ''}</span></div></div>`).join('')
+    + buys.map(t=>`<div class="dp-row"><span class="dp-time">·</span><i class="dp-dot buy" aria-hidden="true"></i><div><b>${esc(t.merchant || t.description || 'Purchase')}</b><span>${money(-Number(t.amount_cents))}${geoBuys.some(g=>g.id === t.id) ? ' · on the map' : ''}</span></div></div>`).join('')
+    + done.map(t=>`<div class="dp-row"><span class="dp-time">✓</span><i class="dp-dot todo" aria-hidden="true"></i><div><b>${esc(t.title)}</b><span>done</span></div></div>`).join('');
+  const lastD = !pts.length ? lastDayWithPoints(d) : null;
+  const mapBlock = pts.length || visits.some(v=>v.lat != null) || geoBuys.length ? '<div id="dpMap" class="dp-map" role="img" aria-label="Map of where you went"></div>'
+    : `<div class="dp-nomap"><span>No location for this day.</span>${lastD ? `<button type="button" class="link-btn" data-day-go="${lastD}">Last day with a route: ${shortDate(lastD)} ›</button>` : ''}</div>`;
+  document.getElementById('dpBody').innerHTML = `${mapBlock}${stats}<div class="section-title">The day<span>${visits.length} stop${visits.length===1?'':'s'}</span></div>
+    <div class="gcard dp-list">${rows || '<div class="empty">Nothing recorded for this day.</div>'}</div>
+    <button type="button" class="link-row" data-day-places>Open in Places ›</button>`;
+  if(dir && !reduceMotion()){ const b = document.getElementById('dpBody'); b.animate([{ opacity:0, transform:`translateX(${dir*40}px)` }, { opacity:1, transform:'none' }], { duration:260, easing:EASE }); }
+  if(document.getElementById('dpMap') && typeof L !== 'undefined'){
+    try{ const m = dayView.map = L.map('dpMap', { zoomControl:false, attributionControl:false, tap:false });
+      makeBaseLayer().addTo(m); const bounds = [];
+      if(pts.length > 1){ const line = simplifyPts(pts, 10); L.polyline(line, { color:'#8BBCA1', weight:4, opacity:.95, lineCap:'round', lineJoin:'round', interactive:false }).addTo(m); line.forEach(x=>bounds.push(x)); }
+      visits.filter(v=>v.lat != null).forEach((v,i)=>{ bounds.push([v.lat, v.lon]); L.circleMarker([v.lat, v.lon], { radius:8, color:'#0C0F0E', weight:3, fillColor:'#ECF1EE', fillOpacity:1 }).bindTooltip(`${esc(v.place || 'Stop')} · ${clockTime(v.arrived_at)}`, { direction:'top', offset:[0,-6] }).addTo(m); });
+      geoBuys.forEach(t=>{ bounds.push([t.location_lat, t.location_lon]); L.circleMarker([t.location_lat, t.location_lon], { radius:6, color:'#0C0F0E', weight:2, fillColor:'#E9B35C', fillOpacity:1 }).bindTooltip(`${esc(t.merchant || 'Purchase')} · ${money(Math.abs(t.amount_cents))}`, { direction:'top', offset:[0,-6] }).addTo(m); });
+      if(bounds.length > 1) m.fitBounds(bounds, { padding:[24,24], maxZoom:16 }); else if(bounds.length) m.setView(bounds[0], 15);
+    }catch(e){ console.error('day map', e); }
+  }
+  wireDaySwipe();
+}
+function wireDaySwipe(){
+  const b = document.getElementById('dpBody'); if(!b) return; let x0 = null, y0 = 0;
+  b.addEventListener('touchstart', e=>{ if(e.target.closest('.dp-map')) return; const t = e.touches[0]; x0 = t.clientX; y0 = t.clientY; }, { passive:true });
+  b.addEventListener('touchend', e=>{ if(x0 == null) return; const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+    if(Math.abs(dx) > 70 && Math.abs(dy) < 50){ const n = isoAddDays(dayView.d, dx < 0 ? 1 : -1); if(n <= localToday()){ openDayPage(n); hapticPulse(); } } }, { passive:true });
+}
+document.addEventListener('click', e=>{
+  const pg = document.getElementById('dayPage'); if(!pg || pg.hidden || !pg.contains(e.target)) return;
+  if(e.target.closest('[data-day-close]')){ goBack(); return; }
+  const st = e.target.closest('[data-day-step]'); if(st){ const n = isoAddDays(dayView.d, Number(st.dataset.dayStep)); if(n <= localToday()) openDayPage(n); return; }
+  const go = e.target.closest('[data-day-go]'); if(go){ openDayPage(go.dataset.dayGo); return; }
+  if(e.target.closest('[data-day-places]')){ const d = dayView.d; closeDayPage(); openArea('assets'); setTimeout(()=>{ try{ tlDay = d; mapDay = d; mapFitKey = ''; renderAssetMap(); renderTimeline(); }catch(err){} }, 400); }
+});
+document.addEventListener('keydown', e=>{ const pg = document.getElementById('dayPage'); if(!pg || pg.hidden) return;
+  if(e.key === 'Escape') goBack(); else if(e.key === 'ArrowLeft') openDayPage(isoAddDays(dayView.d, -1)); else if(e.key === 'ArrowRight' && dayView.d < localToday()) openDayPage(isoAddDays(dayView.d, 1)); });
+
 // ---------- motion: sliding tab underline, directional tab + page changes ----------
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
@@ -6854,6 +6957,7 @@ openArea = function(k){
 // ---------- routes (#/money, #/car/2): reload lands where you were; edge-swipe and ‹ go back ----------
 let navDepth = 0, routing = false;
 function currentRoute(){
+  if(dayView.open) return '#/day/' + dayView.d;
   if(!sheetArea) return '#/today';
   if(sheetArea === 'life'){ const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : 'all'; return '#/' + (k || 'all') + (k !== 'all' && lifeSection ? '/' + lifeSection : ''); }
   return '#/' + sheetArea;
@@ -6866,12 +6970,14 @@ function applyRoute(hash){
   const [k, sec] = String(hash || '').replace(/^#\/?/, '').split('/');
   routing = true;
   try{
+    if(k === 'day'){ openDayPage(sec, true); return; }
+    if(dayView.open) closeDayPage();
     if(k && AREAS2[k] && k !== 'today'){ openArea(k); if(sec && AREAS2[k].life){ lifeSection = Number(sec) || 0; renderLife(); } }
     else if(k && AREAS[k]) openSheet(k);
     else openArea('today');
   } finally { routing = false; }
 }
-function goBack(){ navDir = -1; if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
+function goBack(){ navDir = -1; if(dayView.open && navDepth <= 0){ closeDayPage(); openArea('today'); syncRoute(true); return; } if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
 window.addEventListener('popstate', e=>{ const d = (e.state && e.state.otto) || 0; navDir = d < navDepth ? -1 : 1; navDepth = d; applyRoute(location.hash); });
 (function(){   // swipe right from the left edge = back; the page follows your finger
   let sx = 0, sy = 0, dx = 0, on = false;
