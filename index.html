@@ -1928,6 +1928,21 @@ body.chatting .otto-chat-starters{display:none}
   .dp-time{font:500 12px var(--mono); color:var(--text-muted); padding-top:2px;} .dp-row b{display:block; font:600 15px var(--sans);} .dp-row span{font:13px var(--sans); color:var(--text-muted);}
   .dp-dot{width:10px; height:10px; border-radius:5px; margin-top:5px;} .dp-dot.place{background:var(--text);} .dp-dot.buy{background:var(--amber); border-radius:3px;} .dp-dot.todo{background:var(--accent);}
   body.daying .ia2-dock{display:none !important;}
+
+  /* ===== Build .67: Plan tabs, Upcoming, weekly reset ===== */
+  #panelTodos[data-ptab="today"] [data-pt]:not([data-pt="today"]), #panelTodos[data-ptab="upcoming"] [data-pt]:not([data-pt="upcoming"]), #panelTodos[data-ptab="backlog"] [data-pt]:not([data-pt="backlog"]){display:none !important;}
+  #panelTodos:not([data-ptab="backlog"]) #todoSeg#todoSeg#todoSeg#todoSeg{display:none !important;}   /* beats the older #todoSeg x3 display rule */
+  .reset-chip{all:unset; box-sizing:border-box; cursor:pointer; display:grid !important; grid-template-columns:1fr auto; gap:2px 10px; width:100%; margin:4px 0 12px; padding:14px 16px; border-radius:18px; background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 40%, transparent);}
+  .reset-chip[hidden]{display:none !important;} .reset-chip b{font:700 15px var(--sans);} .reset-chip span{grid-column:1; font:13px var(--sans); color:var(--text-muted);} .reset-chip em{grid-column:2; grid-row:1 / span 2; align-self:center; font:700 14px var(--sans); font-style:normal; color:var(--accent-text);}
+  .reset-wdg{background:var(--accent-soft) !important; border-color:color-mix(in srgb, var(--accent) 40%, transparent) !important;} .reset-wdg .wdg-sub{color:var(--accent-text); font-weight:700;}
+  .up-day{margin:14px 0 4px;} .up-date{display:flex; justify-content:space-between; align-items:baseline; padding:0 4px 6px;} .up-date b{font:700 14px var(--sans);} .up-date span{font:12px var(--mono); color:var(--text-faint);}
+  .up-list{padding:2px 14px !important;} .up-row{display:grid; grid-template-columns:12px minmax(0,1fr); gap:10px; align-items:start; padding:10px 0; border-bottom:1px solid var(--border);} .up-row:last-child{border-bottom:none;}
+  .up-row b{display:block; font:600 15px var(--sans);} .up-row span{font:12.5px var(--sans); color:var(--text-muted);}
+  .up-dot{width:10px; height:10px; border-radius:5px; margin-top:5px; background:var(--text-muted);} .up-dot.event{background:var(--sky);} .up-dot.todo{background:var(--accent);} .up-dot.bill{background:var(--amber); border-radius:3px;} .up-dot.doc{background:var(--coral);} .up-dot.school{background:#C9A0FF;} .up-dot.money{background:var(--accent-text); border-radius:3px;}
+  .rs-dots{display:flex; gap:6px; justify-content:center; margin:6px 0 4px;} .rs-dots i{width:28px; height:4px; border-radius:2px; background:var(--surface-2);} .rs-dots i.on{background:var(--accent);} .rs-dots i.done{background:color-mix(in srgb, var(--accent) 50%, transparent);}
+  .rs-card{display:flex; flex-direction:column; gap:8px;} .rs-h{margin:6px 0 0; font:800 26px var(--sans); letter-spacing:-.01em;} .rs-p{margin:0; font:15px var(--sans); color:var(--text-muted); line-height:1.45;}
+  .rs-list{padding:4px 14px !important; margin-top:6px;} .rs-list .kv{display:flex; justify-content:space-between; padding:9px 0; border-bottom:1px solid var(--border); font:14.5px var(--sans);} .rs-list .kv:last-child{border-bottom:none;}
+  .rs-go{align-self:flex-start; margin-top:8px;}
 </style>
 </head>
 <body class="home-v2">
@@ -2000,25 +2015,28 @@ body.chatting .otto-chat-starters{display:none}
       <div id="homeCancelledList" style="display:none;"></div>
     </div>
 
-    <div class="tab-panel" id="panelTodos">
+    <div class="tab-panel" id="panelTodos" data-ptab="today">
       <div class="studio-page-head"><div class="studio-kicker">YOUR WORKSPACE <span class="studio-dot"></span> STAY ON TRACK</div><h2>Make today<br><span>count.</span></h2><p>Focus on what matters, one task at a time.</p></div>
-      <div class="plan-week" aria-label="Task agenda"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><div class="plan-week-top"><div><span class="plan-overline">YOUR WEEK</span><h3 id="planWeekTitle">Events, todos, meals, bills</h3></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" aria-live="polite"></div>
-      <form id="quickAddForm" class="quick-add-form">
+      <div class="ia2-subtabs" id="planTabs" role="tablist" aria-label="Plan"><button type="button" role="tab" data-ptab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-ptab="upcoming" aria-selected="false">Upcoming</button><button type="button" role="tab" data-ptab="backlog" aria-selected="false">Backlog</button></div>
+      <button type="button" class="reset-chip" data-reset-start data-pt="today" hidden></button>
+      <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><div class="plan-week-top"><div><span class="plan-overline">YOUR WEEK</span><h3 id="planWeekTitle">Events, todos, meals, bills</h3></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div>
+      <form id="quickAddForm" class="quick-add-form" data-pt="today">
         <input type="text" id="quickAddInput" placeholder="Add a todo for today…" required>
         <label class="sr-only" for="quickAddWhen">Schedule task</label><select id="quickAddWhen" aria-label="Schedule task"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="selected">Selected day</option><option value="anytime">Anytime</option></select>
         <button class="save-btn" type="submit">Add</button>
       </form>
-      <div id="triageCard"></div><div class="seg" id="todoSeg"><button type="button" data-tview="later" class="active">Later</button><button type="button" data-tview="someday">Someday</button><button type="button" data-tview="done">Done</button></div>
+      <div id="planUpcoming" data-pt="upcoming"></div>
+      <div id="triageCard" data-pt="backlog"></div><div class="seg" id="todoSeg" data-pt="backlog"><button type="button" data-tview="later" class="active">Later</button><button type="button" data-tview="someday">Someday</button><button type="button" data-tview="done">Done</button></div>
       <!-- Build 003: local, cross-view todo search -->
-      <div class="todo-search-wrap">
+      <div class="todo-search-wrap" data-pt="backlog">
         <label class="sr-only" for="todoSearch">Search all todos</label>
         <input id="todoSearch" type="search" placeholder="Search all todos…" autocomplete="off" spellcheck="false">
         <button id="todoSearchClear" type="button" aria-label="Clear todo search" hidden>Clear</button>
       </div>
-      <div id="todoSearchCount" class="todo-search-count" role="status" aria-live="polite" hidden></div>
+      <div id="todoSearchCount" data-pt="backlog" class="todo-search-count" role="status" aria-live="polite" hidden></div>
       <div class="controls" id="statusFilters" hidden></div>
       <div id="errorBanner"></div>
-      <div class="todo-list" id="todoList"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
+      <div class="todo-list" id="todoList" data-pt="backlog"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
 
     <div class="tab-panel" id="panelAccounts">
@@ -2181,7 +2199,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-01.66';
+const APP_BUILD = '2026-11-01.67';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4031,9 +4049,10 @@ function triageQueue(todos){
     .sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
 }
 function renderTriageCard(todos){
+  try{ renderPlanTabs(); }catch(e){}
   const el = document.getElementById('triageCard'); if(!el) return;
   const q = triageQueue(todos);
-  el.innerHTML = q.length ? `<button class="triage-card" type="button" id="triageStart"><b>${q.length} todo${q.length===1?' needs':'s need'} a decision</b><span>Date it, park it for someday, mark it done, or drop it. About ${Math.max(1, Math.round(q.length*5/60))} min.</span><span class="triage-cta">Start triage ›</span></button>` : '';
+  el.innerHTML = q.length ? `<button class="triage-card" type="button" data-triage-deck><b>${q.length} todo${q.length===1?' needs':'s need'} a decision</b><span>Date it, park it for someday, mark it done, or drop it. About ${Math.max(1, Math.round(q.length*5/60))} min.</span><span class="triage-cta">Start triage ›</span></button>` : '';
 }
 let triageList = [], triageIdx = 0;
 function renderTriage(){
@@ -5337,6 +5356,7 @@ function renderIa2HomeNow(){
     foodW = wdg('money', 'FOOD', fs.total ? `<b class="wdg-mid">${money(fs.total)}</b><span class="wdg-sub">this week · ${fs.n} purchase${fs.n===1?'':'s'}</span>
       <span class="food-split" role="img" aria-label="Eating out ${money(fs.out)}, groceries ${money(fs.groc)}"><i class="fo" style="flex:${fs.out||0.001}"></i><i class="fg" style="flex:${fs.groc||0.001}"></i></span>
       <span class="wdg-sub"><b class="${pOut >= 60 ? 'warn' : ''}">${pOut}% eating out</b> · ${money(fs.groc)} groceries</span>` : '<b class="wdg-mid">$0</b><span class="wdg-sub">no food spending yet this week</span>', { sub:'week' }); }
+  if(typeof resetDue === 'function' && resetDue()) hero = hero.replace(/<\/button>$/, '') + '</button>' + `<button type="button" class="wdg wide reset-wdg" data-reset-start><span class="wdg-head"><span>WEEKLY RESET</span><em>about 3 min</em></span><span class="wdg-li">Close the week, clear the inbox, sort todos, plan meals</span><span class="wdg-sub">Start ›</span></button>`;
   const W = { inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));
   const sized = k => W[k].replace('class="wdg ', `class="wdg ${cfg.wide[k] ? 'wide ' : ''}`).replace(' wide wide', ' wide');
@@ -6568,7 +6588,7 @@ function openDeep(k, sub){
   openArea(k); if(!sub) return;
   setTimeout(()=>{
     if(k === 'money' && typeof setMoneySeg === 'function') setMoneySeg(sub);
-    else { const b = [...document.querySelectorAll('#healthTabsBar [data-htab], #sheet [data-lsec]')].find(x=>x.textContent.trim().toLowerCase() === String(sub).toLowerCase()); if(b) b.click(); }
+    else { const b = [...document.querySelectorAll('#healthTabsBar [data-htab], #sheet [data-lsec], #planTabs [data-ptab]')].find(x=>x.textContent.trim().toLowerCase() === String(sub).toLowerCase()); if(b) b.click(); }
   }, 60);
 }
 // ---------- tiny charts for Home widgets ----------
@@ -6668,15 +6688,15 @@ async function deckTxn(id){
   try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/transactions?id=eq.${encodeURIComponent(id)}&select=id,transaction_date,authorized_date,description,merchant,amount_cents,category_id,exclude_from_budget,plaid_category_primary,account:accounts(name)`, { headers: authHeaders() });
     t = r.ok ? (await r.json())[0] : null; if(t) (allTxns = allTxns || []).push(t); return t || null; }catch(e){ return null; }
 }
-async function openInboxDeck(){
-  if(!clarifications.length) await refreshClarifications();
-  deck.items = clarifications.slice(); deck.i = 0;
+async function openInboxDeck(items, onDone){
+  if(!items && !clarifications.length) await refreshClarifications();
+  deck.items = (items || clarifications).slice(); deck.i = 0; deck.onDone = onDone || null;
   let el = document.getElementById('inboxDeck');
   if(!el){ el = document.createElement('div'); el.id = 'inboxDeck'; el.className = 'deck'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Inbox'); document.body.appendChild(el); }
   el.hidden = false; document.body.classList.add('decking');
   await renderDeck(true);
 }
-function closeInboxDeck(){ const el = document.getElementById('inboxDeck'); if(el) el.hidden = true; document.body.classList.remove('decking'); if(deck.map){ deck.map.remove(); deck.map = null; } renderIa2Home(); }
+function closeInboxDeck(){ const el = document.getElementById('inboxDeck'); if(el) el.hidden = true; document.body.classList.remove('decking'); if(deck.map){ deck.map.remove(); deck.map = null; } renderIa2Home(); renderPlanTabs(); const cb = deck.onDone; deck.onDone = null; if(cb) cb(); }
 async function renderDeck(first){
   const el = document.getElementById('inboxDeck'); if(!el || el.hidden) return;
   if(deck.map){ deck.map.remove(); deck.map = null; }
@@ -6901,6 +6921,95 @@ document.addEventListener('click', e=>{
 });
 document.addEventListener('keydown', e=>{ const pg = document.getElementById('dayPage'); if(!pg || pg.hidden) return;
   if(e.key === 'Escape') goBack(); else if(e.key === 'ArrowLeft') openDayPage(isoAddDays(dayView.d, -1)); else if(e.key === 'ArrowRight' && dayView.d < localToday()) openDayPage(isoAddDays(dayView.d, 1)); });
+
+
+// ---------- Plan: Today · Upcoming · Backlog ----------
+document.addEventListener('click', e=>{ if(e.target.closest('[data-triage-deck]')) openInboxDeck(triageQueue(allTodos).map(t=>({ kind:'todo', ref_id:t.code, title:t.title }))); });
+function setPlanTab(t){
+  const panel = document.getElementById('panelTodos'); if(!panel) return; panel.dataset.ptab = t;
+  document.querySelectorAll('#planTabs [data-ptab]').forEach(b=>{ const on = b.dataset.ptab === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+  if(t === 'upcoming') renderUpcoming();
+  const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0;
+}
+document.addEventListener('click', e=>{ const b = e.target.closest('#planTabs [data-ptab]'); if(b) setPlanTab(b.dataset.ptab); });
+function renderPlanTabs(){
+  const bl = document.querySelector('#planTabs [data-ptab="backlog"]'); if(!bl) return;
+  const n = (allTodos||[]).filter(t=>t.status === 'open' && !t.due_date).length; bl.textContent = n ? `Backlog ${n}` : 'Backlog';
+  const chip = document.querySelector('.reset-chip'); if(chip){ const due = resetDue(); chip.hidden = !due; chip.innerHTML = due ? `<b>Weekly reset</b><span>Close the week, clear the inbox, sort todos, plan meals · about 3 min</span><em>Start ›</em>` : ''; }
+}
+// everything with a date in the next 30 days, from every area
+async function renderUpcoming(){
+  const el = document.getElementById('planUpcoming'); if(!el) return;
+  const need = ['documents','subscriptions','assignments','vehicles'].filter(t=>!lifeRows[t]);
+  if(need.length){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>'; try{ await lifeLoad(need); }catch(e){} }
+  const today = localToday(), end = isoAddDays(today, 30), by = {};
+  const add = (d, it) => { if(!d || d < today || d > end) return; (by[d] = by[d] || []).push(it); };
+  for(let i=0;i<=30;i++){ const d = isoAddDays(today, i); planItemsFor(d).filter(x=>x.kind !== 'meal' && !(i === 0 && x.late)).forEach(x=>add(d, { kind:x.kind, title:x.title, sub: x.kind === 'event' ? x.time : x.kind === 'todo' ? 'todo' : (x.sub || '').toLowerCase() })); }
+  (lifeRows.documents||[]).forEach(r=>{ if(r.expires_on) add(r.expires_on, { kind:'doc', title:`${r.name || 'Document'} expires`, sub:'documents' }); });
+  (lifeRows.subscriptions||[]).filter(r=>r.status !== 'cancelled').forEach(r=>{ const nm = String(r.name||'').toLowerCase();   // skip when the same charge is already listed as a bill that day
+    if((by[r.next_charge_on]||[]).some(x=>x.kind === 'bill' && x.title.toLowerCase().startsWith(nm))) return;
+    add(r.next_charge_on, { kind:'bill', title:`${r.name} renews · ${money(r.amount_cents||0)}`, sub:'subscription' }); });
+  (lifeRows.assignments||[]).filter(r=>!r.done && r.due_at).forEach(r=>add(isoOf(r.due_at), { kind:'school', title:r.title, sub:r.kind || 'school' }));
+  const S = lastBudgetData && lastBudgetData.summary; if(S && S.week_end) add(isoAddDays(S.week_end, 1), { kind:'money', title:'New budget week', sub:'spending resets' });
+  const days = Object.keys(by).sort();
+  const label = d => d === today ? 'Today' : d === isoAddDays(today,1) ? 'Tomorrow' : new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
+  el.innerHTML = days.length ? days.map(d=>`<div class="up-day"><div class="up-date"><b>${label(d)}</b><span>${Math.round((new Date(d) - new Date(today))/86400000) || ''}${d !== today ? 'd' : ''}</span></div><div class="gcard up-list">${by[d].map(x=>`<div class="up-row"><i class="up-dot ${x.kind}" aria-hidden="true"></i><div><b>${esc(x.title)}</b><span>${esc(x.sub || '')}</span></div></div>`).join('')}</div></div>`).join('')
+    : '<div class="empty">Nothing dated in the next 30 days.</div>';
+}
+
+// ---------- Sunday reset: close the week → inbox → todos → next week's meals ----------
+const RESET_STEPS = ['week','inbox','todos','meals','done'];
+const reset = { on:false, step:0 };
+function resetWeekKey(){ const S = lastBudgetData && lastBudgetData.summary; return S && S.week_start || isoAddDays(localToday(), -((new Date().getDay()+6)%7)); }
+function resetDue(){ let doneFor = null; try{ doneFor = localStorage.getItem('otto.reset'); }catch(e){} const dow = new Date().getDay(); return (dow === 0 || dow === 6 || (dow === 1 && new Date().getHours() < 12)) && doneFor !== resetWeekKey(); }
+function resetTodoItems(){ const today = localToday(); return (allTodos||[]).filter(t=>t.status === 'open' && !t.someday && (!t.due_date ? triageQueue([t]).length : t.due_date < today)).map(t=>({ kind:'todo', ref_id:t.code, title:t.title })); }
+function startReset(){ reset.on = true; reset.step = 0; renderReset(); }
+function renderReset(){
+  let el = document.getElementById('resetFlow');
+  if(!el){ el = document.createElement('div'); el.id = 'resetFlow'; el.className = 'deck reset'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Weekly reset'); document.body.appendChild(el); }
+  el.hidden = false; document.body.classList.add('decking');
+  const k = RESET_STEPS[reset.step], m = homeMoney(), S = lastBudgetData && lastBudgetData.summary;
+  const dots = RESET_STEPS.slice(0,4).map((x,i)=>`<i class="${i < reset.step ? 'done' : i === reset.step ? 'on' : ''}"></i>`).join('');
+  let body = '';
+  if(k === 'week'){
+    const cats = ((lastBudgetData && lastBudgetData.categories) || []).filter(c=>c.category_type !== 'savings' && Number(c.spent_cents) > 0).sort((a,b)=>Number(b.spent_cents)-Number(a.spent_cents)).slice(0,4);
+    const fs = typeof foodSpendWeek === 'function' ? foodSpendWeek() : null;
+    body = `<div class="deck-kind">1 · Close the week</div><h3 class="rs-h">${m ? (m.left >= 0 ? `${money(m.left)} under budget` : `${money(-m.left)} over budget`) : 'This week'}</h3>
+      <p class="rs-p">${m ? `${money(m.spent)} spent of ${money(m.planned)}${S ? ` · ${dateRange(S.week_start, S.week_end)}` : ''}` : 'Budget not loaded yet.'}</p>
+      ${cats.length ? `<div class="gcard rs-list">${cats.map(c=>`<div class="kv"><span>${esc(c.category)}</span><b>${money(Number(c.spent_cents))}</b></div>`).join('')}</div>` : ''}
+      ${fs && fs.total ? `<p class="rs-p">Food: ${money(fs.total)}, ${fs.total ? Math.round(100*fs.out/fs.total) : 0}% eating out.</p>` : ''}`;
+  } else if(k === 'inbox'){
+    const n = clarifications.length;
+    body = `<div class="deck-kind">2 · Inbox</div><h3 class="rs-h">${n ? `${n} thing${n===1?'':'s'} to sort` : 'Inbox is clear'}</h3><p class="rs-p">${n ? 'Purchases to file, stops to name, todos to decide. Swipe through them.' : 'Nothing to file or name.'}</p>
+      ${n ? '<button type="button" class="save-btn rs-go" data-reset-deck="inbox">Clear the inbox</button>' : ''}`;
+  } else if(k === 'todos'){
+    const q = resetTodoItems();
+    body = `<div class="deck-kind">3 · Todos</div><h3 class="rs-h">${q.length ? `${q.length} todo${q.length===1?'':'s'} to decide` : 'Todos are sorted'}</h3><p class="rs-p">${q.length ? 'Overdue or undated for a week. Today, someday, done or drop.' : 'Everything open has a date or a home.'}</p>
+      ${q.length ? '<button type="button" class="save-btn rs-go" data-reset-deck="todos">Sort todos</button>' : ''}`;
+  } else if(k === 'meals'){
+    body = `<div class="deck-kind">4 · Next week's meals</div><h3 class="rs-h">Plan a few dinners</h3><p class="rs-p">Cooking 3 nights is the easiest way to bring the eating-out share down.</p>
+      <button type="button" class="save-btn rs-go" data-reset-meals>Plan 3 dinners with Otto</button><button type="button" class="link-btn" data-reset-kitchen>See what's at home first</button>`;
+  } else {
+    try{ localStorage.setItem('otto.reset', resetWeekKey()); }catch(e){}
+    body = `<div class="deck-done"><div class="deck-ring" aria-hidden="true"></div><h3>Week reset</h3><p>You're set for next week.</p><button type="button" class="save-btn" data-reset-close>Back to Today</button></div>`;
+  }
+  el.innerHTML = `<div class="deck-head"><button type="button" class="deck-x" data-reset-close aria-label="Close weekly reset">✕</button><div><b>Weekly reset</b><span>${k === 'done' ? 'Done' : `Step ${reset.step+1} of 4`}</span></div></div>
+    <div class="rs-dots" aria-hidden="true">${dots}</div>
+    <div class="deck-stage"><div class="deck-card next rs-card">${body}</div></div>
+    ${k === 'done' ? '' : `<div class="deck-foot"><button type="button" class="deck-btn no" data-reset-back ${reset.step ? '' : 'disabled'}>Back</button><button type="button" class="deck-btn yes" data-reset-next>${k === 'meals' ? 'Finish' : 'Next'}</button></div>`}`;
+  (el.querySelector('.rs-go') || el.querySelector('[data-reset-next]') || el.querySelector('.save-btn')).focus({ preventScroll:true });
+}
+function closeReset(){ reset.on = false; const el = document.getElementById('resetFlow'); if(el) el.hidden = true; document.body.classList.remove('decking'); renderPlanTabs(); renderIa2Home(); }
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-reset-start]')){ startReset(); return; }
+  const el = document.getElementById('resetFlow'); if(!el || el.hidden || !el.contains(e.target)) return;
+  if(e.target.closest('[data-reset-close]')){ closeReset(); return; }
+  if(e.target.closest('[data-reset-next]')){ reset.step = Math.min(RESET_STEPS.length-1, reset.step+1); renderReset(); hapticPulse(); return; }
+  if(e.target.closest('[data-reset-back]')){ reset.step = Math.max(0, reset.step-1); renderReset(); return; }
+  const dk = e.target.closest('[data-reset-deck]'); if(dk){ el.hidden = true; openInboxDeck(dk.dataset.resetDeck === 'todos' ? resetTodoItems() : null, ()=>{ reset.step++; renderReset(); }); return; }
+  if(e.target.closest('[data-reset-meals]')){ closeReset(); openChatWith("Plan 3 dinners for next week using what I already have at home, and add what's missing to my grocery list."); return; }
+  if(e.target.closest('[data-reset-kitchen]')){ closeReset(); openArea('food'); return; }
+});
 
 // ---------- motion: sliding tab underline, directional tab + page changes ----------
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
