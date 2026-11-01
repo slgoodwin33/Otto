@@ -1905,6 +1905,11 @@ body.chatting .otto-chat-starters{display:none}
   body.decking .ia2-dock{display:none !important;}
   body.decking .otto-notice{z-index:2147483200 !important; top:auto !important; bottom:calc(env(safe-area-inset-bottom,0px) + 104px) !important;}   /* Undo sits above the card buttons, not over the header */
   @media (prefers-reduced-motion: reduce){ .deck, .deck-card, .deck-ring{animation:none !important;} }
+
+  /* ===== Build .65: Kitchen Cook · Shop · Plan, food widget ===== */
+  .plan-ask{margin-top:6px;}
+  .food-split{display:flex; gap:2px; height:8px; border-radius:4px; overflow:hidden; margin:10px 0 6px;} .food-split i{display:block;} .food-split .fo{background:var(--amber);} .food-split .fg{background:var(--accent);}
+  .wdg-sub b.warn{color:var(--amber);}
 </style>
 </head>
 <body class="home-v2">
@@ -2112,12 +2117,10 @@ body.chatting .otto-chat-starters{display:none}
     <div class="tab-panel" id="panelFood">
       <div class="studio-page-head food-head"><div class="studio-kicker">YOUR KITCHEN <span class="studio-dot"></span> FOOD & PLANNING</div><h2>Eat well.<br><span>Plan easy.</span></h2><p>Everything from your fridge to the week ahead.</p></div>
       <div id="foodErrorBanner"></div>
-      <div class="food-sub" id="foodSubTabs">
-        <button class="chip active" data-food="kitchen" type="button">Kitchen</button>
-        <button class="chip" data-food="fridge" type="button">Fridge</button>
-        <button class="chip" data-food="list" type="button">Groceries</button>
-        <button class="chip" data-food="meals" type="button">Meals</button>
-        <button class="chip" data-food="recipes" type="button">Recipes</button>
+      <div class="food-sub" id="foodSubTabs" role="tablist" aria-label="Kitchen">
+        <button class="chip active" data-food="cook" type="button" role="tab" aria-selected="true">Cook</button>
+        <button class="chip" data-food="shop" type="button" role="tab" aria-selected="false">Shop</button>
+        <button class="chip" data-food="plan" type="button" role="tab" aria-selected="false">Plan</button>
       </div>
       <div id="foodContent"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
@@ -2160,7 +2163,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-01.64';
+const APP_BUILD = '2026-11-01.65';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4367,7 +4370,7 @@ document.querySelectorAll('#tabbar .tab-btn').forEach(btn=>{
 
 // ================= FOOD =================
 let foodData = null;
-let foodView = 'kitchen';
+let foodView = 'cook';
 let expandedGroceryId = null;
 let expandedRecipeId = null;
 
@@ -4604,14 +4607,26 @@ function renderFoodRecipes(recipes){
   }).join('');
 }
 
+const PLAN_ASK = '<button type="button" class="save-btn plan-ask" data-plan-ask>Plan 3 dinners from what\'s at home</button>';
 function renderFood(){
   const el = document.getElementById('foodContent');
   if(!foodData) return;
-  if(foodView === 'recipes'){ el.innerHTML = renderFoodRecipes(foodData.recipes); return; }
-  if(foodView === 'kitchen'){ el.innerHTML = renderKitchen(); return; }
-  if(foodView === 'fridge'){ el.innerHTML = renderFoodFridge(foodData); return; }
-  if(!foodData.plan){ el.innerHTML = '<div class="empty">No meal plan yet. Ask Claude to build this week\'s plan.</div>'; return; }
-  el.innerHTML = foodView === 'meals' ? renderFoodMeals(foodData.plan) : renderFoodList(foodData.plan);
+  const plan = foodData.plan, K = kitchenParts(), wait = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
+  const receipt = `<div class="kt-receipt"><b>Add receipts</b><span>Up to 5 photos at a time. Groceries update what's at home and match the bank charge.</span><div><button type="button" class="save-btn" data-receipt="photo">📷 Photos of receipts</button><button type="button" class="link-btn" data-receipt="paste">Paste receipt text</button></div></div>`;
+  if(foodView === 'cook'){
+    el.innerHTML = !K ? wait : `<div class="section-title">Ready to cook<span>${K.ready ? K.ready + ' ready' : ''}</span></div><div class="gcard kt-list">${K.make}</div>
+      ${plan && plan.started_on ? `<div class="section-title">This week's fridge</div>${renderFoodFridge(foodData)}` : ''}
+      <div class="section-title">At home<span>${K.count || ''}</span></div><div class="gcard kt-list">${K.home}</div>`;
+    return;
+  }
+  if(foodView === 'shop'){
+    el.innerHTML = (plan ? renderFoodList(plan) : `<div class="empty">No shopping list yet. Plan a few meals and Otto builds the list from what's missing.${PLAN_ASK}</div>`)
+      + receipt + (K ? `<div class="section-title">Grocery trips</div><div class="gcard kt-list">${K.trips}</div>` : wait);
+    return;
+  }
+  // plan: this week's meals, then recipes
+  el.innerHTML = (plan ? renderFoodMeals(plan) : `<div class="empty">No meal plan this week.${PLAN_ASK}</div>`)
+    + `<div class="section-title">Recipes<span>${(foodData.recipes||[]).length || ''}</span></div>` + renderFoodRecipes(foodData.recipes);
 }
 
 async function refreshFood(){
@@ -4628,8 +4643,8 @@ async function refreshFood(){
 
 document.querySelectorAll('#foodSubTabs .chip').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    document.querySelectorAll('#foodSubTabs .chip').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
+    document.querySelectorAll('#foodSubTabs .chip').forEach(b=>{ b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected', 'true');
     foodView = btn.getAttribute('data-food');
     renderFood();
   });
@@ -5113,8 +5128,9 @@ async function loadKitchen(){
     fetch(`${SUPABASE_URL}/rest/v1/grocery_trips?select=code,store,trip_date,total_cents,transaction_id,source,grocery_trip_items(count)&order=trip_date.desc&limit=12`, { headers: H }).then(r=>r.ok?r.json():[]).catch(()=>[]) ]);
   kitchenData = { pantry: p, canMake: c, trips: t };
 }
+function kitchenParts(){ renderKitchen(); return kitchenParts.last || null; }
 function renderKitchen(){
-  if(!kitchenData){ loadKitchen().then(()=>{ if(foodView === 'kitchen') renderFood(); }); return '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>'; }
+  if(!kitchenData){ loadKitchen().then(()=>{ if(['cook','shop','kitchen'].includes(foodView)) renderFood(); }); return '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>'; }
   const K = kitchenData, LOC = { fridge:'Fridge', freezer:'Freezer', pantry:'Pantry', counter:'Counter' };
   const by = {}; K.pantry.forEach(p=>{ const k = p.location || 'other'; (by[k] = by[k] || []).push(p); });
   const home = K.pantry.length ? Object.keys(by).map(k=>`<div class="kt-loc">${LOC[k] || 'Other'}</div>${by[k].map(p=>`<div class="kt-item"><span>${p.food && p.food.emoji ? p.food.emoji + ' ' : ''}${esc(p.food ? p.food.name : '')}</span><span class="kt-qty ${p.status==='low'?'low':''}">${p.status==='low' ? 'running low' : `${Number(p.quantity)} ${esc(p.unit||'')}`}</span></div>`).join('')}`).join('')
@@ -5122,6 +5138,7 @@ function renderKitchen(){
   const ready = K.canMake.filter(r=>r.required && r.have >= r.required), close = K.canMake.filter(r=>r.required && r.have < r.required && r.have > 0).sort((a,b)=>(b.have/b.required)-(a.have/a.required)).slice(0,3);
   const make = (ready.length || close.length) ? ready.map(r=>`<div class="kt-item"><span>${r.emoji||''} ${esc(r.name)}</span><span class="lf-badge ok">ready</span></div>`).join('') + close.map(r=>`<div class="kt-item"><span>${r.emoji||''} ${esc(r.name)}</span><span class="kt-qty">need ${esc(r.missing||'')}</span></div>`).join('') : '<div class="empty">Nothing you can make yet with what\u2019s recorded.</div>';
   const trips = K.trips.length ? K.trips.map(t=>`<div class="kt-item"><span>${esc(t.store || 'Grocery trip')} · ${shortDate(t.trip_date)}</span><span class="kt-qty">${t.total_cents ? money(t.total_cents) : 'no receipt yet'}${t.transaction_id ? ' · ✓ bank' : ''}</span></div>`).join('') : '<div class="empty">No trips yet.</div>';
+  kitchenParts.last = { home, make, trips, count: K.pantry.length, ready: ready.length };
   return `<div class="kt-receipt"><b>Add receipts</b><span>Any store, up to 5 photos at a time. Groceries go to what's at home, clothes can go to your closet, everything else is kept and matched to its bank charge.</span><div><button type="button" class="save-btn" data-receipt="photo">📷 Photos of receipts</button><button type="button" class="link-btn" data-receipt="paste">Paste receipt text</button></div></div>
     <div class="section-title">At home<span>${K.pantry.length || ''}</span></div><div class="gcard kt-list">${home}</div>
     <div class="section-title">You can make</div><div class="gcard kt-list">${make}</div>
@@ -5297,7 +5314,12 @@ function renderIa2HomeNow(){
   const v0 = (lifeRows.vehicles||[])[0]; let carW = wdg('car', 'CAR', '<span class="wdg-sub">Add your car</span>');
   if(v0){ const order = ['oil','rotation','brakes','battery','wipers','filter'].map(k=>({ k, s: carStatus(k) })), due = order.find(x=>x.s.st==='over') || order.find(x=>x.s.st==='due');
     carW = wdg('car', 'CAR', `<span class="wdg-li">${esc(v0.model || v0.name)}</span><span class="wdg-sub ${due ? 'warn' : ''}">${due ? `${CAR_RULES[due.k].label} ${due.s.st==='over'?'overdue':'due soon'}` : (order.some(x=>x.s.st!=='none') ? 'all good' : 'no services logged')}</span>`); }
-  const W = { inbox, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
+  const fs = foodSpendWeek(); let foodW = wdg('money', 'FOOD', '<span class="wdg-sub">Loading…</span>', { sub:'week' });
+  if(fs){ const pOut = fs.total ? Math.round(100*fs.out/fs.total) : 0;
+    foodW = wdg('money', 'FOOD', fs.total ? `<b class="wdg-mid">${money(fs.total)}</b><span class="wdg-sub">this week · ${fs.n} purchase${fs.n===1?'':'s'}</span>
+      <span class="food-split" role="img" aria-label="Eating out ${money(fs.out)}, groceries ${money(fs.groc)}"><i class="fo" style="flex:${fs.out||0.001}"></i><i class="fg" style="flex:${fs.groc||0.001}"></i></span>
+      <span class="wdg-sub"><b class="${pOut >= 60 ? 'warn' : ''}">${pOut}% eating out</b> · ${money(fs.groc)} groceries</span>` : '<b class="wdg-mid">$0</b><span class="wdg-sub">no food spending yet this week</span>', { sub:'week' }); }
+  const W = { inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));
   const sized = k => W[k].replace('class="wdg ', `class="wdg ${cfg.wide[k] ? 'wide ' : ''}`).replace(' wide wide', ' wide');
   const grid = (homeEditing ? renderHomeEdit(cfg) : `<div class="wdg-grid ${ia2FirstPaint ? 'enter' : ''}">${hero}${keys.map(k=>cfg.wide[k] === false ? W[k].replace('class="wdg wide', 'class="wdg') : sized(k)).join('')}</div>`);
@@ -5901,8 +5923,8 @@ document.addEventListener('click', e=>{
 
 
 // ===================== Build .52: widget editing, sort by use, motion, instant open =====================
-const HOME_KEYS = ['inbox','steps','stop','next','kitchen','sleep','recurring','closet','car'];
-const HOME_LABEL = { inbox:'Inbox', steps:'Steps', stop:'Last stop (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
+const HOME_KEYS = ['inbox','food','steps','stop','next','kitchen','sleep','recurring','closet','car'];
+const HOME_LABEL = { inbox:'Inbox', food:'Food spend', steps:'Steps', stop:'Last stop (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
 let homeEditing = false, ia2FirstPaint = true, homeCachedAt = null;
 function homeCfg(){ let c = {}; try{ c = JSON.parse(localStorage.getItem('otto.widgets') || '{}'); }catch(e){}
   return { order: Array.isArray(c.order) ? c.order.filter(k=>HOME_KEYS.includes(k)) : [], hidden: Array.isArray(c.hidden) ? c.hidden : ['closet','car'], wide: c.wide || { stop:true }, byUse: !!c.byUse }; }
@@ -6762,6 +6784,20 @@ document.addEventListener('keydown', e=>{ const d = document.getElementById('inb
   if(e.key === 'Escape') closeInboxDeck();
   else if(e.target.tagName !== 'INPUT' && e.key === 'ArrowRight'){ const y = d.querySelector('.deck-btn.yes'); if(y && !y.disabled) deckDecide(1); }
   else if(e.target.tagName !== 'INPUT' && e.key === 'ArrowLeft') deckDecide(-1); });
+
+document.addEventListener('click', e=>{ if(e.target.closest('[data-plan-ask]')) openChatWith("Plan 3 dinners for this week using what I already have at home, and add what's missing to my grocery list."); });
+
+// ---------- Home: food spend this budget week (your biggest category) ----------
+function foodSpendWeek(){
+  const S = lastBudgetData && lastBudgetData.summary; if(!S || !S.week_start) return null;
+  const cats = allCategories || [], name = id => ((cats.find(c=>c.id === id) || {}).name || '');
+  let groc = 0, out = 0, n = 0;
+  (allTxns||[]).forEach(t=>{ if(Number(t.amount_cents) >= 0 || t.exclude_from_budget || t.transaction_date < S.week_start || t.transaction_date > S.week_end) return;
+    const nm = name(t.category_id), m = String(t.merchant || t.description || ''), amt = -Number(t.amount_cents);
+    if(/grocer/i.test(nm) || (!t.category_id && GROCERY_RX.test(m))){ groc += amt; n++; }
+    else if(/dining|eat|restaurant|coffee|food|takeout/i.test(nm) || (!t.category_id && t.plaid_category_primary === 'FOOD_AND_DRINK')){ out += amt; n++; } });
+  return { groc, out, total: groc + out, n };
+}
 
 // ---------- motion: sliding tab underline, directional tab + page changes ----------
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
