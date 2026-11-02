@@ -1930,6 +1930,9 @@ body.chatting .otto-chat-starters{display:none}
   .dp-time{font:500 12px var(--mono); color:var(--text-muted); padding-top:2px;} .dp-row b{display:block; font:600 15px var(--sans);} .dp-row span{font:13px var(--sans); color:var(--text-muted);}
   .dp-dot{width:10px; height:10px; border-radius:5px; margin-top:5px;} .dp-dot.place{background:var(--text);} .dp-dot.buy{background:var(--amber); border-radius:3px;} .dp-dot.todo{background:var(--accent);}
   body.daying .ia2-dock{display:none !important;}
+  /* Build .71: Car */
+  .car-add{display:flex; gap:8px; margin:8px 0 4px;} .car-add .lf-add{flex:1; margin:0;}
+  .cz-pill{width:10px; height:10px; border-radius:5px; flex:none; background:var(--text-faint);} .cz-pill.over{background:var(--alert);} .cz-pill.due{background:var(--amber);} .cz-pill.ok{background:var(--accent);} .cz-pill.svc{background:#8FB4E8;} .cz-pill.gas{background:var(--amber);}
   /* Build .70: Body tabs */
   #panelHealth[data-btab="today"] [data-bt]:not([data-bt="today"]), #panelHealth[data-btab="trends"] [data-bt]:not([data-bt="trends"]), #panelHealth[data-btab="history"] [data-bt]:not([data-bt="history"]), #panelHealth[data-btab="sleep"] [data-bt]:not([data-bt="sleep"]){display:none !important;}
   #panelHealth:not([data-btab="trends"]) #healthRangeFilters#healthRangeFilters#healthRangeFilters{display:none !important;}
@@ -2218,7 +2221,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-02.70';
+const APP_BUILD = '2026-11-02.71';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5064,7 +5067,7 @@ const LIFE = {
     { table:'vehicles', title:'Vehicles', query:'order=id.asc', row: r => ({ t: `${r.year||''} ${r.make||''} ${r.model||r.name}`.trim(), s: r.odometer_miles ? `${r.odometer_miles.toLocaleString()} mi` : 'add an odometer reading when you log a service' }),
       fields:[['name','Name','text',true],['make','Make'],['model','Model'],['year','Year','number'],['plate','Plate']] },
     { table:'vehicle_services', title:'Maintenance', query:'order=service_on.desc', row: r => ({ t: `${r.kind}${r.description ? ' — ' + r.description : ''}`, s: [shortDate(r.service_on), r.odometer_miles ? r.odometer_miles.toLocaleString() + ' mi' : '', r.shop].filter(Boolean).join(' · '), right: dollars(r.cost_cents) }),
-      fields:[['vehicle_id','Vehicle','fk:vehicles',true],['service_on','Date','date',true],['kind','Type',sel(['oil','tires','brakes','battery','inspection','registration','repair','wash','other'])],['odometer_miles','Odometer','number'],['cost_cents','Cost','money'],['shop','Shop'],['description','Notes'],['next_due_on','Next due','date']] },
+      fields:[['vehicle_id','Vehicle','fk:vehicles',true],['service_on','Date','date',true],['kind','Type',sel(['oil','tires','rotation','brakes','battery','wipers','filter','inspection','registration','repair','wash','other'])],['odometer_miles','Odometer','number'],['cost_cents','Cost','money'],['shop','Shop'],['description','Notes'],['next_due_on','Next due','date']] },
     { table:'fuel_logs', title:'Gas', query:'order=filled_on.desc', row: r => ({ t: `${r.gallons ? r.gallons + ' gal' : 'Fill-up'}${r.station ? ' · ' + r.station : ''}`, s: [shortDate(r.filled_on), r.odometer_miles ? r.odometer_miles.toLocaleString() + ' mi' : ''].filter(Boolean).join(' · '), right: dollars(r.total_cents) }),
       fields:[['vehicle_id','Vehicle','fk:vehicles',true],['filled_on','Date','date',true],['gallons','Gallons','number'],['total_cents','Total','money'],['odometer_miles','Odometer','number'],['station','Station']] } ],
     summary: rows => { const v = (rows.vehicles||[])[0]; const s = (rows.vehicle_services||[])[0]; return v ? `${v.year||''} ${v.model||v.name} · ${s ? 'last ' + s.kind + ' ' + shortDate(s.service_on) : 'no services logged'}` : 'Add your car'; } },
@@ -5104,6 +5107,18 @@ async function lifeLoad(tables){
   }));
 }
 async function renderLife(){ await renderLifeBody(); renderPageHead(); }
+// the add form for one table; inputs take values from lifePrefill (money prefill is in cents)
+function lifeForm(sec, addLabel){
+  if(lifeAdding !== sec.table) return addLabel === false ? '' : `<button type="button" class="lf-add" data-ladd="${sec.table}">${addLabel || '+ Add ' + (LIFE_ONE[sec.table] || 'item')}</button>`;
+  const pv = (k, type) => { const v = lifePrefill[k]; if(v == null || v === '') return ''; return ` value="${esc(type === 'money' ? (Number(v)/100).toFixed(2) : String(v))}"`; };
+  return `<form class="lf-form" data-lform="${sec.table}">${sec.fields.map(([k,label,type,req])=>{
+      type = type || 'text';
+      if(typeof type === 'object') return `<label>${label}<select name="${k}">${type.options.map(o=>`<option ${lifePrefill[k]===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
+      if(String(type).startsWith('fk:')){ const t = type.slice(3); return `<label>${label}<select name="${k}" ${req?'required':''}>${req?'':'<option value="">—</option>'}${(lifeRows[t]||[]).map(o=>`<option value="${o.id}">${esc(o.name || o.title || o.code || ('#'+o.id))}</option>`).join('')}</select></label>`; }
+      return `<label>${label}<input name="${k}" type="${type==='money'?'text':type}" ${type==='money'?'inputmode="decimal" placeholder="$0.00"':''} ${type==='number'?'inputmode="decimal" step="any"':''} ${req?'required':''}${pv(k, type)}></label>`; }).join('')}
+      ${lifePrefill._note ? `<div class="suggest-note" style="margin:0">${esc(lifePrefill._note)}</div>` : ''}
+      <div class="lf-form-actions"><button type="submit" class="save-btn">Save</button><button type="button" class="link-btn" data-lcancel>Cancel</button></div></form>`;
+}
 async function renderLifeBody(){
   const el = document.getElementById('lifeContent'); if(!el) return;
   if(lifeArea === '__dock'){ el.innerHTML = renderEditDock(); return; }
@@ -5130,13 +5145,7 @@ async function renderLifeBody(){
     const list = rows.map(r=>{ const v = sec.row(r); const open = lifeOpenRow === sec.table + ':' + r.id;
       return `<div class="lf-row ${open?'open':''}" data-lrow="${sec.table}:${r.id}"><div class="grow-main"><div class="grow-title">${esc(v.t || '')}</div>${v.s ? `<div class="grow-sub">${esc(v.s)}</div>` : ''}</div>${v.right ? `<div class="lf-right">${v.right}</div>` : ''}
         ${open ? `<div class="lf-actions">${sec.closet ? `<button type="button" data-wore="${r.id}">Wore it today</button>` : ''}<button type="button" class="danger" data-ldel="${sec.table}:${r.id}">Delete</button></div>` : ''}</div>`; }).join('');
-    const form = lifeAdding === sec.table ? `<form class="lf-form" data-lform="${sec.table}">${sec.fields.map(([k,label,type,req])=>{
-        type = type || 'text';
-        if(typeof type === 'object') return `<label>${label}<select name="${k}">${type.options.map(o=>`<option ${lifePrefill[k]===o?'selected':''}>${o}</option>`).join('')}</select></label>`;
-        if(String(type).startsWith('fk:')){ const t = type.slice(3); return `<label>${label}<select name="${k}" ${req?'required':''}>${req?'':'<option value="">—</option>'}${(lifeRows[t]||[]).map(o=>`<option value="${o.id}">${esc(o.name || o.title || o.code || ('#'+o.id))}</option>`).join('')}</select></label>`; }
-        return `<label>${label}<input name="${k}" type="${type==='money'?'text':type}" ${type==='money'?'inputmode="decimal" placeholder="$0.00"':''} ${type==='number'?'inputmode="decimal" step="any"':''} ${req?'required':''}></label>`; }).join('')}
-        <div class="lf-form-actions"><button type="submit" class="save-btn">Save</button><button type="button" class="link-btn" data-lcancel>Cancel</button></div></form>`
-      : `<button type="button" class="lf-add" data-ladd="${sec.table}">+ Add ${LIFE_ONE[sec.table] || 'item'}</button>`;
+    const form = lifeForm(sec);
     return `<div class="section-title">${sec.title}<span>${rows.length || ''}</span></div>${rows.length ? `<div class="gcard lf-list">${list}</div>` : ''}${form}`;
   }).join('');
   const extra = lifeArea === 'closet' && (lifeRows.wardrobe_items||[]).some(x=>x.laundry_status==='worn') ? `<button type="button" class="lf-add strong" data-laundry>🧺 Laundry done: mark everything clean</button>` : '';
@@ -5169,10 +5178,11 @@ document.addEventListener('submit', async e=>{
   const t = f.dataset.lform, sec = Object.values(LIFE).flatMap(a=>a.sections).find(x=>x.table===t), body = {};
   for(const [k,label,type] of sec.fields){ const v = f.elements[k] && f.elements[k].value.trim(); if(v === '' || v == null) continue;
     body[k] = type === 'money' ? Math.round(parseFloat(v.replace(/[$,]/g,''))*100) : type === 'number' ? Number(v) : String(type||'').startsWith('fk:') ? Number(v) : type === 'datetime-local' ? new Date(v).toISOString() : v; }
+  if(lifePrefill && lifePrefill._extra) Object.assign(body, lifePrefill._extra);
   if(t === 'documents' && body.number_last4) body.number_last4 = String(body.number_last4).replace(/\W/g,'').slice(-4);
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=representation' }, body: JSON.stringify(body) });
   if(!r.ok){ showNotice(`Couldn't save: ${(await r.text()).slice(0,140)}`); return; }
-  const [row] = await r.json(); (lifeRows[t] = lifeRows[t] || []).unshift(row); lifeAdding = null; hapticPulse(); renderLife();
+  const [row] = await r.json(); (lifeRows[t] = lifeRows[t] || []).unshift(row); lifeAdding = null; lifePrefill = {}; hapticPulse(); renderLife();
 });
 
 // ===================== Food: Kitchen (at home, can make, trips, receipts) =====================
@@ -5717,12 +5727,63 @@ function carModel(){
   const rec = (car.recalls||[]).length ? `<div class="section-title">Recalls on this model<span>${car.recalls.length}</span></div><div class="gcard lf-list">${car.recalls.map(r=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(r.component||'Recall')}</div><div class="grow-sub">${esc((r.summary||'').slice(0,140))}… · #${esc(r.campaign||'')}</div></div></div>`).join('')}</div><div class="suggest-note">A dealer can tell you if your VIN's recalls were already fixed.</div>` : '';
   return `${vinBox}${svg}<div class="cz-legend"><span class="ok">Good</span><span class="due">Due soon</span><span class="over">Overdue</span><span class="none">No record</span></div><div class="suggest-note">Tap a zone to log it. Intervals are typical; check your owner's manual.</div>${rec}`;
 }
-function carCosts(){
+function carCosts(){ return carCosts0() + carBankCost(); }
+function carBankCost(){
+  if(carBank === null){ carBank = 'loading'; loadCarBank(); }
+  if(!Array.isArray(carBank) || !carBank.length) return '';
+  const tot = carBank.reduce((a,t)=>a - Number(t.amount_cents), 0), per = {}; carBank.forEach(t=>{ const m = (t.authorized_date || t.transaction_date).slice(0,7); per[m] = (per[m]||0) - Number(t.amount_cents); });
+  const ms = Object.keys(per).sort(), mx = Math.max(...Object.values(per));
+  return `<div class="viz-card" style="margin-top:12px"><div class="viz-title"><span>Gas from your bank</span><span>last 4 months</span></div><div class="vital-big">${money(tot)} <small>${carBank.length} fill-ups, about ${money(Math.round(tot / Math.max(1, ms.length)))}/mo</small></div>
+    <div class="yoy">${ms.map(m=>`<div class="yoy-row"><span>${new Date(m + '-15T12:00').toLocaleDateString('en-US',{ month:'short' })}</span><i><i style="width:${Math.max(3, Math.round(100*per[m]/mx))}%"></i></i><b>${money(per[m])}</b></div>`).join('')}</div>
+    <div class="wdg-sub">Charges at gas stations, $15 and up. Kept separate from the costs you've logged above.</div></div>`;
+}
+function carCosts0(){
   const sv = lifeRows.vehicle_services||[], fu = lifeRows.fuel_logs||[], since = isoAddDays(localToday(), -365);
   const s12 = sv.filter(x=>x.service_on >= since).reduce((a,x)=>a+(x.cost_cents||0),0), f12 = fu.filter(x=>x.filled_on >= since).reduce((a,x)=>a+(x.total_cents||0),0);
   const odo = fu.concat(sv).map(x=>x.odometer_miles).filter(Boolean).sort((a,b)=>a-b), miles = odo.length > 1 ? odo[odo.length-1] - odo[0] : 0;
   const mpg = (()=>{ const f = fu.filter(x=>x.full_tank && x.odometer_miles && x.gallons).sort((a,b)=>a.odometer_miles-b.odometer_miles); if(f.length<2) return null; const g = f.slice(1).reduce((a,x)=>a+Number(x.gallons),0); return (f[f.length-1].odometer_miles - f[0].odometer_miles)/g; })();
   return `<div class="wdg-grid" style="margin-top:8px">${[['LAST 12 MONTHS', money(s12+f12), `${money(s12)} service · ${money(f12)} gas`],['PER MONTH', money(Math.round((s12+f12)/12)), 'average'],['PER MILE', miles ? money(Math.round((s12+f12)/miles)) : '—', miles ? `${miles.toLocaleString()} mi logged` : 'log odometer readings'],['MPG', mpg ? mpg.toFixed(1) : '—', mpg ? 'from full fill-ups' : 'log 2+ full fill-ups']].map(([l,v,s3])=>`<div class="wdg"><span class="wdg-head"><span>${l}</span></span><b class="wdg-mid">${v}</b><span class="wdg-sub">${s3}</span></div>`).join('')}</div>`;
+}
+// what's due next, most urgent first (from the same rules as the diagram)
+function carNextUp(){
+  const order = { over:0, due:1, none:2, ok:3 }, items = Object.entries(CAR_RULES).map(([k,r])=>({ k, label:r.label, ...carStatus(k) })).sort((a,b)=>order[a.st]-order[b.st]);
+  const urgent = items.filter(x=>x.st === 'over' || x.st === 'due'), unknown = items.filter(x=>x.st === 'none');
+  const row = x => `<div class="lf-row"><span class="cz-pill ${x.st}" aria-hidden="true"></span><div class="grow-main"><div class="grow-title">${esc(x.label)}</div><div class="grow-sub">${x.st === 'over' ? 'Overdue · last ' : x.st === 'due' ? 'Due soon · last ' : ''}${esc(x.text)}</div></div><button type="button" class="link-btn" data-ladd="vehicle_services" data-gotab="1" data-prefill='${JSON.stringify({ kind:x.k })}'>Log</button></div>`;
+  return `<div class="section-title">Next up<span>${urgent.length ? urgent.length + ' need attention' : unknown.length === items.length ? 'nothing logged yet' : 'all good'}</span></div>
+    <div class="gcard lf-list">${(urgent.length ? urgent : unknown).slice(0, 4).map(row).join('') || items.slice(0,3).map(row).join('')}</div>
+    ${!urgent.length && unknown.length ? `<div class="suggest-note">Log the last time each was done and Otto tracks when it's due.</div>` : ''}`;
+}
+// Log: services and fill-ups in one list, plus gas-station charges from the bank that aren't logged yet
+const GAS_RX = /\b(shell|speedway|super petro\w*|circle k|sunoco|irving|citgo|a\.?\s?l\.? prime|exxon\w*|mobil|gulf|bp|valero|cumberland|getty|marathon|chevron|xtra mart|global|wawa|sheetz)\b/i;
+let carBank = null;
+async function loadCarBank(){
+  try{ const since = isoAddDays(localToday(), -120);
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,authorized_date,merchant,description,amount_cents&removed_at=is.null&amount_cents=lt.0&transaction_date=gte.${since}&order=transaction_date.desc&limit=1000`, { headers: authHeaders() });
+    const rows = r.ok ? await r.json() : [];
+    carBank = rows.filter(t=>-Number(t.amount_cents) >= 1500 && GAS_RX.test(`${t.merchant||''} ${t.description||''}`)).sort((a,b)=>(b.authorized_date||b.transaction_date).localeCompare(a.authorized_date||a.transaction_date));   // under $15 at a station is usually a snack
+  }catch(e){ carBank = []; }
+  if(lifeArea === 'car') renderLife();
+}
+function carLog(){
+  if(carBank === null){ carBank = 'loading'; loadCarBank(); }
+  const A = LIFE.car.sections, fu = lifeRows.fuel_logs || [], sv = lifeRows.vehicle_services || [];
+  const linked = new Set(fu.map(x=>x.transaction_id).concat(sv.map(x=>x.transaction_id)).filter(Boolean));
+  const fuSorted = fu.filter(x=>x.odometer_miles).sort((a,b)=>a.odometer_miles-b.odometer_miles);
+  const mpgOf = x => { if(!x.full_tank || !x.gallons || !x.odometer_miles) return null; const prev = fuSorted.filter(y=>y.odometer_miles < x.odometer_miles && y.full_tank).pop(); return prev ? (x.odometer_miles - prev.odometer_miles) / Number(x.gallons) : null; };
+  const items = sv.map(r=>({ table:'vehicle_services', r, d:r.service_on, t:(CAR_RULES[r.kind] || {}).label || (r.kind[0].toUpperCase() + r.kind.slice(1)), s:[r.description, r.shop, r.odometer_miles ? r.odometer_miles.toLocaleString() + ' mi' : ''], amt:r.cost_cents, kind:'svc' }))
+    .concat(fu.map(r=>{ const m = mpgOf(r); return { table:'fuel_logs', r, d:r.filled_on, t:`Gas${r.gallons ? ' · ' + r.gallons + ' gal' : ''}`, s:[r.station, r.odometer_miles ? r.odometer_miles.toLocaleString() + ' mi' : '', m ? m.toFixed(1) + ' mpg' : ''], amt:r.total_cents, kind:'gas' }; }))
+    .filter(x=>x.d).sort((a,b)=>String(b.d).localeCompare(String(a.d)));
+  const months = []; items.forEach(x=>{ const k = new Date(x.d + 'T12:00').toLocaleDateString('en-US',{ month:'long', year:'numeric' }); let g = months.find(m=>m.k===k); if(!g) months.push(g = { k, items:[] }); g.items.push(x); });
+  const sameAsLogged = t => fu.some(x=>x.total_cents && Math.abs(Number(x.total_cents) + Number(t.amount_cents)) <= 100 && Math.abs((new Date(x.filled_on) - new Date(t.authorized_date || t.transaction_date))/86400000) <= 2);
+  const bank = Array.isArray(carBank) ? carBank.filter(t=>!linked.has(t.id) && !sameAsLogged(t)) : [];
+  const forms = lifeAdding === 'vehicle_services' ? lifeForm(A[1]) : lifeAdding === 'fuel_logs' ? lifeForm(A[2]) : '';
+  const addRow = `<div class="car-add"><button type="button" class="lf-add" data-ladd="vehicle_services">+ Service</button><button type="button" class="lf-add" data-ladd="fuel_logs">+ Fill-up</button></div>`;
+  const bankCard = bank.length ? `<div class="section-title">From your bank<span>${bank.length} not logged</span></div><div class="gcard lf-list">${bank.slice(0, 5).map(t=>{ const st = String(t.merchant || t.description || '').replace(/^(POS|DBT|AFT)\s+(DBT\s+)?/i,'').trim();
+      return `<div class="lf-row"><span class="cz-pill gas" aria-hidden="true"></span><div class="grow-main"><div class="grow-title">${esc(st)}</div><div class="grow-sub">${shortDate(t.authorized_date || t.transaction_date)} · ${money(-Number(t.amount_cents))}</div></div><button type="button" class="link-btn" data-ladd="fuel_logs" data-prefill='${esc(JSON.stringify({ filled_on: t.authorized_date || t.transaction_date, total_cents: -Number(t.amount_cents), station: st, _extra:{ transaction_id: t.id }, _note: 'From your bank. Add gallons and the odometer if you have them.' }))}'>Add</button></div>`; }).join('')}</div>
+      <div class="suggest-note">Gas-station charges of $15 or more from the last 4 months. Smaller ones are usually snacks.</div>` : '';
+  const list = months.map(g=>`<div class="day-label"><span>${esc(g.k)}</span><span>${money(g.items.reduce((a,x)=>a+(Number(x.amt)||0),0))}</span></div><div class="gcard lf-list">${g.items.map(x=>{ const open = lifeOpenRow === x.table + ':' + x.r.id;
+      return `<div class="lf-row ${open?'open':''}" data-lrow="${x.table}:${x.r.id}"><span class="cz-pill ${x.kind}" aria-hidden="true"></span><div class="grow-main"><div class="grow-title">${esc(x.t)}</div><div class="grow-sub">${esc([shortDate(x.d)].concat(x.s).filter(Boolean).join(' · '))}</div></div>${x.amt ? `<div class="lf-right">${money(x.amt)}</div>` : ''}${open ? `<div class="lf-actions"><button type="button" class="danger" data-ldel="${x.table}:${x.r.id}">Delete</button></div>` : ''}</div>`; }).join('')}</div>`).join('');
+  return `${forms || addRow}${bankCard}${list ? `<div class="section-title">History<span>${items.length}</span></div>${list}` : (bank.length ? '' : '<div class="empty">Nothing logged yet. Add a service or a fill-up, or tell Otto “oil change today at 98,450, $65”.</div>')}`;
 }
 function carRecords(){ return `<div class="kt-receipt"><b>Registration, insurance, inspection</b><span>Car documents live in your private vault, tagged Car.</span><div><button type="button" class="save-btn" data-opendocs="Car">Open car documents</button></div></div>`; }
 
@@ -5802,7 +5863,7 @@ function droneCompliance(){
 
 // tab declarations on the existing areas
 Object.assign(LIFE.closet, { tabs:[ { title:'Today', render: closetToday }, { title:'Wardrobe', render: closetWardrobe }, { title:'Laundry', render: closetLaundry }, { title:'Insights', render: closetInsights } ] });
-Object.assign(LIFE.car, { tabs:[ { title:'Model', render: carModel }, { title:'Service', section:1 }, { title:'Gas', section:2 }, { title:'Costs', render: carCosts }, { title:'Records', render: carRecords } ] });
+Object.assign(LIFE.car, { tabs:[ { title:'Status', render: () => carModel() + carNextUp() + carRecords() }, { title:'Log', render: carLog }, { title:'Costs', render: carCosts } ] });
 Object.assign(LIFE.apartments, { tabs:[ { title:'Map', render: aptMapTab }, { title:'Board', section:0, pre: aptBoardPre }, { title:'Compare', render: aptCompare }, { title:'Afford', render: aptAfford }, { title:'Move', render: aptMove } ] });
 Object.assign(LIFE.school, { tabs:[ { title:'Transfer', render: schoolTransfer }, { title:'Courses', section:0 }, { title:'Deadlines', section:1 }, { title:'Progress', render: schoolProgress } ] });
 Object.assign(LIFE.drone, { tabs:[ { title:'Flights', section:0 }, { title:'Compliance', render: droneCompliance } ] });
