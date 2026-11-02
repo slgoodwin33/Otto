@@ -1868,6 +1868,8 @@ body.chatting .otto-chat-starters{display:none}
   #netWorthReadout .readouts{display:block !important;}
   .mo-card .pace-in{margin-top:16px; padding-top:14px; border-top:1px solid var(--border);}
   .link-row{all:unset; box-sizing:border-box; cursor:pointer; display:block; width:100%; margin:10px 0 4px; padding:14px 16px; min-height:44px; border-radius:16px; background:var(--surface); border:1px solid var(--border); font:600 14px var(--sans); color:var(--accent-text);}
+  .cf-card{margin:0 0 12px;} .cf-nums{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:4px 0 6px;} .cf-nums small{display:block; font-size:12px; color:var(--text-muted);} .cf-nums b{font-size:18px; font-variant-numeric:tabular-nums;} .cf-nums .neg b{color:var(--alert);}
+  .cf-list{margin-top:8px; border-top:1px solid var(--border);} .cf-row{display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--border); font-size:14px;} .cf-row:last-child{border-bottom:none;} .cf-dot{width:8px; height:8px; border-radius:50%; background:var(--alert); flex:none;} .cf-dot.pay{background:var(--accent);} .cf-d{color:var(--text-muted); width:92px; flex:none; font-variant-numeric:tabular-nums;} .cf-n{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;} .cf-a{font-variant-numeric:tabular-nums;} .cf-a.pos{color:var(--accent);} .cf-more{font-size:13px; color:var(--text-muted); padding:8px 0 0;}
   .rec-actions{display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin:10px 2px;}
 
   /* ===== Build .64: Inbox cards ===== */
@@ -2199,7 +2201,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-01.67';
+const APP_BUILD = '2026-11-02.68';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2616,7 +2618,7 @@ async function fetchBudget(){
   if(!catRes.ok) throw new Error(`Supabase returned ${catRes.status}`);
   const categories = await catRes.json();
 
-  const billsRes = await fetch(`${SUPABASE_URL}/rest/v1/recurring_bills?select=code,name,amount_cents,frequency,due_day,autopay,category:transaction_categories(code)&active=eq.true&order=name.asc`, { headers: authHeaders() });
+  const billsRes = await fetch(`${SUPABASE_URL}/rest/v1/recurring_bills?select=id,code,name,account_id,match_text,amount_cents,frequency,due_day,autopay,category:transaction_categories(code)&active=eq.true&order=name.asc`, { headers: authHeaders() });
   if(!billsRes.ok) throw new Error(`Supabase returned ${billsRes.status}`);
   const bills = await billsRes.json();
 
@@ -5818,18 +5820,84 @@ document.addEventListener('submit', async e=>{
 }, true);
 
 // ---------- MONEY: Recurring (bills + subscriptions, one list) and the pace chart ----------
-async function renderRecurring(){
-  const el = document.getElementById('recurringContent'); if(!el) return;
-  if(!lifeRows.subscriptions){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div></div>'; await lifeLoad(['subscriptions']); }
+// one list of recurring charges: subscriptions + bills, without duplicates
+function recurringItems(){
   const bills = ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.active !== false);
   const subs = (lifeRows.subscriptions||[]).filter(x=>x.status !== 'cancelled');
   const billIds = new Set(subs.map(x=>x.recurring_bill_id).filter(Boolean)), subNames = new Set(subs.map(x=>String(x.name||'').trim().toLowerCase()));
-  const items = subs.map(x=>({ name:x.name, amt:x.amount_cents, next:x.next_charge_on, how: x.cadence, tag: x.detected ? 'found in your bank' : 'subscription', sub:true }))
-    .concat(bills.filter(b=>!billIds.has(b.id) && !subNames.has(String(b.name||'').trim().toLowerCase())).map(b=>({ name:b.name, amt:b.amount_cents, next: b.due_day ? nextOccurrenceFromDueDay(b.due_day) : null, how: b.frequency || 'monthly', tag: b.autopay ? 'autopay' : 'pay yourself' })))
+  return subs.map(x=>({ name:x.name, amt:x.amount_cents, next:x.next_charge_on, how: x.cadence, tag: x.detected ? 'found in your bank' : 'subscription', sub:true, match:x.merchant_match }))
+    .concat(bills.filter(b=>!billIds.has(b.id) && !subNames.has(String(b.name||'').trim().toLowerCase())).map(b=>({ name:b.name, amt:b.amount_cents, next: b.due_day ? nextOccurrenceFromDueDay(b.due_day) : null, how: b.frequency || 'monthly', tag: b.autopay ? 'autopay' : 'pay yourself', match:b.match_text })))
     .sort((a,b)=>(a.next||'9999').localeCompare(b.next||'9999'));
+}
+async function renderRecurring(){
+  const el = document.getElementById('recurringContent'); if(!el) return;
+  if(!lifeRows.subscriptions){ el.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div></div>'; await lifeLoad(['subscriptions']); }
+  const items = recurringItems();
   const per = { weekly:52/12, monthly:1, quarterly:1/3, yearly:1/12 }, mo = items.reduce((t,x)=>t + (x.amt||0)*(per[x.how]||1), 0);
   el.innerHTML = `<div class="wdg wide hero" style="margin:6px 0 12px"><span class="wdg-head"><span>RECURRING</span><em>bills + subscriptions</em></span><b class="wdg-big acc">${money(Math.round(mo))}<small style="font-size:14px;color:var(--text-muted)">/mo</small></b><span class="wdg-sub">${items.length} charges · ${money(Math.round(mo*12))} a year</span></div>
     <div class="gcard lf-list">${items.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div><div class="grow-sub">${esc([x.next ? 'next ' + shortDate(x.next) : '', x.how, x.tag].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${money(x.amt||0)}</div></div>`).join('') || '<div class="empty">No recurring charges found yet.</div>'}</div><div class="rec-actions"><button type="button" class="lf-add" data-subs-add>+ Add subscription</button><button type="button" class="link-btn" data-subs-manage>Edit or cancel subscriptions ›</button></div>`;
+  el.querySelector('.wdg.hero').insertAdjacentHTML('afterend', '<div id="cashflowCard" class="viz-card cf-card"><div class="skeleton"><div class="skeleton-row"></div></div></div>');
+  renderCashflow().catch(err=>{ const c = document.getElementById('cashflowCard'); if(c) c.innerHTML = `<div class="empty">Couldn't project your balance. ${esc(err.message||'')}</div>`; });
+}
+
+/* ---------- CASH FLOW: checking balance projected 30 days ahead ----------
+   start = checking balance now; + each expected paycheck (income_sources, rolled forward by frequency);
+   − each recurring charge on its date; − everyday spending = the last 60 days of checking outflows
+   that are NOT one of those recurring charges, spread evenly per day. "Planned" is kept separate from
+   "actual": the line is an estimate, the dots are known dates. */
+let cashflowRows = null;
+function isoAddMonths(iso, n){ const [y,m,d] = iso.split('-').map(Number); const last = new Date(y, m-1+n+1, 0).getDate(); const t = new Date(y, m-1+n, Math.min(d, last)); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
+function stepDate(iso, freq, k){ const f = String(freq||'monthly').toLowerCase();
+  return /bi-?weekly|fortnight/.test(f) ? isoAddDays(iso, 14*k) : /week/.test(f) ? isoAddDays(iso, 7*k) : /semi/.test(f) ? isoAddDays(iso, 15*k) : /quarter/.test(f) ? isoAddMonths(iso, 3*k) : /year|annual/.test(f) ? isoAddMonths(iso, 12*k) : isoAddMonths(iso, k); }
+function occurrences(first, freq, from, to){ const out = []; if(!first) return out; let d = first, k = 0;
+  while(d <= from && k < 600){ k++; d = stepDate(first, freq, k); }
+  while(d <= to && out.length < 40){ out.push(d); k++; d = stepDate(first, freq, k); } return out; }
+async function renderCashflow(){
+  const box = document.getElementById('cashflowCard'); if(!box) return;
+  const acct = (allAccounts||[]).find(a=>/checking/i.test(a.account_type||'') && a.status !== 'closed');
+  if(!acct || acct.current_balance_cents == null){ box.innerHTML = '<div class="empty">Connect a checking account to see where your balance is heading.</div>'; return; }
+  const today = localToday(), end = isoAddDays(today, 30), since = isoAddDays(today, -60);
+  if(!cashflowRows || cashflowRows.acct !== acct.id){
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=amount_cents,transaction_date,authorized_date,merchant,description&account_id=eq.${acct.id}&removed_at=is.null&transaction_date=gte.${since}&order=transaction_date.desc&limit=1000`, { headers: authHeaders() });
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    cashflowRows = { acct: acct.id, rows: await r.json() };
+  }
+  const items = recurringItems().filter(x=>Number(x.amt) > 0);
+  const keys = items.map(x=>String(x.match || x.name || '').toLowerCase().replace(/[^a-z0-9 ]/g,' ').trim()).filter(k=>k.length >= 3);
+  const isRecurring = t => { const txt = String((t.merchant||'') + ' ' + (t.description||'')).toLowerCase().replace(/[^a-z0-9 ]/g,' '); return keys.some(k=>txt.includes(k)); };
+  // a bill paid some other way (rent by Apple Cash) has no name to match: claim the outflow of about the
+  // same amount (±15%) within 4 days of each past due date, so it isn't counted twice
+  const rows = cashflowRows.rows, claimed = new Set();
+  items.forEach(x=>{ if(!x.next) return; for(let k = 1; k <= 3; k++){ const due = stepDate(x.next, x.how, -k); if(due < since) break;
+    const hit = rows.find(t=>!claimed.has(t) && Number(t.amount_cents) < 0 && Math.abs(-Number(t.amount_cents) - x.amt) <= x.amt*0.15 && Math.abs((new Date(t.transaction_date) - new Date(due))/86400000) <= 4);
+    if(hit) claimed.add(hit); } });
+  const outs = rows.filter(t=>Number(t.amount_cents) < 0 && !claimed.has(t) && !isRecurring(t));
+  const firstDay = rows.length ? rows.map(t=>t.transaction_date).sort()[0] : today;
+  const span = Math.max(14, Math.min(60, Math.round((new Date(today) - new Date(firstDay))/86400000)));
+  const daily = Math.round(outs.reduce((a,t)=>a - Number(t.amount_cents), 0) / span);
+  const ev = [];
+  ((lastBudgetData && lastBudgetData.income) || []).forEach(s=>{ const amt = Number(s.net_amount_cents)||0; if(!amt) return;
+    occurrences(s.next_expected_date, s.frequency, today, end).forEach(d=>ev.push({ d, amt, name: 'Pay', pay:true })); });
+  items.forEach(x=>{ if(!x.next) return; occurrences(x.next, x.how, isoAddDays(today, -1), end).filter(d=>d > today).forEach(d=>ev.push({ d, amt:-Number(x.amt), name:x.name })); });
+  ev.sort((a,b)=>a.d.localeCompare(b.d) || b.amt - a.amt);
+  const start = Number(acct.current_balance_cents), pts = [start]; let bal = start, low = { v:start, d:today }, lowWhy = '';
+  for(let i = 1; i <= 30; i++){ const d = isoAddDays(today, i); bal -= daily; ev.filter(e=>e.d === d).forEach(e=>{ bal += e.amt; e.after = bal; }); pts.push(bal);
+    if(bal < low.v){ low = { v:bal, d }; const big = ev.filter(e=>e.d <= d && !e.pay).slice(-1)[0]; lowWhy = big ? big.name : ''; } }
+  const W = 354, H = 150, top = 14, bot = 122, mn = Math.min(0, ...pts), mx = Math.max(...pts) * 1.05 || 1;
+  const X = i => 10 + i * (W-20)/30, Y = v => Math.round(bot - (bot-top) * (v - mn) / (mx - mn || 1));
+  const line = pts.map((v,i)=>`${X(i).toFixed(1)},${Y(v)}`).join(' ');
+  const area = `${X(0)},${Y(mn)} ${line} ${X(30)},${Y(mn)}`;
+  const di = d => Math.round((new Date(d+'T12:00') - new Date(today+'T12:00'))/86400000);
+  const dots = ev.map(e=>{ const i = di(e.d); return `<circle cx="${X(i).toFixed(1)}" cy="${Y(pts[i])}" r="${e.pay ? 4.5 : Math.min(6, 3 + Math.abs(e.amt)/20000)}" fill="${e.pay ? 'var(--accent)' : 'var(--alert)'}" stroke="var(--surface, #151A18)" stroke-width="1.5"/>`; }).join('');
+  const ticks = [0, 10, 20, 30].map(i=>`<text x="${X(i)}" y="${H-6}" text-anchor="${i===0?'start':i===30?'end':'middle'}" font-size="10" fill="var(--text-muted)">${i===0 ? 'Today' : shortDate(isoAddDays(today, i))}</text>`).join('');
+  const zero = mn < 0 ? `<line x1="10" x2="${W-10}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--alert)" stroke-dasharray="3 4" stroke-width="1"/>` : '';
+  const endV = pts[30], neg = low.v < 0;
+  box.innerHTML = `<div class="viz-title"><span>Checking, next 30 days</span><span>estimate</span></div>
+    <div class="cf-nums"><div><small>Now</small><b>${money(start)}</b></div><div><small>${shortDate(end)}</small><b>${money(Math.round(endV))}</b></div><div class="${neg?'neg':''}"><small>Lowest</small><b>${money(Math.round(low.v))}</b></div></div>
+    <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Projected checking balance: ${money(start)} now, lowest ${money(Math.round(low.v))} on ${shortDate(low.d)}, about ${money(Math.round(endV))} on ${shortDate(end)}"><defs><linearGradient id="cfFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+      <polygon points="${area}" fill="url(#cfFill)"/>${zero}<polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>${dots}${ticks}</svg>
+    <div class="wdg-sub">${low.d === today ? 'Your balance only goes up from here.' : `Lowest around ${shortDate(low.d)}${lowWhy ? `, after ${esc(lowWhy)}` : ''}.`} Assumes ${money(daily)}/day of everyday spending (your last ${span} days, bills left out).</div>
+    <div class="cf-list">${ev.slice(0, 8).map(e=>`<div class="cf-row"><span class="cf-dot ${e.pay?'pay':''}" aria-hidden="true"></span><span class="cf-d">${new Date(e.d+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})}</span><span class="cf-n">${esc(e.name)}</span><span class="cf-a ${e.pay?'pos':''}">${e.pay?'+':'−'}${money(Math.abs(e.amt))}</span></div>`).join('')}${ev.length > 8 ? `<div class="cf-more">+${ev.length - 8} more in the next 30 days</div>` : ''}</div>`;
 }
 // the bank posts weekend purchases on Monday; place a purchase on the day it was made (still inside its budget week)
 function spentDay(t, weekStart){ const d = t.authorized_date && t.authorized_date <= t.transaction_date ? t.authorized_date : t.transaction_date; return weekStart && d < weekStart ? weekStart : d; }
