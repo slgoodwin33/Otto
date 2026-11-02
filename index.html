@@ -1930,6 +1930,14 @@ body.chatting .otto-chat-starters{display:none}
   .dp-time{font:500 12px var(--mono); color:var(--text-muted); padding-top:2px;} .dp-row b{display:block; font:600 15px var(--sans);} .dp-row span{font:13px var(--sans); color:var(--text-muted);}
   .dp-dot{width:10px; height:10px; border-radius:5px; margin-top:5px;} .dp-dot.place{background:var(--text);} .dp-dot.buy{background:var(--amber); border-radius:3px;} .dp-dot.todo{background:var(--accent);}
   body.daying .ia2-dock{display:none !important;}
+  /* Build .70: Body tabs */
+  #panelHealth[data-btab="today"] [data-bt]:not([data-bt="today"]), #panelHealth[data-btab="trends"] [data-bt]:not([data-bt="trends"]), #panelHealth[data-btab="history"] [data-bt]:not([data-bt="history"]), #panelHealth[data-btab="sleep"] [data-bt]:not([data-bt="sleep"]){display:none !important;}
+  #panelHealth:not([data-btab="trends"]) #healthRangeFilters#healthRangeFilters#healthRangeFilters{display:none !important;}
+  #panelHealth .studio-page-head{display:none;} #panelHealth .sleep-card .bars7{display:none;} #bodyTabs{margin:0 0 12px;}
+  .yoy{display:flex; flex-direction:column; gap:7px; margin:6px 0 10px;} .yoy-row{display:grid; grid-template-columns:40px minmax(0,1fr) 56px; gap:8px; align-items:center; font:13px var(--sans); color:var(--text-muted);}
+  .yoy-row>i{display:block; height:10px; border-radius:5px; background:var(--surface-2);} .yoy-row>i>i{display:block; height:100%; border-radius:5px; background:color-mix(in srgb, var(--accent) 55%, transparent);} .yoy-row.cur>i>i{background:var(--accent);} .yoy-row b{text-align:right; font-variant-numeric:tabular-nums; color:var(--text); font-weight:600;} .yoy-row.cur span{color:var(--text); font-weight:700;}
+  .nights{display:flex; flex-direction:column; gap:6px; margin:12px 0 8px;} .night{display:grid; grid-template-columns:52px minmax(0,1fr) 58px; gap:8px; align-items:center; font:12.5px var(--sans); color:var(--text-muted);}
+  .night>i{display:flex; height:12px; border-radius:6px; overflow:hidden; min-width:6px;} .night b{text-align:right; font-variant-numeric:tabular-nums; color:var(--text); font-weight:600;}
   .sp-chips{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none;} .sp-chips::-webkit-scrollbar{display:none;} .sp-chips .chip{flex:none; min-height:36px; display:inline-flex; align-items:center; gap:6px;}
   .sp-cats{padding-top:10px;} .sp-sw{width:9px; height:9px; border-radius:50%; display:inline-block;} .sp-map{height:300px;}
   .sp-stats{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,1.25fr);}
@@ -2137,16 +2145,17 @@ body.chatting .otto-chat-starters{display:none}
       </div>
     </div>
 
-    <div class="tab-panel" id="panelHealth">
+    <div class="tab-panel" id="panelHealth" data-btab="today">
       <div class="studio-page-head"><div class="studio-kicker">YOUR WELLBEING <span class="studio-dot"></span> OTTO</div><h2>Find your<br><span>rhythm.</span></h2><p>Activity and trends from your connected records.</p></div>
       <div id="healthErrorBanner"></div>
-      <div id="healthHero"></div>
-      <div class="controls" id="healthRangeFilters">
+      <div class="ia2-subtabs" id="bodyTabs" role="tablist" aria-label="Body"><button type="button" role="tab" data-btab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-btab="trends" aria-selected="false">Trends</button><button type="button" role="tab" data-btab="history" aria-selected="false">History</button><button type="button" role="tab" data-btab="sleep" aria-selected="false">Sleep</button></div>
+      <div id="healthHero" data-bt="today"></div>
+      <div class="controls" id="healthRangeFilters" data-bt="trends">
         <button class="chip active" data-days="30" type="button">30 days</button>
         <button class="chip" data-days="90" type="button">90 days</button>
       </div>
-      <button class="refresh-btn" id="addHealthBtn" type="button" style="margin-bottom:0.6rem;">+ Log activity by hand</button>
-      <form id="healthForm" class="txn-form" style="display:none;">
+      <button class="link-btn" id="addHealthBtn" type="button" data-bt="today" style="margin:4px 2px 10px;">+ Log activity by hand</button>
+      <form id="healthForm" class="txn-form" style="display:none;" data-bt="today">
         <div class="field-row"><label>Date</label><input type="date" id="healthDate" required></div>
         <div class="field-row"><label>Steps</label><input type="number" id="healthSteps" min="0" placeholder="e.g. 6500"></div>
         <div class="field-row"><label>Active kcal</label><input type="number" step="0.1" id="healthEnergy" min="0" placeholder="optional"></div>
@@ -2157,6 +2166,7 @@ body.chatting .otto-chat-starters{display:none}
           <span class="save-status" id="healthStatus"></span>
         </div>
       </form>
+      <div id="histBox" data-bt="history"></div>
       <div id="healthContent"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
     </div>
     <div class="tab-panel" id="panelFood">
@@ -2208,7 +2218,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-02.69';
+const APP_BUILD = '2026-11-02.70';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -3623,7 +3633,7 @@ function renderVitals(data){
   // --- sleep ---
   const last = sleep[0];
   if(!last){
-    h += `<div class="viz-card"><div class="viz-title"><span>Sleep</span></div><div class="map-help" style="margin:0">No sleep data yet. In Health Auto Export, add <b>Sleep Analysis</b> (summarized) to your Health Metrics automation.</div></div>`;
+    h += `<div class="viz-card" data-bt="sleep"><div class="viz-title"><span>Sleep</span></div><div class="map-help" style="margin:0">No sleep data yet. In Health Auto Export, add <b>Sleep Analysis</b> (summarized) to your Health Metrics automation.</div></div>`;
   } else {
     const prior = sleep.slice(1, 15).map(n=>Number(n.asleep_min)).filter(x=>x > 0);
     const avg = prior.length ? prior.reduce((a,b)=>a+b,0)/prior.length : null;
@@ -3634,7 +3644,7 @@ function renderVitals(data){
     const label = daysOld <= 0 ? 'Last night' : daysOld === 1 ? 'Night before last' : `Latest night recorded, ${new Date(last.sleep_date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})}`;
     const span = last.bedtime && last.wake_time ? Math.round((new Date(last.wake_time) - new Date(last.bedtime)) / 60000) : null;
     const inBed = span && span > 0 ? Math.max(span, Number(last.asleep_min)||0) : (Number(last.in_bed_min) > Number(last.asleep_min) ? Number(last.in_bed_min) : null);
-    h += `<div class="viz-card sleep-card"><div class="viz-title"><span>${label}</span><span>${last.bedtime ? clockTime(last.bedtime) : ''}${last.wake_time ? ' – ' + clockTime(last.wake_time) : ''}</span></div>
+    h += `<div class="viz-card sleep-card" data-bt="sleep"><div class="viz-title"><span>${label}</span><span>${last.bedtime ? clockTime(last.bedtime) : ''}${last.wake_time ? ' – ' + clockTime(last.wake_time) : ''}</span></div>
       <div class="vital-big">${hm(last.asleep_min)} <small>asleep${avg ? (Math.abs(Number(last.asleep_min) - avg) < 10 ? ', about your usual' : `, ${Number(last.asleep_min) >= avg ? '+' : '−'}${hm(Math.abs(Number(last.asleep_min) - avg))} vs your 2-week average`) : ''}</small></div>
       ${segs.length ? `<div class="stage-bar">${segs.map(x=>`<i style="width:${(100*x.v/tot).toFixed(1)}%;background:${SLEEP_COLORS[x.k]}"></i>`).join('')}</div>
       <div class="stage-legend">${segs.map(x=>`<span><i style="background:${SLEEP_COLORS[x.k]}"></i>${x.k === 'core' ? 'Core' : x.k === 'rem' ? 'REM' : x.k[0].toUpperCase()+x.k.slice(1)} ${hm(x.v)}</span>`).join('')}</div>` : ''}
@@ -3652,15 +3662,15 @@ function renderVitals(data){
     const tile = (name, unit, arr, color, lowerIsBetter) => { const l = lastOf(arr), a = avgOf(arr); if(l == null) return `<div class="vital"><div class="k">${name}</div><div class="grow-sub">No readings yet</div></div>`;
       const diff = a ? l - a : 0, good = lowerIsBetter ? diff <= 0 : diff >= 0;
       return `<div class="vital"><div class="k">${name}</div><div class="v">${Math.round(l)}<small> ${unit}</small></div><div class="d" style="color:${Math.abs(diff) < 1 ? 'var(--text-faint)' : good ? 'var(--ok)' : 'var(--coral)'}">${Math.abs(diff) < 1 ? 'about your usual' : `${diff > 0 ? '+' : '−'}${Math.abs(diff).toFixed(0)} vs 30-day avg ${Math.round(a)}`}</div>${sparkline(arr, color, 140, 34)}</div>`; };
-    h += `<div class="viz-card"><div class="viz-title"><span>Heart</span><span>last 30 days</span></div><div class="vitals2">${tile('Resting heart rate','bpm', rhr, '#8FB4E8', true)}${tile('Heart rate variability','ms', hrv, '#8A5CC7', false)}</div></div>`;
+    h += `<div class="viz-card" data-bt="trends"><div class="viz-title"><span>Heart</span><span>last 30 days</span></div><div class="vitals2">${tile('Resting heart rate','bpm', rhr, '#8FB4E8', true)}${tile('Heart rate variability','ms', hrv, '#8A5CC7', false)}</div></div>`;
   } else {
-    h += `<div class="viz-card"><div class="viz-title"><span>Heart</span></div><div class="map-help" style="margin:0">No heart data yet. Add <b>Resting Heart Rate</b> and <b>Heart Rate Variability</b> to your Health Auto Export automation.</div></div>`;
+    h += `<div class="viz-card" data-bt="trends"><div class="viz-title"><span>Heart</span></div><div class="map-help" style="margin:0">No heart data yet. Add <b>Resting Heart Rate</b> and <b>Heart Rate Variability</b> to your Health Auto Export automation.</div></div>`;
   }
   // --- weight ---
   const wl = weights[0];
   const cutoff = new Date(Date.now() - 30*86400000).toISOString();
   const old = weights.filter(w=>w.measured_at <= cutoff)[0] || weights[weights.length-1];
-  h += `<div class="viz-card"><div class="viz-title"><span>Weight</span><button class="tl-open" type="button" id="logWeightBtn" style="color:#2E8B57">+ Log weight</button></div>
+  h += `<div class="viz-card" data-bt="trends"><div class="viz-title"><span>Weight</span><button class="tl-open" type="button" id="logWeightBtn" style="color:var(--accent)">+ Log weight</button></div>
     ${wl ? `<div class="vital-big">${Number(wl.weight_lb).toFixed(1)} <small>lb, ${shortDate(wl.measured_at.slice(0,10))}${old && old !== wl ? `, ${Number(wl.weight_lb) - Number(old.weight_lb) >= 0 ? '+' : '−'}${Math.abs(Number(wl.weight_lb) - Number(old.weight_lb)).toFixed(1)} lb since ${shortDate(old.measured_at.slice(0,10))}` : ''}</small></div>
       ${sparkline(weights.slice(0,60).reverse().map(w=>Number(w.weight_lb)), '#2E8B57', 300, 44)}` : `<div class="map-help" style="margin:0">No weigh-ins yet. Log one here, or add <b>Weight</b> to Health Auto Export if your scale syncs to Apple Health.</div>`}
     <div class="offplan-form" id="weightForm" hidden><input type="number" step="0.1" min="50" max="600" inputmode="decimal" id="weightInput" placeholder="Weight in lb"><button class="save-btn" type="button" id="weightSave">Save</button></div>
@@ -3754,7 +3764,6 @@ function renderHealth0(data){
     </div></div>
     <div class="viz-card"><div class="viz-title"><span>This week</span><span>${S.thisWeek.toLocaleString()} steps vs ${S.lastWeek.toLocaleString()} last week</span></div><div class="weekstrip">${strip.map(d=>{ const r = daily.find(x=>x.activity_date===d); const fut = d > S.today; return `<div class="d ${d===S.today?'today':''}">${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}<b>${fut ? '' : r && r.steps != null ? (r.steps >= 1000 ? (r.steps/1000).toFixed(1)+'k' : r.steps) : '—'}</b>${wkDays.has(d) ? '<span class="wk">● workout</span>' : '&nbsp;'}</div>`; }).join('')}</div></div>`;
   })()}
-  ${renderVitals(data)}
   <div class="stat-trio" hidden>
     <div><div class="k">This week</div><div class="v">${S.thisWeek.toLocaleString()}</div><div class="d">steps, ${S.daysIn} day${S.daysIn===1?'':'s'}</div></div>
     <div><div class="k">Last week</div><div class="v">${S.lastWeek.toLocaleString()}</div><div class="d">same ${S.daysIn} day${S.daysIn===1?'':'s'}</div></div>
@@ -3762,11 +3771,12 @@ function renderHealth0(data){
   </div>`;
   hero.innerHTML = h;
 
-  let html = buildStepsChart(daily.slice(0, healthRangeDays), S.avg30);
-  if(!workouts.length){ html += '<div class="empty">No workouts logged.</div>'; el.innerHTML = html; return; }
+  let html = `<div class="viz-card" data-bt="trends"><div class="viz-title"><span>Steps</span><span>last ${healthRangeDays} days · line = 30-day average</span></div>${buildStepsChart(daily.slice(0, healthRangeDays), S.avg30)}</div>
+    <div id="yoyBox" data-bt="trends"></div>${renderVitals(data)}${renderNights(data.sleep || [])}`;
+  if(!workouts.length){ html += '<div class="empty" data-bt="trends">No workouts logged.</div>'; el.innerHTML = html; return; }
   const months = [];
   workouts.forEach((w,i)=>{ const t = new Date(w.start_time); const key = t.toLocaleDateString('en-US',{month:'long', year:'numeric'}); let g = months.find(m=>m.key===key); if(!g){ g={key, items:[]}; months.push(g); } g.items.push({w,i}); });
-  html += months.map(g=>`<div class="day-label"><span>${esc(g.key)}</span><span>${g.items.length} workout${g.items.length===1?'':'s'}</span></div>
+  html += '<div class="section-title" data-bt="trends">Workouts</div>' + months.map(g=>`<div data-bt="trends"><div class="day-label"><span>${esc(g.key)}</span><span>${g.items.length} workout${g.items.length===1?'':'s'}</span></div>
     <div class="gcard">${g.items.map(({w,i})=>{
       const open = expandedWorkoutIndex === i;
       const dateStr = new Date(w.start_time).toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
@@ -3781,7 +3791,7 @@ function renderHealth0(data){
         <div class="grow-right">${minutes} min</div>
         ${open ? `<div class="grow-detail" style="flex-basis:100%">${kv.map(([k,v])=>`<div class="kv"><span>${k}</span><span>${esc(String(v))}</span></div>`).join('')}</div>` : ''}
       </div>`;
-    }).join('')}</div>`).join('');
+    }).join('')}</div></div>`).join('');
   el.innerHTML = html;
   el.querySelectorAll('.workout-card').forEach(card=>{
     card.addEventListener('click', ()=>{
@@ -4808,7 +4818,7 @@ function pageSubtitle(area){
   try{
     if(area === 'money'){ const m = homeMoney(); return m ? (m.left < 0 ? `${money(-m.left)} over this week` : `${money(m.left)} left this week`) : ''; }
     if(area === 'food'){ if(!foodData || !foodData.plan) return ''; if(foodData.plan.started_on && foodData.pace) return `${Number(foodData.pace.mains_left||0)} meals left in the fridge`; const meal = homeNextMeal(); return meal ? `Next: ${meal.name}` : ''; }
-    if(area === 'health'){ if(!lastHealthData || !lastHealthData.daily) return ''; const S = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); const stale = !S.synced || (Date.now() - new Date(S.synced).getTime()) > 6*3600000; return stale && !(S.todayRow && S.todayRow.steps) ? `Not synced since ${timeAgo(S.synced || new Date().toISOString())}` : `${(S.todayRow && S.todayRow.steps || 0).toLocaleString()} steps today`; }
+    if(area === 'health'){ if(!lastHealthData || !lastHealthData.daily) return ''; const S = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); const stale = !S.synced || (Date.now() - new Date(S.synced).getTime()) > 6*3600000; return stale && !(S.todayRow && S.todayRow.steps) ? (S.synced ? `Last synced ${timeAgo(S.synced)}` : `Health data hasn't synced yet`) : `${(S.todayRow && S.todayRow.steps || 0).toLocaleString()} steps today`; }
     if(area === 'todos'){ const its = planItemsFor(localToday()); const ev = its.find(x=>x.kind==='event' && x.sort >= new Date().toTimeString().slice(0,5)); return its.length ? `${its.length} today${ev ? ` · next: ${ev.title}` : ''}` : 'Nothing planned today'; }
     if(area === 'assets'){ const lp = mapData && mapData.lastPoint, fresh = lp && (Date.now() - new Date(lp.recorded_at).getTime()) < 6*3600000; const v = (mapData && mapData.visits || []).find(x=>x.is_open && x.arrived_at); return fresh && v ? `At ${v.place} since ${clockTime(v.arrived_at)}` : (lp ? `Location ${fresh ? 'updated' : 'paused, last update'} ${timeAgo(lp.recorded_at)}` : 'Your places, purchases and stuff'); }
   } catch(e){}
@@ -5332,7 +5342,7 @@ function renderIa2HomeNow(){
   if(lastHealthData && lastHealthData.daily){ const Sx = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); const st = Sx.todayRow && Sx.todayRow.steps;
     if(st != null){ const by = {}; lastHealthData.daily.forEach(r=>{ by[r.activity_date] = Number(r.steps)||0; });
       const days = [...Array(7)].map((_,i)=>isoAddDays(today, i-6));
-      stepsW = wdg('health', 'STEPS', `<span class="wdg-row">${ia2Ring(Sx.avg30 ? st/Sx.avg30 : 0)}<span class="wdg-col"><b class="wdg-mid">${st.toLocaleString()}</b><span class="wdg-sub">usual ${Sx.avg30 ? Sx.avg30.toLocaleString() : '—'}</span></span></span>${miniBars(days.map(d=>by[d]||0), 6)}`, { sub:'Activity' }); } }
+      stepsW = wdg('health', 'STEPS', `<span class="wdg-row">${ia2Ring(Sx.avg30 ? st/Sx.avg30 : 0)}<span class="wdg-col"><b class="wdg-mid">${st.toLocaleString()}</b><span class="wdg-sub">usual ${Sx.avg30 ? Sx.avg30.toLocaleString() : '—'}</span></span></span>${miniBars(days.map(d=>by[d]||0), 6)}`, { sub:'Trends' }); } }
   // last stop (mini map)
   const fx = lastFix(); const lastV = (mapData.visits||[]).filter(v=>v.status!=='declined' && v.arrived_at).sort((a,b)=>b.arrived_at.localeCompare(a.arrived_at))[0];
   const hasPos = !!(fx.pos || (lastV && lastV.lat != null));
@@ -5926,28 +5936,48 @@ function insertPace(){
     <div class="wdg-sub">Solid line: spent so far · dashed: an even pace to ${money(planned)}.</div></div>`);
 }
 
-// ---------- BODY: section tabs built from the sections the page actually has ----------
-let healthTab = 0;
-function healthTabs(){
-  const host = document.getElementById('healthContent'); if(!host) return;
-  const groups = [{ name:'Overview', els:[] }, { name:'Activity', els:[] }, { name:'Sleep', els:[] }, { name:'Heart', els:[] }];
-  const pick = t => /sleep|bed|asleep|rem|deep/i.test(t) ? 2 : /heart|hrv|resting|bpm|pulse/i.test(t) ? 3 : 1;
-  let cur = null;
-  [...host.children].forEach((ch, i)=>{ const title = (ch.querySelector && ch.querySelector('.viz-title span') || {}).textContent || ch.textContent || '';
-    if(ch.classList && ch.classList.contains('viz-card')){ cur = groups[pick(title)]; cur.els.push(ch); if(!groups[0].els.length) groups[0].first = ch; } else (cur || groups[1]).els.push(ch); });
-  const used = groups.filter((g,i)=>i===0 || g.els.length); used.push({ name:'History', els:[], history:true }); used.push({ name:'Mood', els:[], mood:true });
-  document.getElementById('healthTabsBar')?.remove(); document.getElementById('moodBox')?.remove(); document.getElementById('histBox')?.remove();
-  if(healthTab >= used.length) healthTab = 0;
-  host.insertAdjacentHTML('beforebegin', `<div class="ia2-subtabs" id="healthTabsBar" role="tablist">${used.map((g,i)=>`<button type="button" role="tab" class="${i===healthTab?'on':''}" aria-selected="${i===healthTab}" data-htab="${i}">${esc(g.name)}</button>`).join('')}</div>`);
-  const sel = used[healthTab];
-  groups.slice(1).forEach(g=>g.els.forEach(el=>{ el.style.display = (healthTab === 0 ? el === groups[0].first : sel === g) ? '' : 'none'; }));
-  const hero = document.getElementById('healthHero'); if(hero) hero.style.display = healthTab === 0 ? '' : 'none';
-  if(sel.history){ host.insertAdjacentHTML('beforeend', '<div id="histBox"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>'); loadStepHistory().then(renderStepHistory).catch(err=>{ const b = document.getElementById('histBox'); if(b) b.innerHTML = `<div class="empty">Couldn't load your step history. ${esc(err.message||'')}</div>`; }); }
-  if(sel.mood){ host.insertAdjacentHTML('beforeend', '<div id="moodBox"><div class="skeleton"><div class="skeleton-row"></div></div></div>');
-    fetch(`${SUPABASE_URL}/rest/v1/daily_checkins?select=checkin_date,mood,energy,highlight&order=checkin_date.desc&limit=30`, { headers: authHeaders() }).then(r=>r.ok?r.json():[]).then(rows=>{ const b = document.getElementById('moodBox'); if(!b) return;
-      b.innerHTML = rows.length ? `<div class="gcard lf-list">${rows.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${shortDate(x.checkin_date)} · mood ${x.mood??'—'}/5 · energy ${x.energy??'—'}/5</div><div class="grow-sub">${esc(x.highlight||'')}</div></div></div>`).join('')}</div>` : '<div class="empty">No check-ins yet. Tell Otto “mood 4, energy 3” any evening.</div>'; }); }
+// ---------- BODY: Today · Trends · History · Sleep (Mood retired: 1 check-in ever; "mood 4" still works in chat) ----------
+let bodyTab = 'today';
+function healthTabs(){ setBodyTab(bodyTab, true); }
+function setBodyTab(t, quiet){
+  const panel = document.getElementById('panelHealth'); if(!panel) return; bodyTab = t; panel.dataset.btab = t;
+  document.querySelectorAll('#bodyTabs [data-btab]').forEach(b=>{ const on = b.dataset.btab === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
+  if(t === 'history'){ const box = document.getElementById('histBox'); if(box && !box.children.length) box.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
+    loadStepHistory().then(renderStepHistory).catch(err=>{ const b = document.getElementById('histBox'); if(b) b.innerHTML = `<div class="empty">Couldn't load your step history. ${esc(err.message||'')}</div>`; }); }
+  if(t === 'trends') loadStepHistory().then(renderYoY).catch(()=>{});
+  if(!quiet){ const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
 }
-document.addEventListener('click', e=>{ const h = e.target.closest('[data-htab]'); if(h){ healthTab = Number(h.dataset.htab); healthTabs(); } });
+document.addEventListener('click', e=>{ const b = e.target.closest('#bodyTabs [data-btab]'); if(b) setBodyTab(b.dataset.btab); });
+// This month vs the same month every year since 2018 (month-to-date for this year)
+function renderYoY(){
+  const box = document.getElementById('yoyBox'); if(!box || !stepHistory) return;
+  const today = localToday(), mm = today.slice(5,7), dd = Number(today.slice(8,10)), monthName = new Date(today+'T12:00').toLocaleDateString('en-US',{ month:'long' });
+  const years = [...new Set([...stepHistory.keys()].map(d=>d.slice(0,4)))].sort();
+  const rows = years.map(y=>{ const v = []; stepHistory.forEach((n,d)=>{ if(d.slice(0,7) === `${y}-${mm}` && (y !== today.slice(0,4) || Number(d.slice(8,10)) <= dd)) v.push(n); });
+    return { y, avg: v.length ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : null, n: v.length }; }).filter(r=>r.avg != null && r.n >= (r.y === today.slice(0,4) ? 1 : 10));
+  if(rows.length < 2){ box.innerHTML = ''; return; }
+  const mx = Math.max(...rows.map(r=>r.avg)), cur = rows.find(r=>r.y === today.slice(0,4)), best = rows.slice().sort((a,b)=>b.avg-a.avg)[0];
+  const past = rows.filter(r=>r !== cur), pastAvg = past.length ? Math.round(past.reduce((a,r)=>a+r.avg,0)/past.length) : null;
+  box.innerHTML = `<div class="viz-card"><div class="viz-title"><span>Every ${monthName}</span><span>average steps a day</span></div>
+    <div class="yoy">${rows.map(r=>`<div class="yoy-row ${r === cur ? 'cur' : ''}"><span>${r.y}</span><i><i style="width:${Math.max(3, Math.round(100*r.avg/mx))}%"></i></i><b>${r.avg.toLocaleString()}</b></div>`).join('')}</div>
+    <div class="wdg-sub">${cur && pastAvg ? `This ${monthName} so far: ${cur.avg >= pastAvg ? `${Math.round(100*(cur.avg-pastAvg)/pastAvg)}% above` : `${Math.round(100*(pastAvg-cur.avg)/pastAvg)}% below`} your usual ${monthName} (${pastAvg.toLocaleString()}). ` : ''}Best ${monthName}: ${best.y}.</div></div>`;
+}
+// Sleep tab: the last two weeks of nights — consistency, not just last night
+function renderNights(sleep){
+  const nights = sleep.filter(n=>Number(n.asleep_min) > 0).slice(0, 14);
+  if(nights.length < 2) return '';
+  const avg = Math.round(nights.reduce((a,n)=>a + Number(n.asleep_min), 0) / nights.length);
+  const mins = iso => { const t = new Date(iso); let m = t.getHours()*60 + t.getMinutes(); return m; };
+  const beds = nights.filter(n=>n.bedtime).map(n=>{ const m = mins(n.bedtime); return m < 12*60 ? m + 24*60 : m; }), wakes = nights.filter(n=>n.wake_time).map(n=>mins(n.wake_time));
+  const avgM = a => a.length ? Math.round(a.reduce((x,y)=>x+y,0)/a.length) : null, sd = a => { const m = avgM(a); return a.length > 1 ? Math.round(Math.sqrt(a.reduce((x,y)=>x+(y-m)**2,0)/a.length)) : null; };
+  const clock = m => { if(m == null) return '—'; m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m/60), mi = m % 60; return `${(h % 12) || 12}:${String(mi).padStart(2,'0')} ${h < 12 ? 'AM' : 'PM'}`; };
+  const spread = sd(beds), mx = Math.max(...nights.map(n=>Number(n.asleep_min)), 480);
+  return `<div class="viz-card" data-bt="sleep"><div class="viz-title"><span>Last ${nights.length} nights</span><span>${hm(avg)} average</span></div>
+    <div class="dp-stats" style="grid-template-columns:repeat(3,minmax(0,1fr)); margin-top:4px"><div class="dp-stat"><span>Bedtime</span><b>${clock(avgM(beds))}</b><em>${spread != null ? `±${spread} min` : ''}</em></div><div class="dp-stat"><span>Wake</span><b>${clock(avgM(wakes))}</b><em>average</em></div><div class="dp-stat"><span>Under 7h</span><b>${nights.filter(n=>Number(n.asleep_min) < 420).length}</b><em>of ${nights.length} nights</em></div></div>
+    <div class="nights">${nights.map(n=>{ const segs = ['deep','core','rem','awake'].map(k=>({ k, v:Number(n[k+'_min'])||0 })).filter(x=>x.v > 0);
+      return `<div class="night"><span>${new Date(n.sleep_date+'T12:00').toLocaleDateString('en-US',{ weekday:'short', day:'numeric' })}</span><i style="width:${Math.round(100*Number(n.asleep_min)/mx)}%">${segs.length ? segs.map(x=>`<i style="flex:${x.v};background:${SLEEP_COLORS[x.k]}"></i>`).join('') : '<i style="flex:1;background:var(--accent)"></i>'}</i><b>${hm(n.asleep_min)}</b></div>`; }).join('')}</div>
+    <div class="wdg-sub">${spread != null ? (spread <= 30 ? 'Your bedtime is steady.' : `Your bedtime moves around by about ${spread} minutes; a steadier one usually means better sleep.`) : ''}</div></div>`;
+}
 
 // ---------- BODY · History: every day since 2018 — heatmap, records, on this day ----------
 let stepHistory = null, histYear = null, histPick = null;
@@ -6664,7 +6694,7 @@ function openDeep(k, sub){
   openArea(k); if(!sub) return;
   setTimeout(()=>{
     if(k === 'money' && typeof setMoneySeg === 'function') setMoneySeg(sub);
-    else { const b = [...document.querySelectorAll('#healthTabsBar [data-htab], #sheet [data-lsec], #planTabs [data-ptab]')].find(x=>x.textContent.trim().toLowerCase() === String(sub).toLowerCase()); if(b) b.click(); }
+    else { const b = [...document.querySelectorAll('#bodyTabs [data-btab], #sheet [data-lsec], #planTabs [data-ptab]')].find(x=>x.textContent.trim().toLowerCase() === String(sub).toLowerCase()); if(b) b.click(); }
   }, 60);
 }
 // ---------- tiny charts for Home widgets ----------
