@@ -1930,6 +1930,12 @@ body.chatting .otto-chat-starters{display:none}
   .dp-time{font:500 12px var(--mono); color:var(--text-muted); padding-top:2px;} .dp-row b{display:block; font:600 15px var(--sans);} .dp-row span{font:13px var(--sans); color:var(--text-muted);}
   .dp-dot{width:10px; height:10px; border-radius:5px; margin-top:5px;} .dp-dot.place{background:var(--text);} .dp-dot.buy{background:var(--amber); border-radius:3px;} .dp-dot.todo{background:var(--accent);}
   body.daying .ia2-dock{display:none !important;}
+  .sp-chips{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none;} .sp-chips::-webkit-scrollbar{display:none;} .sp-chips .chip{flex:none; min-height:36px; display:inline-flex; align-items:center; gap:6px;}
+  .sp-cats{padding-top:10px;} .sp-sw{width:9px; height:9px; border-radius:50%; display:inline-block;} .sp-map{height:300px;}
+  .sp-stats{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,1.25fr);}
+  .sp-list{padding:2px 12px !important;} .sp-row{all:unset; box-sizing:border-box; width:100%; display:grid; grid-template-columns:22px minmax(0,1fr) auto; gap:8px; align-items:center; padding:11px 0; border-bottom:1px solid var(--border); cursor:pointer;} .sp-row:last-child{border-bottom:none;}
+  .sp-row:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:8px;} .sp-rank{font:600 12px var(--mono); color:var(--text-muted);} .sp-main{min-width:0; display:flex; flex-direction:column; gap:2px;} .sp-main b{font:600 15px var(--sans); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;} .sp-main>span{font:13px var(--sans); color:var(--text-muted);}
+  .sp-bar{display:block; height:4px; border-radius:2px; background:var(--surface-2); margin-top:4px;} .sp-bar i{display:block; height:100%; border-radius:2px;} .sp-amt{font:600 15px var(--sans); font-variant-numeric:tabular-nums;}
 
   /* ===== Build .67: Plan tabs, Upcoming, weekly reset ===== */
   #panelTodos[data-ptab="today"] [data-pt]:not([data-pt="today"]), #panelTodos[data-ptab="upcoming"] [data-pt]:not([data-pt="upcoming"]), #panelTodos[data-ptab="backlog"] [data-pt]:not([data-pt="backlog"]){display:none !important;}
@@ -2060,6 +2066,7 @@ body.chatting .otto-chat-starters{display:none}
     <div class="tab-panel" id="panelBudget">
       <div id="budgetErrorBanner"></div>
       <div class="money-actions" data-mseg="txns" style="gap:0.5rem; flex-wrap:wrap; margin-bottom:0.6rem; justify-content:flex-end;">
+        <button class="refresh-btn" type="button" data-spend-open>Spending map</button>
         <button class="refresh-btn" id="addTxnBtn" type="button">+ Log cash or other</button>
         <button class="refresh-btn" id="dupWeekBtn" type="button" hidden>Duplicate last week →</button>
       </div>
@@ -2201,7 +2208,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-02.68';
+const APP_BUILD = '2026-11-02.69';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -3098,6 +3105,7 @@ function renderMapControls(){
     ['live','LIVE OVERLAYS','Weather and nearby transit']
   ];
   document.getElementById('mapLayers').innerHTML = groups.map(([group,heading,description])=>`<section class="map-layer-group" aria-label="${heading}"><div class="map-layer-heading"><span>${heading}</span><small>${description}</small></div>${layers.filter(x=>x[4]===group).map(([k,name,color,sub,,symbol])=>`<label class="layer-row"><span class="layer-symbol" style="--layer-color:${color}" aria-hidden="true">${symbol}</span><span class="grow-main"><span class="grow-title" style="display:block">${name}</span><span class="grow-sub" style="display:block">${esc(sub)}</span></span><input type="checkbox" data-layer="${k}" aria-label="Show ${name}" ${mapLayersOn[k]?'checked':''}></label>`).join('')}</section>`).join('');
+  document.getElementById('mapLayers').insertAdjacentHTML('beforeend', '<button type="button" class="link-row" data-spend-open>Spending map: where your money goes ›</button>');
   document.getElementById('mapRanges').innerHTML = MAP_RANGES.map(([d,l])=>`<button class="chip ${!mapDay && mapRangeDays===d?'active':''}" type="button" data-maprange="${d}">${l}</button>`).join('');
   const dl = []; for(let i=0;i<7;i++){ const d = isoAddDays(localToday(), -i); dl.push(`<button class="chip ${mapDay===d?'active':''}" type="button" data-mapday="${d}">${i===0 ? 'Today' : i===1 ? 'Yesterday' : new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short', day:'numeric'})}</button>`); }
   document.getElementById('mapDays').innerHTML = dl.join('');
@@ -6991,6 +6999,85 @@ document.addEventListener('keydown', e=>{ const pg = document.getElementById('da
   if(e.key === 'Escape') goBack(); else if(e.key === 'ArrowLeft') openDayPage(isoAddDays(dayView.d, -1)); else if(e.key === 'ArrowRight' && dayView.d < localToday()) openDayPage(isoAddDays(dayView.d, 1)); });
 
 
+// ---------- Spending map (#/spend): proportional circles of where money goes, by category ----------
+// Spots = purchases grouped by merchant within ~100 m. Circle area ∝ total spent there. Only purchases the
+// bank sent a store location for are mapped, and the page says how many that is.
+const spendView = { open:false, range:90, cat:'all', rows:null, rowsRange:null, map:null, markers:{} };
+async function openSpendMap(fromRoute){
+  let el = document.getElementById('spendMap');
+  if(!el){ el = document.createElement('div'); el.id = 'spendMap'; el.className = 'daypage'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Spending map'); document.body.appendChild(el); }
+  const was = spendView.open; spendView.open = true; el.hidden = false; document.body.classList.add('daying');
+  if(!fromRoute && !was) syncRoute(false);
+  await renderSpendMap();
+}
+function closeSpendMap(){ const el = document.getElementById('spendMap'); if(el) el.hidden = true; spendView.open = false; if(!dayView.open) document.body.classList.remove('daying'); if(spendView.map){ spendView.map.remove(); spendView.map = null; } }
+async function loadSpendRows(){
+  const key = spendView.range; if(spendView.rows && spendView.rowsRange === key) return spendView.rows;
+  const since = key ? isoAddDays(localToday(), -(key - 1)) : null;
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,authorized_date,merchant,description,amount_cents,category_id,exclude_from_budget,location_lat,location_lon,location_city&removed_at=is.null&location_lat=not.is.null&amount_cents=lt.0${since ? `&transaction_date=gte.${since}` : ''}&order=transaction_date.desc&limit=3000`, { headers: authHeaders() });
+  if(!r.ok) throw new Error('HTTP ' + r.status);
+  spendView.rows = (await r.json()).filter(t=>Number(t.amount_cents) < 0 && t.location_lon != null && !t.exclude_from_budget); spendView.rowsRange = key; return spendView.rows;
+}
+function spendCat(t){ const c = (allCategories||[]).find(x=>x.id === t.category_id); return c ? c.name : 'Not sorted'; }
+function spendColor(name){ return name === 'Not sorted' ? '#9AA3A0' : (TXN_STYLE[name] || TXN_STYLE.Transfer)[0]; }
+function spendSpots(rows){
+  const list = [];   // same merchant within 150 m of where it was first seen = one spot
+  rows.forEach(t=>{ const nm = String(t.merchant || t.description || 'Purchase').trim(), key = nm.toLowerCase(), at = { lat:Number(t.location_lat), lon:Number(t.location_lon) };
+    let s = list.find(x=>x.key === key && haversineKm(x.at, at) < 0.15);
+    if(!s){ s = { key, at, name:nm, city:t.location_city || '', total:0, n:0, lat:0, lon:0, cats:{}, last:'' }; list.push(s); }
+    const amt = -Number(t.amount_cents); s.total += amt; s.n++; s.lat += at.lat; s.lon += at.lon; const c = spendCat(t); s.cats[c] = (s.cats[c]||0) + amt; if(t.transaction_date > s.last) s.last = t.transaction_date; });
+  return list.map(s=>({ ...s, lat:s.lat/s.n, lon:s.lon/s.n, cat:Object.entries(s.cats).sort((a,b)=>b[1]-a[1])[0][0] })).sort((a,b)=>b.total - a.total);
+}
+async function renderSpendMap(){
+  const el = document.getElementById('spendMap'); if(!el || !spendView.open) return;
+  if(spendView.map){ spendView.map.remove(); spendView.map = null; }
+  const rangeName = { 30:'Last 30 days', 90:'Last 90 days', 0:'All time' }[spendView.range];
+  el.innerHTML = `<div class="dp-head"><button type="button" class="deck-x" data-spend-close aria-label="Close spending map">✕</button><div class="dp-when"><b>Where money goes</b><span>${rangeName}</span></div></div>
+    <div class="dp-body" id="spBody"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>`;
+  let rows; try{ rows = await loadSpendRows(); }catch(err){ document.getElementById('spBody').innerHTML = `<div class="empty">Couldn't load purchases. ${esc(err.message||'')}</div>`; return; }
+  if(!spendView.open) return;
+  const catTotals = {}; rows.forEach(t=>{ const c = spendCat(t); catTotals[c] = (catTotals[c]||0) - Number(t.amount_cents); });
+  const cats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  if(spendView.cat !== 'all' && !catTotals[spendView.cat]) spendView.cat = 'all';
+  const shown = spendView.cat === 'all' ? rows : rows.filter(t=>spendCat(t) === spendView.cat);
+  const spots = spendSpots(shown), total = spots.reduce((a,s)=>a+s.total, 0), maxT = spots.length ? spots[0].total : 1;
+  const cities = {}; shown.forEach(t=>{ if(t.location_city) cities[t.location_city] = (cities[t.location_city]||0) - Number(t.amount_cents); }); const topCity = Object.entries(cities).sort((a,b)=>b[1]-a[1])[0];
+  const chip = (attr, val, label, on, color) => `<button type="button" class="chip ${on?'active':''}" ${attr}="${esc(String(val))}" aria-pressed="${on}">${color ? `<i class="sp-sw" style="background:${color}" aria-hidden="true"></i>` : ''}${esc(label)}</button>`;
+  document.getElementById('spBody').innerHTML = `<div class="sp-chips" role="group" aria-label="Time range">${[[30,'30 days'],[90,'90 days'],[0,'All']].map(([v,l])=>chip('data-spend-range', v, l, spendView.range === v)).join('')}</div>
+    ${rows.length ? `<div id="spMapEl" class="dp-map sp-map" role="img" aria-label="Map of ${spots.length} places you spent money"></div>
+    <div class="sp-chips sp-cats" role="group" aria-label="Category">${chip('data-spend-cat', 'all', 'All', spendView.cat === 'all')}${cats.map(([c])=>chip('data-spend-cat', c, c, spendView.cat === c, spendColor(c))).join('')}</div>
+    <div class="dp-stats sp-stats"><div class="dp-stat"><span>Mapped</span><b>${money(total)}</b><em>${shown.length} purchase${shown.length===1?'':'s'}</em></div><div class="dp-stat"><span>Spots</span><b>${spots.length}</b><em>${spots.filter(s=>s.n>1).length} repeat</em></div><div class="dp-stat sp-wide"><span>Top town</span><b>${topCity ? esc(topCity[0]) : '—'}</b><em>${topCity ? money(topCity[1]) : ''}</em></div></div>
+    <div class="section-title">Top spots<span>tap to find</span></div>
+    <div class="gcard sp-list">${spots.slice(0, 12).map((s,i)=>`<button type="button" class="sp-row" data-spend-spot="${i}"><span class="sp-rank">${i+1}</span><span class="sp-main"><b>${esc(s.name)}</b><span>${esc([s.city, s.n > 1 ? `${s.n} visits` : '1 visit', 'last ' + shortDate(s.last)].filter(Boolean).join(' · '))}</span><i class="sp-bar"><i style="width:${Math.max(4, Math.round(100*s.total/maxT))}%; background:${spendColor(s.cat)}"></i></i></span><span class="sp-amt">${money(s.total)}</span></button>`).join('')}</div>
+    <div class="map-help">Only purchases where your bank sent a store location are mapped. Circle size is the total spent at that spot.</div>`
+    : `<div class="dp-nomap"><span>No purchases with a store location ${spendView.range ? 'in this range' : 'yet'}.</span>${spendView.range ? '<button type="button" class="link-btn" data-spend-range="0">Show all time ›</button>' : ''}</div>`}`;
+  spendView.spots = spots;
+  document.querySelector('.sp-cats .chip.active')?.scrollIntoView({ block:'nearest', inline:'center' });
+  if(!document.getElementById('spMapEl') || typeof L === 'undefined' || !spots.length) return;
+  try{ const m = spendView.map = L.map('spMapEl', { zoomControl:false, attributionControl:false, tap:false }); makeBaseLayer().addTo(m); spendView.markers = {};
+    // biggest first so small circles stay on top and tappable
+    spots.slice().reverse().forEach(s=>{ const i = spots.indexOf(s);
+      spendView.markers[i] = L.circleMarker([s.lat, s.lon], { radius: 5 + 17*Math.sqrt(s.total/maxT), color:'#0C0F0E', weight:1.5, fillColor:spendColor(s.cat), fillOpacity:.78 })
+        .bindTooltip(`${esc(s.name)} · ${money(s.total)}${s.n > 1 ? ` · ${s.n}×` : ''}`, { direction:'top' }).addTo(m); });
+    const b = L.latLngBounds(spots.map(s=>[s.lat, s.lon]));
+    // fit the busiest cluster, not one far-off airport charge: use spots covering ~90% of spend
+    let acc = 0; const core = spots.filter(s=>{ const keep = acc < total*0.9; acc += s.total; return keep; });
+    const cb = core.length > 1 ? L.latLngBounds(core.map(s=>[s.lat, s.lon])) : b;
+    if(cb.isValid() && core.length > 1) m.fitBounds(cb, { padding:[28,28], maxZoom:15 }); else m.setView([spots[0].lat, spots[0].lon], 14);
+  }catch(e){ console.error('spend map', e); }
+}
+document.addEventListener('click', e=>{
+  if(e.target.closest('[data-spend-open]')){ openSpendMap(); return; }
+  const pg = document.getElementById('spendMap'); if(!pg || pg.hidden || !pg.contains(e.target)) return;
+  if(e.target.closest('[data-spend-close]')){ goBack(); return; }
+  const r = e.target.closest('[data-spend-range]'); if(r){ spendView.range = Number(r.dataset.spendRange); renderSpendMap(); return; }
+  const c = e.target.closest('[data-spend-cat]'); if(c){ spendView.cat = c.dataset.spendCat; renderSpendMap(); return; }
+  const sp = e.target.closest('[data-spend-spot]'); if(sp && spendView.map){ const i = Number(sp.dataset.spendSpot), s = spendView.spots[i], mk = spendView.markers[i];
+    spendView.map.flyTo([s.lat, s.lon], Math.max(spendView.map.getZoom(), 15), { duration: reduceMotion() ? 0 : .6 }); if(mk) setTimeout(()=>mk.openTooltip(), reduceMotion() ? 0 : 650);
+    document.getElementById('spMapEl').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block:'nearest' }); hapticPulse(); }
+});
+document.addEventListener('keydown', e=>{ const pg = document.getElementById('spendMap'); if(pg && !pg.hidden && e.key === 'Escape') goBack(); });
+
 // ---------- Plan: Today · Upcoming · Backlog ----------
 document.addEventListener('click', e=>{ if(e.target.closest('[data-triage-deck]')) openInboxDeck(triageQueue(allTodos).map(t=>({ kind:'todo', ref_id:t.code, title:t.title }))); });
 function setPlanTab(t){
@@ -7135,6 +7222,7 @@ openArea = function(k){
 let navDepth = 0, routing = false;
 function currentRoute(){
   if(dayView.open) return '#/day/' + dayView.d;
+  if(spendView.open) return '#/spend';
   if(!sheetArea) return '#/today';
   if(sheetArea === 'life'){ const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : 'all'; return '#/' + (k || 'all') + (k !== 'all' && lifeSection ? '/' + lifeSection : ''); }
   return '#/' + sheetArea;
@@ -7147,14 +7235,16 @@ function applyRoute(hash){
   const [k, sec] = String(hash || '').replace(/^#\/?/, '').split('/');
   routing = true;
   try{
-    if(k === 'day'){ openDayPage(sec, true); return; }
+    if(k === 'day'){ if(spendView.open) closeSpendMap(); openDayPage(sec, true); return; }
     if(dayView.open) closeDayPage();
+    if(k === 'spend'){ openSpendMap(true); return; }
+    if(spendView.open) closeSpendMap();
     if(k && AREAS2[k] && k !== 'today'){ openArea(k); if(sec && AREAS2[k].life){ lifeSection = Number(sec) || 0; renderLife(); } }
     else if(k && AREAS[k]) openSheet(k);
     else openArea('today');
   } finally { routing = false; }
 }
-function goBack(){ navDir = -1; if(dayView.open && navDepth <= 0){ closeDayPage(); openArea('today'); syncRoute(true); return; } if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
+function goBack(){ navDir = -1; if(spendView.open && navDepth <= 0){ closeSpendMap(); openArea('money'); syncRoute(true); return; } if(dayView.open && navDepth <= 0){ closeDayPage(); openArea('today'); syncRoute(true); return; } if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
 window.addEventListener('popstate', e=>{ const d = (e.state && e.state.otto) || 0; navDir = d < navDepth ? -1 : 1; navDepth = d; applyRoute(location.hash); });
 (function(){   // swipe right from the left edge = back; the page follows your finger
   let sx = 0, sy = 0, dx = 0, on = false;
