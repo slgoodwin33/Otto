@@ -1,6 +1,6 @@
 # Otto product review — Nov 1, 2026 (build .61)
 
-> **Status:** §6 items .62–.67 shipped (see ROADMAP). Still open from §4–§5: cash-flow line, spending map, People ↔ Places, arrival context, Shortcuts, and the Body / Car / Places tab redesigns.
+> **Status:** §6 items .62–.67 and builds .68–.72 shipped (cash-flow line, spending map, Body and Car redesigns, People ↔ Places; see ROADMAP). Still open: arrival context, Shortcuts, the Places tab redesign, the evening wrap card.
 
 How this was made: a scripted crawl opened every page and every tab (49 screens) and recorded every button and heading. Then read-only aggregate queries against the real Supabase data showed what's actually used. No individual records were read.
 

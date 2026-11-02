@@ -1,31 +1,24 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — builds .68–.72 (Nov 2)
+- .68 Money › Recurring: cash-flow line, checking projected 30 days (weekly pay, each bill/subscription on its date, everyday spending = last 60 days of checking outflows minus bills; rent paid by Apple Cash is matched by amount + date so it isn't counted twice). Shows now / day 30 / lowest + the next dated events.
+- .69 Spending map (#/spend): purchases with a store location, grouped by merchant within 150 m, circle area = total, colored by category; 30/90/All, category filter, top town, Top spots list that flies the map. From Money › Transactions and Places › Layers.
+- .70 Body → Today · Trends · History · Sleep (Mood retired). Trends adds "Every November" (this month vs the same month each year since 2018); Sleep adds a 14-night card (bedtime/wake, spread, nights under 7h).
+- .71 Car → Status (diagram + Next up + records) · Log (services + fill-ups in one list, mpg, gas-station charges from the bank to add in one tap, linked by transaction_id) · Costs (logged vs bank gas kept separate). Fixed Wipers/Air filter zones preselecting "oil".
+- .72 People ↔ Places: pick a person's place (people.location_id, no schema change); rows show last visit, visits in 30 days, usual length; "Time at their place" card; Catch up flag from keep_in_touch_days; Day pages name who lives at a stop.
+
+## Waiting on Samuel
+- Two Hannah places exist: "Hannah’s House" (id 9, 6 visits, linked) and "Hannah's house" (id 3, 0 visits). Deleting id 3 is destructive, so it's left for you.
+
+## Next
+- Arrival context (todos/shopping list when you arrive somewhere), Shortcuts recipes, Places tabs (Day · Insights · Layers; weather → Home morning card), evening wrap card (with a 2-tap mood question).
+
 ## Just shipped — builds .63–.67 (Nov 1), from docs/PRODUCT-REVIEW.md
 - .63 Money: account cards only on Accounts (below the tabs); stale overview card removed; pace inside the Left-to-spend card; spending by day uses authorized_date; Subscriptions folded into Recurring (deduped; Add / Edit or cancel links).
 - .64 Inbox as swipe cards (purchases with Otto's guess + "always file" rule, stops with map + saved-place chips + Not a stop, todos Today/Someday/Done/Drop), Undo, no AI call. Fixed the Apartments map reading locations' lng as lon.
 - .65 Kitchen → Cook · Shop · Plan; "Plan 3 dinners from what's at home"; Home Food spend widget (groceries vs eating out this budget week).
 - .66 Day pages (#/day/YYYY-MM-DD) from the Home "Your day" widget: map with route, stops and geotagged purchases; steps, spent, miles, sleep; timeline; swipe between days; jump to last day with a route.
 - .67 Plan → Today · Upcoming · Backlog (Upcoming = next 30 days from todos, events, bills, renewals, document expirations, school, budget week); Weekly reset (weekend card on Home + Plan): close the week → inbox → todos → next week's meals; "N todos need a decision" uses the card deck.
-
-## Next
-- Cash-flow line (balance 30 days ahead), spending map heat layer, People ↔ Places, arrival context, Shortcuts recipes (PRODUCT-REVIEW §4 D, F, H).
-- Body tab redesign (Today · Trends · History · Sleep), Car tabs (Status · Log · Costs), Places Weather → Home morning card.
-
-## Just shipped — build .62 (Nov 1)
-- docs/PRODUCT-REVIEW.md: full crawl (49 screens) + real-data review, 24 ideas, redesign table, order of work (.62–.67).
-- All: Daily · Life admin · Projects; areas with no data fold into "Not started"; pinned areas show a dot.
-- Body › History: every day since 2018 (paged past the 1,000-row API limit): best day / best month / longest 10k streak / total, On this day, year heatmap you can tap, every-year averages.
-
-## Just shipped — builds .63–.67 (Nov 1), from docs/PRODUCT-REVIEW.md
-- .63 Money: account cards only on Accounts (below the tabs); stale overview card removed; pace inside the Left-to-spend card; spending by day uses authorized_date; Subscriptions folded into Recurring (deduped; Add / Edit or cancel links).
-- .64 Inbox as swipe cards (purchases with Otto's guess + "always file" rule, stops with map + saved-place chips + Not a stop, todos Today/Someday/Done/Drop), Undo, no AI call. Fixed the Apartments map reading locations' lng as lon.
-- .65 Kitchen → Cook · Shop · Plan; "Plan 3 dinners from what's at home"; Home Food spend widget (groceries vs eating out this budget week).
-- .66 Day pages (#/day/YYYY-MM-DD) from the Home "Your day" widget: map with route, stops and geotagged purchases; steps, spent, miles, sleep; timeline; swipe between days; jump to last day with a route.
-- .67 Plan → Today · Upcoming · Backlog (Upcoming = next 30 days from todos, events, bills, renewals, document expirations, school, budget week); Weekly reset (weekend card on Home + Plan): close the week → inbox → todos → next week's meals; "N todos need a decision" uses the card deck.
-
-## Next
-- Cash-flow line (balance 30 days ahead), spending map heat layer, People ↔ Places, arrival context, Shortcuts recipes (PRODUCT-REVIEW §4 D, F, H).
-- Body tab redesign (Today · Trends · History · Sleep), Car tabs (Status · Log · Costs), Places Weather → Home morning card.
 
 ## Just shipped — build .62 (Nov 1)
 - docs/PRODUCT-REVIEW.md: full crawl (49 screens) + real-data review, 24 ideas, redesign table, order of work (.62–.67).

@@ -1930,6 +1930,10 @@ body.chatting .otto-chat-starters{display:none}
   .dp-time{font:500 12px var(--mono); color:var(--text-muted); padding-top:2px;} .dp-row b{display:block; font:600 15px var(--sans);} .dp-row span{font:13px var(--sans); color:var(--text-muted);}
   .dp-dot{width:10px; height:10px; border-radius:5px; margin-top:5px;} .dp-dot.place{background:var(--text);} .dp-dot.buy{background:var(--amber); border-radius:3px;} .dp-dot.todo{background:var(--accent);}
   body.daying .ia2-dock{display:none !important;}
+  /* Build .72: People ↔ Places */
+  .pp-due{font:600 12px var(--sans); color:var(--amber); padding:4px 8px; border-radius:10px; background:color-mix(in srgb, var(--amber) 14%, transparent);} .yoy-row.pp-row{grid-template-columns:96px minmax(0,1fr) 76px;} .yoy-row.pp-row b{white-space:nowrap;} .pp-row span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--text);}
+  .pp-place{display:flex; align-items:center; gap:8px; font:13px var(--sans); color:var(--text-muted); margin-right:auto;} .pp-place select{min-height:40px; border-radius:10px; background:var(--surface-2); color:var(--text); border:1px solid var(--border); padding:0 10px; font:14px var(--sans);}
+  .dp-who{font:500 14px var(--sans); font-style:normal; color:var(--text-muted);}
   /* Build .71: Car */
   .car-add{display:flex; gap:8px; margin:8px 0 4px;} .car-add .lf-add{flex:1; margin:0;}
   .cz-pill{width:10px; height:10px; border-radius:5px; flex:none; background:var(--text-faint);} .cz-pill.over{background:var(--alert);} .cz-pill.due{background:var(--amber);} .cz-pill.ok{background:var(--accent);} .cz-pill.svc{background:#8FB4E8;} .cz-pill.gas{background:var(--amber);}
@@ -2221,7 +2225,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-02.71';
+const APP_BUILD = '2026-11-02.72';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5072,8 +5076,8 @@ const LIFE = {
       fields:[['vehicle_id','Vehicle','fk:vehicles',true],['filled_on','Date','date',true],['gallons','Gallons','number'],['total_cents','Total','money'],['odometer_miles','Odometer','number'],['station','Station']] } ],
     summary: rows => { const v = (rows.vehicles||[])[0]; const s = (rows.vehicle_services||[])[0]; return v ? `${v.year||''} ${v.model||v.name} · ${s ? 'last ' + s.kind + ' ' + shortDate(s.service_on) : 'no services logged'}` : 'Add your car'; } },
   people: { title:'People', emoji:'🫶', sections:[
-    { table:'people', title:'People', query:'order=name.asc', row: r => { let next = ''; if(r.birthday){ const b = new Date(r.birthday+'T12:00'), n = new Date(); b.setFullYear(n.getFullYear()); if(b < n) b.setFullYear(n.getFullYear()+1); const d = Math.round((b-n)/86400000); next = `birthday in ${d}d`; } return { t: r.name, s: [r.relationship, next, r.last_seen_on ? 'seen ' + shortDate(r.last_seen_on) : ''].filter(Boolean).join(' · ') }; },
-      fields:[['name','Name','text',true],['relationship','Relationship'],['birthday','Birthday','date'],['gift_ideas','Gift ideas'],['notes','Notes']] } ],
+    { table:'people', title:'People', query:'order=name.asc', row: r => { let next = ''; if(r.birthday){ const b = new Date(r.birthday+'T12:00'), n = new Date(); b.setFullYear(n.getFullYear()); if(b < n) b.setFullYear(n.getFullYear()+1); const d = Math.round((b-n)/86400000); next = `birthday in ${d}d`; } const pl = personPlace(r); return { t: r.name, s: [r.relationship, next, pl ? pl.line : r.last_seen_on ? 'seen ' + shortDate(r.last_seen_on) : ''].filter(Boolean).join(' · '), right: pl && pl.overdue ? '<span class="pp-due">Catch up</span>' : '' }; },
+      fields:[['name','Name','text',true],['relationship','Relationship'],['birthday','Birthday','date'],['location_id','Their place','fk:locations'],['keep_in_touch_days','Check in every (days)','number'],['gift_ideas','Gift ideas'],['notes','Notes']] } ],
     summary: rows => { const n = (rows.people||[]).length; return n ? `${n} ${n === 1 ? 'person' : 'people'}` : 'Birthdays, gift ideas'; } },
   trips: { title:'Trips', emoji:'🧳', sections:[
     { table:'trips', title:'Trips', query:'order=start_on.asc.nullslast', row: r => ({ t: r.name, s: [r.destination, r.start_on ? shortDate(r.start_on) + (r.end_on ? '–' + shortDate(r.end_on) : '') : '', r.status].filter(Boolean).join(' · '), right: dollars(r.budget_cents) }),
@@ -5144,7 +5148,7 @@ async function renderLifeBody(){
     const rows = lifeRows[sec.table] || [];
     const list = rows.map(r=>{ const v = sec.row(r); const open = lifeOpenRow === sec.table + ':' + r.id;
       return `<div class="lf-row ${open?'open':''}" data-lrow="${sec.table}:${r.id}"><div class="grow-main"><div class="grow-title">${esc(v.t || '')}</div>${v.s ? `<div class="grow-sub">${esc(v.s)}</div>` : ''}</div>${v.right ? `<div class="lf-right">${v.right}</div>` : ''}
-        ${open ? `<div class="lf-actions">${sec.closet ? `<button type="button" data-wore="${r.id}">Wore it today</button>` : ''}<button type="button" class="danger" data-ldel="${sec.table}:${r.id}">Delete</button></div>` : ''}</div>`; }).join('');
+        ${open ? `<div class="lf-actions">${sec.table === 'people' ? personActions(r) : ''}${sec.closet ? `<button type="button" data-wore="${r.id}">Wore it today</button>` : ''}<button type="button" class="danger" data-ldel="${sec.table}:${r.id}">Delete</button></div>` : ''}</div>`; }).join('');
     const form = lifeForm(sec);
     return `<div class="section-title">${sec.title}<span>${rows.length || ''}</span></div>${rows.length ? `<div class="gcard lf-list">${list}</div>` : ''}${form}`;
   }).join('');
@@ -5171,7 +5175,7 @@ document.addEventListener('click', async e=>{
     await fetch(`${SUPABASE_URL}/rest/v1/laundry_loads`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ washed_on: localToday(), item_ids: worn.map(x=>x.id) }) });
     await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=in.(${worn.map(x=>x.id).join(',')})`, { method:'PATCH', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wears_since_wash: 0, laundry_status: 'clean' }) });
     worn.forEach(x=>{ x.wears_since_wash = 0; x.laundry_status = 'clean'; }); hapticPulse(); renderLife(); return; }
-  const row = e.target.closest('[data-lrow]'); if(row && !e.target.closest('button')){ lifeOpenRow = lifeOpenRow === row.dataset.lrow ? null : row.dataset.lrow; renderLife(); }
+  const row = e.target.closest('[data-lrow]'); if(row && !e.target.closest('button, select, label, input')){ lifeOpenRow = lifeOpenRow === row.dataset.lrow ? null : row.dataset.lrow; renderLife(); }
 });
 document.addEventListener('submit', async e=>{
   const f = e.target.closest('[data-lform]'); if(!f) return; e.preventDefault();
@@ -5744,6 +5748,55 @@ function carCosts0(){
   const mpg = (()=>{ const f = fu.filter(x=>x.full_tank && x.odometer_miles && x.gallons).sort((a,b)=>a.odometer_miles-b.odometer_miles); if(f.length<2) return null; const g = f.slice(1).reduce((a,x)=>a+Number(x.gallons),0); return (f[f.length-1].odometer_miles - f[0].odometer_miles)/g; })();
   return `<div class="wdg-grid" style="margin-top:8px">${[['LAST 12 MONTHS', money(s12+f12), `${money(s12)} service · ${money(f12)} gas`],['PER MONTH', money(Math.round((s12+f12)/12)), 'average'],['PER MILE', miles ? money(Math.round((s12+f12)/miles)) : '—', miles ? `${miles.toLocaleString()} mi logged` : 'log odometer readings'],['MPG', mpg ? mpg.toFixed(1) : '—', mpg ? 'from full fill-ups' : 'log 2+ full fill-ups']].map(([l,v,s3])=>`<div class="wdg"><span class="wdg-head"><span>${l}</span></span><b class="wdg-mid">${v}</b><span class="wdg-sub">${s3}</span></div>`).join('')}</div>`;
 }
+// ---------- PEOPLE ↔ PLACES: a person's place (people.location_id) + your visits there (v_visits) ----------
+const peopleCtx = { visits:null, busy:false };
+async function loadPeopleCtx(){
+  if(peopleCtx.busy) return; peopleCtx.busy = true;
+  try{ if(!lifeRows.locations){ const r = await fetch(`${SUPABASE_URL}/rest/v1/locations?select=id,code,name,lat,lng&order=name.asc`, { headers: authHeaders() }); lifeRows.locations = r.ok ? await r.json() : []; }
+    const ids = [...new Set((lifeRows.people||[]).map(p=>p.location_id).filter(Boolean))];
+    if(ids.length){ const since = new Date(Date.now() - 365*86400000).toISOString();
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/v_visits?select=location_id,arrived_at,left_at,minutes,status&location_id=in.(${ids.join(',')})&arrived_at=gte.${encodeURIComponent(since)}&order=arrived_at.desc&limit=2000`, { headers: authHeaders() });
+      peopleCtx.visits = r.ok ? (await r.json()).filter(v=>v.arrived_at && v.status !== 'declined') : []; }
+    else peopleCtx.visits = [];
+  }catch(e){ peopleCtx.visits = []; }
+  peopleCtx.busy = false; if(lifeArea === 'people') renderLife();
+}
+function personPlace(p){
+  if(!p.location_id) return null;
+  const loc = (lifeRows.locations||[]).find(l=>l.id === p.location_id), name = loc ? loc.name : 'their place';
+  const vs = (peopleCtx.visits||[]).filter(v=>v.location_id === p.location_id);
+  if(!vs.length) return { name, line: `${name} · no visits yet`, vs };
+  const last = vs[0], since30 = Date.now() - 30*86400000, n30 = vs.filter(v=>new Date(v.arrived_at) >= since30).length;
+  const mins = vs.map(v=>Number(v.minutes)||0).filter(m=>m > 0).sort((a,b)=>a-b), med = mins.length ? mins[Math.floor(mins.length/2)] : 0;
+  const days = Math.floor((new Date(localToday()) - new Date(isoOf(last.arrived_at)))/86400000);
+  const when = days <= 0 ? 'today' : days === 1 ? 'yesterday' : days < 7 ? new Date(last.arrived_at).toLocaleDateString('en-US',{ weekday:'long' }) : shortDate(isoOf(last.arrived_at));
+  return { name, vs, days, n30, med, last, overdue: p.keep_in_touch_days ? days > p.keep_in_touch_days : false,
+    line: `last at ${name} ${when}${n30 ? ` · ${n30} visit${n30===1?'':'s'} in 30 days` : ''}${med ? ` · usually ${fmtMinutes(med)}` : ''}` };
+}
+function peoplePre(){
+  if(peopleCtx.visits === null && !peopleCtx.busy) loadPeopleCtx();
+  const ps = (lifeRows.people||[]).map(p=>({ p, pl: personPlace(p) })).filter(x=>x.pl && x.pl.vs.length);
+  if(!ps.length) return (lifeRows.people||[]).length && !(lifeRows.people||[]).some(p=>p.location_id) ? `<div class="suggest-note">Tap a person and pick their place. Otto then shows when you were last there and how often.</div>` : '';
+  // time at each person's place, last 30 days — who you actually see
+  const since = Date.now() - 30*86400000;
+  const rows = ps.map(x=>({ ...x, mins: x.pl.vs.filter(v=>new Date(v.arrived_at) >= since).reduce((a,v)=>a + (Number(v.minutes)||0), 0) })).sort((a,b)=>b.mins - a.mins);
+  const mx = Math.max(1, ...rows.map(r=>r.mins));
+  return `<div class="viz-card" style="margin:6px 0 4px"><div class="viz-title"><span>Time at their place</span><span>last 30 days</span></div>
+    <div class="yoy">${rows.map(r=>`<div class="yoy-row pp-row"><span>${esc(r.p.name)}</span><i><i style="width:${Math.max(3, Math.round(100*r.mins/mx))}%"></i></i><b>${r.mins ? fmtMinutes(r.mins) : '—'}</b></div>`).join('')}</div>
+    <div class="wdg-sub">From your visits in Places. ${rows[0].mins ? `Most time: ${esc(rows[0].p.name)} (${esc(rows[0].pl.name)}).` : ''}</div></div>`;
+}
+function personActions(p){
+  const locs = lifeRows.locations || [];
+  return `<label class="pp-place">Their place<select data-person-place="${p.id}" aria-label="${esc(p.name)}'s place"><option value="">None</option>${locs.map(l=>`<option value="${l.id}" ${l.id === p.location_id ? 'selected' : ''}>${esc(l.name)}</option>`).join('')}</select></label>`;
+}
+document.addEventListener('change', async e=>{
+  const sel = e.target.closest('[data-person-place]'); if(!sel) return;
+  const id = Number(sel.dataset.personPlace), loc = sel.value ? Number(sel.value) : null, p = (lifeRows.people||[]).find(x=>x.id === id); if(!p) return;
+  const prev = p.location_id; p.location_id = loc;
+  try{ await patchRow('people', id, { location_id: loc }); peopleCtx.visits = null; hapticPulse(); loadPeopleCtx(); }
+  catch(err){ p.location_id = prev; showNotice(`Couldn't save (${err.message || err})`); renderLife(); }
+});
+
 // what's due next, most urgent first (from the same rules as the diagram)
 function carNextUp(){
   const order = { over:0, due:1, none:2, ok:3 }, items = Object.entries(CAR_RULES).map(([k,r])=>({ k, label:r.label, ...carStatus(k) })).sort((a,b)=>order[a.st]-order[b.st]);
@@ -5863,6 +5916,7 @@ function droneCompliance(){
 
 // tab declarations on the existing areas
 Object.assign(LIFE.closet, { tabs:[ { title:'Today', render: closetToday }, { title:'Wardrobe', render: closetWardrobe }, { title:'Laundry', render: closetLaundry }, { title:'Insights', render: closetInsights } ] });
+Object.assign(LIFE.people, { tabs:[ { title:'People', section:0, pre: peoplePre } ] });
 Object.assign(LIFE.car, { tabs:[ { title:'Status', render: () => carModel() + carNextUp() + carRecords() }, { title:'Log', render: carLog }, { title:'Costs', render: carCosts } ] });
 Object.assign(LIFE.apartments, { tabs:[ { title:'Map', render: aptMapTab }, { title:'Board', section:0, pre: aptBoardPre }, { title:'Compare', render: aptCompare }, { title:'Afford', render: aptAfford }, { title:'Move', render: aptMove } ] });
 Object.assign(LIFE.school, { tabs:[ { title:'Transfer', render: schoolTransfer }, { title:'Courses', section:0 }, { title:'Deadlines', section:1 }, { title:'Progress', render: schoolProgress } ] });
@@ -7052,7 +7106,7 @@ async function renderDayPage(dir){
   const stat = (label, val, sub) => `<div class="dp-stat"><span>${label}</span><b>${val}</b>${sub ? `<em>${sub}</em>` : ''}</div>`;
   const stats = `<div class="dp-stats">${stat('Steps', act && act.steps != null ? Number(act.steps).toLocaleString() : '—')}${stat('Spent', money(spent), buys.length ? `${buys.length} purchase${buys.length===1?'':'s'}` : '')}${stat('Moved', pts.length > 1 ? `${(km*0.621).toFixed(1)} mi` : '—')}${stat('Slept', sl && sl.asleep_min ? hm(sl.asleep_min) : '—')}</div>`;
   // one timeline: stops with times; purchases (the bank gives dates, not times) and finished todos after
-  const rows = visits.map(v=>`<div class="dp-row"><span class="dp-time">${clockTime(v.arrived_at).replace(' AM','a').replace(' PM','p')}</span><i class="dp-dot place" aria-hidden="true"></i><div><b>${esc(v.place || 'Stop')}</b><span>${v.is_open ? 'here now' : v.minutes ? fmtMinutes(v.minutes) : ''}${v.status === 'suggested' ? ' · not named yet' : ''}</span></div></div>`).join('')
+  const rows = visits.map(v=>`<div class="dp-row"><span class="dp-time">${clockTime(v.arrived_at).replace(' AM','a').replace(' PM','p')}</span><i class="dp-dot place" aria-hidden="true"></i><div><b>${esc(v.place || 'Stop')}${(()=>{ const who = (lifeRows.people||[]).filter(p=>p.location_id && p.location_id === v.location_id).map(p=>p.name); return who.length ? ` <em class="dp-who">· ${esc(who.join(', '))}</em>` : ''; })()}</b><span>${v.is_open ? 'here now' : v.minutes ? fmtMinutes(v.minutes) : ''}${v.status === 'suggested' ? ' · not named yet' : ''}</span></div></div>`).join('')
     + buys.map(t=>`<div class="dp-row"><span class="dp-time">·</span><i class="dp-dot buy" aria-hidden="true"></i><div><b>${esc(t.merchant || t.description || 'Purchase')}</b><span>${money(-Number(t.amount_cents))}${geoBuys.some(g=>g.id === t.id) ? ' · on the map' : ''}</span></div></div>`).join('')
     + done.map(t=>`<div class="dp-row"><span class="dp-time">✓</span><i class="dp-dot todo" aria-hidden="true"></i><div><b>${esc(t.title)}</b><span>done</span></div></div>`).join('');
   const lastD = !pts.length ? lastDayWithPoints(d) : null;
