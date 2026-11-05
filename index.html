@@ -1946,6 +1946,10 @@ body.chatting .otto-chat-starters{display:none}
   .nights{display:flex; flex-direction:column; gap:6px; margin:12px 0 8px;} .night{display:grid; grid-template-columns:52px minmax(0,1fr) 58px; gap:8px; align-items:center; font:12.5px var(--sans); color:var(--text-muted);}
   .night>i{display:flex; height:12px; border-radius:6px; overflow:hidden; min-width:6px;} .night b{text-align:right; font-variant-numeric:tabular-nums; color:var(--text); font-weight:600;}
   .sp-chips{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none;} .sp-chips::-webkit-scrollbar{display:none;} .sp-chips .chip{flex:none; min-height:36px; display:inline-flex; align-items:center; gap:6px;}
+  .sp-zones{padding-bottom:8px;} .sp-drawing{cursor:crosshair; touch-action:none; outline:2px dashed var(--accent); outline-offset:-2px;}
+  .sp-zone{padding:12px 14px !important; margin-top:10px; display:flex; flex-direction:column; gap:10px;} .sp-zone-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;} .sp-zone-top>div{display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .sp-zone-k{font:600 12px var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);} .sp-zone-top b{font:700 18px var(--sans);} .sp-zone-top em{font:normal 14px var(--sans); color:var(--text);} .sp-zone-rate{font:13px var(--sans); color:var(--text-muted);}
+  .sp-save{display:flex; gap:8px;} .sp-save input{flex:1; min-width:0; min-height:40px; padding:0 12px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font:15px var(--sans);} .sp-save .chip{flex:none; min-height:40px;} .sp-zdel{align-self:flex-start;}
   .sp-cats{padding-top:10px;} .sp-sw{width:9px; height:9px; border-radius:50%; display:inline-block;} .sp-map{height:300px;}
   .sp-stats{grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr) minmax(0,1.25fr);}
   .sp-list{padding:2px 12px !important;} .sp-row{all:unset; box-sizing:border-box; width:100%; display:grid; grid-template-columns:22px minmax(0,1fr) auto; gap:8px; align-items:center; padding:11px 0; border-bottom:1px solid var(--border); cursor:pointer;} .sp-row:last-child{border-bottom:none;}
@@ -2282,7 +2286,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.76';
+const APP_BUILD = '2026-11-05.77';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -7289,7 +7293,46 @@ document.addEventListener('keydown', e=>{ const pg = document.getElementById('da
 // ---------- Spending map (#/spend): proportional circles of where money goes, by category ----------
 // Spots = purchases grouped by merchant within ~100 m. Circle area ∝ total spent there. Only purchases the
 // bank sent a store location for are mapped, and the page says how many that is.
-const spendView = { open:false, range:90, cat:'all', rows:null, rowsRange:null, map:null, markers:{} };
+const spendView = { open:false, range:90, cat:'all', rows:null, rowsRange:null, map:null, markers:{}, draw:false, poly:null, zone:null, zones:null };
+// Loop + zones (.77): draw a loop on the map to filter purchases to what's inside it; save the loop as a named zone
+// (table zones, GeoJSON Polygon in [lng,lat] order, PostGIS geom generated server-side) and re-apply it from a chip.
+function inPoly(lat, lon, poly){ let inside = false;   // ray casting on [lat,lon] pairs
+  for(let i=0, j=poly.length-1; i<poly.length; j=i++){ const [yi,xi] = poly[i], [yj,xj] = poly[j];
+    if(((yi > lat) !== (yj > lat)) && (lon < (xj-xi)*(lat-yi)/(yj-yi) + xi)) inside = !inside; }
+  return inside; }
+async function loadZones(force){
+  if(spendView.zones && !force) return spendView.zones;
+  try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/zones?select=id,code,name,geojson,notes,created_at&order=created_at.asc`, { headers: authHeaders() });
+    spendView.zones = r.ok ? await r.json() : []; }catch(e){ spendView.zones = []; }
+  return spendView.zones; }
+function zonePoly(z){ const ring = (z.geojson && z.geojson.coordinates && z.geojson.coordinates[0]) || []; return ring.slice(0, -1).map(([lng,lat])=>[lat,lng]); }
+function thinLoop(pts, map){   // drop points closer than 6 px, cap at 80 vertices
+  const out = []; let last = null;
+  pts.forEach(ll=>{ const p = map.latLngToContainerPoint(ll); if(!last || Math.hypot(p.x-last.x, p.y-last.y) >= 6){ out.push(ll); last = p; } });
+  const step = Math.ceil(out.length / 80); return out.filter((_,i)=>i % step === 0).map(ll=>[ll.lat, ll.lng]); }
+function startLoopDraw(){ const m = spendView.map, el = document.getElementById('spMapEl'); if(!m || !el) return;
+  spendView.draw = true; m.dragging.disable(); m.touchZoom.disable(); m.doubleClickZoom.disable(); el.classList.add('sp-drawing');
+  document.querySelectorAll('[data-spend-draw]').forEach(b=>{ b.setAttribute('aria-pressed','true'); b.classList.add('active'); b.textContent = 'Drawing… drag a loop'; });
+  let pts = [], line = null, id = null;
+  const at = e => { const r = el.getBoundingClientRect(); return m.containerPointToLatLng([e.clientX - r.left, e.clientY - r.top]); };
+  const down = e => { if(id !== null) return; id = e.pointerId; el.setPointerCapture(id); pts = [at(e)]; line = L.polyline(pts, { color:'#D7FF3D', weight:3, dashArray:'6 6' }).addTo(m); e.preventDefault(); };
+  const move = e => { if(e.pointerId !== id) return; pts.push(at(e)); line.setLatLngs(pts); e.preventDefault(); };
+  const up = e => { if(e.pointerId !== id) return; id = null; stopLoopDraw(); if(line) m.removeLayer(line);
+    const poly = thinLoop(pts, m); if(poly.length < 3){ showNotice('Drag a bigger loop around some places.'); return; }
+    spendView.poly = poly; spendView.zone = null; hapticPulse(); renderSpendMap(); };
+  el.addEventListener('pointerdown', down); el.addEventListener('pointermove', move); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up);
+  spendView.__unbind = () => { ['pointerdown','pointermove','pointerup','pointercancel'].forEach((t,i)=>el.removeEventListener(t, [down,move,up,up][i])); };
+}
+function stopLoopDraw(){ spendView.draw = false; if(spendView.__unbind){ spendView.__unbind(); spendView.__unbind = null; }
+  const m = spendView.map; if(m){ m.dragging.enable(); m.touchZoom.enable(); m.doubleClickZoom.enable(); }
+  document.getElementById('spMapEl')?.classList.remove('sp-drawing');
+  document.querySelectorAll('[data-spend-draw]').forEach(b=>{ b.setAttribute('aria-pressed','false'); b.classList.remove('active'); b.textContent = '✎ Draw a loop'; }); }
+async function saveZone(name){
+  const ring = spendView.poly.map(([lat,lon])=>[Math.round(lon*1e6)/1e6, Math.round(lat*1e6)/1e6]); ring.push(ring[0]);
+  await ensureValidSession();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/zones`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([{ name, geojson:{ type:'Polygon', coordinates:[ring] } }]) });
+  if(!r.ok) throw new Error(`Save failed (${r.status})`);
+  const z = (await r.json())[0]; await loadZones(true); if(z) spendView.zone = z.id; return z; }
 async function openSpendMap(fromRoute){
   let el = document.getElementById('spendMap');
   if(!el){ el = document.createElement('div'); el.id = 'spendMap'; el.className = 'daypage'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Spending map'); document.body.appendChild(el); }
@@ -7297,7 +7340,7 @@ async function openSpendMap(fromRoute){
   if(!fromRoute && !was) syncRoute(false);
   await renderSpendMap();
 }
-function closeSpendMap(){ const el = document.getElementById('spendMap'); if(el) el.hidden = true; spendView.open = false; if(!dayView.open) document.body.classList.remove('daying'); if(spendView.map){ spendView.map.remove(); spendView.map = null; } }
+function closeSpendMap(){ stopLoopDraw(); const el = document.getElementById('spendMap'); if(el) el.hidden = true; spendView.open = false; if(!dayView.open) document.body.classList.remove('daying'); if(spendView.map){ spendView.map.remove(); spendView.map = null; } }
 async function loadSpendRows(){
   const key = spendView.range; if(spendView.rows && spendView.rowsRange === key) return spendView.rows;
   const since = key ? isoAddDays(localToday(), -(key - 1)) : null;
@@ -7315,14 +7358,22 @@ function spendSpots(rows){
     const amt = -Number(t.amount_cents); s.total += amt; s.n++; s.lat += at.lat; s.lon += at.lon; const c = spendCat(t); s.cats[c] = (s.cats[c]||0) + amt; if(t.transaction_date > s.last) s.last = t.transaction_date; });
   return list.map(s=>({ ...s, lat:s.lat/s.n, lon:s.lon/s.n, cat:Object.entries(s.cats).sort((a,b)=>b[1]-a[1])[0][0] })).sort((a,b)=>b.total - a.total);
 }
+function perMonth(rows){ if(rows.length < 2) return '';
+  const ds = rows.map(t=>t.transaction_date).sort(), days = Math.max(1, (new Date(ds[ds.length-1]) - new Date(ds[0]))/864e5 + 1);
+  const tot = rows.reduce((a,t)=>a - Number(t.amount_cents), 0); if(days < 14) return '';
+  return `<span class="sp-zone-rate">about ${money(Math.round(tot / days * 30.44 / 100) * 100)} a month · ${(rows.length / days * 7).toFixed(1)} visits a week</span>`; }
 async function renderSpendMap(){
   const el = document.getElementById('spendMap'); if(!el || !spendView.open) return;
+  stopLoopDraw();
   if(spendView.map){ spendView.map.remove(); spendView.map = null; }
   const rangeName = { 30:'Last 30 days', 90:'Last 90 days', 0:'All time' }[spendView.range];
   el.innerHTML = `<div class="dp-head"><button type="button" class="deck-x" data-spend-close aria-label="Close spending map">✕</button><div class="dp-when"><b>Where money goes</b><span>${rangeName}</span></div></div>
     <div class="dp-body" id="spBody"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>`;
   let rows; try{ rows = await loadSpendRows(); }catch(err){ document.getElementById('spBody').innerHTML = `<div class="empty">Couldn't load purchases. ${esc(err.message||'')}</div>`; return; }
   if(!spendView.open) return;
+  const zones = await loadZones(); if(!spendView.open) return;
+  const allRows = rows, poly = spendView.poly, zoneObj = spendView.zone ? zones.find(z=>z.id === spendView.zone) : null;
+  if(poly) rows = rows.filter(t=>inPoly(Number(t.location_lat), Number(t.location_lon), poly));
   const catTotals = {}; rows.forEach(t=>{ const c = spendCat(t); catTotals[c] = (catTotals[c]||0) - Number(t.amount_cents); });
   const cats = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
   if(spendView.cat !== 'all' && !catTotals[spendView.cat]) spendView.cat = 'all';
@@ -7331,17 +7382,24 @@ async function renderSpendMap(){
   const cities = {}; shown.forEach(t=>{ if(t.location_city) cities[t.location_city] = (cities[t.location_city]||0) - Number(t.amount_cents); }); const topCity = Object.entries(cities).sort((a,b)=>b[1]-a[1])[0];
   const chip = (attr, val, label, on, color) => `<button type="button" class="chip ${on?'active':''}" ${attr}="${esc(String(val))}" aria-pressed="${on}">${color ? `<i class="sp-sw" style="background:${color}" aria-hidden="true"></i>` : ''}${esc(label)}</button>`;
   document.getElementById('spBody').innerHTML = `<div class="sp-chips" role="group" aria-label="Time range">${[[30,'30 days'],[90,'90 days'],[0,'All']].map(([v,l])=>chip('data-spend-range', v, l, spendView.range === v)).join('')}</div>
-    ${rows.length ? `<div id="spMapEl" class="dp-map sp-map" role="img" aria-label="Map of ${spots.length} places you spent money"></div>
+    ${allRows.length ? `<div class="sp-chips sp-zones" role="group" aria-label="Areas"><button type="button" class="chip" data-spend-draw aria-pressed="false">✎ Draw a loop</button>${zones.map(z=>chip('data-spend-zone', z.id, z.name, spendView.zone === z.id)).join('')}</div>
+    <div id="spMapEl" class="dp-map sp-map" role="img" aria-label="Map of ${spots.length} places you spent money${poly ? ' inside the drawn area' : ''}"></div>
+    ${poly ? `<div class="gcard sp-zone"><div class="sp-zone-top"><div><span class="sp-zone-k">${zoneObj ? 'Zone' : 'Inside your loop'}</span><b>${zoneObj ? esc(zoneObj.name) : `${money(total)} · ${shown.length} purchase${shown.length===1?'':'s'}`}</b>${zoneObj ? `<em>${money(total)} · ${shown.length} purchase${shown.length===1?'':'s'}</em>` : ''}${perMonth(shown)}</div><button type="button" class="link-btn" data-spend-clear>Clear</button></div>
+      ${zoneObj ? `<button type="button" class="link-btn sp-zdel" data-spend-zdel="${zoneObj.id}">Delete this zone</button>` : `<form class="sp-save" data-spend-save><label for="spZoneName" class="sr-only">Zone name</label><input id="spZoneName" name="name" maxlength="80" placeholder="Name this area (e.g. Downtown Beverly)" autocomplete="off" required><button type="submit" class="chip active">Save zone</button></form>`}</div>` : ''}
+    ${rows.length ? `
     <div class="sp-chips sp-cats" role="group" aria-label="Category">${chip('data-spend-cat', 'all', 'All', spendView.cat === 'all')}${cats.map(([c])=>chip('data-spend-cat', c, c, spendView.cat === c, spendColor(c))).join('')}</div>
     <div class="dp-stats sp-stats"><div class="dp-stat"><span>Mapped</span><b>${money(total)}</b><em>${shown.length} purchase${shown.length===1?'':'s'}</em></div><div class="dp-stat"><span>Spots</span><b>${spots.length}</b><em>${spots.filter(s=>s.n>1).length} repeat</em></div><div class="dp-stat sp-wide"><span>Top town</span><b>${topCity ? esc(topCity[0]) : '—'}</b><em>${topCity ? money(topCity[1]) : ''}</em></div></div>
     <div class="section-title">Top spots<span>tap to find</span></div>
     <div class="gcard sp-list">${spots.slice(0, 12).map((s,i)=>`<button type="button" class="sp-row" data-spend-spot="${i}"><span class="sp-rank">${i+1}</span><span class="sp-main"><b>${esc(s.name)}</b><span>${esc([s.city, s.n > 1 ? `${s.n} visits` : '1 visit', 'last ' + shortDate(s.last)].filter(Boolean).join(' · '))}</span><i class="sp-bar"><i style="width:${Math.max(4, Math.round(100*s.total/maxT))}%; background:${spendColor(s.cat)}"></i></i></span><span class="sp-amt">${money(s.total)}</span></button>`).join('')}</div>
     <div class="map-help">Only purchases where your bank sent a store location are mapped. Circle size is the total spent at that spot.</div>`
+    : `<div class="dp-nomap"><span>No purchases inside this area${spendView.range ? ' in this range' : ''}.</span>${spendView.range ? '<button type="button" class="link-btn" data-spend-range="0">Show all time ›</button>' : ''}</div>`}`
     : `<div class="dp-nomap"><span>No purchases with a store location ${spendView.range ? 'in this range' : 'yet'}.</span>${spendView.range ? '<button type="button" class="link-btn" data-spend-range="0">Show all time ›</button>' : ''}</div>`}`;
   spendView.spots = spots;
   document.querySelector('.sp-cats .chip.active')?.scrollIntoView({ block:'nearest', inline:'center' });
-  if(!document.getElementById('spMapEl') || typeof L === 'undefined' || !spots.length) return;
+  if(!document.getElementById('spMapEl') || typeof L === 'undefined') return;
   try{ const m = spendView.map = L.map('spMapEl', { zoomControl:false, attributionControl:false, tap:false }); makeBaseLayer().addTo(m); spendView.markers = {};
+    if(poly){ const pl = L.polygon(poly, { color:'#D7FF3D', weight:2, fillColor:'#D7FF3D', fillOpacity:.08, interactive:false }).addTo(m); if(!spots.length){ m.fitBounds(pl.getBounds(), { padding:[24,24] }); return; } }
+    if(!spots.length){ const ab = L.latLngBounds(allRows.map(t=>[Number(t.location_lat), Number(t.location_lon)])); if(ab.isValid()) m.fitBounds(ab, { padding:[28,28], maxZoom:15 }); return; }
     // biggest first so small circles stay on top and tappable
     spots.slice().reverse().forEach(s=>{ const i = spots.indexOf(s);
       spendView.markers[i] = L.circleMarker([s.lat, s.lon], { radius: 5 + 17*Math.sqrt(s.total/maxT), color:'#0C0F0E', weight:1.5, fillColor:spendColor(s.cat), fillOpacity:.78 })
@@ -7350,7 +7408,8 @@ async function renderSpendMap(){
     // fit the busiest cluster, not one far-off airport charge: use spots covering ~90% of spend
     let acc = 0; const core = spots.filter(s=>{ const keep = acc < total*0.9; acc += s.total; return keep; });
     const cb = core.length > 1 ? L.latLngBounds(core.map(s=>[s.lat, s.lon])) : b;
-    if(cb.isValid() && core.length > 1) m.fitBounds(cb, { padding:[28,28], maxZoom:15 }); else m.setView([spots[0].lat, spots[0].lon], 14);
+    if(poly) m.fitBounds(L.latLngBounds(poly).extend(b), { padding:[24,24], maxZoom:16 });
+    else if(cb.isValid() && core.length > 1) m.fitBounds(cb, { padding:[28,28], maxZoom:15 }); else m.setView([spots[0].lat, spots[0].lon], 14);
   }catch(e){ console.error('spend map', e); }
 }
 document.addEventListener('click', e=>{
@@ -7359,11 +7418,22 @@ document.addEventListener('click', e=>{
   if(e.target.closest('[data-spend-close]')){ goBack(); return; }
   const r = e.target.closest('[data-spend-range]'); if(r){ spendView.range = Number(r.dataset.spendRange); renderSpendMap(); return; }
   const c = e.target.closest('[data-spend-cat]'); if(c){ spendView.cat = c.dataset.spendCat; renderSpendMap(); return; }
+  if(e.target.closest('[data-spend-draw]')){ if(spendView.draw) stopLoopDraw(); else startLoopDraw(); return; }
+  const zb = e.target.closest('[data-spend-zone]'); if(zb){ const id = Number(zb.dataset.spendZone);
+    if(spendView.zone === id){ spendView.zone = null; spendView.poly = null; } else { const z = (spendView.zones||[]).find(x=>x.id === id); if(z){ spendView.zone = id; spendView.poly = zonePoly(z); } }
+    spendView.cat = 'all'; renderSpendMap(); return; }
+  if(e.target.closest('[data-spend-clear]')){ spendView.zone = null; spendView.poly = null; renderSpendMap(); return; }
+  const zd = e.target.closest('[data-spend-zdel]'); if(zd){ const z = (spendView.zones||[]).find(x=>x.id === Number(zd.dataset.spendZdel)); if(!z || !confirm(`Delete the zone "${z.name}"? Purchases aren't touched.`)) return;
+    (async()=>{ try{ await ensureValidSession(); const r = await fetch(`${SUPABASE_URL}/rest/v1/zones?id=eq.${z.id}`, { method:'DELETE', headers: authHeaders() }); if(!r.ok) throw new Error(`Delete failed (${r.status})`);
+      spendView.zone = null; spendView.poly = null; await loadZones(true); showNotice(`Deleted "${z.name}".`); renderSpendMap(); }catch(err){ showNotice(err.message); } })(); return; }
   const sp = e.target.closest('[data-spend-spot]'); if(sp && spendView.map){ const i = Number(sp.dataset.spendSpot), s = spendView.spots[i], mk = spendView.markers[i];
     spendView.map.flyTo([s.lat, s.lon], Math.max(spendView.map.getZoom(), 15), { duration: reduceMotion() ? 0 : .6 }); if(mk) setTimeout(()=>mk.openTooltip(), reduceMotion() ? 0 : 650);
     document.getElementById('spMapEl').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block:'nearest' }); hapticPulse(); }
 });
-document.addEventListener('keydown', e=>{ const pg = document.getElementById('spendMap'); if(pg && !pg.hidden && e.key === 'Escape') goBack(); });
+document.addEventListener('keydown', e=>{ const pg = document.getElementById('spendMap'); if(pg && !pg.hidden && e.key === 'Escape'){ if(spendView.draw) stopLoopDraw(); else goBack(); } });
+document.addEventListener('submit', async e=>{ const f = e.target.closest('[data-spend-save]'); if(!f) return; e.preventDefault();
+  const name = f.name.value.trim(); if(!name || !spendView.poly) return; const btn = f.querySelector('button'); btn.disabled = true;
+  try{ await saveZone(name); hapticPulse(); showNotice(`Saved zone "${name}".`); renderSpendMap(); }catch(err){ btn.disabled = false; showNotice(err.message); } });
 
 // ---------- Plan: Today · Upcoming · Backlog ----------
 document.addEventListener('click', e=>{ if(e.target.closest('[data-triage-deck]')) openInboxDeck(triageQueue(allTodos).map(t=>({ kind:'todo', ref_id:t.code, title:t.title }))); });

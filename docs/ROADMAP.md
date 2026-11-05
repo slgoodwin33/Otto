@@ -1,5 +1,12 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .77 (Nov 5): draw a loop on the spending map, saved zones
+- Money › Where money goes: "✎ Draw a loop" freezes the map; drag a loop with one finger and only purchases inside it count (stats, categories, top spots), with "about $X a month · N visits a week". Name it and Save zone. Saved zones show as chips; tap one to re-apply, tap again or Clear to drop it; Delete this zone removes it (purchases untouched).
+- New table `zones` (migration `20261105_zones_v1.sql`): name + GeoJSON Polygon ([lng,lat]) with a PostGIS `geom` generated column and GiST index, so SQL can ask "spending in Downtown" later (`st_contains(z.geom, st_point(lon,lat))`). Borrowed from GeoJSON/OwnTracks waypoints + Home Assistant zones (named area, stored once, reused everywhere).
+
+## Just shipped — build .76 (Nov 5): scrub the week
+- Home hero: press and drag across the week bars; the panel follows your finger with that day's spent / left / top purchase, and the Last stop mini-map dot moves to where you were. Lift to return to today. Money › Recurring cash-flow line scrubs the same way (date, projected balance, what hits that day).
+
 ## Just shipped — build .75 (Nov 5): data-viz pass, Body + Car
 - Body › Today: the three rings (which showed "0%" when Health hadn't synced) become stat tiles with a meter and a tick at your 30-day average; missing data shows "—, not synced". Steps hero bar gets the same tick. Workouts is a count, so no ring.
 - Body › Trends: steps chart redrawn at its real aspect ratio (date labels were squashed), gray bars with above-average days brighter and the latest day in lime; average named in the card title.
