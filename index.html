@@ -2011,6 +2011,12 @@ body.chatting .otto-chat-starters{display:none}
   .fs-legend{display:flex; flex-direction:column; gap:2px; font:13px var(--sans); color:var(--text-muted);} .fs-legend i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px;} .fs-legend .fo{background:#D4731F;} .fs-legend .fg{background:#2E7D50;}
   .mini-bars i{background:color-mix(in srgb, var(--text-faint) 45%, transparent) !important;} .mini-bars i.on{background:var(--accent) !important;} .mini-bars i.zero{background:var(--surface-2) !important;}
   .db{cursor:pointer;} .db text{font-family:var(--sans);}
+  /* Build .75 */
+  .kpis{display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:10px; margin-top:6px;}
+  .kpi{display:flex; flex-direction:column; gap:3px; min-width:0;} .kpi>span{font:600 12.5px var(--sans); color:var(--text-muted);} .kpi>b{font:700 26px var(--sans); letter-spacing:-.02em; line-height:1.1;} .kpi em{font:12.5px var(--sans); font-style:normal; color:var(--text-muted);}
+  .kmeter{position:relative; display:block; height:6px; border-radius:3px; background:var(--surface-2); margin:4px 0 2px;} .kmeter>i{position:absolute; left:0; top:0; bottom:0; border-radius:3px; background:color-mix(in srgb, var(--accent) 55%, var(--surface-2));} .kmeter>i.hit{background:var(--accent);} .kmeter.big{height:10px; border-radius:5px; margin:14px 0 6px;} .kmeter.big>i{border-radius:5px;}
+  .kmeter>b{position:absolute; left:66.67%; top:-3px; bottom:-3px; width:2px; margin-left:-1px; background:var(--text); border-radius:1px;}
+  .steps-chart2{display:block; margin:4px 0 2px;} .steps-chart2 text{font-family:var(--sans);}
 </style>
 </head>
 <body class="home-v2">
@@ -2270,7 +2276,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.74';
+const APP_BUILD = '2026-11-05.75';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -3752,22 +3758,16 @@ document.addEventListener('click', async e=>{
 
 function buildStepsChart(daily, avg){
   if(!daily.length) return '';
-  const chronological = [...daily].reverse();
-  const today = localToday();
-  const max = Math.max(...chronological.map(d=>d.steps || 0), avg || 0, 1);
-  const w = 600, h = 100, plot = h - 14;
-  const barWidth = Math.max(1, (w / chronological.length) - 2);
-  const bars = chronological.map((d,i)=>{
-    const barH = Math.max(2, (d.steps||0)/max * plot);
-    const x = i * (w/chronological.length);
-    return `<rect class="${d.activity_date===today?'today':''}" x="${x.toFixed(1)}" y="${(plot-barH).toFixed(1)}" width="${barWidth.toFixed(1)}" height="${barH.toFixed(1)}" rx="1"></rect>`;
-  }).join('');
-  const avgY = avg ? (plot - avg/max*plot).toFixed(1) : null;
-  return `<svg class="steps-chart" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" role="img" aria-label="Daily steps">
-    ${bars}${avgY ? `<line class="avg" x1="0" x2="${w}" y1="${avgY}" y2="${avgY}"></line>` : ''}
-    <text x="0" y="${h-2}">${shortDate(chronological[0].activity_date)}</text>
-    <text x="${w}" y="${h-2}" text-anchor="end">${shortDate(chronological[chronological.length-1].activity_date)}</text>
-  </svg>`;
+  const rows = [...daily].reverse(), today = localToday(), n = rows.length;
+  const W = 354, top = 8, bot = 104, max = Math.max(...rows.map(d=>d.steps || 0), avg || 0, 1) * 1.08, step = (W - 4) / n, bw = Math.max(1.5, step - (n > 45 ? 1 : 2));
+  const Y = v => bot - (bot - top) * v / max;
+  const bars = rows.map((d,i)=>{ const v = d.steps || 0, h = Math.max(1.5, bot - Y(v)), last = i === n - 1;
+    return `<rect x="${(2 + i*step).toFixed(1)}" y="${(bot-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(3, bw/2).toFixed(1)}" fill="${last || d.activity_date === today ? 'var(--accent)' : v >= (avg||Infinity) ? 'color-mix(in srgb, var(--accent) 45%, var(--surface-2))' : 'color-mix(in srgb, var(--text-faint) 50%, var(--surface-2))'}"><title>${shortDate(d.activity_date)}: ${v.toLocaleString()} steps</title></rect>`; }).join('');
+  const ay = avg ? Y(avg).toFixed(1) : null, mid = rows[Math.floor(n/2)];
+  return `<svg class="steps-chart2" viewBox="0 0 ${W} 124" width="100%" role="img" aria-label="Daily steps, ${shortDate(rows[0].activity_date)} to ${shortDate(rows[n-1].activity_date)}; 30-day average ${(avg||0).toLocaleString()}">
+    ${bars}${ay ? `<line x1="0" x2="${W}" y1="${ay}" y2="${ay}" stroke="var(--text)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>` : ''}
+    <text x="2" y="120" font-size="11" fill="var(--text-faint)">${shortDate(rows[0].activity_date)}</text><text x="${W/2}" y="120" text-anchor="middle" font-size="11" fill="var(--text-faint)">${shortDate(mid.activity_date)}</text><text x="${W-2}" y="120" text-anchor="end" font-size="11" fill="var(--text-faint)">${shortDate(rows[n-1].activity_date)}</text></svg>
+    <div class="wdg-sub">Brighter bars: days at or above your average. Latest day in lime.</div>`;
 }
 
 function isoAddDays(iso, n){ const [y,m,d] = iso.split('-').map(Number); const t = new Date(y, m-1, d+n); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
@@ -3806,7 +3806,7 @@ function renderHealth0(data){
     ${ageH > 6 && (!S.todayRow || !S.todayRow.steps) ? `<div class="mo-big" style="color:var(--text-faint)">—</div>
     <div class="mo-sub">Today's steps haven't synced yet. Your usual is ${S.avg30 ? S.avg30.toLocaleString() : '—'}.</div>` : `<div class="mo-big">${steps.toLocaleString()}</div>
     <div class="mo-sub">${S.avg30 ? (diff >= 0 ? `${diff}% above` : `${-diff}% below`) + ` your 30-day average of ${S.avg30.toLocaleString()}` : 'Not enough history for an average yet'}</div>`}
-    <div class="mo-bar"><div style="width:${pct}%"></div></div>
+    ${S.avg30 && S.todayRow && S.todayRow.steps != null ? `<i class="kmeter big" role="img" aria-label="${Math.round(100*steps/S.avg30)} percent of your usual"><i class="${steps >= S.avg30 ? 'hit' : ''}" style="width:${Math.min(100, 100*steps/S.avg30/1.5).toFixed(1)}%"></i><b></b></i>` : ''}
     <div class="mo-pace">${S.todayRow && S.todayRow.active_energy_kcal != null ? `${Math.round(S.todayRow.active_energy_kcal)} active kcal, ` : ''}${S.todayRow && S.todayRow.distance_walking_running_qty != null ? `${parseFloat(S.todayRow.distance_walking_running_qty).toFixed(1)} ${S.todayRow.distance_unit||'mi'} walked` : 'No distance yet today'}</div>
   </div>
   ${(()=>{
@@ -3817,11 +3817,13 @@ function renderHealth0(data){
     const wkLast = workouts.filter(w=>{ const t = new Date(w.start_time); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}` === lastMonthKey; }).length;
     const ws = weekStartIso(S.today), strip = []; for(let i=0;i<7;i++) strip.push(isoAddDays(ws,i));
     const wkDays = new Set(workouts.map(w=>{ const t = new Date(w.start_time); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }));
-    return `<div class="viz-card"><div class="viz-title"><span>Today vs. your usual</span><span>30-day averages</span></div><div class="rings">
-      <div class="rg">${svgRing(S.avg30 ? steps/S.avg30 : 0, '#D7FF3D', 84, 10, S.avg30 ? Math.round(100*steps/S.avg30)+'%' : '—')}<b>${steps.toLocaleString()}</b><small>steps<br>usual ${S.avg30.toLocaleString()}</small></div>
-      <div class="rg">${svgRing(kAvg ? kcalToday/kAvg : 0, '#D9822B', 84, 10, kAvg ? Math.round(100*kcalToday/kAvg)+'%' : '—')}<b>${kcalToday}</b><small>active kcal<br>usual ${kAvg}</small></div>
-      <div class="rg">${svgRing(wkLast ? S.wkMonth/wkLast : (S.wkMonth ? 1 : 0), '#2E8B57', 84, 10, String(S.wkMonth))}<b>${S.wkMonth}</b><small>workouts this month<br>${wkLast} last month</small></div>
-    </div></div>
+    const has = !!(S.todayRow && S.todayRow.steps != null), hasK = !!(S.todayRow && S.todayRow.active_energy_kcal != null);
+    // meter: 0–150% of your usual, tick at 100%
+    const meter = r => `<i class="kmeter" aria-hidden="true"><i class="${r >= 1 ? 'hit' : ''}" style="width:${Math.min(100, 100*r/1.5).toFixed(1)}%"></i><b></b></i>`;
+    const kpi = (label, val, sub, r) => `<div class="kpi"><span>${label}</span><b>${val}</b>${r != null ? meter(r) : ''}<em>${sub}</em></div>`;
+    return `<div class="viz-card"><div class="viz-title"><span>Also today</span><span>tick = your 30-day average</span></div><div class="kpis">
+      ${kpi('Active kcal', hasK ? kcalToday.toLocaleString() : '—', hasK ? (kAvg ? `${Math.round(100*kcalToday/kAvg)}% of ${kAvg}` : 'no average yet') : `not synced · usual ${kAvg}`, hasK && kAvg ? kcalToday/kAvg : null)}
+      ${kpi('Workouts', String(S.wkMonth), `this month · ${wkLast} last month`, null)}    </div></div>
     <div class="viz-card"><div class="viz-title"><span>This week</span><span>${S.thisWeek.toLocaleString()} steps vs ${S.lastWeek.toLocaleString()} last week</span></div><div class="weekstrip">${strip.map(d=>{ const r = daily.find(x=>x.activity_date===d); const fut = d > S.today; return `<div class="d ${d===S.today?'today':''}">${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}<b>${fut ? '' : r && r.steps != null ? (r.steps >= 1000 ? (r.steps/1000).toFixed(1)+'k' : r.steps) : '—'}</b>${wkDays.has(d) ? '<span class="wk">● workout</span>' : '&nbsp;'}</div>`; }).join('')}</div></div>`;
   })()}
   <div class="stat-trio" hidden>
@@ -3831,7 +3833,7 @@ function renderHealth0(data){
   </div>`;
   hero.innerHTML = h;
 
-  let html = `<div class="viz-card" data-bt="trends"><div class="viz-title"><span>Steps</span><span>last ${healthRangeDays} days · line = 30-day average</span></div>${buildStepsChart(daily.slice(0, healthRangeDays), S.avg30)}</div>
+  let html = `<div class="viz-card" data-bt="trends"><div class="viz-title"><span>Steps</span><span>dashed = ${S.avg30 ? S.avg30.toLocaleString() + ' a day avg' : 'average'}</span></div>${buildStepsChart(daily.slice(0, healthRangeDays), S.avg30)}</div>
     <div id="yoyBox" data-bt="trends"></div>${renderVitals(data)}${renderNights(data.sleep || [])}`;
   if(!workouts.length){ html += '<div class="empty" data-bt="trends">No workouts logged.</div>'; el.innerHTML = html; return; }
   const months = [];
@@ -5804,7 +5806,7 @@ function carBankCost(){
   const tot = carBank.reduce((a,t)=>a - Number(t.amount_cents), 0), per = {}; carBank.forEach(t=>{ const m = (t.authorized_date || t.transaction_date).slice(0,7); per[m] = (per[m]||0) - Number(t.amount_cents); });
   const ms = Object.keys(per).sort(), mx = Math.max(...Object.values(per));
   return `<div class="viz-card" style="margin-top:12px"><div class="viz-title"><span>Gas from your bank</span><span>last 4 months</span></div><div class="vital-big">${money(tot)} <small>${carBank.length} fill-ups, about ${money(Math.round(tot / Math.max(1, ms.length)))}/mo</small></div>
-    <div class="yoy">${ms.map(m=>`<div class="yoy-row"><span>${new Date(m + '-15T12:00').toLocaleDateString('en-US',{ month:'short' })}</span><i><i style="width:${Math.max(3, Math.round(100*per[m]/mx))}%"></i></i><b>${money(per[m])}</b></div>`).join('')}</div>
+    ${ms.length < 2 ? '' : `<div class="yoy">${ms.map(m=>`<div class="yoy-row"><span>${new Date(m + '-15T12:00').toLocaleDateString('en-US',{ month:'short' })}</span><i><i style="width:${Math.max(3, Math.round(100*per[m]/mx))}%"></i></i><b>${money(per[m])}</b></div>`).join('')}</div>`}
     <div class="wdg-sub">Charges at gas stations, $15 and up. Kept separate from the costs you've logged above.</div></div>`;
 }
 function carCosts0(){
@@ -5812,7 +5814,13 @@ function carCosts0(){
   const s12 = sv.filter(x=>x.service_on >= since).reduce((a,x)=>a+(x.cost_cents||0),0), f12 = fu.filter(x=>x.filled_on >= since).reduce((a,x)=>a+(x.total_cents||0),0);
   const odo = fu.concat(sv).map(x=>x.odometer_miles).filter(Boolean).sort((a,b)=>a-b), miles = odo.length > 1 ? odo[odo.length-1] - odo[0] : 0;
   const mpg = (()=>{ const f = fu.filter(x=>x.full_tank && x.odometer_miles && x.gallons).sort((a,b)=>a.odometer_miles-b.odometer_miles); if(f.length<2) return null; const g = f.slice(1).reduce((a,x)=>a+Number(x.gallons),0); return (f[f.length-1].odometer_miles - f[0].odometer_miles)/g; })();
-  return `<div class="wdg-grid" style="margin-top:8px">${[['LAST 12 MONTHS', money(s12+f12), `${money(s12)} service · ${money(f12)} gas`],['PER MONTH', money(Math.round((s12+f12)/12)), 'average'],['PER MILE', miles ? money(Math.round((s12+f12)/miles)) : '—', miles ? `${miles.toLocaleString()} mi logged` : 'log odometer readings'],['MPG', mpg ? mpg.toFixed(1) : '—', mpg ? 'from full fill-ups' : 'log 2+ full fill-ups']].map(([l,v,s3])=>`<div class="wdg"><span class="wdg-head"><span>${l}</span></span><b class="wdg-mid">${v}</b><span class="wdg-sub">${s3}</span></div>`).join('')}</div>`;
+  // per month: only over the months you've actually been logging (not a flat ÷12)
+  const firstLog = fu.concat(sv).map(x=>x.filled_on || x.service_on).filter(d=>d && d >= since).sort()[0];
+  const monthsLogged = firstLog ? Math.min(12, Math.max(1, Math.round((new Date(localToday()) - new Date(firstLog))/(30.44*86400000)))) : 0;
+  // gas per mile: gas bought after the first odometer reading ÷ miles between first and last reading
+  const fo = fu.filter(x=>x.odometer_miles && x.total_cents).sort((a,b)=>a.odometer_miles-b.odometer_miles), gm = fo.length > 1 ? fo[fo.length-1].odometer_miles - fo[0].odometer_miles : 0;
+  const gpm = gm > 0 ? fo.slice(1).reduce((a,x)=>a+Number(x.total_cents),0) / gm : null;
+  return `<div class="wdg-grid" style="margin-top:8px">${[['LAST 12 MONTHS', money(s12+f12), `${money(s12)} service · ${money(f12)} gas`],['PER MONTH', monthsLogged ? money(Math.round((s12+f12)/monthsLogged)) : '—', monthsLogged ? `over ${monthsLogged} month${monthsLogged===1?'':'s'} of logs` : 'nothing logged yet'],['GAS PER MILE', gpm != null ? '$' + (gpm/100).toFixed(2) : '—', gpm != null ? `${gm.toLocaleString()} mi between fill-ups` : 'log 2+ fill-ups with odometer'],['MPG', mpg ? mpg.toFixed(1) : '—', mpg ? 'from full fill-ups' : 'log 2+ full fill-ups']].map(([l,v,s3])=>`<div class="wdg"><span class="wdg-head"><span>${l}</span></span><b class="wdg-mid">${v}</b><span class="wdg-sub">${s3}</span></div>`).join('')}</div>`;
 }
 // ---------- PEOPLE ↔ PLACES: a person's place (people.location_id) + your visits there (v_visits) ----------
 const peopleCtx = { visits:null, busy:false };

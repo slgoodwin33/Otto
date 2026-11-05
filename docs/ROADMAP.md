@@ -1,5 +1,10 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .75 (Nov 5): data-viz pass, Body + Car
+- Body › Today: the three rings (which showed "0%" when Health hadn't synced) become stat tiles with a meter and a tick at your 30-day average; missing data shows "—, not synced". Steps hero bar gets the same tick. Workouts is a count, so no ring.
+- Body › Trends: steps chart redrawn at its real aspect ratio (date labels were squashed), gray bars with above-average days brighter and the latest day in lime; average named in the card title.
+- Car › Costs: Per month divides by the months you've actually logged (not ÷12); "Per mile" becomes Gas per mile from odometer readings between fill-ups; the bank-gas card skips a one-bar chart.
+
 ## Just shipped — build .74 (Nov 5): dashboard data-viz pass
 - Home hero: the number is the chart. Unscaled half-gauge removed; "$X left of $Y", "$Z a day for the next N days", and a bullet bar (spent vs. a tick at an even pace by today) with "Day 4 of 7 · $109 under pace". Week bars use purchase date (now match Money) and gray with today in lime.
 - Inbox count in neutral ink (red is for over/overdue). Food split bar uses the category colors with a two-line legend (validated pair #D4731F / #2E7D50, labels as secondary encoding). Empty tiles (Not synced, Nothing coming up) shrink to a dashed outline.
