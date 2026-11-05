@@ -1,5 +1,11 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .80 (Nov 5): filter sentence + #tags
+- Money › Transactions search reads a small language: `#tag`, `@store` (spaces don't matter: @marketbasket), `over $20` / `under $5`, `today · yesterday · this week · last week · this month · last month · this year · last 30 days`, `in <saved zone>` (zones from .77). Anything else is plain text. Suggestions pop up as you type # / @ / "in ".
+- Under the box a sentence says what's showing: "4 transactions · $304.66 spent · $76.17 each on average", with one chip per part (✕ drops just that part). "Tag these N…" tags everything shown at once (undo from the notice). Open a purchase to add/remove its tags (#name + Enter creates the tag).
+- New tables `tags` + `transaction_tags` (migration `20261105_tags_v1.sql`, owner RLS). Borrowed from Firefly III (tags + tag_transaction_journal) and Monica (tags + contact_tag): one tag row, many purchases; names are one word because they're typed inline.
+- Filters work on the transactions loaded on the phone (most recent 120); the sentence says so and offers Load older when a filter reaches past them.
+
 ## Just shipped — build .79 (Nov 5): pinch-zoom calendar
 - New page `#/cal/<steps|spend>/<year|month|week>/<date>`: Year = 12 mini heatmaps with each month's average (steps) or total (spending); spread two fingers on a month to open it; on a day to open its week (bars + top purchases); on a week day to open the full Day page. Pinch in to step back out. The zoom grows out of the spot under your fingers. Same moves without gestures: tap, − / +, the breadcrumb, ‹ › to page, ctrl+scroll on a trackpad.
 - Entry: Body › History "Zoom calendar" and Money › Transactions "Calendar". Spending = purchases in expense categories (or uncategorized), by purchase date; a past day with nothing bought is $0, not missing. Back from a Day page returns to the week you came from.

@@ -1962,6 +1962,18 @@ body.chatting .otto-chat-starters{display:none}
   .night>i{display:flex; height:12px; border-radius:6px; overflow:hidden; min-width:6px;} .night b{text-align:right; font-variant-numeric:tabular-nums; color:var(--text); font-weight:600;}
   .sp-chips{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none;} .sp-chips::-webkit-scrollbar{display:none;} .sp-chips .chip{flex:none; min-height:36px; display:inline-flex; align-items:center; gap:6px;}
 
+
+  /* filter sentence + tags (.80) */
+  body[data-moneyseg="txns"] #txnSuggest:not([hidden]), body[data-moneyseg="txns"] #txnSentence:not([hidden]){display:flex !important;}
+  body[data-moneyseg] #txnSuggest[hidden], body[data-moneyseg] #txnSentence[hidden], body[data-moneyseg] #txnSearchCount[hidden]{display:none !important;}
+  .txn-suggest{display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding:2px 0 8px;} .txn-suggest[hidden]{display:none !important;} .txn-suggest .chip{flex:none; min-height:36px;}
+  .txn-sentence{background:var(--surface); border-radius:16px; padding:10px 12px; margin:0 0 8px; display:flex; flex-direction:column; gap:8px;} .txn-sentence[hidden]{display:none !important;}
+  .ts-line{font:15px var(--sans); color:var(--text-muted);} .ts-line b{color:var(--text); font-weight:700;}
+  .ts-parts{display:flex; flex-wrap:wrap; gap:6px;} .ts-part{min-height:34px;} .ts-part span{margin-left:4px; color:var(--text-muted);} .ts-tag{color:var(--accent);} .ts-tagall{min-height:34px; border-style:dashed;}
+  .ts-note{font:13px var(--sans); color:var(--text-muted);} .ts-tagform{display:flex; gap:6px;} .ts-tagform input{flex:1; min-width:0; min-height:40px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); padding:0 12px; font:16px var(--sans);}
+  .txn-tag{font-size:0.74rem; color:var(--accent); font-weight:600;}
+  .txn-tags-edit{flex-basis:100%; display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding-top:4px; border-top:1px solid var(--border); margin-top:4px;}
+  .txn-tag-in{flex:1 1 140px; min-width:0; min-height:36px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); padding:0 10px; font:16px var(--sans);}
   /* zoom calendar (.79) */
   .cal-body{touch-action:pan-y;} .cal-stage{touch-action:pan-y; will-change:transform;}
   .cal-bar{display:flex; justify-content:space-between; align-items:center; gap:8px;} .cal-zoom{display:flex; gap:6px;} .cal-zoom .chip{min-width:44px; min-height:40px; justify-content:center; font-size:20px; display:inline-flex; align-items:center;} .cal-zoom .chip:disabled{opacity:.4;}
@@ -2198,10 +2210,12 @@ body.chatting .otto-chat-starters{display:none}
       <!-- Build 004: local transaction search -->
       <div class="txn-search-wrap" data-mseg="txns">
         <label class="sr-only" for="txnSearch">Search loaded transactions</label>
-        <input type="search" id="txnSearch" placeholder="Search transactions…" autocomplete="off" spellcheck="false">
+        <input type="search" id="txnSearch" placeholder="Search, #tag, @store, over $20…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-describedby="txnSentence">
         <button type="button" id="txnSearchClear" hidden>Clear</button>
       </div>
-      <div class="txn-search-count" id="txnSearchCount" data-mseg="txns" role="status" aria-live="polite" hidden></div>
+      <div class="txn-suggest" id="txnSuggest" data-mseg="txns" role="group" aria-label="Suggestions" hidden></div>
+      <div class="txn-sentence" id="txnSentence" data-mseg="txns" role="status" aria-live="polite" hidden></div>
+      <div class="txn-search-count" id="txnSearchCount" data-mseg="txns" hidden></div>
       <div id="txnList" class="budget-cat" style="padding:0;" data-mseg="txns"><div class="account-row"><span class="food-note" style="margin:0;">Loading…</span></div></div>
       <div id="recurringContent" data-mseg="recurring"></div>
       <div id="budgetContent" data-mseg="week"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
@@ -2322,7 +2336,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.79';
+const APP_BUILD = '2026-11-05.80';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -6903,15 +6917,17 @@ async function callFn(name, body){
   if(!res.ok) throw new Error(data.error || `Function ${name} returned ${res.status}`);
   return data;
 }
+let allTags = [], txnTagging = false;
 let bankConnections = [], allTxns = [], expandedTxnId = null, txnLimit = 120, txnFilter = 'all', txnDay = null;
 
 async function fetchBank(){
   const r = await fetch(`${SUPABASE_URL}/rest/v1/v_bank_connections?select=*&order=created_at.asc`, { headers: authHeaders() });
   if(!r.ok) throw new Error(`Supabase returned ${r.status}`);
   bankConnections = await r.json();
-  const t = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,authorized_date,description,merchant,amount_cents,pending,source,category_id,exclude_from_budget,plaid_category_primary,account:accounts(name)&removed_at=is.null&order=transaction_date.desc,id.desc&limit=${txnLimit}`, { headers: authHeaders() });
+  const t = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=id,transaction_date,authorized_date,description,merchant,amount_cents,pending,source,category_id,exclude_from_budget,plaid_category_primary,location_lat,location_lon,account:accounts(name),tags:transaction_tags(tag_id)&removed_at=is.null&order=transaction_date.desc,id.desc&limit=${txnLimit}`, { headers: authHeaders() });
   if(!t.ok) throw new Error(`Supabase returned ${t.status}`);
   allTxns = await t.json();
+  try{ const g = await fetch(`${SUPABASE_URL}/rest/v1/tags?select=id,code,name,color&order=name.asc`, { headers: authHeaders() }); if(g.ok) allTags = await g.json(); }catch(e){}
 }
 function renderBank(){
   const card = document.getElementById('bankCard'); if(!card) return;
@@ -6956,16 +6972,15 @@ function renderTxns(){
   const used = [...new Set(allTxns.map(labelOf).filter(Boolean))].sort();
   const filters = [['all','All'], ...(needs ? [['none', `Needs category (${needs})`]] : []), ...used.map(n=>[n,n])];
   if(!filters.some(f=>f[0]===txnFilter)) txnFilter = 'all';
-  const txnQuery = (document.getElementById('txnSearch')?.value || '').trim().toLocaleLowerCase();
+  const rawQ = document.getElementById('txnSearch')?.value || '', Q = parseTxnQuery(rawQ), txnQuery = Q.text.join(' ').toLocaleLowerCase();
   const txnClear = document.getElementById('txnSearchClear');
-  const txnCount = document.getElementById('txnSearchCount');
-  if(txnClear) txnClear.hidden = !txnQuery;
-  if(txnCount) txnCount.hidden = !txnQuery;
+  if(txnClear) txnClear.hidden = !rawQ.trim();
   const shown = allTxns.filter(t=> (!txnDay || t.transaction_date === txnDay)
     && (txnFilter==='all' ? true : txnFilter==='none' ? labelOf(t)===null : labelOf(t)===txnFilter)
-    && (!txnQuery || [t.merchant, t.description, labelOf(t), t.account?.name, t.transaction_date]
-      .some(v=>String(v || '').toLocaleLowerCase().includes(txnQuery))));
-  if(txnCount && txnQuery) txnCount.textContent = `${shown.length} matching ${shown.length === 1 ? 'transaction' : 'transactions'} among ${allTxns.length} loaded`;
+    && txnMatches(t, Q)
+    && (!txnQuery || txnQuery.split(/\s+/).every(w=>[t.merchant, t.description, labelOf(t), t.account?.name, t.transaction_date]
+      .some(v=>String(v || '').toLocaleLowerCase().includes(w)))));
+  renderTxnSentence(Q, shown, rawQ);
   const days = []; shown.forEach(t=>{ let d = days.find(x=>x.date===t.transaction_date); if(!d){ d={date:t.transaction_date, items:[]}; days.push(d); } d.items.push(t); });
   const today = localToday(), yday = isoAddDays(today,-1);
   let html = `<div class="txn-filters">${txnDay ? `<button class="chip active" type="button" data-cleartxnday="1">${esc(new Date(txnDay+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'}))} ✕</button>` : ''}${filters.map(([k,l])=>`<button class="chip ${txnFilter===k?'active':''}" type="button" data-txnfilter="${esc(k)}">${esc(l)}</button>`).join('')}</div>`;
@@ -6978,8 +6993,11 @@ function renderTxns(){
         ${txnIcon(label)}
         <div class="txn-name">${esc(t.merchant || t.description || '')}</div>
         <div class="txn-amt ${inflow?'in':''}">${inflow ? '+' : ''}${money(t.amount_cents)}</div>
-        <div class="txn-meta"><span class="txn-cat ${label?'':'none'}">${esc(label || 'Needs category')}</span>${t.pending ? '<span>Pending</span>' : ''}</div>
-        ${open ? `<div class="txn-pick"><div style="flex-basis:100%;font-size:0.78rem;color:var(--text-faint)">${esc(t.description || '')}</div>${(t.merchant || t.description) ? `<label class="rule-toggle"><input type="checkbox" id="alwaysRule" ${alwaysRule?'checked':''}> Always for “${esc(t.merchant || t.description)}”</label>` : ''}${cats.filter(c=>c.category_type!=='income' || inflow).map(c=>`<button class="chip ${c.id===t.category_id?'active':''}" type="button" data-setcat="${c.id}">${esc(c.name)}</button>`).join('')}<button class="chip ${t.exclude_from_budget?'active':''}" type="button" data-setcat="transfer">Transfer (not spending)</button></div>` : ''}
+        <div class="txn-meta"><span class="txn-cat ${label?'':'none'}">${esc(label || 'Needs category')}</span>${txnTagNames(t).map(n=>`<span class="txn-tag">#${esc(n)}</span>`).join('')}${t.pending ? '<span>Pending</span>' : ''}</div>
+        ${open ? `<div class="txn-pick"><div style="flex-basis:100%;font-size:0.78rem;color:var(--text-faint)">${esc(t.description || '')}</div>${(t.merchant || t.description) ? `<label class="rule-toggle"><input type="checkbox" id="alwaysRule" ${alwaysRule?'checked':''}> Always for “${esc(t.merchant || t.description)}”</label>` : ''}${cats.filter(c=>c.category_type!=='income' || inflow).map(c=>`<button class="chip ${c.id===t.category_id?'active':''}" type="button" data-setcat="${c.id}">${esc(c.name)}</button>`).join('')}<button class="chip ${t.exclude_from_budget?'active':''}" type="button" data-setcat="transfer">Transfer (not spending)</button>
+          <div class="txn-tags-edit" role="group" aria-label="Tags">${txnTagIds(t).map(id=>{ const g = allTags.find(x=>x.id === id); return g ? `<button type="button" class="chip active" data-untag="${g.id}" aria-label="Remove tag ${esc(g.name)}">#${esc(g.name)} ✕</button>` : ''; }).join('')}
+            <label class="sr-only" for="tagIn${t.id}">Add a tag</label><input id="tagIn${t.id}" class="txn-tag-in" data-tagin="${t.id}" placeholder="#add a tag" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="41">
+            ${allTags.filter(g=>!txnTagIds(t).includes(g.id)).slice(0, 4).map(g=>`<button type="button" class="chip" data-addtag="${esc(g.name)}">+ #${esc(g.name)}</button>`).join('')}</div></div>` : ''}
       </div>`;
     }).join('')}</div>`;
   }).join('');
@@ -7029,6 +7047,9 @@ document.getElementById('txnSearch').addEventListener('keydown', e => {
 });
 document.getElementById('txnList').addEventListener('click', async e=>{
   if(e.target.closest('[data-cleartxnday]')){ txnDay = null; renderTxns(); return; }
+  const ut = e.target.closest('[data-untag]'); if(ut){ e.stopPropagation(); const id = Number(e.target.closest('[data-txn]').dataset.txn); await untagTxn(id, Number(ut.dataset.untag)); return; }
+  const at = e.target.closest('[data-addtag]'); if(at){ e.stopPropagation(); const id = Number(e.target.closest('[data-txn]').dataset.txn); await tagTxns([id], at.dataset.addtag); return; }
+  if(e.target.closest('.txn-tags-edit')) return;
   const f = e.target.closest('[data-txnfilter]');
   if(f){ txnFilter = f.dataset.txnfilter; expandedTxnId = null; renderTxns(); return; }
   if(e.target.closest('#txnMore')){ txnLimit += 150; await fetchBank(); renderTxns(); return; }
@@ -7054,6 +7075,115 @@ document.getElementById('txnList').addEventListener('click', async e=>{
   const row = e.target.closest('[data-txn]');
   if(row){ const id = Number(row.dataset.txn); alwaysRule = false; expandedTxnId = expandedTxnId === id ? null : id; renderTxns(); }
 });
+
+// ---------- Filter sentence + tags (.80) ----------
+// The search box reads a little language: #tag  @store  over $20  under $5  today | yesterday | this week | last week |
+// this month | last month | this year | last 30 days   in <saved zone>. Whatever's left is plain text search.
+// Under it, a sentence says what's showing ("12 purchases · $340 spent") with one chip per part (✕ removes it).
+// Tags: Firefly III-style tags + transaction_tags. Tag one purchase from its row, or all shown at once ("Tag these").
+function txnTagIds(t){ return (t.tags || []).map(x=>Number(x.tag_id)); }
+function txnTagNames(t){ return txnTagIds(t).map(id=>(allTags.find(g=>g.id === id) || {}).name).filter(Boolean); }
+const normTxt = v => String(v || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+function weekMonday(d){ const [y,m,dd] = d.split('-').map(Number); const w = new Date(y, m-1, dd).getDay(); return isoAddDays(d, -((w + 6) % 7)); }
+function parseTxnQuery(q){
+  const Q = { tags:[], at:[], min:null, max:null, from:null, to:null, zone:null, text:[], parts:[] }; let rest = ' ' + q + ' ';
+  const take = (re, fn) => { rest = rest.replace(re, (...m)=>{ const r = fn(m); return r === false ? m[0] : ' '; }); };
+  const today = localToday();
+  take(/(^|\s)#([^\s#@]+)/g, m=>{ Q.tags.push(m[2]); Q.parts.push({ raw:'#' + m[2], label:'#' + m[2], kind:'tag' }); });
+  take(/(^|\s)@([^\s#@]+)/g, m=>{ const hit = (allTxns||[]).find(t=>normTxt(t.merchant || t.description).includes(normTxt(m[2]))); Q.at.push(m[2]); Q.parts.push({ raw:'@' + m[2], label:'at ' + (hit ? (hit.merchant || hit.description) : m[2]), kind:'at' }); });
+  take(/(^|\s)(over|above|more than|>)\s*\$?(\d+(?:\.\d{1,2})?)(?=\s)/gi, m=>{ Q.min = Math.round(Number(m[3])*100); Q.parts.push({ raw:m[0].trim(), label:'over ' + money(Q.min), kind:'amt' }); });
+  take(/(^|\s)(under|below|less than|<)\s*\$?(\d+(?:\.\d{1,2})?)(?=\s)/gi, m=>{ Q.max = Math.round(Number(m[3])*100); Q.parts.push({ raw:m[0].trim(), label:'under ' + money(Q.max), kind:'amt' }); });
+  take(/(^|\s)(today|yesterday|this week|last week|this month|last month|this year|last (\d{1,3}) days)(?=\s)/gi, m=>{ const k = m[2].toLowerCase(), mo = today.slice(0,7);
+    if(k === 'today'){ Q.from = Q.to = today; } else if(k === 'yesterday'){ Q.from = Q.to = isoAddDays(today, -1); }
+    else if(k === 'this week'){ Q.from = weekMonday(today); Q.to = today; } else if(k === 'last week'){ Q.from = isoAddDays(weekMonday(today), -7); Q.to = isoAddDays(weekMonday(today), -1); }
+    else if(k === 'this month'){ Q.from = mo + '-01'; Q.to = today; } else if(k === 'last month'){ Q.from = isoAddMonths(mo + '-01', -1); Q.to = isoAddDays(mo + '-01', -1); }
+    else if(k === 'this year'){ Q.from = today.slice(0,4) + '-01-01'; Q.to = today; } else { Q.from = isoAddDays(today, -(Number(m[3]) - 1)); Q.to = today; }
+    Q.parts.push({ raw:m[2], label:k, kind:'when' }); });
+  const zones = spendView.zones || [];
+  take(/(^|\s)in\s+(.+?)(?=\s*$)/i, m=>{ const name = m[2].trim().toLowerCase(), z = zones.find(x=>x.name.toLowerCase() === name) || zones.find(x=>x.name.toLowerCase().startsWith(name));
+    if(!z) return false; Q.zone = z; Q.parts.push({ raw:'in ' + m[2].trim(), label:'in ' + z.name, kind:'zone' }); });
+  Q.text = rest.split(/\s+/).filter(Boolean); if(Q.text.length) Q.parts.push({ raw:null, label:'“' + Q.text.join(' ') + '”', kind:'text' });
+  return Q;
+}
+function txnMatches(t, Q){
+  if(Q.tags.length){ const names = txnTagNames(t).map(n=>n.toLowerCase()); if(!Q.tags.every(g=>names.includes(g.toLowerCase()))) return false; }
+  if(Q.at.length && !Q.at.every(a=>normTxt(t.merchant || t.description).includes(normTxt(a)))) return false;
+  const amt = Math.abs(Number(t.amount_cents)); if(Q.min != null && amt < Q.min) return false; if(Q.max != null && amt > Q.max) return false;
+  if(Q.from && (t.transaction_date < Q.from || t.transaction_date > Q.to)) return false;
+  if(Q.zone){ if(t.location_lat == null) return false; if(!inPoly(Number(t.location_lat), Number(t.location_lon), zonePoly(Q.zone))) return false; }
+  return true;
+}
+function renderTxnSentence(Q, shown, rawQ){
+  const el = document.getElementById('txnSentence'); if(!el) return;
+  const active = Q.parts.length > 0; el.hidden = !active && !txnTagging; if(el.hidden){ el.innerHTML = ''; return; }
+  const out = shown.filter(t=>t.amount_cents < 0 && !t.exclude_from_budget).reduce((a,t)=>a - Number(t.amount_cents), 0), inn = shown.filter(t=>t.amount_cents > 0).reduce((a,t)=>a + Number(t.amount_cents), 0);
+  const unknown = Q.tags.filter(g=>!allTags.some(x=>x.name.toLowerCase() === g.toLowerCase()));
+  const oldest = allTxns.length ? allTxns[allTxns.length-1].transaction_date : null, partial = allTxns.length >= txnLimit && (!Q.from || (oldest && Q.from < oldest));
+  el.innerHTML = `<div class="ts-line"><b>${shown.length} transaction${shown.length===1?'':'s'}</b>${out ? ` · ${money(out)} spent` : ''}${inn ? ` · ${money(inn)} in` : ''}${shown.length > 1 && out ? ` · ${money(Math.round(out / Math.max(1, shown.filter(t=>t.amount_cents < 0).length)))} each on average` : ''}</div>
+    <div class="ts-parts">${Q.parts.map((p,i)=>`<button type="button" class="chip ts-part ts-${p.kind}" data-tsdrop="${i}" aria-label="Remove ${esc(p.label)}">${esc(p.label)} <span aria-hidden="true">✕</span></button>`).join('')}
+      ${shown.length && active && !txnTagging ? `<button type="button" class="chip ts-tagall" data-tstag>Tag these ${shown.length}…</button>` : ''}</div>
+    ${unknown.length ? `<div class="ts-note">No tag called #${esc(unknown[0])} yet. Open a purchase to add it, or use “Tag these”.</div>` : ''}
+    ${txnTagging ? `<form class="ts-tagform" data-tsform><label class="sr-only" for="tsTagIn">Tag name for ${shown.length} transactions</label><input id="tsTagIn" placeholder="#tag for all ${shown.length}" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="41" required><button type="submit" class="chip active">Tag ${shown.length}</button><button type="button" class="chip" data-tscancel>Cancel</button></form>` : ''}
+    ${partial ? `<div class="ts-note">Searching the ${allTxns.length} most recent. <button type="button" class="link-btn" data-tsmore>Load older</button></div>` : ''}`;
+  el.__shown = shown.map(t=>t.id);
+}
+function txnTokenAtCaret(inp){ const v = inp.value, c = inp.selectionStart == null ? v.length : inp.selectionStart, before = v.slice(0, c), m = before.match(/(?:^|\s)([#@][^\s#@]*|in\s+[^#@]*)$/i); return m ? { tok:m[1], start:c - m[1].length, end:c } : { tok:'', start:c, end:c }; }
+function renderTxnSuggest(){
+  const box = document.getElementById('txnSuggest'), inp = document.getElementById('txnSearch'); if(!box || !inp) return;
+  if(document.activeElement !== inp){ box.hidden = true; return; }
+  const { tok } = txnTokenAtCaret(inp); let items = [];
+  if(tok.startsWith('#')){ const q = tok.slice(1).toLowerCase(); items = allTags.filter(g=>g.name.toLowerCase().startsWith(q)).slice(0, 8).map(g=>['#' + g.name, '#' + g.name]); if(!items.length && !allTags.length) items = [['', 'No tags yet. Open a purchase to add one.']]; }
+  else if(tok.startsWith('@')){ const q = normTxt(tok.slice(1)), cnt = {}; (allTxns||[]).forEach(t=>{ const n = String(t.merchant || '').trim(); if(n) cnt[n] = (cnt[n]||0) + 1; });
+    items = Object.entries(cnt).filter(([n])=>normTxt(n).includes(q)).sort((a,b)=>b[1]-a[1]).slice(0, 8).map(([n])=>['@' + n.replace(/\s+/g,''), '@' + n]); }
+  else if(/^in\s/i.test(tok)){ const q = tok.slice(3).trim().toLowerCase(); items = (spendView.zones||[]).filter(z=>z.name.toLowerCase().startsWith(q)).map(z=>['in ' + z.name, 'in ' + z.name]); if(!items.length) items = [['', (spendView.zones||[]).length ? 'No zone by that name' : 'No saved zones yet. Draw one on the spending map.']]; }
+  else if(!inp.value.trim()) items = [['#', '#tag'], ['@', '@store'], ['over $20', 'over $20'], ['this month', 'this month'], ['last week', 'last week'], ...((spendView.zones||[]).length ? [['in ', 'in a zone…']] : [])];
+  box.hidden = !items.length; box.innerHTML = items.map(([v,l])=>v ? `<button type="button" class="chip" data-tsins="${esc(v)}">${esc(l)}</button>` : `<span class="ts-note">${esc(l)}</span>`).join('');
+}
+async function ensureTag(name){
+  name = String(name || '').trim().replace(/^#+/, '').replace(/\s+/g, '-'); if(!name) throw new Error('Type a tag name'); if(/[#@]/.test(name) || name.length > 40) throw new Error('Tags are one word, up to 40 letters');
+  const have = allTags.find(g=>g.name.toLowerCase() === name.toLowerCase()); if(have) return have;
+  await ensureValidSession();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/tags`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([{ name }]) });
+  if(!r.ok) throw new Error(`Couldn't make the tag (${r.status})`); const g = ((await r.json()) || [])[0]; if(!g || !g.id || !g.name) throw new Error("Couldn't make the tag"); allTags.push(g); allTags.sort((a,b)=>a.name.localeCompare(b.name)); return g;
+}
+async function tagTxns(ids, name, quiet){
+  const g = await ensureTag(name), fresh = ids.filter(id=>{ const t = allTxns.find(x=>x.id === id); return t && !txnTagIds(t).includes(g.id); });
+  if(fresh.length){ await ensureValidSession();
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/transaction_tags?on_conflict=transaction_id,tag_id`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'resolution=ignore-duplicates,return=minimal' }), body: JSON.stringify(fresh.map(id=>({ transaction_id:id, tag_id:g.id }))) });
+    if(!r.ok) throw new Error(`Couldn't tag (${r.status})`);
+    fresh.forEach(id=>{ const t = allTxns.find(x=>x.id === id); t.tags = [...(t.tags||[]), { tag_id:g.id }]; }); }
+  hapticPulse(); renderTxns();
+  if(!quiet && ids.length > 1) showNotice(`Tagged ${fresh.length} with #${g.name}. Tap to undo.`, async ()=>{ document.getElementById('ottoNotice')?.classList.remove('show'); for(const id of fresh) await untagTxn(id, g.id, true); showNotice('Undone.'); });
+  return { tag:g, added:fresh };
+}
+async function untagTxn(id, tagId, quiet){
+  await ensureValidSession(); const r = await fetch(`${SUPABASE_URL}/rest/v1/transaction_tags?transaction_id=eq.${id}&tag_id=eq.${tagId}`, { method:'DELETE', headers: authHeaders() });
+  if(!r.ok){ showNotice(`Couldn't remove the tag (${r.status})`); return; }
+  const t = allTxns.find(x=>x.id === id); if(t) t.tags = (t.tags||[]).filter(x=>Number(x.tag_id) !== tagId); if(!quiet) hapticPulse(); renderTxns();
+}
+(function(){
+  const inp = document.getElementById('txnSearch'), sug = document.getElementById('txnSuggest'), sen = document.getElementById('txnSentence'); if(!inp || !sug || !sen) return;
+  const zonesOnce = () => { if(!spendView.zones) loadZones().then(()=>{ renderTxnSuggest(); if(/\bin\s/i.test(inp.value)) renderTxns(); }); };
+  inp.addEventListener('focus', ()=>{ zonesOnce(); renderTxnSuggest(); });
+  inp.addEventListener('input', renderTxnSuggest); inp.addEventListener('keyup', e=>{ if(/Arrow|Home|End/.test(e.key)) renderTxnSuggest(); });
+  inp.addEventListener('blur', ()=>setTimeout(()=>{ if(!sug.contains(document.activeElement)) sug.hidden = true; }, 180));
+  sug.addEventListener('pointerdown', e=>e.preventDefault());   // keep the keyboard up
+  sug.addEventListener('click', e=>{ const b = e.target.closest('[data-tsins]'); if(!b) return; const { start, end } = txnTokenAtCaret(inp), v = b.dataset.tsins, tail = /[#@ ]$/.test(v) || v === '#' || v === '@' ? '' : ' ';
+    inp.value = inp.value.slice(0, start) + v + tail + inp.value.slice(end).replace(/^\s+/, ''); const c = start + v.length + tail.length; inp.focus(); inp.setSelectionRange(c, c); expandedTxnId = null; renderTxns(); renderTxnSuggest(); });
+  sen.addEventListener('click', async e=>{
+    const d = e.target.closest('[data-tsdrop]'); if(d){ const Q = parseTxnQuery(inp.value), p = Q.parts[Number(d.dataset.tsdrop)]; if(!p) return;
+      if(p.kind === 'text') inp.value = Q.parts.filter(x=>x.raw).map(x=>x.raw).join(' ');
+      else inp.value = inp.value.replace(p.raw, '').replace(/\s{2,}/g, ' ').trim();
+      renderTxns(); return; }
+    if(e.target.closest('[data-tstag]')){ zonesOnce(); txnTagging = true; renderTxns(); document.getElementById('tsTagIn')?.focus(); return; }
+    if(e.target.closest('[data-tscancel]')){ txnTagging = false; renderTxns(); return; }
+    if(e.target.closest('[data-tsmore]')){ txnLimit += 300; await fetchBank(); renderTxns(); }
+  });
+  sen.addEventListener('submit', async e=>{ if(!e.target.closest('[data-tsform]')) return; e.preventDefault(); const name = document.getElementById('tsTagIn').value, ids = sen.__shown || [];
+    try{ txnTagging = false; await tagTxns(ids, name); }catch(err){ txnTagging = true; showNotice(err.message); renderTxns(); } });
+  document.getElementById('txnList').addEventListener('keydown', async e=>{ const ti = e.target.closest('[data-tagin]'); if(!ti || e.key !== 'Enter') return; e.preventDefault();
+    try{ await tagTxns([Number(ti.dataset.tagin)], ti.value); setTimeout(()=>document.querySelector(`[data-tagin="${ti.dataset.tagin}"]`)?.focus(), 0); }catch(err){ showNotice(err.message); } });
+})();
 
 async function bootApp(){
   const cached = await loadCache();
