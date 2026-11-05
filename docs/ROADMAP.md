@@ -1,5 +1,9 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .79 (Nov 5): pinch-zoom calendar
+- New page `#/cal/<steps|spend>/<year|month|week>/<date>`: Year = 12 mini heatmaps with each month's average (steps) or total (spending); spread two fingers on a month to open it; on a day to open its week (bars + top purchases); on a week day to open the full Day page. Pinch in to step back out. The zoom grows out of the spot under your fingers. Same moves without gestures: tap, − / +, the breadcrumb, ‹ › to page, ctrl+scroll on a trackpad.
+- Entry: Body › History "Zoom calendar" and Money › Transactions "Calendar". Spending = purchases in expense categories (or uncategorized), by purchase date; a past day with nothing bought is $0, not missing. Back from a Day page returns to the week you came from.
+
 ## Just shipped — build .78 (Nov 5): move money between categories
 - Money › This week: hold a category for a moment, drag it onto another, let go. A sheet opens with From → To, a big amount, a slider, "Cover the overage" / "All of it", and the after-state of both. Drag an over-budget category onto one with money left and it pulls from that one. Also reachable without dragging: tap a category → Move money ›.
 - Only unspent planned money moves; the week's total stays the same. New DB function `move_budget(period, from, to, cents)` (migration `20261105_move_budget_v1.sql`, security invoker so the owner RLS still applies) changes both `budget_allocations.planned_cents` in one transaction. Undo = tap the notice (moves it back). Planned only; actual spending untouched.

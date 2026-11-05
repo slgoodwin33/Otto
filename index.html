@@ -1961,6 +1961,26 @@ body.chatting .otto-chat-starters{display:none}
   .nights{display:flex; flex-direction:column; gap:6px; margin:12px 0 8px;} .night{display:grid; grid-template-columns:52px minmax(0,1fr) 58px; gap:8px; align-items:center; font:12.5px var(--sans); color:var(--text-muted);}
   .night>i{display:flex; height:12px; border-radius:6px; overflow:hidden; min-width:6px;} .night b{text-align:right; font-variant-numeric:tabular-nums; color:var(--text); font-weight:600;}
   .sp-chips{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none;} .sp-chips::-webkit-scrollbar{display:none;} .sp-chips .chip{flex:none; min-height:36px; display:inline-flex; align-items:center; gap:6px;}
+
+  /* zoom calendar (.79) */
+  .cal-body{touch-action:pan-y;} .cal-stage{touch-action:pan-y; will-change:transform;}
+  .cal-bar{display:flex; justify-content:space-between; align-items:center; gap:8px;} .cal-zoom{display:flex; gap:6px;} .cal-zoom .chip{min-width:44px; min-height:40px; justify-content:center; font-size:20px; display:inline-flex; align-items:center;} .cal-zoom .chip:disabled{opacity:.4;}
+  .cal-crumb{display:flex; align-items:center; gap:6px; flex-wrap:wrap; padding:2px 0 6px; font:14px var(--sans); color:var(--text-muted);} .cal-crumb button{all:unset; cursor:pointer; color:var(--accent); font-weight:600; padding:6px 2px; min-height:24px;} .cal-crumb button[aria-current]{color:var(--text); cursor:default;} .cal-crumb button:focus-visible{outline:2px solid var(--accent); border-radius:4px;}
+  .cal-nav{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 0 8px;} .cal-nav b{font:700 22px var(--sans);} .cal-nav .chip{min-width:44px; min-height:40px; justify-content:center; display:inline-flex; align-items:center; font-size:20px;} .cal-nav .chip:disabled{opacity:.35;}
+  .cal-sum{font:14px var(--sans); color:var(--text-muted); padding:0 0 10px;}
+  .cz{background:var(--surface-2);} .cz.l1{background:rgba(215,255,61,.16);} .cz.l2{background:rgba(215,255,61,.34);} .cz.l3{background:rgba(215,255,61,.55);} .cz.l4{background:rgba(215,255,61,.78);} .cz.l5{background:#D7FF3D;} .cz.fut{background:transparent; box-shadow:inset 0 0 0 1px var(--border);} .cz.pad{background:transparent; box-shadow:none;}
+  .cal-year{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:10px;}
+  .cal-mo{all:unset; box-sizing:border-box; cursor:pointer; padding:8px; border-radius:14px; background:var(--surface); display:flex; flex-direction:column; gap:6px; min-width:0;} .cal-mo.cur{box-shadow:inset 0 0 0 2px var(--accent);} .cal-mo:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .cal-mo-h{display:flex; justify-content:space-between; align-items:baseline; gap:4px;} .cal-mo-h b{font:700 14px var(--sans);} .cal-mo-h em{font:normal 12px var(--sans); color:var(--text-muted); white-space:nowrap;}
+  .cal-mini{display:grid; grid-template-columns:repeat(7, 1fr); gap:2px;} .cal-mini .cz{display:block; aspect-ratio:1; border-radius:2px;} .cal-mini .tdy{box-shadow:0 0 0 1.5px var(--text);}
+  .cal-dow{display:grid; grid-template-columns:repeat(7, 1fr); gap:4px; padding-bottom:4px;} .cal-dow span{text-align:center; font:600 12px var(--sans); color:var(--text-muted);}
+  .cal-grid{display:grid; grid-template-columns:repeat(7, 1fr); gap:4px;}
+  .cal-grid .day{all:unset; box-sizing:border-box; cursor:pointer; aspect-ratio:1/1.1; border-radius:10px; padding:5px 4px; display:flex; flex-direction:column; justify-content:space-between; min-width:0; color:var(--text);} .cal-grid .day.cz{background:var(--surface-2);} .cal-grid .day.l1{background:rgba(215,255,61,.16);} .cal-grid .day.l2{background:rgba(215,255,61,.34);} .cal-grid .day.l3{background:rgba(215,255,61,.55);} .cal-grid .day.l4{background:rgba(215,255,61,.78);} .cal-grid .day.l5{background:#D7FF3D;} .cal-grid .day.fut{background:transparent;}
+  .cal-grid .day.l3, .cal-grid .day.l4, .cal-grid .day.l5{color:#0B0C0A;} .cal-grid .day b{font:700 14px var(--sans);} .cal-grid .day em{font:normal 11.5px var(--sans); text-align:right; white-space:nowrap; overflow:hidden;} .cal-grid .day.fut{color:var(--text-muted);} .cal-grid .day.tdy{box-shadow:inset 0 0 0 2px var(--text);} .cal-grid .day:focus-visible{outline:3px solid var(--accent); outline-offset:1px;} .cal-grid .pad{aspect-ratio:1/1.1;}
+  .cal-week{display:flex; flex-direction:column; background:var(--surface); border-radius:18px; padding:2px 12px;}
+  .cal-wd{all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:44px minmax(0,1fr) 14px; gap:10px; align-items:center; padding:12px 0; border-bottom:1px solid var(--border); min-height:56px;} .cal-wd:last-child{border-bottom:none;} .cal-wd:disabled{cursor:default; opacity:.55;} .cal-wd:focus-visible{outline:3px solid var(--accent); outline-offset:2px; border-radius:8px;}
+  .cal-wd-d{display:flex; flex-direction:column;} .cal-wd-d b{font:700 14px var(--sans);} .cal-wd-d em{font:normal 13px var(--sans); color:var(--text-muted);} .cal-wd.tdy .cal-wd-d b{color:var(--accent);}
+  .cal-wd-m{display:flex; flex-direction:column; gap:5px; min-width:0;} .cal-wd-m>span{font:14px var(--sans); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .cal-wd-bar{display:block; height:8px; border-radius:4px; background:var(--surface-2);} .cal-wd-bar i{display:block; height:100%; border-radius:4px;} .cal-wd-go{color:var(--text-muted); font-size:18px;}
   .sp-zones{padding-bottom:8px;} .sp-drawing{cursor:crosshair; touch-action:none; outline:2px dashed var(--accent); outline-offset:-2px;}
   .sp-zone{padding:12px 14px !important; margin-top:10px; display:flex; flex-direction:column; gap:10px;} .sp-zone-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;} .sp-zone-top>div{display:flex; flex-direction:column; gap:2px; min-width:0;}
   .sp-zone-k{font:600 12px var(--sans); letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);} .sp-zone-top b{font:700 18px var(--sans);} .sp-zone-top em{font:normal 14px var(--sans); color:var(--text);} .sp-zone-rate{font:13px var(--sans); color:var(--text-muted);}
@@ -2158,6 +2178,7 @@ body.chatting .otto-chat-starters{display:none}
       <div id="budgetErrorBanner"></div>
       <div class="money-actions" data-mseg="txns" style="gap:0.5rem; flex-wrap:wrap; margin-bottom:0.6rem; justify-content:flex-end;">
         <button class="refresh-btn" type="button" data-spend-open>Spending map</button>
+        <button class="refresh-btn" type="button" data-cal-open="spend">Calendar</button>
         <button class="refresh-btn" id="addTxnBtn" type="button">+ Log cash or other</button>
         <button class="refresh-btn" id="dupWeekBtn" type="button" hidden>Duplicate last week →</button>
       </div>
@@ -2301,7 +2322,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.78';
+const APP_BUILD = '2026-11-05.79';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -6386,6 +6407,7 @@ function renderStepHistory(){
       <div class="hr"><span>Since ${dates[0].slice(0,4)}</span><b>${(total/1e6).toFixed(1)}M</b><em>steps · about ${Math.round(total/2100).toLocaleString()} miles</em></div>
     </div>
     ${otd.length ? `<div class="viz-card"><div class="viz-title"><span>On this day</span><em>${new Date(today+'T12:00').toLocaleDateString('en-US',{month:'long', day:'numeric'})}</em></div><div class="otd" tabindex="0" role="group" aria-label="Steps on this day in past years">${otd.map(([yy,n])=>`<div><span>${yy}</span><b>${n.toLocaleString()}</b></div>`).join('')}</div></div>` : ''}
+    <button type="button" class="link-row" data-cal-open="steps">Zoom calendar: pinch from years down to a single day ›</button>
     <div class="viz-card">
       <div class="viz-title"><span>${y}</span><em>${yAvg.toLocaleString()} a day</em></div>
       <div class="hist-years" role="group" aria-label="Year">${years.map(yy=>`<button type="button" data-hy="${yy}" class="${yy===y?'on':''}" aria-pressed="${yy===y}">${yy}</button>`).join('')}</div>
@@ -7533,6 +7555,135 @@ document.addEventListener('submit', async e=>{ const f = e.target.closest('[data
   const name = f.name.value.trim(); if(!name || !spendView.poly) return; const btn = f.querySelector('button'); btn.disabled = true;
   try{ await saveZone(name); hapticPulse(); showNotice(`Saved zone "${name}".`); renderSpendMap(); }catch(err){ btn.disabled = false; showNotice(err.message); } });
 
+// ---------- Zoom calendar (#/cal/steps | #/cal/spend, .79): pinch year → month → week → day ----------
+// Spread two fingers on a month to open it, on a day to open its week, on a week row to open the day page.
+// Pinch in to step back out. Tap does the same as spreading; − / + buttons and the breadcrumb do it without gestures.
+const calView = { open:false, metric:'steps', level:'month', y:null, m:null, w:null, spend:{}, pinch:null };
+const CAL_LEVELS = ['year','month','week'];
+async function openCal(metric, fromRoute){
+  if(metric === 'steps' || metric === 'spend') calView.metric = metric;
+  const t = localToday(); if(!calView.y){ calView.y = t.slice(0,4); calView.m = t.slice(0,7); calView.w = weekOf(t); }
+  let el = document.getElementById('calPage');
+  if(!el){ el = document.createElement('div'); el.id = 'calPage'; el.className = 'daypage'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-label','Calendar'); document.body.appendChild(el); }
+  const was = calView.open; calView.open = true; el.hidden = false; document.body.classList.add('daying');
+  if(!fromRoute) syncRoute(was);
+  await renderCal();
+}
+function closeCal(){ const el = document.getElementById('calPage'); if(el) el.hidden = true; calView.open = false; if(!dayView.open && !spendView.open) document.body.classList.remove('daying'); }
+function weekOf(d){ const [y,m,dd] = d.split('-').map(Number); return isoAddDays(d, -new Date(y, m-1, dd).getDay()); }
+async function loadSpendYear(y){
+  if(calView.spend[y]) return calView.spend[y];
+  const rows = []; let from = 0;
+  for(;;){ const r = await fetch(`${SUPABASE_URL}/rest/v1/transactions?select=transaction_date,authorized_date,amount_cents,category_id,exclude_from_budget,merchant,description&removed_at=is.null&amount_cents=lt.0&transaction_date=gte.${y}-01-01&transaction_date=lte.${y}-12-31&order=transaction_date.asc`, { headers: authHeaders({ Range:`${from}-${from+999}`, 'Range-Unit':'items' }) });
+    if(!r.ok) throw new Error('HTTP ' + r.status); const page = await r.json(); rows.push(...page); if(page.length < 1000 || from > 20000) break; from += 1000; }
+  const by = new Map(), top = new Map();
+  rows.forEach(t=>{ if(t.exclude_from_budget || !(Number(t.amount_cents) < 0)) return; const c = (allCategories||[]).find(x=>x.id === t.category_id); if(c && c.category_type && c.category_type !== 'expense') return;
+    const d = spentDay(t), a = -Number(t.amount_cents); by.set(d, (by.get(d)||0) + a); const l = top.get(d) || []; l.push([String(t.merchant || t.description || 'Purchase'), a]); top.set(d, l); });
+  calView.spend[y] = { by, top }; return calView.spend[y];
+}
+function calLevel(v){ if(calView.metric === 'steps') return stepLevel(v); return !v ? 0 : v < 1000 ? 1 : v < 2500 ? 2 : v < 5000 ? 3 : v < 10000 ? 4 : 5; }
+function calFmt(v, short){ if(v == null) return '—'; if(calView.metric === 'steps') return short ? (v >= 1000 ? (v/1000).toFixed(v >= 10000 ? 0 : 1).replace(/\.0$/,'') + 'k' : String(v)) : v.toLocaleString(); return short ? '$' + Math.round(v/100) : money(v); }
+function calNoun(){ return calView.metric === 'steps' ? 'steps' : 'spent'; }
+async function calData(){ if(calView.metric === 'steps'){ const by = await loadStepHistory(); return { by, top:null }; }
+  const ys = new Set([calView.y, calView.m.slice(0,4), calView.w.slice(0,4), isoAddDays(calView.w, 6).slice(0,4)]); const out = { by:new Map(), top:new Map() };
+  for(const y of ys){ const d = await loadSpendYear(y); d.by.forEach((v,k)=>out.by.set(k,v)); d.top.forEach((v,k)=>out.top.set(k,v)); } return out; }
+function calCrumb(){ const mN = m => new Date(m + '-15T12:00').toLocaleDateString('en-US', { month:'long' }), L = calView.level;
+  const parts = [`<button type="button" data-cal-go="year" ${L==='year'?'aria-current="true"':''}>${calView.y}</button>`];
+  if(L !== 'year') parts.push(`<button type="button" data-cal-go="month" ${L==='month'?'aria-current="true"':''}>${mN(calView.m)}</button>`);
+  if(L === 'week') parts.push(`<button type="button" data-cal-go="week" aria-current="true">${shortDate(calView.w)}–${shortDate(isoAddDays(calView.w, 6)).replace(/^[A-Za-z]+ /, s=>isoAddDays(calView.w,6).slice(5,7) === calView.w.slice(5,7) ? '' : s)}</button>`);
+  return parts.join('<span aria-hidden="true">›</span>'); }
+async function renderCal(anim){
+  const el = document.getElementById('calPage'); if(!el || !calView.open) return;
+  const L = calView.level, today = localToday();
+  if(!el.querySelector('#calBody')){
+    el.innerHTML = `<div class="dp-head"><button type="button" class="deck-x" data-cal-close aria-label="Close calendar">✕</button><div class="dp-when"><b>Calendar</b><span id="calSub"></span></div></div>
+      <div class="dp-body cal-body" id="calBody"><div class="cal-bar"><div class="sp-chips" role="group" aria-label="Show">${[['steps','Steps'],['spend','Spending']].map(([k,l])=>`<button type="button" class="chip" data-cal-metric="${k}">${l}</button>`).join('')}</div>
+        <div class="cal-zoom"><button type="button" class="chip" data-cal-zoom="-1" aria-label="Zoom out">−</button><button type="button" class="chip" data-cal-zoom="1" aria-label="Zoom in">+</button></div></div>
+        <nav class="cal-crumb" id="calCrumb" aria-label="Zoom level"></nav><div class="cal-nav"><button type="button" class="chip" data-cal-step="-1" aria-label="Previous">‹</button><b id="calTitle" aria-live="polite"></b><button type="button" class="chip" data-cal-step="1" aria-label="Next">›</button></div>
+        <div class="cal-stage" id="calStage"><div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div></div>
+        <div class="map-help" id="calHelp"></div></div>`;
+  }
+  el.querySelectorAll('[data-cal-metric]').forEach(b=>{ const on = b.dataset.calMetric === calView.metric; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+  el.querySelector('[data-cal-zoom="-1"]').disabled = L === 'year';
+  document.getElementById('calCrumb').innerHTML = calCrumb();
+  document.getElementById('calSub').textContent = calView.metric === 'steps' ? 'Steps' : 'Spending (purchases)';
+  const stage = document.getElementById('calStage');
+  let D; try{ D = await calData(); }catch(err){ stage.innerHTML = `<div class="empty">Couldn't load. ${esc(err.message||'')}</div>`; return; }
+  if(!calView.open) return; const by = D.by, sp = calView.metric === 'spend', val = d => sp ? (by.get(d) || 0) : by.get(d);   // a past day with no purchases is $0 spent, not missing
+  const cell = (d, cls, inner, attrs) => { const v = d > today ? null : val(d), lv = d > today ? 'fut' : 'l' + calLevel(v); return `<${attrs ? 'button type="button"' : 'i'} class="${cls} cz ${lv} ${d === today ? 'tdy' : ''}" ${attrs||''}>${inner||''}</${attrs ? 'button' : 'i'}>`; };
+  const sumOf = ds => { const v = ds.filter(d=>d <= today).map(val).filter(x=>x != null); const tot = v.reduce((a,b)=>a+b,0); return { n:v.length, tot, avg: v.length ? Math.round(tot / v.length) : 0, best: ds.filter(d=>d <= today && val(d)).sort((a,b)=>val(b) - val(a))[0] }; };
+  const days = (a, n) => Array.from({ length:n }, (_,i)=>isoAddDays(a, i));
+  const monthDays = m => { const [y,mm] = m.split('-').map(Number); return days(`${m}-01`, new Date(y, mm, 0).getDate()); };
+  const statLine = S => S.n ? (calView.metric === 'steps' ? `${S.avg.toLocaleString()} a day · best ${calFmt(val(S.best))} on ${shortDate(S.best)}` : `${money(S.tot)} spent · ${money(S.avg)} a day${S.best ? ` · biggest ${shortDate(S.best)}` : ''}`) : 'No data here.';
+  let html = '', title = '', help = '';
+  if(L === 'year'){
+    const y = calView.y; title = y; const all = days(`${y}-01-01`, (Number(y) % 4 === 0 && (Number(y) % 100 !== 0 || Number(y) % 400 === 0)) ? 366 : 365);
+    html = `<div class="cal-sum">${statLine(sumOf(all))}</div><div class="cal-year">${Array.from({ length:12 }, (_,i)=>{ const m = `${y}-${String(i+1).padStart(2,'0')}`, ds = monthDays(m), lead = new Date(`${m}-01T12:00`).getDay(), S = sumOf(ds);
+      return `<button type="button" class="cal-mo ${m === calView.m ? 'cur' : ''}" data-cal-m="${m}" aria-label="${new Date(m+'-15T12:00').toLocaleDateString('en-US',{month:'long'})}: ${S.n ? (calView.metric === 'steps' ? S.avg.toLocaleString() + ' steps a day' : money(S.tot) + ' spent') : 'no data'}"><span class="cal-mo-h"><b>${new Date(m+'-15T12:00').toLocaleDateString('en-US',{month:'short'})}</b><em>${S.n ? calFmt(calView.metric === 'steps' ? S.avg : S.tot, true) : ''}</em></span><span class="cal-mini" aria-hidden="true">${'<i class="cz pad"></i>'.repeat(lead)}${ds.map(d=>cell(d, 'mini')).join('')}</span></button>`; }).join('')}</div>`;
+    help = 'Spread two fingers on a month (or tap it) to open it.';
+  } else if(L === 'month'){
+    const m = calView.m, ds = monthDays(m), lead = new Date(`${m}-01T12:00`).getDay(); title = new Date(m+'-15T12:00').toLocaleDateString('en-US',{month:'long', year:'numeric'});
+    html = `<div class="cal-sum">${statLine(sumOf(ds))}</div><div class="cal-month" role="group" aria-label="${esc(title)}"><div class="cal-dow" aria-hidden="true">${['S','M','T','W','T','F','S'].map(x=>`<span>${x}</span>`).join('')}</div><div class="cal-grid">${'<i class="cz pad"></i>'.repeat(lead)}${ds.map(d=>cell(d, 'day', `<b>${Number(d.slice(8))}</b><em>${d > today || !val(d) ? '' : calFmt(val(d), true)}</em>`, `data-cal-d="${d}" aria-label="${dayLong(d)}: ${d > today ? 'still to come' : val(d) == null ? 'no data' : calFmt(val(d)) + ' ' + calNoun()}"`)).join('')}</div></div>`;
+    help = 'Spread on a day (or tap it) to open its week. Pinch in for the year.';
+  } else {
+    const w = calView.w, ds = days(w, 7), S = sumOf(ds), mx = Math.max(1, ...ds.map(d=>val(d)||0)); title = `Week of ${shortDate(w)}`;
+    html = `<div class="cal-sum">${statLine(S)}</div><div class="cal-week">${ds.map(d=>{ const v = d > today ? null : val(d), tops = D.top && D.top.get(d) ? D.top.get(d).slice().sort((a,b)=>b[1]-a[1]).slice(0,2).map(x=>x[0]).join(', ') : '';
+      return `<button type="button" class="cal-wd ${d === today ? 'tdy' : ''}" data-cal-day="${d}" ${d > today ? 'disabled' : ''} aria-label="${dayLong(d)}: ${d > today ? 'still to come' : v == null ? 'no data' : calFmt(v) + ' ' + calNoun()}. Open the day."><span class="cal-wd-d"><b>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'short'})}</b><em>${Number(d.slice(8))}</em></span>
+        <span class="cal-wd-m"><i class="cal-wd-bar"><i class="cz l${calLevel(v)}" style="width:${v ? Math.max(3, Math.round(100*v/mx)) : 0}%"></i></i><span>${d > today ? 'still to come' : v == null ? 'no data' : sp && !v ? 'Nothing spent' : calFmt(v) + ' ' + calNoun()}${tops ? ' · ' + esc(tops) : ''}</span></span><span class="cal-wd-go" aria-hidden="true">›</span></button>`; }).join('')}</div>`;
+    help = 'Spread on a day (or tap it) to open the whole day. Pinch in for the month.';
+  }
+  document.getElementById('calTitle').textContent = title; document.getElementById('calHelp').textContent = help;
+  el.querySelector('[data-cal-step="1"]').disabled = L === 'year' ? calView.y >= today.slice(0,4) : L === 'month' ? calView.m >= today.slice(0,7) : calView.w >= weekOf(today);
+  stage.innerHTML = html;
+  if(anim && !reduceMotion() && stage.animate){ const r = stage.getBoundingClientRect(), ox = anim.x != null ? anim.x - r.left : r.width/2, oy = anim.y != null ? anim.y - r.top : r.height/3;
+    stage.style.transformOrigin = `${ox}px ${oy}px`; stage.animate([{ transform:`scale(${anim.dir > 0 ? .55 : 1.6})`, opacity:0 }, { transform:'scale(1)', opacity:1 }], { duration:260, easing:'cubic-bezier(.2,.8,.2,1)' }); }
+}
+function calZoom(dir, target, at){
+  const L = calView.level, i = CAL_LEVELS.indexOf(L), today = localToday();
+  if(dir > 0){
+    if(L === 'year'){ const m = target && target.closest('[data-cal-m]'); if(m) calView.m = m.dataset.calM; else if(!calView.m.startsWith(calView.y)) calView.m = calView.y === today.slice(0,4) ? today.slice(0,7) : calView.y + '-01'; }
+    else if(L === 'month'){ const d = target && target.closest('[data-cal-d]'); calView.w = weekOf(d ? d.dataset.calD : (calView.m === today.slice(0,7) ? today : calView.m + '-01')); }
+    else { const d = target && target.closest('[data-cal-day]'); const dd = d ? d.dataset.calDay : (calView.w <= today && today <= isoAddDays(calView.w, 6) ? today : calView.w); if(dd > today) return; hapticPulse(); closeCal(); openDayPage(dd); return; }
+    calView.level = CAL_LEVELS[i+1];
+  } else { if(i === 0){ hapticPulse(); return; } if(L === 'week') calView.m = isoAddDays(calView.w, 3).slice(0,7); if(L === 'month') calView.y = calView.m.slice(0,4); calView.level = CAL_LEVELS[i-1]; }
+  hapticPulse(); syncRoute(true); renderCal({ dir, x: at && at.x, y: at && at.y });
+}
+function calStep(n){ const L = calView.level;
+  if(L === 'year') calView.y = String(Number(calView.y) + n);
+  else if(L === 'month'){ calView.m = isoAddMonths(calView.m + '-01', n).slice(0,7); calView.y = calView.m.slice(0,4); }
+  else { calView.w = isoAddDays(calView.w, 7*n); calView.m = isoAddDays(calView.w, 3).slice(0,7); calView.y = calView.m.slice(0,4); }
+  renderCal({ dir: 0 }); }
+document.addEventListener('click', e=>{
+  const o = e.target.closest('[data-cal-open]'); if(o){ openCal(o.dataset.calOpen); return; }
+  const pg = document.getElementById('calPage'); if(!pg || pg.hidden || !pg.contains(e.target)) return;
+  if(Date.now() - (calView.pinchEnd||0) < 400) return;
+  if(e.target.closest('[data-cal-close]')){ goBack(); return; }
+  const mt = e.target.closest('[data-cal-metric]'); if(mt){ calView.metric = mt.dataset.calMetric; syncRoute(true); renderCal(); return; }
+  const z = e.target.closest('[data-cal-zoom]'); if(z){ calZoom(Number(z.dataset.calZoom), null); return; }
+  const st = e.target.closest('[data-cal-step]'); if(st){ calStep(Number(st.dataset.calStep)); return; }
+  const g = e.target.closest('[data-cal-go]'); if(g){ const to = CAL_LEVELS.indexOf(g.dataset.calGo), i = CAL_LEVELS.indexOf(calView.level); if(to < i){ if(calView.level === 'week') calView.m = isoAddDays(calView.w, 3).slice(0,7); calView.y = calView.m.slice(0,4); calView.level = g.dataset.calGo; syncRoute(true); renderCal({ dir:-1 }); } return; }
+  const t = e.target.closest('[data-cal-m], [data-cal-d], [data-cal-day]'); if(t){ const r = t.getBoundingClientRect(); calZoom(1, t, { x:r.left + r.width/2, y:r.top + r.height/2 }); }
+});
+document.addEventListener('keydown', e=>{ const pg = document.getElementById('calPage'); if(!pg || pg.hidden || dayView.open) return;
+  if(e.key === 'Escape') goBack(); else if((e.key === '-' || e.key === '_') && !e.target.closest('input')) calZoom(-1); else if((e.key === '+' || e.key === '=') && !e.target.closest('input')) calZoom(1); });
+// pinch: two pointers (Android / desktop touch) or Safari's gesture events (iPhone); ctrl+wheel = trackpad pinch
+(function(){
+  const pts = new Map(); let base = 0, mid = null, gest = false;
+  const stage = () => document.getElementById('calStage');
+  const live = sc => { const s = stage(); if(!s || !mid) return; const r = s.getBoundingClientRect(); s.style.transformOrigin = `${mid.x - r.left}px ${mid.y - r.top}px`; s.style.transform = `scale(${Math.max(.6, Math.min(1.6, sc))})`; };
+  const finish = sc => { const s = stage(); if(s){ s.style.transform = ''; } calView.pinchEnd = Date.now(); const at = mid; mid = null;
+    if(sc > 1.18){ const tg = at && document.elementFromPoint(at.x, at.y); calZoom(1, tg, at); } else if(sc < 0.85) calZoom(-1, null, at); };
+  const inCal = e => { const pg = document.getElementById('calPage'); return pg && !pg.hidden && !dayView.open && pg.contains(e.target) && e.target.closest('#calStage'); };
+  document.addEventListener('pointerdown', e=>{ if(e.pointerType !== 'touch' || !inCal(e)) return; pts.set(e.pointerId, { x:e.clientX, y:e.clientY }); if(pts.size === 2){ const [a,b] = [...pts.values()]; base = Math.hypot(a.x-b.x, a.y-b.y) || 1; mid = { x:(a.x+b.x)/2, y:(a.y+b.y)/2 }; } });
+  document.addEventListener('pointermove', e=>{ if(!pts.has(e.pointerId)) return; pts.set(e.pointerId, { x:e.clientX, y:e.clientY }); if(pts.size === 2 && !gest && base){ const [a,b] = [...pts.values()]; calView.pinchSc = Math.hypot(a.x-b.x, a.y-b.y) / base; live(calView.pinchSc); } });
+  const up = e => { if(!pts.has(e.pointerId)) return; const was = pts.size; pts.delete(e.pointerId); if(was === 2 && base && !gest){ base = 0; finish(calView.pinchSc || 1); calView.pinchSc = 1; } };
+  document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
+  document.addEventListener('gesturestart', e=>{ if(!inCal(e)) return; gest = true; mid = { x:e.clientX || innerWidth/2, y:e.clientY || innerHeight/2 }; }, { passive:false });
+  document.addEventListener('gesturechange', e=>{ if(!gest) return; live(e.scale); }, { passive:false });
+  document.addEventListener('gestureend', e=>{ if(!gest) return; gest = false; base = 0; finish(e.scale); }, { passive:false });
+  let wacc = 0, wt = 0; document.addEventListener('wheel', e=>{ if(!e.ctrlKey || !inCal(e)) return; e.preventDefault(); wacc += e.deltaY; mid = { x:e.clientX, y:e.clientY }; live(Math.exp(-wacc/100)); clearTimeout(wt); wt = setTimeout(()=>{ const sc = Math.exp(-wacc/100); wacc = 0; finish(sc); }, 160); }, { passive:false });
+})();
+
 // ---------- Plan: Today · Upcoming · Backlog ----------
 document.addEventListener('click', e=>{ if(e.target.closest('[data-triage-deck]')) openInboxDeck(triageQueue(allTodos).map(t=>({ kind:'todo', ref_id:t.code, title:t.title }))); });
 function setPlanTab(t){
@@ -7678,6 +7829,7 @@ let navDepth = 0, routing = false;
 function currentRoute(){
   if(dayView.open) return '#/day/' + dayView.d;
   if(spendView.open) return '#/spend';
+  if(calView.open) return '#/cal/' + calView.metric + '/' + calView.level + '/' + (calView.level === 'year' ? calView.y : calView.level === 'month' ? calView.m : calView.w);
   if(!sheetArea) return '#/today';
   if(sheetArea === 'life'){ const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : 'all'; return '#/' + (k || 'all') + (k !== 'all' && lifeSection ? '/' + lifeSection : ''); }
   return '#/' + sheetArea;
@@ -7690,8 +7842,12 @@ function applyRoute(hash){
   const [k, sec] = String(hash || '').replace(/^#\/?/, '').split('/');
   routing = true;
   try{
-    if(k === 'day'){ if(spendView.open) closeSpendMap(); openDayPage(sec, true); return; }
+    if(k === 'day'){ if(spendView.open) closeSpendMap(); if(calView.open) closeCal(); openDayPage(sec, true); return; }
     if(dayView.open) closeDayPage();
+    if(k === 'cal'){ if(spendView.open) closeSpendMap(); const [, , lv, at] = String(hash).replace(/^#\/?/, '').split('/');
+      if(CAL_LEVELS.includes(lv) && at){ calView.level = lv; if(lv === 'year' && /^\d{4}$/.test(at)) calView.y = at; if(lv === 'month' && /^\d{4}-\d{2}$/.test(at)){ calView.m = at; calView.y = at.slice(0,4); } if(lv === 'week' && /^\d{4}-\d{2}-\d{2}$/.test(at)){ calView.w = at; calView.m = isoAddDays(at, 3).slice(0,7); calView.y = calView.m.slice(0,4); } }
+      openCal(sec, true); return; }
+    if(calView.open) closeCal();
     if(k === 'spend'){ openSpendMap(true); return; }
     if(spendView.open) closeSpendMap();
     if(k && AREAS2[k] && k !== 'today'){ openArea(k); if(sec && AREAS2[k].life){ lifeSection = Number(sec) || 0; renderLife(); } }
@@ -7699,7 +7855,7 @@ function applyRoute(hash){
     else openArea('today');
   } finally { routing = false; }
 }
-function goBack(){ navDir = -1; if(spendView.open && navDepth <= 0){ closeSpendMap(); openArea('money'); syncRoute(true); return; } if(dayView.open && navDepth <= 0){ closeDayPage(); openArea('today'); syncRoute(true); return; } if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
+function goBack(){ navDir = -1; if(calView.open && !dayView.open && navDepth <= 0){ const m = calView.metric; closeCal(); openArea(m === 'spend' ? 'money' : 'health'); syncRoute(true); return; } if(spendView.open && navDepth <= 0){ closeSpendMap(); openArea('money'); syncRoute(true); return; } if(dayView.open && navDepth <= 0){ closeDayPage(); openArea('today'); syncRoute(true); return; } if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
 window.addEventListener('popstate', e=>{ const d = (e.state && e.state.otto) || 0; navDir = d < navDepth ? -1 : 1; navDepth = d; applyRoute(location.hash); });
 (function(){   // swipe right from the left edge = back; the page follows your finger
   let sx = 0, sy = 0, dx = 0, on = false;
