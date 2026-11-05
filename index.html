@@ -2017,6 +2017,12 @@ body.chatting .otto-chat-starters{display:none}
   .kmeter{position:relative; display:block; height:6px; border-radius:3px; background:var(--surface-2); margin:4px 0 2px;} .kmeter>i{position:absolute; left:0; top:0; bottom:0; border-radius:3px; background:color-mix(in srgb, var(--accent) 55%, var(--surface-2));} .kmeter>i.hit{background:var(--accent);} .kmeter.big{height:10px; border-radius:5px; margin:14px 0 6px;} .kmeter.big>i{border-radius:5px;}
   .kmeter>b{position:absolute; left:66.67%; top:-3px; bottom:-3px; width:2px; margin-left:-1px; background:var(--text); border-radius:1px;}
   .steps-chart2{display:block; margin:4px 0 2px;} .steps-chart2 text{font-family:var(--sans);}
+  /* Build .76: scrub */
+  .hero-week{touch-action:none; cursor:ew-resize; user-select:none; -webkit-user-select:none;} #cashflowCard svg{touch-action:pan-y; cursor:ew-resize; user-select:none; -webkit-user-select:none;} .wdg.hero.scrubbing, #cashflowCard.scrubbing{user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;}
+  .wdg.hero.scrubbing .hero-kpi, .wdg.hero.scrubbing .hero-daily, .wdg.hero.scrubbing .bullet, .wdg.hero.scrubbing .hero-pace, .wdg.hero.scrubbing .wdg-row, .wdg.hero.scrubbing .wdg-sub, .wdg.hero.scrubbing .wdg-li{display:none !important;}
+  .scrub-pane{display:flex; flex-direction:column; gap:3px; margin-top:4px; min-height:118px;} .sp-day{font:700 15px var(--sans); color:var(--accent);} .sp-big{font:700 40px var(--sans); letter-spacing:-.02em; line-height:1.05;} .sp-big.neg{color:var(--alert);}
+  .sp-line{font:14px var(--sans); color:var(--text-muted);} .sp-facts{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;} .sp-facts span{font:600 12.5px var(--sans); padding:4px 9px; border-radius:10px; background:var(--surface-2); color:var(--text);}
+  .cf-readout{font:14px var(--sans); color:var(--text-muted); margin:2px 0 4px;} .cf-readout b{color:var(--text);} #cashflowCard.scrubbing .cf-nums{opacity:.35;}
 </style>
 </head>
 <body class="home-v2">
@@ -2276,7 +2282,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.75';
+const APP_BUILD = '2026-11-05.76';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5393,9 +5399,61 @@ function ia2Gauge(pct){
 function ia2Ring(pct){ const c = 2*Math.PI*30, f = Math.min(1, pct); return `<svg width="64" height="64" viewBox="0 0 76 76" role="img" aria-label="${Math.round(pct*100)} percent of your usual steps"><circle cx="38" cy="38" r="30" fill="none" stroke="var(--surface-2)" stroke-width="9"/><circle cx="38" cy="38" r="30" fill="none" stroke="var(--ok)" stroke-width="9" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 38 38)"/> <text x="38" y="43" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">${Math.round(pct*100)}%</text></svg>`; }
 const wdg = (key, label, inner, opts={}) => `<button type="button" class="wdg ${opts.wide?'wide':''} ${opts.hero?'hero':''} ${opts.quiet || /^<span class="wdg-sub[^"]*">(Not synced|Nothing coming up|Loading…)/.test(inner) ? 'quiet' : ''}" data-w="${key}"${opts.sub ? ` data-sub="${opts.sub}"` : ''}><span class="wdg-head"><span>${label}</span><em>${opts.right||''}</em></span>${inner}</button>`;
 let ia2MiniMap = null, ia2MiniEl = null, ia2MiniBase = null, ia2MiniDot = null;
+// ---------- Scrub (build .76): press and drag across the week bars; Home rewinds to that day ----------
+const scrub = { on:false, pending:false, idx:-1, moved:false, el:null, kind:null, swallow:0 };
+function dayStory(d){
+  const S = lastBudgetData && lastBudgetData.summary, m = homeMoney(); if(!S || !m) return null;
+  const buys = (allTxns||[]).filter(t=>Number(t.amount_cents) < 0 && !t.exclude_from_budget && t.transaction_date >= S.week_start && t.transaction_date <= S.week_end);
+  const spentOn = buys.filter(t=>spentDay(t, S.week_start) === d), spent = spentOn.reduce((a,t)=>a - Number(t.amount_cents), 0);
+  const through = buys.filter(t=>spentDay(t, S.week_start) <= d).reduce((a,t)=>a - Number(t.amount_cents), 0);
+  const act = ((lastHealthData && lastHealthData.daily) || []).find(r=>r.activity_date === d) || (stepHistory && stepHistory.has(d) ? { steps: stepHistory.get(d) } : null);
+  const visits = (mapData.visits||[]).filter(v=>v.arrived_at && isoOf(v.arrived_at) === d && v.status !== 'declined').sort((a,b)=>a.arrived_at.localeCompare(b.arrived_at));
+  const pts = (mapData.points||[]).filter(p=>p.lat != null && isoOf(p.recorded_at) === d);
+  const lastPos = pts.length ? pts[pts.length-1] : visits.filter(v=>v.lat != null).pop() || null;
+  const done = (allTodos||[]).filter(t=>t.completed_at && isoOf(t.completed_at) === d).length;
+  const top = spentOn.slice().sort((a,b)=>a.amount_cents - b.amount_cents)[0];
+  return { d, spent, n: spentOn.length, left: d > localToday() ? m.left : m.planned - through, planned: m.planned, steps: act && act.steps != null ? Number(act.steps) : null, visits, lastPos, done, top, future: d > localToday() };
+}
+function paintScrub(d){
+  const hero = document.querySelector('#ia2Home .wdg.hero'); if(!hero) return; const st = dayStory(d); if(!st) return;
+  let pane = hero.querySelector('.scrub-pane'); if(!pane){ pane = document.createElement('span'); pane.className = 'scrub-pane'; pane.setAttribute('aria-live', 'polite'); hero.insertBefore(pane, hero.querySelector('.hero-week')); }
+  hero.classList.add('scrubbing');
+  const label = d === localToday() ? 'Today' : d === isoAddDays(localToday(), -1) ? 'Yesterday' : new Date(d+'T12:00').toLocaleDateString('en-US',{ weekday:'long', month:'short', day:'numeric' });
+  pane.innerHTML = st.future ? `<b class="sp-day">${label}</b><span class="sp-big">${money(st.left)}</span><span class="sp-line">still to spend · this day hasn't happened yet</span>`
+    : `<b class="sp-day">${label}</b><span class="sp-big ${st.left < 0 ? 'neg' : ''}">${st.left < 0 ? '−' + money(-st.left) : money(st.left)}</span><span class="sp-line">left after this day · ${money(st.spent)} spent${st.n ? ` on ${st.n} purchase${st.n===1?'':'s'}` : ''}${st.top ? ` (most at ${esc(st.top.merchant || st.top.description || '')})` : ''}</span>
+      <span class="sp-facts">${st.steps != null ? `<span>${st.steps.toLocaleString()} steps</span>` : ''}${st.visits.length ? `<span>${esc(st.visits.map(v=>v.place).filter(Boolean).slice(0,3).join(' → '))}</span>` : ''}${st.done ? `<span>${st.done} done</span>` : ''}</span>`;
+  hero.querySelectorAll('.hero-week .mb i').forEach((b,i)=>b.classList.toggle('on', i === scrub.idx));
+  if(ia2MiniMap && ia2MiniDot && st.lastPos){ try{ ia2MiniDot.setLatLng([st.lastPos.lat, st.lastPos.lon]); ia2MiniMap.panTo([st.lastPos.lat, st.lastPos.lon], { animate:!reduceMotion(), duration:.25 }); }catch(e){} }
+}
+function endScrub(){
+  if(!scrub.on) return; scrub.on = false; scrub.idx = -1;
+  if(scrub.kind === 'cash'){ const c = document.getElementById('cashflowCard'); if(c) c.classList.remove('scrubbing'); const r = document.getElementById('cfReadout'); if(r) r.hidden = true; const g = document.getElementById('cfRule'); if(g) g.setAttribute('opacity', 0); return; }
+  const hero = document.querySelector('#ia2Home .wdg.hero'); if(hero){ hero.classList.remove('scrubbing'); hero.querySelector('.scrub-pane')?.remove(); }
+  scrub.pending = false; renderIa2HomeNow();
+}
+document.addEventListener('pointerdown', e=>{
+  const wk = e.target.closest('[data-scrub-week]'), cf = e.target.closest('#cashflowCard svg');
+  if(!wk && !cf) return;
+  scrub.on = true; scrub.moved = false; scrub.idx = -1; scrub.el = wk || cf; scrub.kind = wk ? 'week' : 'cash'; scrub.x0 = e.clientX;
+  try{ scrub.el.setPointerCapture(e.pointerId); }catch(err){}
+  scrubMove(e);
+}, true);
+function scrubMove(e){
+  if(!scrub.on) return;
+  if(Math.abs(e.clientX - scrub.x0) > 6) scrub.moved = true;
+  const r = scrub.el.getBoundingClientRect(), f = Math.min(0.9999, Math.max(0, (e.clientX - r.left) / r.width));
+  if(scrub.kind === 'week'){ const i = Math.floor(f * 7); if(i === scrub.idx) return; scrub.idx = i; if(scrub.moved || e.type === 'pointerdown') { if(e.type !== 'pointerdown') hapticPulse(); paintScrub(isoAddDays(scrub.el.dataset.scrubWeek, i)); } }
+  else { const i = Math.round(f * 30); if(i === scrub.idx) return; scrub.idx = i; if(e.type !== 'pointerdown') hapticPulse(); paintCashScrub(i); }
+}
+document.addEventListener('pointermove', e=>{ if(scrub.on){ scrubMove(e); if(scrub.moved) e.preventDefault(); } }, { passive:false });
+document.addEventListener('pointerup', ()=>{ if(scrub.on){ if(scrub.moved) scrub.swallow = Date.now(); endScrub(); } });
+document.addEventListener('pointercancel', ()=>endScrub());
+// a scrub is not a tap: don't open Money when the finger lifts
+document.addEventListener('click', e=>{ if(Date.now() - scrub.swallow < 400 && e.target.closest('#ia2Home .wdg.hero, #cashflowCard')){ e.stopPropagation(); e.preventDefault(); } }, true);
+
 // many loaders finish within the same moment; draw Home once per frame instead of once per loader
 let ia2HomeRaf = 0;
-function renderIa2Home(){ if(ia2HomeRaf) return; ia2HomeRaf = requestAnimationFrame(()=>{ ia2HomeRaf = 0; renderIa2HomeNow(); }); }
+function renderIa2Home(){ if(scrub.on){ scrub.pending = true; return; } if(ia2HomeRaf) return; ia2HomeRaf = requestAnimationFrame(()=>{ ia2HomeRaf = 0; renderIa2HomeNow(); }); }
 function renderIa2HomeNow(){
   const el = document.getElementById('ia2Home'); if(!el) return;
   const today = localToday(), now = new Date(), h = now.getHours();
@@ -5414,7 +5472,7 @@ function renderIa2HomeNow(){
                  : wdg('money', part, '<span class="wdg-sub">Budget loading…</span>', { wide:true, hero:true });
   if(m && S && S.week_start){ const days = [...Array(7)].map((_,i)=>isoAddDays(S.week_start, i)), by = {};
     (allTxns||[]).forEach(t=>{ if(Number(t.amount_cents) < 0 && !t.exclude_from_budget && t.transaction_date >= S.week_start && t.transaction_date <= S.week_end){ const d = spentDay(t, S.week_start); by[d] = (by[d]||0) - Number(t.amount_cents); } });   // same day rule as Money (purchase date)
-    const ti = days.indexOf(today); hero = hero.replace(/<\/button>$/, `<span class="hero-week">${miniBars(days.map(d=>d > today ? 0 : (by[d]||0)), ti, days.map(d=>new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})))}</span></button>`); }
+    const ti = days.indexOf(today); hero = hero.replace(/<\/button>$/, `<span class="hero-week" data-scrub-week="${S.week_start}" aria-label="Press and drag across the week to look back at each day">${miniBars(days.map(d=>d > today ? 0 : (by[d]||0)), ti, days.map(d=>new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})))}</span></button>`); }
   // inbox
   const q = clarifications || [], kinds = {}; q.forEach(c=>{ kinds[c.kind] = (kinds[c.kind]||0) + 1; });
   const kname = { place:['place','places'], transaction:['buy','buys'], todo:['todo','todos'], meal:['meal','meals'], checkin:['check-in','check-ins'] };
@@ -6052,7 +6110,15 @@ async function renderRecurring(){
    − each recurring charge on its date; − everyday spending = the last 60 days of checking outflows
    that are NOT one of those recurring charges, spread evenly per day. "Planned" is kept separate from
    "actual": the line is an estimate, the dots are known dates. */
-let cashflowRows = null;
+let cashflowRows = null, cashScrubData = null;
+function paintCashScrub(i){
+  const D = cashScrubData, g = document.getElementById('cfRule'), r = document.getElementById('cfReadout'); if(!D || !g || !r) return;
+  const x = D.X(i), y = D.Y(D.pts[i]), d = isoAddDays(D.today, i);
+  g.setAttribute('opacity', 1); g.querySelector('line').setAttribute('x1', x); g.querySelector('line').setAttribute('x2', x); g.querySelector('circle').setAttribute('cx', x); g.querySelector('circle').setAttribute('cy', y);
+  const evs = D.ev.filter(e=>e.d === d);
+  r.hidden = false; r.innerHTML = `<b>${i === 0 ? 'Today' : new Date(d+'T12:00').toLocaleDateString('en-US',{ weekday:'short', month:'short', day:'numeric' })}</b> · about <b>${money(Math.round(D.pts[i]))}</b>${evs.length ? ' · ' + evs.map(e=>`${esc(e.name)} ${e.pay?'+':'−'}${money(Math.abs(e.amt))}`).join(', ') : ''}`;
+  document.getElementById('cashflowCard').classList.add('scrubbing');
+}
 function isoAddMonths(iso, n){ const [y,m,d] = iso.split('-').map(Number); const last = new Date(y, m-1+n+1, 0).getDate(); const t = new Date(y, m-1+n, Math.min(d, last)); return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`; }
 function stepDate(iso, freq, k){ const f = String(freq||'monthly').toLowerCase();
   return /bi-?weekly|fortnight/.test(f) ? isoAddDays(iso, 14*k) : /week/.test(f) ? isoAddDays(iso, 7*k) : /semi/.test(f) ? isoAddDays(iso, 15*k) : /quarter/.test(f) ? isoAddMonths(iso, 3*k) : /year|annual/.test(f) ? isoAddMonths(iso, 12*k) : isoAddMonths(iso, k); }
@@ -6099,10 +6165,12 @@ async function renderCashflow(){
   const ticks = [0, 10, 20, 30].map(i=>`<text x="${X(i)}" y="${H-6}" text-anchor="${i===0?'start':i===30?'end':'middle'}" font-size="10" fill="var(--text-muted)">${i===0 ? 'Today' : shortDate(isoAddDays(today, i))}</text>`).join('');
   const zero = mn < 0 ? `<line x1="10" x2="${W-10}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--alert)" stroke-dasharray="3 4" stroke-width="1"/>` : '';
   const endV = pts[30], neg = low.v < 0;
+  cashScrubData = { pts, ev, today, X, Y, H, top, bot };
   box.innerHTML = `<div class="viz-title"><span>Checking, next 30 days</span><span>estimate</span></div>
     <div class="cf-nums"><div><small>Now</small><b>${money(start)}</b></div><div><small>${shortDate(end)}</small><b>${money(Math.round(endV))}</b></div><div class="${neg?'neg':''}"><small>Lowest</small><b>${money(Math.round(low.v))}</b></div></div>
     <svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Projected checking balance: ${money(start)} now, lowest ${money(Math.round(low.v))} on ${shortDate(low.d)}, about ${money(Math.round(endV))} on ${shortDate(end)}"><defs><linearGradient id="cfFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
-      <polygon points="${area}" fill="url(#cfFill)"/>${zero}<polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>${dots}${ticks}</svg>
+      <polygon points="${area}" fill="url(#cfFill)"/>${zero}<polyline points="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>${dots}${ticks}<g id="cfRule" opacity="0"><line x1="0" x2="0" y1="${top-6}" y2="${bot}" stroke="var(--text)" stroke-width="1"/><circle r="5" cx="0" cy="0" fill="var(--accent)" stroke="var(--surface, #151A18)" stroke-width="2"/></g></svg>
+    <div class="cf-readout" id="cfReadout" hidden aria-live="polite"></div>
     <div class="wdg-sub">${low.d === today ? 'Your balance only goes up from here.' : `Lowest around ${shortDate(low.d)}${lowWhy ? `, after ${esc(lowWhy)}` : ''}.`} Assumes ${money(daily)}/day of everyday spending (your last ${span} days, bills left out).</div>
     <div class="cf-list">${ev.slice(0, 8).map(e=>`<div class="cf-row"><span class="cf-dot ${e.pay?'pay':''}" aria-hidden="true"></span><span class="cf-d">${new Date(e.d+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})}</span><span class="cf-n">${esc(e.name)}</span><span class="cf-a ${e.pay?'pos':''}">${e.pay?'+':'−'}${money(Math.abs(e.amt))}</span></div>`).join('')}${ev.length > 8 ? `<div class="cf-more">+${ev.length - 8} more in the next 30 days</div>` : ''}</div>`;
 }
