@@ -1,5 +1,8 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .73 (Nov 5)
+- Samuel's dark + neon lime theme (made in another chat on top of an older .55 copy) ported onto .72 instead of replacing the file: lime accent #D7FF3D, near-black #0B0C0A, lime Otto button with glow, new app icon + favicon, black-translucent status bar, theme-color #0B0C0A. Hard-coded sage in map dots, the day-page route, the steps ring and the History heatmap switched to lime. Uploading that older file directly would have dropped builds .55–.72.
+
 ## Just shipped — builds .68–.72 (Nov 2)
 - .68 Money › Recurring: cash-flow line, checking projected 30 days (weekly pay, each bill/subscription on its date, everyday spending = last 60 days of checking outflows minus bills; rent paid by Apple Cash is matched by amount + date so it isn't counted twice). Shows now / day 30 / lowest + the next dated events.
 - .69 Spending map (#/spend): purchases with a store location, grouped by merchant within 150 m, circle area = total, colored by category; 30/90/All, category filter, top town, Top spots list that flies the map. From Money › Transactions and Places › Layers.
