@@ -1,5 +1,9 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .78 (Nov 5): move money between categories
+- Money › This week: hold a category for a moment, drag it onto another, let go. A sheet opens with From → To, a big amount, a slider, "Cover the overage" / "All of it", and the after-state of both. Drag an over-budget category onto one with money left and it pulls from that one. Also reachable without dragging: tap a category → Move money ›.
+- Only unspent planned money moves; the week's total stays the same. New DB function `move_budget(period, from, to, cents)` (migration `20261105_move_budget_v1.sql`, security invoker so the owner RLS still applies) changes both `budget_allocations.planned_cents` in one transaction. Undo = tap the notice (moves it back). Planned only; actual spending untouched.
+
 ## Just shipped — build .77 (Nov 5): draw a loop on the spending map, saved zones
 - Money › Where money goes: "✎ Draw a loop" freezes the map; drag a loop with one finger and only purchases inside it count (stats, categories, top spots), with "about $X a month · N visits a week". Name it and Save zone. Saved zones show as chips; tap one to re-apply, tap again or Clear to drop it; Delete this zone removes it (purchases untouched).
 - New table `zones` (migration `20261105_zones_v1.sql`): name + GeoJSON Polygon ([lng,lat]) with a PostGIS `geom` generated column and GiST index, so SQL can ask "spending in Downtown" later (`st_contains(z.geom, st_point(lon,lat))`). Borrowed from GeoJSON/OwnTracks waypoints + Home Assistant zones (named area, stored once, reused everywhere).

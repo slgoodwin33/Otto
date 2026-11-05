@@ -754,6 +754,21 @@ body{background:var(--bg); color:var(--text); font-family:var(--sans);}
   .bcat-bar{grid-column:2 / 4; height:6px; border-radius:3px; background:var(--surface-2); overflow:hidden; margin-top:4px;}
   .bcat-bar > div{height:100%; border-radius:3px;}
   .bcat .grow-detail{grid-column:1 / -1; padding:6px 0 0;}
+  .bcat{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none; transition:transform .15s, box-shadow .15s, background .15s;}
+  .bcat.blift{transform:scale(.97); opacity:.55;} .bcat.bdrop{background:color-mix(in srgb, var(--accent) 16%, var(--surface)); box-shadow:inset 0 0 0 2px var(--accent); border-radius:14px;}
+  body.bdragging{-webkit-user-select:none; user-select:none;}
+  .bghost{position:fixed; left:0; top:0; z-index:2147483150; width:220px; pointer-events:none; padding:10px 14px; border-radius:16px; background:var(--accent); color:#0B0C0A; box-shadow:0 10px 30px rgba(0,0,0,.45); display:flex; flex-direction:column; gap:2px;}
+  .bghost b{font:700 15px var(--sans);} .bghost span{font:13px var(--sans);}
+  .bmove{position:fixed; inset:0; z-index:2147483100; background:rgba(0,0,0,.55); display:flex; align-items:flex-end; justify-content:center;} .bmove[hidden]{display:none;}
+  .bmove-card{width:100%; max-width:620px; background:var(--surface); border-radius:24px 24px 0 0; padding:16px 16px calc(env(safe-area-inset-bottom, 0px) + 18px); display:flex; flex-direction:column; gap:14px; transform:translateY(20px); transition:transform .2s;} .bmove.show .bmove-card{transform:none;}
+  .bmove-head{display:flex; justify-content:space-between; align-items:center;} .bmove-head b{font:700 20px var(--sans);}
+  .bmove-pair{display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); gap:8px; align-items:center;} .bmove-pair>span{font-size:20px; color:var(--text-muted);}
+  .bmove-pair label{display:flex; flex-direction:column; gap:4px; font:600 12px var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted); min-width:0;}
+  .bmove-pair select{min-height:44px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font:600 15px var(--sans); padding:0 10px; text-transform:none; letter-spacing:0; width:100%;}
+  .bmove-pair em{font:normal 13px var(--sans); text-transform:none; letter-spacing:0; color:var(--text-muted);} .bmove-pair em.neg{color:var(--coral);}
+  .bmove-amt{display:flex; flex-direction:column; gap:8px;} .bmove-amt output{font:700 40px var(--sans); letter-spacing:-.02em;} .bmove-amt input[type=range]{width:100%; accent-color:var(--accent); min-height:32px;}
+  .bmove-quick{display:flex; gap:6px; flex-wrap:wrap;} .bmove-quick .chip{min-height:36px;}
+  .bmove-after{font:14px var(--sans); color:var(--text-muted); line-height:1.4;} .bmove-go{width:100%; min-height:48px;}
   /* home widgets */
   
   .wdg{background:var(--surface); border:none; border-radius:20px; padding:14px 14px 13px; text-align:left; font:inherit; color:var(--text); cursor:pointer; min-width:0; display:flex; flex-direction:column; gap:2px; min-height:118px; -webkit-tap-highlight-color:transparent; transition:transform 0.12s;}
@@ -2286,7 +2301,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.77';
+const APP_BUILD = '2026-11-05.78';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2790,10 +2805,10 @@ function renderBudget0(data){
         const cid = ((allCategories||[]).find(x=>x.name===c.category) || {}).id;
         const rows = (allTxns||[]).filter(t=>t.category_id === cid && !t.exclude_from_budget && t.transaction_date >= data.summary.week_start && t.transaction_date <= data.summary.week_end).sort((a,b)=>b.transaction_date.localeCompare(a.transaction_date));
         return rows.length ? `<div class="wk-txns">${rows.slice(0,20).map(t=>`<div class="kv"><span>${esc(new Date(t.transaction_date+'T12:00').toLocaleDateString('en-US',{weekday:'short'}))} · ${esc(t.merchant || t.description || '')}${t.pending ? ' (pending)' : ''}</span><span>${t.amount_cents > 0 ? '+' : ''}${money(Math.abs(t.amount_cents))}</span></div>`).join('')}${rows.length > 20 ? `<div class="kv"><span>${rows.length - 20} more</span><span></span></div>` : ''}</div>` : '<div class="kv"><span>No transactions in this category this week</span><span></span></div>';
-      })()}${bills.length ? bills.map(b=>`<div class="kv"><span>${esc(b.name)}${b.autopay ? ', autopay' : ''}${b.due_day ? `, due the ${ordinal(b.due_day)}` : ''}</span><span>${money(b.amount_cents)}/${esc(b.frequency)}</span></div>`).join('') : '<div class="kv"><span>No recurring bills here</span></div>'}<div class="kv"><span>See these purchases</span><span><button class="link-btn" type="button" data-catjump="${esc(c.category)}">Transactions ›</button></span></div></div>` : ''}
+      })()}${bills.length ? bills.map(b=>`<div class="kv"><span>${esc(b.name)}${b.autopay ? ', autopay' : ''}${b.due_day ? `, due the ${ordinal(b.due_day)}` : ''}</span><span>${money(b.amount_cents)}/${esc(b.frequency)}</span></div>`).join('') : '<div class="kv"><span>No recurring bills here</span></div>'}<div class="kv"><span>See these purchases</span><span><button class="link-btn" type="button" data-catjump="${esc(c.category)}">Transactions ›</button></span></div><div class="kv"><span>${movable(c) > 0 ? `${money(movable(c))} can move to another category` : 'Move money into this category'}</span><span><button class="link-btn" type="button" data-bmove="${esc(c.category_code)}">Move money ›</button></span></div></div>` : ''}
     </div>`;
   };
-  html += `<div class="section-title">Spending by category<span>tap for details</span></div><div class="gcard" style="padding:0">${ordered.map(catRow).join('')}</div>`;
+  html += `<div class="section-title">Spending by category<span>hold to move money</span></div><div class="gcard" style="padding:0">${ordered.map(catRow).join('')}</div>`;
   if(sav.length) html += `<div class="section-title">Saving</div><div class="gcard" style="padding:0">${sav.map(catRow).join('')}</div>`;
   const unmatched = (data.bills || []).filter(b => !b.category || !data.categories.some(c=>c.category_code === b.category.code));
   if(unmatched.length) html += `<button type="button" class="link-row" data-mseg-jump="recurring">${unmatched.length} more recurring bill${unmatched.length===1?'':'s'} · see Recurring ›</button>`;
@@ -2814,11 +2829,94 @@ function renderBudget0(data){
   el.querySelectorAll('[data-legendcat]').forEach(r=>r.addEventListener('click', ()=>{ const c = (data.categories||[]).find(x=>x.category===r.dataset.legendcat); if(!c) return; expandedBudgetCat = c.category_code; renderBudget(data); const row = el.querySelector(`[data-bcat="${c.category_code}"]`); if(row) row.scrollIntoView({ behavior:'smooth', block:'center' }); }));
   el.querySelectorAll('[data-barday]').forEach(b=>b.addEventListener('click', ()=>{ if(b.classList.contains('future')) return; txnDay = b.dataset.barday; txnFilter = 'all'; setMoneySeg('txns'); renderTxns(); }));
   el.querySelectorAll('[data-bcat]').forEach(r=>r.addEventListener('click', e=>{
+    const mv = e.target.closest('[data-bmove]'); if(mv){ e.stopPropagation(); const code = mv.dataset.bmove, c = data.categories.find(x=>x.category_code === code);
+      if(movable(c) > 0) openBudgetMove(code, null); else openBudgetMove(null, code); return; }
     const j = e.target.closest('[data-catjump]');
     if(j){ e.stopPropagation(); txnFilter = j.dataset.catjump; setMoneySeg('txns'); renderTxns(); return; }
     const c = r.getAttribute('data-bcat'); expandedBudgetCat = expandedBudgetCat === c ? null : c; renderBudget(data);
   }));
 }
+// ---------- Move money between categories (.78): hold a category, drag it onto another, pick how much ----------
+// Only planned money that hasn't been spent can move. The week's total stays the same (DB function move_budget,
+// one transaction). Undo = the same move backwards. Planned changes only; what you actually spent is untouched.
+function movable(c){ if(!c) return 0; const left = Number(c.planned_cents||0) + Number(c.carried_in_cents||0) - Number(c.spent_cents||0); return Math.max(0, Math.min(left, Number(c.planned_cents||0))); }
+function catLeft(c){ return Number(c.planned_cents||0) + Number(c.carried_in_cents||0) - Number(c.spent_cents||0); }
+async function moveBudget(period, from, to, cents){
+  await ensureValidSession();
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/move_budget`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json' }), body: JSON.stringify({ p_period_code: period, p_from_code: from, p_to_code: to, p_cents: cents }) });
+  if(!r.ok){ let m = `Move failed (${r.status})`; try{ const j = await r.json(); if(j.message) m = j.message; }catch(e){} throw new Error(m); }
+  const cats = (lastBudgetData && lastBudgetData.categories) || [], a = cats.find(c=>c.category_code === from), b = cats.find(c=>c.category_code === to);
+  if(a){ a.planned_cents = Number(a.planned_cents) - cents; a.remaining_cents = catLeft(a); } if(b){ b.planned_cents = Number(b.planned_cents) + cents; b.remaining_cents = catLeft(b); }
+  [a,b].forEach(c=>{ if(c){ const t = Number(c.planned_cents) + Number(c.carried_in_cents||0); c.pct_used = t > 0 ? Math.round(1000*Number(c.spent_cents||0)/t)/10 : null; } });
+  if(lastBudgetData) renderBudget(lastBudgetData);
+}
+function openBudgetMove(fromCode, toCode){
+  const data = lastBudgetData; if(!data || !data.summary) return; const cats = data.categories;
+  let from = cats.find(c=>c.category_code === fromCode), to = cats.find(c=>c.category_code === toCode);
+  if(!from) from = cats.filter(c=>c !== to).sort((a,b)=>movable(b) - movable(a))[0];
+  if(!to) to = cats.filter(c=>c !== from && c.category_type !== 'savings').sort((a,b)=>catLeft(a) - catLeft(b))[0];
+  let el = document.getElementById('bmoveSheet');
+  if(!el){ el = document.createElement('div'); el.id = 'bmoveSheet'; el.className = 'bmove'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','bmoveTitle'); document.body.appendChild(el); }
+  const opt = (sel, filt) => cats.filter(filt).map(c=>`<option value="${esc(c.category_code)}" ${c === sel ? 'selected' : ''}>${esc(c.category)}</option>`).join('');
+  const draw = () => {
+    const max = movable(from), over = Math.max(0, -catLeft(to)), def = Math.min(max, over || Math.min(max, 1000));
+    el.innerHTML = `<div class="bmove-card"><div class="bmove-head"><b id="bmoveTitle">Move money</b><button type="button" class="deck-x" data-bmove-x aria-label="Cancel">✕</button></div>
+      <div class="bmove-pair"><label>From<select data-bmove-from>${opt(from, ()=>true)}</select><em>${money(max)} can move</em></label><span aria-hidden="true">→</span>
+        <label>To<select data-bmove-to>${opt(to, c=>c !== from)}</select><em class="${catLeft(to) < 0 ? 'neg' : ''}">${catLeft(to) < 0 ? money(-catLeft(to)) + ' over' : money(catLeft(to)) + ' left'}</em></label></div>
+      ${max > 0 ? `<div class="bmove-amt"><output id="bmoveOut" for="bmoveRange">${money(def)}</output>
+        <label for="bmoveRange" class="sr-only">Amount to move</label><input type="range" id="bmoveRange" min="${Math.min(100, max)}" max="${max}" step="1" value="${def}">
+        <div class="bmove-quick">${over ? `<button type="button" class="chip" data-bmove-set="${Math.min(max, over)}">Cover the overage · ${money(Math.min(max, over))}</button>` : ''}<button type="button" class="chip" data-bmove-set="${max}">All of it · ${money(max)}</button></div></div>
+        <div class="bmove-after" id="bmoveAfter"></div>
+        <button type="button" class="save-btn bmove-go" data-bmove-go>Move it</button>`
+      : `<div class="bmove-after">${esc(from.category)} has nothing unspent to move this week. Pick another "From".</div>`}</div>`;
+    const rg = el.querySelector('#bmoveRange'); if(rg){ const val = () => { const r = Number(rg.value); if(rg.__exact) return Math.min(max, r); return r >= max - 50 ? max : Math.min(max, Math.max(100, Math.round(r/100)*100)); }; rg.__val = val; const sync = () => { const v = val(); el.querySelector('#bmoveOut').textContent = money(v);
+        el.querySelector('#bmoveAfter').innerHTML = `After: ${esc(from.category)} ${money(catLeft(from) - v)} left · ${esc(to.category)} ${catLeft(to) + v < 0 ? money(-(catLeft(to) + v)) + ' over' : money(catLeft(to) + v) + ' left'}. Week total stays ${money(cats.filter(c=>c.category_type !== 'savings').reduce((a,c)=>a + Number(c.planned_cents) + Number(c.carried_in_cents||0), 0) + (from.category_type === 'savings' ? v : 0) - (to.category_type === 'savings' ? v : 0))} for spending.`; };
+      rg.__exact = true; rg.__sync = sync; rg.oninput = () => { rg.__exact = false; sync(); }; sync(); }
+  };
+  el.onclick = async e => {
+    if(e.target === el || e.target.closest('[data-bmove-x]')){ closeBudgetMove(); return; }
+    const q = e.target.closest('[data-bmove-set]'); if(q){ const rg = el.querySelector('#bmoveRange'); rg.value = q.dataset.bmoveSet; rg.__exact = true; rg.__sync(); return; }
+    const go = e.target.closest('[data-bmove-go]'); if(go){ const rg = el.querySelector('#bmoveRange'), v = Math.min(movable(from), rg.__val ? rg.__val() : Number(rg.value)); if(v <= 0) return; go.disabled = true;
+      const period = data.summary.period_code, f = from, t = to;
+      try{ await moveBudget(period, f.category_code, t.category_code, v); hapticPulse(); closeBudgetMove();
+        showNotice(`Moved ${money(v)} from ${f.category} to ${t.category}. Tap to undo.`, async ()=>{ document.getElementById('ottoNotice')?.classList.remove('show');
+          try{ await moveBudget(period, t.category_code, f.category_code, v); showNotice('Undone.'); }catch(err){ showNotice(`Couldn't undo: ${err.message}`); refreshBudget(); } });
+      }catch(err){ go.disabled = false; showNotice(err.message); } }
+  };
+  el.onchange = e => { if(e.target.matches('[data-bmove-from]')){ from = cats.find(c=>c.category_code === e.target.value); if(to === from) to = cats.find(c=>c !== from); draw(); }
+    if(e.target.matches('[data-bmove-to]')){ to = cats.find(c=>c.category_code === e.target.value); draw(); } };
+  draw(); el.hidden = false; requestAnimationFrame(()=>el.classList.add('show')); el.querySelector('#bmoveRange, select')?.focus({ preventScroll:true });
+}
+function closeBudgetMove(){ const el = document.getElementById('bmoveSheet'); if(el){ el.classList.remove('show'); el.hidden = true; } }
+document.addEventListener('keydown', e=>{ const el = document.getElementById('bmoveSheet'); if(e.key === 'Escape' && el && !el.hidden) closeBudgetMove(); });
+let bdrag = null;
+function scrollParent(n){ for(let x = n.parentElement; x; x = x.parentElement){ const st = getComputedStyle(x); if(/(auto|scroll)/.test(st.overflowY) && x.scrollHeight > x.clientHeight) return x; } return document.scrollingElement; }
+function bdragEnd(drop){ if(!bdrag) return; const d = bdrag; bdrag = null; clearTimeout(d.t); cancelAnimationFrame(d.raf);
+  document.getElementById('bghost')?.remove(); d.row.classList.remove('blift'); document.querySelectorAll('.bdrop').forEach(x=>x.classList.remove('bdrop')); document.body.classList.remove('bdragging');
+  if(d.lifted){ d.swallow = Date.now(); bdragSwallow = Date.now(); if(drop && d.over){ if(d.give) openBudgetMove(d.row.dataset.bcat, d.over.dataset.bcat); else openBudgetMove(d.over.dataset.bcat, d.row.dataset.bcat); } } }
+let bdragSwallow = 0;
+document.addEventListener('pointerdown', e=>{ const row = e.target.closest('#budgetContent .bcat'); if(!row || e.button > 0 || e.target.closest('button, a, select, input, .grow-detail')) return;
+  bdrag = { row, id:e.pointerId, x:e.clientX, y:e.clientY, cx:e.clientX, cy:e.clientY, lifted:false };
+  bdrag.t = setTimeout(()=>{ if(!bdrag || bdrag.row !== row) return; const c = (lastBudgetData && lastBudgetData.categories || []).find(x=>x.category_code === row.dataset.bcat);
+    const give = movable(c) > 0; if(!give && !(c && catLeft(c) < 0)){ hapticPulse(); showNotice(`Nothing unspent in ${c ? c.category : 'this category'} to move. Drag a category that has money left.`); bdrag = null; return; }
+    bdrag.give = give;
+    bdrag.lifted = true; bdrag.sp = scrollParent(row); row.classList.add('blift'); document.body.classList.add('bdragging'); hapticPulse();
+    try{ row.setPointerCapture(bdrag.id); }catch(err){}
+    const g = document.createElement('div'); g.id = 'bghost'; g.className = 'bghost'; g.setAttribute('aria-hidden','true'); g.innerHTML = `<b>${esc(c.category)}</b><span>${give ? `${money(movable(c))} to move · drop on a category` : `${money(-catLeft(c))} over · drop on one with money left`}</span>`; document.body.appendChild(g);
+    const tick = () => { if(!bdrag || !bdrag.lifted) return; const vh = innerHeight, y = bdrag.cy; if(y < 110) bdrag.sp.scrollTop -= Math.ceil((110 - y)/12); else if(y > vh - 110) bdrag.sp.scrollTop += Math.ceil((y - (vh - 110))/12); bdragHit(); bdrag.raf = requestAnimationFrame(tick); };
+    bdrag.raf = requestAnimationFrame(tick); bdragPlace(); }, 380);
+});
+function bdragPlace(){ const g = document.getElementById('bghost'); if(g && bdrag) g.style.transform = `translate(${Math.round(Math.min(innerWidth - 228, Math.max(8, bdrag.cx - 110)))}px, ${Math.round(bdrag.cy - 104)}px)`; }
+function bdragHit(){ if(!bdrag) return; const hit = document.elementFromPoint(bdrag.cx, bdrag.cy), over = hit && hit.closest('#budgetContent .bcat'), ok = over && over !== bdrag.row ? over : null;
+  if(ok !== bdrag.over){ if(bdrag.over) bdrag.over.classList.remove('bdrop'); if(ok){ ok.classList.add('bdrop'); hapticPulse(); } bdrag.over = ok; } }
+document.addEventListener('pointermove', e=>{ if(!bdrag || e.pointerId !== bdrag.id) return; bdrag.cx = e.clientX; bdrag.cy = e.clientY;
+  if(!bdrag.lifted){ if(Math.hypot(e.clientX - bdrag.x, e.clientY - bdrag.y) > 8){ clearTimeout(bdrag.t); bdrag = null; } return; }
+  e.preventDefault(); bdragPlace(); bdragHit(); });
+document.addEventListener('pointerup', e=>{ if(bdrag && e.pointerId === bdrag.id) bdragEnd(true); });
+document.addEventListener('pointercancel', e=>{ if(bdrag && e.pointerId === bdrag.id) bdragEnd(false); });
+document.addEventListener('touchmove', e=>{ if(bdrag && bdrag.lifted) e.preventDefault(); }, { passive:false });
+document.addEventListener('contextmenu', e=>{ if(bdrag) e.preventDefault(); });
+document.addEventListener('click', e=>{ if(Date.now() - bdragSwallow < 400 && e.target.closest('#budgetContent')){ e.stopPropagation(); e.preventDefault(); } }, true);
 function ordinal(n){ const v = n % 100; return n + (['th','st','nd','rd'][(v-20)%10] || ['th','st','nd','rd'][v] || 'th'); }
 let expandedBudgetCat = null;
 
