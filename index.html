@@ -1997,6 +1997,20 @@ body.chatting .otto-chat-starters{display:none}
   .hm.l1{background:rgba(215,255,61,.16) !important;} .hm.l2{background:rgba(215,255,61,.34) !important;} .hm.l3{background:rgba(215,255,61,.55) !important;} .hm.l4{background:rgba(215,255,61,.78) !important;} .hm.l5{background:#D7FF3D !important;}
   .yr-row i{background:rgba(215,255,61,.3) !important;} .yr-row i.on{background:var(--accent) !important;}
 
+
+  /* Build .74: dashboard legibility */
+  .wdg-big, .wdg-mid{font-family:var(--sans) !important; font-variant-numeric:normal; letter-spacing:-.02em;}
+  .wdg-big{font-size:34px; font-weight:700;} .wdg.hero .wdg-big{font-size:44px;}
+  .hero-kpi{display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-top:4px;} .hero-of{font:500 15px var(--sans); color:var(--text-muted);}
+  .hero-daily{display:block; font:15px var(--sans); color:var(--text-muted); margin-top:4px;} .hero-daily b{color:var(--text); font-weight:700;}
+  .bullet{position:relative; display:block; height:10px; border-radius:5px; background:var(--surface-2); margin:12px 0 6px;} .bullet i{position:absolute; left:0; top:0; bottom:0; border-radius:5px; background:var(--accent);}
+  .bullet b{position:absolute; top:-4px; bottom:-4px; width:2px; margin-left:-1px; border-radius:1px; background:var(--text);} .bullet.hot i{background:var(--amber);} .bullet.over i{background:var(--alert);}
+  .hero-pace{display:block; font:600 13.5px var(--sans); color:var(--text-muted);} .hero-pace.warn{color:var(--amber);} .hero-pace.neg{color:var(--alert);} .bullet-key{font-weight:400; color:var(--text-faint);}
+  .wdg.quiet{min-height:0 !important; background:transparent !important; border-style:dashed !important; box-shadow:none !important;} .wdg.quiet .wdg-sub{font-size:13px;}
+  .food-split .fo{background:#D4731F !important;} .food-split .fg{background:#2E7D50 !important;}
+  .fs-legend{display:flex; flex-direction:column; gap:2px; font:13px var(--sans); color:var(--text-muted);} .fs-legend i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:6px;} .fs-legend .fo{background:#D4731F;} .fs-legend .fg{background:#2E7D50;}
+  .mini-bars i{background:color-mix(in srgb, var(--text-faint) 45%, transparent) !important;} .mini-bars i.on{background:var(--accent) !important;} .mini-bars i.zero{background:var(--surface-2) !important;}
+  .db{cursor:pointer;} .db text{font-family:var(--sans);}
 </style>
 </head>
 <body class="home-v2">
@@ -2256,7 +2270,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.73';
+const APP_BUILD = '2026-11-05.74';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2688,7 +2702,22 @@ async function fetchBudget(){
   return { summary: summary[0], categories, bills, income, goals };
 }
 
-function renderBudget(data){ window.__freshData = true; renderBudget0(data); if(homeCachedAt){ homeCachedAt = null; try{ renderIa2Home(); }catch(e){} } try{ insertPace(); }catch(e){ console.error('pace', e); } }
+function dayBars(days, per, planned, today, spent, dayN){
+  const allow = planned / 7, vals = days.map(d=>per[d]||0), mx = Math.max(allow * 1.15, ...vals, 1);
+  const W = 354, top = 22, bot = 112, X = i => 8 + i*(W-16)/7, bw = (W-16)/7 - 10, Y = v => bot - (bot-top) * v / mx;
+  const bars = days.map((d,i)=>{ const v = vals[i], fut = d > today, h = fut ? 0 : Math.max(v ? 3 : 1.5, bot - Y(v));
+    const fill = fut ? 'var(--surface-2)' : v > allow ? 'var(--amber)' : d === today ? 'var(--accent)' : 'color-mix(in srgb, var(--text-faint) 55%, var(--surface-2))';
+    return `<g class="db" data-barday="${d}" role="listitem" aria-label="${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'long'})}: ${fut ? 'still to come' : money(v)}"><rect x="${X(i)}" y="${top-18}" width="${bw+10}" height="${bot-top+40}" fill="transparent"/>
+      <rect x="${X(i)+5}" y="${(bot-(fut?3:h)).toFixed(1)}" width="${bw}" height="${(fut?3:h).toFixed(1)}" rx="4" fill="${fill}"/>
+      ${v && !fut ? `<text x="${X(i)+5+bw/2}" y="${(bot-h-6).toFixed(1)}" text-anchor="middle" font-size="11" fill="var(--text-muted)">$${Math.round(v/100)}</text>` : ''}
+      <text x="${X(i)+5+bw/2}" y="${bot+16}" text-anchor="middle" font-size="11" font-weight="${d===today?700:400}" fill="${d===today?'var(--text)':'var(--text-faint)'}">${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</text></g>`; }).join('');
+  const ay = Y(allow).toFixed(1), overDays = days.filter(d=>d <= today && (per[d]||0) > allow).length;
+  return `<div class="viz-card"><div class="viz-title"><span>Spending by day</span><span>${money(Math.round(spent/Math.max(1,dayN)))} a day so far</span></div>
+    <svg viewBox="0 0 ${W} 134" width="100%" role="list" aria-label="Spending each day this week against a daily budget of ${money(Math.round(allow))}">${bars}
+      <line x1="8" x2="${W-8}" y1="${ay}" y2="${ay}" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="3 3"/></svg>
+    <div class="wdg-sub">Dashed line: ${money(Math.round(allow))} a day (your week ÷ 7).${overDays ? ` ${overDays} day${overDays===1?' went':'s went'} over it.` : ''}</div></div>`;
+}
+function renderBudget(data){ window.__freshData = true; renderBudget0(data); if(homeCachedAt){ homeCachedAt = null; try{ renderIa2Home(); }catch(e){} } /* pace now lives in the bullet bar (build .74) */ }
 function renderBudget0(data){
   const el = document.getElementById('budgetContent');
   if(!data.summary){ el.innerHTML = '<div class="empty">No budget period set up yet.</div>'; return; }
@@ -2707,20 +2736,13 @@ function renderBudget0(data){
     <div class="mo-top"><span class="mo-label">Left to spend, week of ${dateRange(s.week_start, s.week_end)}</span></div>
     <div class="mo-big ${left < 0 ? 'neg' : ''}">${left < 0 ? '−' : ''}${money(Math.abs(left))}</div>
     <div class="mo-sub">${money(spent)} spent of ${money(planned)}${savPlanned ? `, plus ${money(savPlanned)} to savings` : ''}</div>
-    <div class="mo-bar"><div class="${left < 0 ? 'over' : ''}" style="width:${Math.min(100, usedPct)}%"></div></div>
-    <div class="mo-pace">Day ${dayN} of 7. ${usedPct > pacePct + 10 ? 'Spending is ahead of the week.' : usedPct === 0 ? 'Nothing spent yet this week.' : 'On pace for the week.'}</div>
+    ${planned <= 0 ? '' : (()=>{ const P = weekPace(planned, spent, s.week_start); return `${!P.over ? `<div class="hero-daily" style="margin-top:10px"><b>${money(P.perDay)}</b> a day for the next ${P.daysLeft} day${P.daysLeft===1?'':'s'}</div>` : ''}${bulletBar(planned, spent, P)}<div class="mo-pace hero-pace ${P.over ? 'neg' : P.hot ? 'warn' : ''}">Day ${dayN} of 7 · ${paceText(P)} <span class="bullet-key">· tick = an even pace by today</span></div>`; })()}
   </div>`;
   {
-    const parts = exp.filter(c=>Number(c.spent_cents) > 0).sort((a,b)=>Number(b.spent_cents)-Number(a.spent_cents)).map(c=>({ name:c.category, v:Number(c.spent_cents), color:(TXN_STYLE[c.category] || TXN_STYLE.Transfer)[0] }));
-    if(parts.length){
-      const top = parts.slice(0,5), rest = parts.slice(5).reduce((a,p)=>a+p.v,0);
-      html += `<div class="viz-card"><div class="viz-title"><span>Where it went</span><span>${parts.length} categories</span></div><div class="viz-row">${svgDonut(parts, 128, 18, [money(spent), 'spent'])}
-        <div class="viz-legend">${top.map(p=>`<div data-legendcat="${esc(p.name)}" style="cursor:pointer"><i style="background:${p.color}"></i><span>${esc(p.name)}</span><b>${money(p.v)}</b></div>`).join('')}${rest ? `<div><i style="background:var(--surface-2)"></i><span>Everything else</span><b>${money(rest)}</b></div>` : ''}</div></div></div>`;
-    }
     const days = []; for(let i=0;i<7;i++) days.push(isoAddDays(s.week_start, i));
     const per = {}; (allTxns||[]).forEach(t=>{ if(t.amount_cents < 0 && !t.exclude_from_budget && t.transaction_date >= s.week_start && t.transaction_date <= s.week_end){ const cat = (allCategories||[]).find(c=>c.id===t.category_id); if(!cat || cat.category_type === 'expense'){ const d = spentDay(t, s.week_start); per[d] = (per[d]||0) - t.amount_cents; } } });
     const mx = Math.max(1, ...days.map(d=>per[d]||0));
-    html += `<div class="viz-card"><div class="viz-title"><span>Spending by day</span><span>${money(Math.round(spent/Math.max(1,dayN)))} a day so far</span></div><div class="bars7">${days.map(d=>{ const v = per[d]||0, fut = d > today; return `<div class="b ${d===today?'today':''} ${fut?'future':''}" data-barday="${d}" style="cursor:pointer"><em>${v ? '$'+Math.round(v/100) : ''}</em><i style="height:${fut ? 3 : Math.max(3, Math.round(100*v/mx))}%"></i><small>${new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})}</small></div>`; }).join('')}</div></div>`;
+    html += dayBars(days, per, planned, today, spent, dayN);
   }
   const upcoming = (data.bills || []).filter(b=>b.due_day && Number(b.amount_cents) > 0)
     .map(b=>({ ...b, next: nextOccurrenceFromDueDay(b.due_day) })).sort((a,b)=>a.next.localeCompare(b.next)).slice(0, 4);
@@ -2737,7 +2759,7 @@ function renderBudget0(data){
     const isSave = c.category_type === 'savings';
     const ratio = budget ? spentC / budget : (spentC ? 2 : 0);
     const color = (TXN_STYLE[c.category] || TXN_STYLE.Transfer)[0];
-    const barColor = isSave ? color : ratio > 1 ? 'var(--coral)' : ratio >= 0.85 ? '#D9A23B' : color;
+    const barColor = isSave ? color : ratio > 1 ? 'var(--coral)' : ratio >= 0.85 ? 'var(--amber)' : 'color-mix(in srgb, var(--accent) 70%, var(--surface-2))';
     const bills = billsFor(c.category_code);
     const open = expandedBudgetCat === c.category_code;
     const rem = budget - spentC;
@@ -5352,12 +5374,22 @@ document.addEventListener('click', e=>{
 document.addEventListener('click', e=>{ if(e.target.closest('[data-close-sheet], .sheet-close')){ ia2Active = 'today'; setTimeout(renderIa2Dock, 0); } }, true);
 
 // ---------- widget Home ----------
+function weekPace(planned, spent, weekStart){
+  const today = localToday(), dayN = Math.min(7, Math.max(1, Math.round((new Date(today+'T12:00') - new Date(weekStart+'T12:00'))/86400000) + 1));
+  const left = planned - spent, daysLeft = Math.max(1, 8 - dayN), pace = planned * dayN / 7, ahead = spent - pace;
+  return { dayN, daysLeft, left, perDay: left > 0 ? Math.floor(left / daysLeft) : 0, pace, ahead, over: left < 0, hot: !(left < 0) && ahead > planned * 0.05 };
+}
+function bulletBar(planned, spent, P){
+  const used = planned ? Math.min(100, 100*spent/planned) : 0, tick = planned ? Math.min(100, 100*P.pace/planned) : 0;
+  return `<span class="bullet ${P.over ? 'over' : P.hot ? 'hot' : ''}" role="img" aria-label="${money(spent)} spent of ${money(planned)}; an even pace by today would be ${money(Math.round(P.pace))}"><i style="width:${used.toFixed(1)}%"></i><b style="left:${tick.toFixed(1)}%"></b></span>`;
+}
+function paceText(P){ return P.over ? `Over by ${money(-P.left)}` : P.hot ? `${money(Math.round(P.ahead))} ahead of an even pace` : P.ahead < 0 && P.dayN > 1 ? `${money(Math.round(-P.ahead))} under pace` : 'On pace'; }
 function ia2Gauge(pct){
   const a = Math.PI * Math.min(1, Math.max(0, pct)), x = 75 - 60*Math.cos(a), y = 78 - 60*Math.sin(a);
   return `<svg width="128" height="74" viewBox="0 0 150 86" role="img" aria-label="${Math.round(pct*100)} percent of the week's budget used"><path d="M15 78 A 60 60 0 0 1 135 78" fill="none" stroke="var(--surface-2)" stroke-width="12" stroke-linecap="round"/>${pct>0?`<path d="M15 78 A 60 60 0 0 1 ${x.toFixed(1)} ${y.toFixed(1)}" fill="none" stroke="${pct>1?'var(--alert)':'var(--accent)'}" stroke-width="12" stroke-linecap="round"/>`:''}</svg>`;
 }
-function ia2Ring(pct){ const c = 2*Math.PI*30, f = Math.min(1, pct); return `<svg width="64" height="64" viewBox="0 0 76 76" role="img" aria-label="${Math.round(pct*100)} percent of your usual steps"><circle cx="38" cy="38" r="30" fill="none" stroke="var(--surface-2)" stroke-width="9"/><circle cx="38" cy="38" r="30" fill="none" stroke="var(--ok)" stroke-width="9" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 38 38)"/><text x="38" y="43" text-anchor="middle" font-family="IBM Plex Mono" font-size="14" font-weight="600" fill="var(--text)">${Math.round(pct*100)}%</text></svg>`; }
-const wdg = (key, label, inner, opts={}) => `<button type="button" class="wdg ${opts.wide?'wide':''} ${opts.hero?'hero':''}" data-w="${key}"${opts.sub ? ` data-sub="${opts.sub}"` : ''}><span class="wdg-head"><span>${label}</span><em>${opts.right||''}</em></span>${inner}</button>`;
+function ia2Ring(pct){ const c = 2*Math.PI*30, f = Math.min(1, pct); return `<svg width="64" height="64" viewBox="0 0 76 76" role="img" aria-label="${Math.round(pct*100)} percent of your usual steps"><circle cx="38" cy="38" r="30" fill="none" stroke="var(--surface-2)" stroke-width="9"/><circle cx="38" cy="38" r="30" fill="none" stroke="var(--ok)" stroke-width="9" stroke-dasharray="${(c*f).toFixed(1)} ${c.toFixed(1)}" transform="rotate(-90 38 38)"/> <text x="38" y="43" text-anchor="middle" font-size="14" font-weight="600" fill="var(--text)">${Math.round(pct*100)}%</text></svg>`; }
+const wdg = (key, label, inner, opts={}) => `<button type="button" class="wdg ${opts.wide?'wide':''} ${opts.hero?'hero':''} ${opts.quiet || /^<span class="wdg-sub[^"]*">(Not synced|Nothing coming up|Loading…)/.test(inner) ? 'quiet' : ''}" data-w="${key}"${opts.sub ? ` data-sub="${opts.sub}"` : ''}><span class="wdg-head"><span>${label}</span><em>${opts.right||''}</em></span>${inner}</button>`;
 let ia2MiniMap = null, ia2MiniEl = null, ia2MiniBase = null, ia2MiniDot = null;
 // many loaders finish within the same moment; draw Home once per frame instead of once per loader
 let ia2HomeRaf = 0;
@@ -5373,17 +5405,20 @@ function renderIa2HomeNow(){
   let side = '';
   if(h < 11) side = its.slice(0,2).map(x=>`<span class="wdg-li">${esc(x.title)}</span>`).join('') || '<span class="wdg-sub">Nothing scheduled</span>';
   else side = `<span class="wdg-sub">${money(spentToday)} spent today</span>`;
-  let hero = m ? wdg('money', part, `<span class="wdg-row">${ia2Gauge(m.planned ? m.spent/m.planned : 0)}<span class="wdg-col"><b class="wdg-big ${m.left<0?'neg':'acc'}">${m.left>=0?money(m.left):'−'+money(-m.left)}</b><span class="wdg-sub">${m.left>=0?'left':'over'}${S && S.week_end===today ? ' · resets 12 AM' : ''}</span>${side}</span></span>`, { wide:true, hero:true, right:'tap for the week' })
+  const HP = m && m.planned > 0 && S && S.week_start ? weekPace(m.planned, m.spent, S.week_start) : null;
+  let hero = m ? wdg('money', part, `<span class="hero-kpi"><b class="wdg-big ${m.left<0?'neg':'acc'}">${m.left>=0?money(m.left):'−'+money(-m.left)}</b><span class="hero-of">${m.planned > 0 ? `${m.left>=0?'left':'over'} of ${money(m.planned)}` : 'no budget set for this week'}</span></span>
+      ${HP && !HP.over ? `<span class="hero-daily"><b>${money(HP.perDay)}</b> a day for the next ${HP.daysLeft} day${HP.daysLeft===1?'':'s'}${S && S.week_end===today ? ' · resets 12 AM' : ''}</span>` : ''}
+      ${HP ? bulletBar(m.planned, m.spent, HP) + `<span class="hero-pace ${HP.over ? 'neg' : HP.hot ? 'warn' : ''}">Day ${HP.dayN} of 7 · ${paceText(HP)}</span>` : ''}${side}`, { wide:true, hero:true, right:'tap for the week' })
                  : wdg('money', part, '<span class="wdg-sub">Budget loading…</span>', { wide:true, hero:true });
   if(m && S && S.week_start){ const days = [...Array(7)].map((_,i)=>isoAddDays(S.week_start, i)), by = {};
-    (allTxns||[]).forEach(t=>{ if(Number(t.amount_cents) < 0 && !t.exclude_from_budget) by[t.transaction_date] = (by[t.transaction_date]||0) - Number(t.amount_cents); });
+    (allTxns||[]).forEach(t=>{ if(Number(t.amount_cents) < 0 && !t.exclude_from_budget && t.transaction_date >= S.week_start && t.transaction_date <= S.week_end){ const d = spentDay(t, S.week_start); by[d] = (by[d]||0) - Number(t.amount_cents); } });   // same day rule as Money (purchase date)
     const ti = days.indexOf(today); hero = hero.replace(/<\/button>$/, `<span class="hero-week">${miniBars(days.map(d=>d > today ? 0 : (by[d]||0)), ti, days.map(d=>new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})))}</span></button>`); }
   // inbox
   const q = clarifications || [], kinds = {}; q.forEach(c=>{ kinds[c.kind] = (kinds[c.kind]||0) + 1; });
   const kname = { place:['place','places'], transaction:['buy','buys'], todo:['todo','todos'], meal:['meal','meals'], checkin:['check-in','check-ins'] };
-  const inbox = wdg('inbox', 'INBOX', `<b class="wdg-big ${q.length?'neg':''}">${q.length}</b><span class="wdg-sub">${Object.entries(kinds).map(([k,n])=>`${n} ${kname[k] ? kname[k][n===1?0:1] : k}`).join(' · ') || 'all clear'}</span>`);
+  const inbox = wdg('inbox', 'INBOX', `<b class="wdg-big">${q.length}</b><span class="wdg-sub">${Object.entries(kinds).map(([k,n])=>`${n} ${kname[k] ? kname[k][n===1?0:1] : k}`).join(' · ') || 'all clear'}</span>`);
   // steps
-  let stepsW = wdg('health', 'STEPS', '<span class="wdg-sub">Not synced</span>');
+  let stepsW = wdg('health', 'STEPS', '<span class="wdg-sub">Not synced</span>', { quiet:true });
   if(lastHealthData && lastHealthData.daily){ const Sx = healthSummary(lastHealthData.daily, lastHealthData.workouts||[]); const st = Sx.todayRow && Sx.todayRow.steps;
     if(st != null){ const by = {}; lastHealthData.daily.forEach(r=>{ by[r.activity_date] = Number(r.steps)||0; });
       const days = [...Array(7)].map((_,i)=>isoAddDays(today, i-6));
@@ -5420,7 +5455,7 @@ function renderIa2HomeNow(){
   if(fs){ const pOut = fs.total ? Math.round(100*fs.out/fs.total) : 0;
     foodW = wdg('money', 'FOOD', fs.total ? `<b class="wdg-mid">${money(fs.total)}</b><span class="wdg-sub">this week · ${fs.n} purchase${fs.n===1?'':'s'}</span>
       <span class="food-split" role="img" aria-label="Eating out ${money(fs.out)}, groceries ${money(fs.groc)}"><i class="fo" style="flex:${fs.out||0.001}"></i><i class="fg" style="flex:${fs.groc||0.001}"></i></span>
-      <span class="wdg-sub"><b class="${pOut >= 60 ? 'warn' : ''}">${pOut}% eating out</b> · ${money(fs.groc)} groceries</span>` : '<b class="wdg-mid">$0</b><span class="wdg-sub">no food spending yet this week</span>', { sub:'week' }); }
+      <span class="fs-legend"><span><i class="fo" aria-hidden="true"></i>Eating out ${money(fs.out)}</span><span><i class="fg" aria-hidden="true"></i>Groceries ${money(fs.groc)}</span></span>` : '<b class="wdg-mid">$0</b><span class="wdg-sub">no food spending yet this week</span>', { sub:'week' }); }
   if(typeof resetDue === 'function' && resetDue()) hero = hero.replace(/<\/button>$/, '') + '</button>' + `<button type="button" class="wdg wide reset-wdg" data-reset-start><span class="wdg-head"><span>WEEKLY RESET</span><em>about 3 min</em></span><span class="wdg-li">Close the week, clear the inbox, sort todos, plan meals</span><span class="wdg-sub">Start ›</span></button>`;
   const W = { inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));

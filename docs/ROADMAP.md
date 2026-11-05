@@ -1,5 +1,11 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .74 (Nov 5): dashboard data-viz pass
+- Home hero: the number is the chart. Unscaled half-gauge removed; "$X left of $Y", "$Z a day for the next N days", and a bullet bar (spent vs. a tick at an even pace by today) with "Day 4 of 7 · $109 under pace". Week bars use purchase date (now match Money) and gray with today in lime.
+- Inbox count in neutral ink (red is for over/overdue). Food split bar uses the category colors with a two-line legend (validated pair #D4731F / #2E7D50, labels as secondary encoding). Empty tiles (Not synced, Nothing coming up) shrink to a dashed outline.
+- Money › This week: donut removed (duplicated the category list); cumulative pace line retired (said the same as the bullet + day bars); Spending by day is one SVG with a dashed daily-budget line and over-budget days in amber. Category bars use status colors only at 85%+ / over.
+- All hero and tile numbers in the sans with proportional figures.
+
 ## Just shipped — build .73 (Nov 5)
 - Samuel's dark + neon lime theme (made in another chat on top of an older .55 copy) ported onto .72 instead of replacing the file: lime accent #D7FF3D, near-black #0B0C0A, lime Otto button with glow, new app icon + favicon, black-translucent status bar, theme-color #0B0C0A. Hard-coded sage in map dots, the day-page route, the steps ring and the History heatmap switched to lime. Uploading that older file directly would have dropped builds .55–.72.
 
