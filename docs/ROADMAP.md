@@ -1,5 +1,11 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .81 (Nov 6): declutter pass
+- Today: the money card is only about money (today's to-dos moved into Next, which now starts with Today and marks late items). Empty tiles (Not synced, Nothing coming up, No data) no longer hold a grid slot; they fold into one "Nothing to show yet: Steps not synced" line under the grid, and the grid packs densely so there are no holes. Loading tiles wait instead of flashing.
+- Plan: Week/Month and the month arrows share one row; the "YOUR WEEK / Events, todos, meals, bills" headline is gone; empty days show nothing instead of "Free" ×6 (screen readers hear "nothing planned"). Fixed: the month arrows showed in Week mode (CSS overrode `hidden`).
+- Money › Transactions: Spending map / Calendar / + Log cash are outline pills in the sans font on one row (were three solid-lime monospace buttons).
+- All areas: even tile heights with a 2-line clamp; one-line intro.
+
 ## Just shipped — build .80 (Nov 5): filter sentence + #tags
 - Money › Transactions search reads a small language: `#tag`, `@store` (spaces don't matter: @marketbasket), `over $20` / `under $5`, `today · yesterday · this week · last week · this month · last month · this year · last 30 days`, `in <saved zone>` (zones from .77). Anything else is plain text. Suggestions pop up as you type # / @ / "in ".
 - Under the box a sentence says what's showing: "4 transactions · $304.66 spent · $76.17 each on average", with one chip per part (✕ drops just that part). "Tag these N…" tags everything shown at once (undo from the notice). Open a purchase to add/remove its tags (#name + Enter creates the tag).

@@ -1601,7 +1601,7 @@ body.chatting .otto-chat-starters{display:none}
   .ia2-kicker{font:500 11px var(--mono); letter-spacing:.08em; color:var(--text-muted);} .ia2-head h2{margin:2px 0 0; font:600 26px var(--sans); letter-spacing:-.01em;}
   .ia2-inbox{position:relative; width:44px; height:44px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); display:grid; place-items:center; cursor:pointer;}
   .ia2-inbox span{position:absolute; top:3px; right:2px; min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--alert); color:#160903; font:600 11px var(--mono); display:grid; place-items:center;}
-  .wdg-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .wdg-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; grid-auto-flow:row dense;}
   .wdg{all:unset; box-sizing:border-box; cursor:pointer; display:flex; flex-direction:column; gap:3px; min-height:118px; padding:12px; background:var(--surface); border:1px solid var(--border); border-radius:18px; color:var(--text); min-width:0;}
   .wdg:active{background:var(--surface-2);} .wdg:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
   .wdg.wide{grid-column:span 2;} .wdg.hero{border-color:var(--accent);}
@@ -1963,6 +1963,15 @@ body.chatting .otto-chat-starters{display:none}
   .sp-chips{display:flex; gap:6px; overflow-x:auto; padding:2px 0 10px; scrollbar-width:none;} .sp-chips::-webkit-scrollbar{display:none;} .sp-chips .chip{flex:none; min-height:36px; display:inline-flex; align-items:center; gap:6px;}
 
 
+
+  /* declutter pass (.81) */
+  .wdg-quietline{display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:12px 4px 4px; font:13px var(--sans); color:var(--text-muted);} .wdg-quietline .link-btn{font:600 13px var(--sans); color:var(--text); min-height:32px;} .wdg-quietline em{font-style:normal; font-weight:400; color:var(--text-muted);}
+  .plan-ctl{display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;} .plan-ctl .plan-view-switch{margin:0;} .plan-ctl .plan-month-nav{flex:1; margin:0; min-width:0;} .plan-month-nav[hidden]{display:none !important;} .plan-ctl .plan-week-reset{margin-left:auto;}
+  .plan-day small:empty{visibility:hidden;} .plan-day small:empty::before{content:'·';}
+  .lt{min-height:104px !important; justify-content:flex-start;} .lt span{display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; white-space:normal; line-height:1.3;} .lt span:empty::before{content:'Open'; opacity:.7;}
+  #panelBudget .money-actions[data-mseg]{flex-wrap:nowrap !important; justify-content:flex-start !important; gap:8px !important; overflow-x:auto; scrollbar-width:none;} #panelBudget .money-actions .refresh-btn{flex:none; background:transparent !important; color:var(--text) !important; border:1px solid var(--border) !important; font:600 14px var(--sans) !important; letter-spacing:0; border-radius:999px; padding:0 14px; min-height:40px;}
+  #panelBudget .money-actions .refresh-btn#addTxnBtn{color:var(--accent) !important; border-color:color-mix(in srgb, var(--accent) 45%, var(--border)) !important;}
+  .lt-top{font-size:13px;}
   /* filter sentence + tags (.80) */
   body[data-moneyseg="txns"] #txnSuggest:not([hidden]), body[data-moneyseg="txns"] #txnSentence:not([hidden]){display:flex !important;}
   body[data-moneyseg] #txnSuggest[hidden], body[data-moneyseg] #txnSentence[hidden], body[data-moneyseg] #txnSearchCount[hidden]{display:none !important;}
@@ -2150,7 +2159,7 @@ body.chatting .otto-chat-starters{display:none}
       <div class="studio-page-head"><div class="studio-kicker">YOUR WORKSPACE <span class="studio-dot"></span> STAY ON TRACK</div><h2>Make today<br><span>count.</span></h2><p>Focus on what matters, one task at a time.</p></div>
       <div class="ia2-subtabs" id="planTabs" role="tablist" aria-label="Plan"><button type="button" role="tab" data-ptab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-ptab="upcoming" aria-selected="false">Upcoming</button><button type="button" role="tab" data-ptab="backlog" aria-selected="false">Backlog</button></div>
       <button type="button" class="reset-chip" data-reset-start data-pt="today" hidden></button>
-      <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><div class="plan-week-top"><div><span class="plan-overline">YOUR WEEK</span><h3 id="planWeekTitle">Events, todos, meals, bills</h3></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div>
+      <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-ctl"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div>
       <form id="quickAddForm" class="quick-add-form" data-pt="today">
         <input type="text" id="quickAddInput" placeholder="Add a todo for today…" required>
         <label class="sr-only" for="quickAddWhen">Schedule task</label><select id="quickAddWhen" aria-label="Schedule task"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="selected">Selected day</option><option value="anytime">Anytime</option></select>
@@ -2191,7 +2200,7 @@ body.chatting .otto-chat-starters{display:none}
       <div class="money-actions" data-mseg="txns" style="gap:0.5rem; flex-wrap:wrap; margin-bottom:0.6rem; justify-content:flex-end;">
         <button class="refresh-btn" type="button" data-spend-open>Spending map</button>
         <button class="refresh-btn" type="button" data-cal-open="spend">Calendar</button>
-        <button class="refresh-btn" id="addTxnBtn" type="button">+ Log cash or other</button>
+        <button class="refresh-btn" id="addTxnBtn" type="button" aria-label="Log cash or another purchase">+ Log cash</button>
         <button class="refresh-btn" id="dupWeekBtn" type="button" hidden>Duplicate last week →</button>
       </div>
       <span class="save-status" id="dupWeekStatus"></span>
@@ -2336,7 +2345,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-05.80';
+const APP_BUILD = '2026-11-06.81';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4240,7 +4249,7 @@ function renderPlanWeek(todos){
     const its=planItemsFor(date).filter(x=>!(x.kind==='todo' && x.late && date!==localToday())), n=its.length;
     const kinds=[...new Set(its.map(x=>x.kind))];
     const outside=planCalendarMode==='month'&&d.getMonth()!==planCalendarMonth.getMonth();
-    return `<button type="button" data-plan-date="${date}" class="plan-day${planSelectedDate===date?' selected':''}${date===localToday()?' is-today':''}${outside?' outside-month':''}" aria-pressed="${planSelectedDate===date}"><span>${fmt.format(d)}</span><strong>${d.getDate()}</strong><span class="plan-dots" aria-hidden="true">${kinds.map(k=>`<i style="background:${PLAN_KIND[k][1]}"></i>`).join('')}</span><small>${n?n+' item'+(n===1?'':'s'):'Free'}</small></button>`;
+    return `<button type="button" data-plan-date="${date}" class="plan-day${planSelectedDate===date?' selected':''}${date===localToday()?' is-today':''}${outside?' outside-month':''}" aria-pressed="${planSelectedDate===date}" aria-label="${d.toLocaleDateString('en-US',{weekday:'long', month:'long', day:'numeric'})}, ${n ? n + ' item' + (n===1?'':'s') : 'nothing planned'}"><span aria-hidden="true">${fmt.format(d)}</span><strong aria-hidden="true">${d.getDate()}</strong><span class="plan-dots" aria-hidden="true">${kinds.map(k=>`<i style="background:${PLAN_KIND[k][1]}"></i>`).join('')}</span><small aria-hidden="true">${n ? n + (planCalendarMode==='month' ? '' : n===1 ? ' item' : ' items') : ''}</small></button>`;
   }).join('');
   const open=todos.filter(t=>t.status==='open');
   const due=open.filter(t=>t.due_date && t.due_date<=planLocalDate(0)).length;
@@ -5598,10 +5607,8 @@ function renderIa2HomeNow(){
   // smart top card: morning plan · day so far · evening wrap-up
   const part = h < 11 ? 'MORNING · TODAY' : h < 18 ? 'DAY SO FAR' : (S && S.week_end === today ? 'SUNDAY EVENING · WRAP-UP' : 'EVENING');
   const spentToday = (allTxns||[]).filter(t=>t.transaction_date===today && Number(t.amount_cents) < 0 && !t.exclude_from_budget).reduce((a,t)=>a - Number(t.amount_cents), 0);
-  const its = planItemsFor(today).filter(x=>x.kind !== 'meal');
-  let side = '';
-  if(h < 11) side = its.slice(0,2).map(x=>`<span class="wdg-li">${esc(x.title)}</span>`).join('') || '<span class="wdg-sub">Nothing scheduled</span>';
-  else side = `<span class="wdg-sub">${money(spentToday)} spent today</span>`;
+  // the money card is only about money (.81): today's plan lives in the Next tile
+  const side = spentToday ? `<span class="wdg-sub">${money(spentToday)} spent today</span>` : '';
   const HP = m && m.planned > 0 && S && S.week_start ? weekPace(m.planned, m.spent, S.week_start) : null;
   let hero = m ? wdg('money', part, `<span class="hero-kpi"><b class="wdg-big ${m.left<0?'neg':'acc'}">${m.left>=0?money(m.left):'−'+money(-m.left)}</b><span class="hero-of">${m.planned > 0 ? `${m.left>=0?'left':'over'} of ${money(m.planned)}` : 'no budget set for this week'}</span></span>
       ${HP && !HP.over ? `<span class="hero-daily"><b>${money(HP.perDay)}</b> a day for the next ${HP.daysLeft} day${HP.daysLeft===1?'':'s'}${S && S.week_end===today ? ' · resets 12 AM' : ''}</span>` : ''}
@@ -5625,9 +5632,9 @@ function renderIa2HomeNow(){
   const hasPos = !!(fx.pos || (lastV && lastV.lat != null));
   const stopW = wdg('day', 'YOUR DAY', `${hasPos ? '<span id="ia2Mini" class="wdg-map"></span>' : ''}<span class="wdg-sub">${lastV ? `${esc(lastV.place)} · ${clockTime(lastV.arrived_at)}` : 'No location yet · turn on OwnTracks'}${fx.at ? ` · ${fx.fresh ? 'live' : timeAgo(fx.at)}` : ''}</span>`, { wide:true, right:'open day' });
   // next
-  const nx = []; for(let d=1; d<=10 && nx.length<2; d++){ const date = isoAddDays(today, d); planItemsFor(date).filter(x=>x.kind!=='meal').forEach(x=>{ if(nx.length<2) nx.push({ date, t: x.kind==='bill' ? x.title.split(' · ')[0] : x.title, r: x.kind==='bill' ? (x.title.split(' · ')[1]||'') : '' }); }); }
+  const nx = []; for(let d=0; d<=10 && nx.length<2; d++){ const date = isoAddDays(today, d); planItemsFor(date).filter(x=>x.kind!=='meal').forEach(x=>{ if(nx.length<2) nx.push({ date, t: x.kind==='bill' ? x.title.split(' · ')[0] : x.title, r: x.kind==='bill' ? (x.title.split(' · ')[1]||'') : (x.late ? 'late' : '') }); }); }
   if(S && S.week_end === today && m) nx.unshift({ date: isoAddDays(today,1), t:'New budget week', r: money(m.planned) });
-  const nextW = wdg('todos', 'NEXT', nx.slice(0,2).map(x=>`<span class="wdg-li">${esc(x.t)}</span><span class="wdg-sub mono">${new Date(x.date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})}${x.r ? ' · ' + esc(x.r) : ''}</span>`).join('') || '<span class="wdg-sub">Nothing coming up</span>');
+  const nextW = wdg('todos', 'NEXT', nx.slice(0,2).map(x=>`<span class="wdg-li">${esc(x.t)}</span><span class="wdg-sub mono ${x.r === 'late' ? 'warn' : ''}">${x.date === today ? 'Today' : new Date(x.date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})}${x.r ? ' · ' + esc(x.r) : ''}</span>`).join('') || '<span class="wdg-sub">Nothing coming up</span>');
   // kitchen
   let kitW = wdg('food', 'KITCHEN', '<span class="wdg-sub">Loading…</span>');
   if(kitchenData){ const ready = kitchenData.canMake.filter(r=>r.required && r.have >= r.required); kitW = wdg('food', 'KITCHEN', `${ready.length ? `<span class="wdg-li">${esc(ready[0].name)}</span><span class="wdg-sub ok">ready to make</span>` : '<span class="wdg-sub">Nothing ready</span>'}<span class="wdg-sub mono">${kitchenData.pantry.length} at home</span>`); }
@@ -5657,7 +5664,13 @@ function renderIa2HomeNow(){
   const W = { inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));
   const sized = k => W[k].replace('class="wdg ', `class="wdg ${cfg.wide[k] ? 'wide ' : ''}`).replace(' wide wide', ' wide');
-  const grid = (homeEditing ? renderHomeEdit(cfg) : `<div class="wdg-grid ${ia2FirstPaint ? 'enter' : ''}">${hero}${keys.map(k=>cfg.wide[k] === false ? W[k].replace('class="wdg wide', 'class="wdg') : sized(k)).join('')}</div>`);
+  // empty tiles don't hold a grid slot (.81): "Not synced / Nothing coming up" fold into one line under the grid
+  const isQuiet = k => /class="wdg[^"]*\bquiet\b/.test(W[k]) || /<span class="wdg-sub">(No data|Loading…|Budget loading…)<\/span>/.test(W[k]);
+  const quietWhy = k => /Loading/.test(W[k]) ? null : (W[k].match(/<span class="wdg-sub[^"]*">([^<]+)<\/span>/) || [])[1];
+  const QL = { inbox:'Inbox', food:'Food', steps:'Steps', stop:'Your day', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
+  const live = keys.filter(k=>!isQuiet(k)), quiet = keys.filter(k=>isQuiet(k) && quietWhy(k));
+  const quietLine = quiet.length ? `<div class="wdg-quietline"><span>Nothing to show yet:</span>${quiet.map(k=>`<button type="button" class="link-btn" data-w="${(W[k].match(/data-w="([^"]+)"/)||[])[1]}">${QL[k] || k} <em>${esc(quietWhy(k).toLowerCase())}</em></button>`).join('')}</div>` : '';
+  const grid = (homeEditing ? renderHomeEdit(cfg) : `<div class="wdg-grid ${ia2FirstPaint ? 'enter' : ''}">${hero}${live.map(k=>cfg.wide[k] === false ? W[k].replace('class="wdg wide', 'class="wdg') : sized(k)).join('')}</div>${quietLine}`);
   el.innerHTML = `<div class="ia2-head"><div><span class="ia2-kicker">${now.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})} · ${homeCachedAt ? `cached ${timeAgo(homeCachedAt)} · updating` : now.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'})}</span><h2><span class="otto-mark" aria-hidden="true"></span>Today</h2></div>
       <span class="ia2-btns"><button type="button" class="ia2-inbox" data-homeedit aria-label="${homeEditing ? 'Done editing widgets' : 'Edit widgets'}" aria-pressed="${homeEditing}">${homeEditing ? '<b class="ia2-done">Done</b>' : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'}</button><button type="button" class="ia2-inbox" data-w="inbox" aria-label="Inbox, ${q.length} to review">${ico2('inbox',20)}${q.length ? `<span>${q.length}</span>` : ''}</button><button type="button" class="ia2-inbox" data-acct aria-label="Account and settings">${ico2('people',20)}</button></span></div>
     ${grid}`;
@@ -5704,7 +5717,7 @@ function renderLauncher(){
   const idle = [];
   const grp = (t, ks) => { const on = ks.filter(k=>k === 'inbox' || areaStarted(k)); ks.filter(k=>!on.includes(k)).forEach(k=>idle.push(k)); return on.length ? `<div class="lt-grp">${t}</div><div class="lt-grid">${on.map(tile).join('')}</div>` : ''; };
   const body = groups.map(([t, ks])=>grp(t, ks)).join('');
-  return `<div class="lt-top"><span>Pinned areas show a dot. Areas you haven't used yet are folded below.</span><button type="button" class="link-btn" data-editdock>Edit dock</button></div>
+  return `<div class="lt-top"><span>Dot = in your dock.</span><button type="button" class="link-btn" data-editdock>Edit dock</button></div>
     ${body}
     ${idle.length ? `<details class="lt-idle"><summary><span>Not started</span><em>${idle.length} · ${idle.map(k=>AREAS2[k].label).join(', ')}</em></summary><div class="lt-grid">${idle.map(tile).join('')}</div></details>` : ''}`;
 }
