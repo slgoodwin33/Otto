@@ -1967,6 +1967,19 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+
+  /* card() + sparklines + document countdown (.85) */
+  .dc{all:unset; box-sizing:border-box; cursor:pointer; position:relative; display:flex; flex-direction:column; gap:6px; padding:14px; min-height:118px; background:var(--surface); border:1px solid var(--border); border-radius:20px; color:var(--text); min-width:0; transition:transform .12s cubic-bezier(.2,.8,.2,1);}
+  .dc:active{transform:scale(.97);} .dc:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .dc-h{font:500 13px var(--sans); color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .dc-val{font:700 26px var(--sans); letter-spacing:-.02em; font-variant-numeric:tabular-nums;} .dc-val.warn{color:var(--amber);} .dc-val.bad{color:var(--coral);}
+  .dc-ctx{font:13px var(--sans); color:var(--text-muted);} .dc-ctx .ok{color:var(--text); font-weight:600;} .dc-ctx .warn{color:var(--amber); font-weight:600;}
+  #panelAccounts .acct-strip .dc.acct-dc{flex:0 0 min(78%, 260px); scroll-snap-align:start; min-width:0;}
+  .dc .acct-bar{background:var(--surface-2);} .spark-wrap{position:relative; display:block; height:34px; margin-top:2px;} .spark{display:block; overflow:visible;} .spark-dot{position:absolute; width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 2px var(--surface);}
+  .lf-badge.bad{color:var(--coral); border-color:color-mix(in srgb, var(--coral) 50%, var(--border));}
+  .dcd{display:grid !important; grid-template-columns:56px minmax(0,1fr); gap:12px; align-items:center;} .dcd .lf-actions{grid-column:1 / -1;}
+  .dcd-n{display:flex; flex-direction:column; align-items:center; justify-content:center; height:56px; border-radius:14px; background:var(--surface-2);} .dcd-n b{font:700 20px var(--sans); line-height:1; font-variant-numeric:tabular-nums;} .dcd-n span{font:11px var(--sans); color:var(--text-muted);}
+  .dcd-n.warn b{color:var(--amber);} .dcd-n.bad b{color:var(--coral);}
+  .dcd-bar{display:block; height:5px; border-radius:3px; background:var(--surface-2); margin-top:6px;} .dcd-bar i{display:block; height:100%; border-radius:3px; background:color-mix(in srgb, var(--text-muted) 70%, var(--surface-2));} .dcd-bar i.warn{background:var(--amber);} .dcd-bar i.bad{background:var(--coral);}
   /* Otto ring commands (.84) */
   .cmd-list{display:flex; flex-direction:column; gap:4px; padding:6px; margin:0 0 8px; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.35);} .cmd-list[hidden]{display:none !important;}
   .cmd{all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 10px; padding:10px 12px; border-radius:12px; min-height:44px;} .cmd b{font:600 15px var(--sans); color:var(--text);} .cmd span{grid-column:1; font:13px var(--sans); color:var(--text-muted);}
@@ -2371,7 +2384,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-06.84';
+const APP_BUILD = '2026-11-06.85';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2581,6 +2594,27 @@ async function saveAccountBalance(code, accountId, newDollars, btn, statusEl){
   }
 }
 
+
+// ---------- card() + sparkline (.85) ----------
+// One card shape for area pages: label · value · one line of context · at most one small visual.
+function card({ label, value, context = '', tone = '', body = '', attrs = '', cls = '' }){
+  return `<button type="button" class="dc ${cls}" ${attrs}><span class="dc-h">${esc(label)}</span><b class="dc-val ${tone}">${value}</b>${context ? `<span class="dc-ctx">${context}</span>` : ''}${body}</button>`;
+}
+// 30-day balance line from balance_snapshots (one per day); today's live balance closes the line.
+function balanceSeries(a, days = 30){
+  const since = isoAddDays(localToday(), -(days - 1)), by = new Map();
+  (a.snapshots || []).filter(s=>s.captured_on >= since).forEach(s=>by.set(s.captured_on, Number(s.balance_cents)));
+  if(a.current_balance_cents != null) by.set(localToday(), Number(a.current_balance_cents));
+  return [...by.entries()].sort((x,y)=>x[0].localeCompare(y[0])).map(([d,v])=>({ d, v }));
+}
+function balSpark(pts, { w = 150, h = 34, label = '' } = {}){
+  if(!pts || pts.length < 2) return '';
+  const vs = pts.map(p=>p.v), lo = Math.min(...vs), hi = Math.max(...vs), span = hi - lo || 1, t0 = Date.parse(pts[0].d), t1 = Date.parse(pts[pts.length-1].d) || t0 + 1;
+  const X = d => 2 + (w - 6) * ((Date.parse(d) - t0) / Math.max(1, t1 - t0)), Y = v => 3 + (h - 6) * (1 - (v - lo) / span);
+  const line = pts.map((p,i)=>`${i ? 'L' : 'M'}${X(p.d).toFixed(1)} ${Y(p.v).toFixed(1)}`).join(' '), last = pts[pts.length-1];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" role="img" aria-label="${esc(label)}"><path d="${line} L${X(last.d).toFixed(1)} ${h} L${X(pts[0].d).toFixed(1)} ${h} Z" fill="var(--text)" fill-opacity=".06"/><path d="${line}" fill="none" stroke="var(--text-muted)" stroke-width="1.6" vector-effect="non-scaling-stroke" stroke-linejoin="round"/></svg><i class="spark-dot" style="left:calc(${(100 * X(last.d) / w).toFixed(1)}% - 4px); top:${(Y(last.v) - 4).toFixed(1)}px" aria-hidden="true"></i>`;
+}
+
 function renderAccountStrip(){
   const el = document.getElementById('moneyAccounts'); if(!el) return;
   const accts = (allAccounts || []).filter(a=>a.status !== 'closed');
@@ -2593,9 +2627,11 @@ function renderAccountStrip(){
       const lim = Number(a.credit_limit_cents || 0), pct = lim ? Math.min(100, Math.round(100*bal/lim)) : 0;
       const due = bills.find(b=>/discover/i.test(b.name) && /discover/i.test(a.name + (a.institution||'')));
       sub = (lim ? `${pct}% of ${money(lim)} used` : 'limit not on file') + (due && due.due_day ? `, due ${shortDate(nextOccurrenceFromDueDay(due.due_day))}` : '');
-      return `<button class="acct-card credit" type="button" data-acctjump="1"><span class="acct-name">${esc(short)}</span><span class="acct-bal">${money(bal)}</span><span class="acct-sub">owed</span><span class="acct-bar"><i style="width:${pct}%"></i></span><span class="acct-sub">${esc(sub)}</span></button>`;
+      const S = balanceSeries(a), ch = S.length > 1 ? S[S.length-1].v - S[0].v : 0, chT = S.length > 1 && ch ? `<span class="${ch > 0 ? 'warn' : 'ok'}">${ch > 0 ? '+' : '−'}${money(Math.abs(ch))}</span> owed in ${Math.round((Date.parse(S[S.length-1].d) - Date.parse(S[0].d))/864e5)} days` : '';
+      return card({ label: short, value: money(bal), context: `owed · ${esc(sub)}`, cls:'acct-dc credit', attrs:'data-acctjump="1"', body: `<span class="acct-bar"><i style="width:${pct}%"></i></span><span class="spark-wrap">${balSpark(S, { label: `${short} balance over the last 30 days` })}</span>${chT ? `<span class="dc-ctx">${chT}</span>` : ''}` });
     }
-    return `<button class="acct-card" type="button" data-acctjump="1"><span class="acct-name">${esc(short)}</span><span class="acct-bal">${money(bal)}</span><span class="acct-sub">${a.available_balance_cents != null ? `${money(a.available_balance_cents)} available` : esc(sub)}</span><span class="acct-sub">${a.balance_updated_at ? 'Updated ' + timeAgo(a.balance_updated_at) : ''}</span></button>`;
+    const S = balanceSeries(a), ch = S.length > 1 ? S[S.length-1].v - S[0].v : 0, chT = S.length > 1 && ch ? `<span class="${ch < 0 ? 'warn' : 'ok'}">${ch > 0 ? '+' : '−'}${money(Math.abs(ch))}</span> in ${Math.round((Date.parse(S[S.length-1].d) - Date.parse(S[0].d))/864e5)} days` : '';
+    return card({ label: short, value: money(bal), context: a.available_balance_cents != null ? `${money(a.available_balance_cents)} available` : esc(sub), cls:'acct-dc', attrs:'data-acctjump="1"', body: `<span class="spark-wrap">${balSpark(S, { label: `${short} balance over the last 30 days` })}</span>${chT ? `<span class="dc-ctx">${chT}</span>` : `<span class="dc-ctx">${a.balance_updated_at ? 'Updated ' + timeAgo(a.balance_updated_at) : ''}</span>`}` });
   }).join('');
 }
 document.addEventListener('click', e=>{ if(e.target.closest('[data-acctjump]')) setMoneySeg('accounts'); });
@@ -5910,7 +5946,20 @@ async function docLoad(){
   url += docs.tab === 1 ? '&expires_on=not.is.null&order=expires_on.asc' : '&order=created_at.desc&limit=200';
   try{ const r = await fetch(url, { headers: authHeaders() }); docs.rows = r.ok ? await r.json() : []; }catch(e){ docs.rows = []; }
 }
-function docBadge(d){ if(!d.expires_on) return ''; const n = daysTo(d.expires_on); return `<span class="lf-badge ${n < 60 ? 'rust' : ''}">${n < 0 ? 'expired' : n < 60 ? `${n}d left` : 'exp ' + shortDate(d.expires_on)}</span>`; }
+function docBadge(d){ if(!d.expires_on) return ''; const n = daysTo(d.expires_on); return `<span class="lf-badge ${n <= 7 ? 'bad' : n <= 30 ? 'rust' : ''}">${n < 0 ? 'expired' : n <= 90 ? `${n}d left` : 'exp ' + shortDate(d.expires_on)}</span>`; }
+// Expiring tab (.85): a countdown, soonest first, grouped; the bar is how much of the document's valid life is left
+function docCountdown(rows){
+  const g = [['Expired', x=>x < 0], ['Next 7 days', x=>x >= 0 && x <= 7], ['Next 30 days', x=>x > 7 && x <= 30], ['Next 90 days', x=>x > 30 && x <= 90], ['Later', x=>x > 90]];
+  const items = rows.filter(d=>d.expires_on).map(d=>({ d, n: daysTo(d.expires_on) })).sort((a,b)=>a.n - b.n);
+  if(!items.length) return '';
+  return g.map(([t, f])=>{ const its = items.filter(x=>f(x.n)); if(!its.length) return '';
+    return `<div class="section-title">${t}<span>${its.length}</span></div><div class="gcard lf-list">${its.map(({ d, n })=>{
+      const life = d.issued_on ? Math.max(1, daysTo(d.expires_on) - daysTo(d.issued_on)) : 365, left = Math.max(0, Math.min(1, n / life)), st = n <= 7 ? 'bad' : n <= 30 ? 'warn' : '';
+      return `<div class="lf-row dcd ${docs.open === d.id ? 'open' : ''}" data-docrow="${d.id}"><div class="dcd-n ${st}" aria-hidden="true"><b>${Math.abs(n) > 999 ? '999+' : Math.abs(n)}</b><span>${n < 0 ? 'days ago' : n === 1 ? 'day' : 'days'}</span></div>
+        <div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${n < 0 ? 'Expired' : 'Expires'} ${new Date(d.expires_on+'T12:00').toLocaleDateString('en-US',{ month:'short', day:'numeric', year:'numeric' })}${d.issuer ? ' · ' + esc(d.issuer) : ''}</div>
+        <span class="dcd-bar" role="img" aria-label="${n < 0 ? `Expired ${-n} days ago` : `${n} days left`}"><i class="${st}" style="width:${(left*100).toFixed(0)}%"></i></span></div>
+        ${docs.open === d.id ? `<div class="lf-actions">${d.file_path ? `<button type="button" data-docopen="${d.id}">View</button>` : ''}<button type="button" class="danger" data-docdel="${d.id}">Delete</button></div>` : ''}</div>`; }).join('')}</div>`; }).join('');
+}
 function docRow(d){
   const open = docs.open === d.id;
   return `<div class="lf-row ${open?'open':''}" data-docrow="${d.id}"><div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${esc([d.kind, d.issuer, d.number_last4 ? 'ends ' + d.number_last4 : '', (d.tags||[]).join(', ')].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${docBadge(d)}</div>
@@ -5920,6 +5969,7 @@ function docResults(){
   const rows = docs.rows || [];
   if(docs.rows === null) return '<div class="skeleton"><div class="skeleton-row"></div></div>';
   if(!rows.length) return `<div class="empty">${docs.q ? `Nothing matches “${esc(docs.q)}”.` : docs.tab === 1 ? 'Nothing with an expiration date yet.' : 'No documents yet. Use Scan to add your first.'}</div>`;
+  if(docs.tab === 1 && !docs.q) return docCountdown(rows) || '<div class="empty">Nothing with an expiration date yet.</div>';
   return `<div class="gcard lf-list">${rows.map(docRow).join('')}</div>`;
 }
 function docPendingCard(it){

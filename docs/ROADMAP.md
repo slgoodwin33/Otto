@@ -1,5 +1,10 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .85 (Nov 6): account sparklines, document countdown, card()
+- Money › Accounts: each account is a `card()` (label · balance · one line · one small visual) with a 30-day balance sparkline from `balance_snapshots` (daily; ~28 days on file for Checking ··9292 and Discover ··5117), the live balance as the lime end dot, and the change over the period. For the credit card, more owed reads amber.
+- Documents › Expiring: a countdown instead of a list: Expired / Next 7 days / Next 30 / Next 90 / Later, each with a big days number (red ≤7, amber ≤30) and a bar for how much of the document's valid life (issued → expires) is left. Badges elsewhere use the same thresholds. (The vault is empty in the real DB right now, so this shows its empty state until you scan something.)
+- `card()` is the shared builder for area-page cards from here on (Home tiles keep `wdg()`).
+
 ## Just shipped — build .84 (Nov 6): commands in the Otto ring
 - Type in the ring and matching actions appear above the box; tap one, or press send when the line fully parsed (↵ badge). End with "?" to ask Otto instead. Anything else goes to chat as before.
 - `move $20 dining to groceries` (moves it this week via move_budget, undo in the notice; says so if the category doesn't have that much) · `#trip`, `@starbucks over $50 last week` (opens Transactions with that filter sentence) · `log gas 9.5 gal $38` (Car › Log form filled in, you save) · `new zone` (spending map in draw mode) · `yesterday`, `oct 27` (Day page) · `car`, `trans`, `sleep`, `calendar`, `spending map`… (opens the page).
