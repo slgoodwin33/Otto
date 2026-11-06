@@ -1,5 +1,8 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Deploy note (Nov 6)
+- GitHub Pages didn't publish .81–.84 (each deploy was cancelled by the next push) and the .85 deploy sat in GitHub's queue for 10 min, then failed ("Deployment failed, try again later"); a re-run also stayed queued. Lesson: when pushing several builds in a row, check the Pages run for the last one actually says success before calling it live.
+
 ## Just shipped — build .85 (Nov 6): account sparklines, document countdown, card()
 - Money › Accounts: each account is a `card()` (label · balance · one line · one small visual) with a 30-day balance sparkline from `balance_snapshots` (daily; ~28 days on file for Checking ··9292 and Discover ··5117), the live balance as the lime end dot, and the change over the period. For the credit card, more owed reads amber.
 - Documents › Expiring: a countdown instead of a list: Expired / Next 7 days / Next 30 / Next 90 / Later, each with a big days number (red ≤7, amber ≤30) and a bar for how much of the document's valid life (issued → expires) is left. Badges elsewhere use the same thresholds. (The vault is empty in the real DB right now, so this shows its empty state until you scan something.)
