@@ -1776,6 +1776,43 @@ body.chatting .otto-chat-starters{display:none}
 
   .map-sheet{left:8px !important; right:8px !important; bottom:8px !important; padding:0 !important; margin:0 !important; border-radius:22px !important; border:1px solid var(--border) !important;} .ms-body{padding-bottom:16px !important;}
 
+  /* ===== Build .56: closet details ===== */
+  button.cl-item{all:unset; box-sizing:border-box; cursor:pointer; position:relative; display:flex; flex-direction:column; gap:3px;}
+  button.cl-item:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:16px;}
+  .cl-img{color:var(--text-muted);} .cl-worth{position:absolute; top:8px; right:8px; font:600 11.5px var(--sans); font-style:normal; padding:3px 7px; border-radius:9px; background:rgba(11,12,10,.78); color:var(--accent);}
+  .cl-detail{background:var(--surface); border:1px solid var(--border); border-radius:22px; padding:16px; margin:0 0 16px;}
+  .cl-hero{height:240px; border-radius:16px; background:#EEEDEA; display:flex; align-items:center; justify-content:center; overflow:hidden; color:#6b6f66;} .cl-hero img{max-width:100%; max-height:100%; object-fit:contain;}
+  .cl-detail h3{font:700 22px var(--sans); margin:14px 0 2px;} .cl-sub{font:14px var(--sans); color:var(--text-muted);}
+  .cl-facts{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:14px 0 8px;} .cl-facts div, .cl-value div{background:var(--surface-2); border-radius:14px; padding:10px;}
+  .cl-facts span, .cl-value span{display:block; font:12.5px var(--sans); color:var(--text-muted);} .cl-facts b, .cl-value b{font:700 16px var(--sans); font-variant-numeric:tabular-nums;} .cl-facts b.acc, .cl-value b.acc{color:var(--accent);}
+  .cl-value{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px;}
+  .cl-basis{font:12.5px/1.45 var(--sans); color:var(--text-muted); margin:6px 0 10px;}
+  .cl-edit .cl-head{display:flex; flex-direction:column; gap:3px; margin-bottom:10px;} .cl-note{font:13px var(--sans); color:var(--amber);}
+  .cl-picks{display:flex; gap:10px; margin-bottom:10px;} .cl-pick{flex:1; cursor:pointer; display:flex; flex-direction:column; gap:6px; align-items:center; font:600 13px var(--sans); color:var(--text-muted);}
+  .cl-pick img{width:100%; aspect-ratio:1; object-fit:contain; background:#EEEDEA; border-radius:14px; border:2px solid transparent;} .cl-pick input{position:absolute; opacity:0;}
+  .cl-pick input:checked + img{border-color:var(--accent);} .cl-pick input:checked ~ span{color:var(--accent);} .cl-pick input:focus-visible + img{outline:2px solid var(--accent); outline-offset:2px;}
+  .cl-link{display:inline-block; margin:0 0 10px; font:600 14px var(--sans); color:var(--accent); text-decoration:none;}
+  .cl-2, .cl-3{display:grid; gap:10px;} .cl-2{grid-template-columns:1fr 1fr;} .cl-3{grid-template-columns:1fr 1fr 1fr;}
+
+  .lf-form.cl-edit{display:flex !important; flex-direction:column; gap:12px; grid-template-columns:none !important;}
+  .lf-form.cl-edit > *, .cl-edit .cl-2 > *, .cl-edit .cl-3 > *{min-width:0; width:auto; grid-column:auto !important;}
+  .cl-edit label{display:flex; flex-direction:column; gap:5px; font:500 13px var(--sans); color:var(--text-muted);}
+  .cl-edit input, .cl-edit select{width:100%; box-sizing:border-box; min-height:44px; font:16px var(--sans);}
+  .cl-picks{display:grid; grid-template-columns:1fr 1fr; gap:12px;} .cl-pick{position:relative;}
+  .cl-detail .cl-edit{margin-top:14px; padding-top:14px; border-top:1px solid var(--border);}
+
+  /* ===== Build .57: types + attributes ===== */
+  .cl-filters{display:flex; gap:8px; overflow-x:auto; padding:2px 0 12px; scrollbar-width:none;} .cl-filters::-webkit-scrollbar{display:none;}
+  .cl-filters button{all:unset; cursor:pointer; flex-shrink:0; min-height:36px; padding:0 14px; display:inline-flex; align-items:center; gap:6px; border-radius:18px; background:var(--surface-2); color:var(--text); font:600 14px var(--sans);}
+  .cl-filters button i{font-style:normal; color:var(--text-muted); font-weight:500;} .cl-filters button[aria-pressed="true"]{background:var(--accent); color:var(--on-accent);} .cl-filters button[aria-pressed="true"] i{color:var(--on-accent);}
+  .cl-filters button:focus-visible{outline:2px solid var(--accent); outline-offset:2px;}
+  .cl-tags{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0 2px;} .cl-tags span{padding:5px 10px; border-radius:12px; background:var(--surface-2); font:500 12.5px var(--sans); color:var(--text);}
+  .cl-star{color:var(--accent);}
+  .cl-seasons{border:none; margin:0; padding:0; display:flex; flex-wrap:wrap; gap:8px;} .cl-seasons legend{font:500 13px var(--sans); color:var(--text-muted); margin-bottom:6px; padding:0;}
+  .cl-chip{position:relative; cursor:pointer;} .cl-chip input{position:absolute; opacity:0;} .cl-chip span{display:inline-flex; align-items:center; min-height:36px; padding:0 14px; border-radius:18px; background:var(--surface-2); font:600 14px var(--sans); color:var(--text);}
+  .cl-chip input:checked + span{background:var(--accent); color:var(--on-accent);} .cl-chip input:focus-visible + span{outline:2px solid var(--accent); outline-offset:2px;}
+  .cl-edit .cl-fav{flex-direction:row; align-items:center; gap:8px; align-self:end; min-height:44px; color:var(--text);} .cl-edit .cl-fav input{width:22px; min-height:22px; accent-color:var(--accent);}
+
   /* ===== Build .59: Polish v1 (docs/DESIGN.md) ===== */
   html.ia2, body.ia2{
     --bg:#0C0F0E; --surface:#151A18; --surface-2:#1C2220; --border:#28302C;
@@ -2384,7 +2421,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-06.85';
+const APP_BUILD = '2026-11-06.86';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -6074,8 +6111,9 @@ const tools = (body) => callFn('otto-tools', body);
 let closet = { urls:{}, signed:false, temp:null, tempAt:0, seed:0, pending:[], wears:null };
 async function closetPrep(){
   const items = lifeRows.wardrobe_items || [];
-  const need = items.filter(x=>x.image_url && !closet.urls[x.image_url]).map(x=>x.image_url);
+  const need = [...new Set(items.flatMap(x=>[x.image_url, x.stock_image_path]).filter(pth=>pth && !closet.urls[pth]))];
   if(need.length){ Object.assign(closet.urls, await signPaths('closet', need)); }
+  if(!closet.types){ try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/clothing_types?select=*&order=sort`, { headers: authHeaders() }); closet.types = r.ok ? await r.json() : []; }catch(e){ closet.types = []; } }
   if(closet.wears === null){ try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/wear_log?select=wardrobe_item_id,worn_on&order=worn_on.desc&limit=2000`, { headers: authHeaders() }); closet.wears = r.ok ? await r.json() : []; }catch(e){ closet.wears = []; } }
   if(closet.temp === null || Date.now() - closet.tempAt > 3600000){
     try{ const pos = (lastFix().pos) || { lat:42.5584, lon:-70.8800 };
@@ -6093,11 +6131,13 @@ function pickOutfit(){
   const t = closet.temp, want = t == null ? 3 : t < 35 ? 5 : t < 50 ? 4 : t < 62 ? 3 : t < 75 ? 2 : 1;
   const choose = (cat, k) => { const c = items.filter(x=>x.category === cat).sort((a,b)=>(recent.has(a.id)-recent.has(b.id)) || (Math.abs((a.warmth||3)-want) - Math.abs((b.warmth||3)-want)));
     return c.length ? c[(closet.seed + k) % Math.min(c.length, 3)] : null; };
-  return { top: choose('top',0), bottom: choose('bottom',1), shoes: choose('shoes',2), outer: t != null && t < 58 ? choose('outerwear',3) : null };
+  return { top: choose('top',0), bottom: choose('bottom',1), shoes: choose('shoes',2), layer: t != null && t < 65 ? choose('layer',4) : null, outer: t != null && t < 50 ? choose('outerwear',3) : null };
 }
+function clImg(it){ const st = it.stock_image_path && closet.urls[it.stock_image_path], ph = it.image_url && closet.urls[it.image_url];
+  return (it.image_choice === 'photo' ? (ph || st) : (st || ph)) || null; }
 function garment(it, cls){
   if(!it) return '';
-  const u = it.image_url && closet.urls[it.image_url];
+  const u = clImg(it);
   return `<figure class="fl-piece ${cls}">${u ? `<img src="${u}" alt="${esc(it.name)}">` : `<span class="fl-ph">${esc(it.name)}</span>`}<figcaption>${esc(it.name)}</figcaption></figure>`;
 }
 function closetToday(){
@@ -6105,22 +6145,21 @@ function closetToday(){
   const items = lifeRows.wardrobe_items || [];
   if(!items.length) return `<div class="kt-receipt"><b>Build your closet</b><span>Photograph each piece (on a bed or the floor works). Otto cuts out the background and names it, so outfits look clean.</span><div><button type="button" class="save-btn" data-closetadd>📷 Add clothes</button></div></div>`;
   const o = pickOutfit(), d = new Date(), work = d.getDay() > 0 && d.getDay() < 6;
-  const pieces = [o.outer, o.top, o.bottom, o.shoes].filter(Boolean);
+  const pieces = [o.outer, o.layer, o.top, o.bottom, o.shoes].filter(Boolean);
   return `<div class="cl-meta">${d.toLocaleDateString('en-US',{weekday:'long'})} · ${closet.temp != null ? `${closet.temp}°F${closet.rain ? ' · rain likely' : ''}` : 'weather loading'} · ${work ? 'work day' : 'day off'}</div>
-    <div class="flatlay" role="img" aria-label="Suggested outfit: ${esc(pieces.map(x=>x.name).join(', ') || 'nothing clean')}">${garment(o.outer,'fl-outer')}${garment(o.top,'fl-top')}${garment(o.bottom,'fl-bottom')}${garment(o.shoes,'fl-shoes')}${pieces.length ? '' : '<span class="fl-empty">Nothing clean in the right categories. Time for laundry?</span>'}</div>
+    <div class="flatlay" role="img" aria-label="Suggested outfit: ${esc(pieces.map(x=>x.name).join(', ') || 'nothing clean')}">${garment(o.outer || o.layer,'fl-outer')}${garment(o.top,'fl-top')}${garment(o.bottom,'fl-bottom')}${garment(o.shoes,'fl-shoes')}${pieces.length ? '' : '<span class="fl-empty">Nothing clean in the right categories. Time for laundry?</span>'}</div>
     <div class="cl-actions"><button type="button" class="save-btn" data-wearoutfit ${pieces.length?'':'disabled'}>Wear this</button><button type="button" class="link-btn" data-shuffle>Shuffle</button></div>`;
 }
 function closetWardrobe(){
   if(!closet.signed){ closet.signed = true; closetPrep(); }
   const items = (lifeRows.wardrobe_items || []).filter(x=>!x.retired);
   const pend = closet.pending.map(it=> it.status === 'working' ? `<div class="doc-pending">${it.preview ? `<img src="${it.preview}" alt="">` : ''}<div><b>${esc(it.step || 'Working…')}</b><span>${esc(it.file.name)}</span></div></div>` :
-    `<form class="lf-form" data-closetform="${it.id}"><div class="doc-form-head">${it.cut ? `<img src="${it.cut}" alt="" style="background:#E9E6E0">` : ''}<span><b>Check the details</b> · then save</span></div>
-      <label>Name<input name="name" value="${esc(it.f.name||'')}" required></label><label>Type<select name="category">${['top','bottom','outerwear','shoes','accessory','other'].map(c=>`<option ${c===it.f.category?'selected':''}>${c}</option>`).join('')}</select></label>
-      <label>Color<input name="color" value="${esc(it.f.color||'')}"></label><label>Brand<input name="brand" value="${esc(it.f.brand||'')}"></label>
-      <label>Warmth 1–5<input name="warmth" type="number" min="1" max="5" value="${it.f.warmth||3}"></label><label>Wears before washing<input name="wears_before_wash" type="number" min="1" max="10" value="${it.f.wears_before_wash||1}"></label>
-      <div class="lf-form-actions"><button type="submit" class="save-btn">Save to closet</button><button type="button" class="link-btn" data-closetdiscard="${it.id}">Discard</button></div></form>`).join('');
+    clEditor({ ...it.f, ...(it.look ? { brand: it.look.brand || it.f.brand, material: it.look.material || it.f.material, retail_price_cents: it.look.retail_price_cents, est_value_cents: it.look.est_value_cents, value_basis: it.look.value_basis, product_url: it.look.product_url, product_title: it.look.product_title, stock_image_path: it.look.stock_image_path } : {}) },
+      { form: `data-closetform="${it.id}"`, photoUrl: it.cut, title: 'Check the details', note: it.lookErr ? `Couldn't find it online (${it.lookErr}). Your photo will be used.` : (it.look && it.look.confidence === 'low' ? 'Closest match online; check the details.' : ''), discard: it.id })).join('');
   return `<div class="lt-top"><span>${items.length} items</span><button type="button" class="link-btn" data-closetadd>📷 Add clothes</button></div>${pend}
-    <div class="cl-grid">${items.map(x=>{ const u = x.image_url && closet.urls[x.image_url]; return `<div class="cl-item ${x.laundry_status==='worn'?'worn':''}"><span class="cl-img">${u ? `<img src="${u}" alt="">` : esc((x.name||'?')[0])}</span><b>${esc(x.name)}</b><span>${esc([x.category, x.color].filter(Boolean).join(' · '))}${x.laundry_status==='worn'?' · needs a wash':''}</span></div>`; }).join('')}</div>`;
+    ${closet.open ? clDetail(items.find(x=>x.id === closet.open)) : ''}
+    ${clFilters(items)}
+    <div class="cl-grid">${items.filter(x=>!closet.group || x.category === closet.group).map(x=>{ const u = clImg(x); return `<button type="button" class="cl-item ${x.laundry_status==='worn'?'worn':''}" data-clopen="${x.id}" aria-label="${esc(x.name)}"><span class="cl-img">${u ? `<img src="${u}" alt="">` : clIcon(x.category)}</span>${x.est_value_cents ? `<i class="cl-worth">${money(x.est_value_cents)}</i>` : ''}<b>${esc(x.name)}</b><span>${esc([clTypeLabel(x), x.color].filter(Boolean).join(' · '))}${x.laundry_status==='worn'?' · needs a wash':''}</span></button>`; }).join('')}</div>`;
 }
 function closetLaundry(){
   const items = (lifeRows.wardrobe_items || []).filter(x=>!x.retired), worn = items.filter(x=>x.laundry_status === 'worn');
@@ -6134,7 +6173,9 @@ function closetInsights(){
   const items = (lifeRows.wardrobe_items || []).filter(x=>!x.retired), wears = {}; (closet.wears||[]).forEach(w=>{ wears[w.wardrobe_item_id] = (wears[w.wardrobe_item_id]||0) + 1; });
   const cpw = items.filter(x=>x.purchase_price_cents).map(x=>({ x, c: Math.round(x.purchase_price_cents / Math.max(1, wears[x.id]||0)), n: wears[x.id]||0 })).sort((a,b)=>b.c-a.c);
   const never = items.filter(x=>!wears[x.id]);
-  return `<div class="section-title">Cost per wear<span>price ÷ times worn</span></div><div class="gcard lf-list">${cpw.map(r=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(r.x.name)}</div><div class="grow-sub">worn ${r.n}×</div></div><div class="lf-right">${money(r.c)}</div></div>`).join('') || '<div class="empty">Add prices (or snap clothing receipts) to see this.</div>'}</div>
+  const paidT = items.reduce((a,x)=>a + (x.purchase_price_cents||0), 0), worthT = items.reduce((a,x)=>a + (x.est_value_cents||0), 0), valued = items.filter(x=>x.est_value_cents).length;
+  return `<div class="cl-value"><div><span>You paid</span><b>${money(paidT)}</b></div><div><span>Worth now</span><b class="acc">${money(worthT)}</b></div><div><span>Valued</span><b>${valued} of ${items.length}</b></div></div>
+    <div class="section-title">Cost per wear<span>price ÷ times worn</span></div><div class="gcard lf-list">${cpw.map(r=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(r.x.name)}</div><div class="grow-sub">worn ${r.n}×</div></div><div class="lf-right">${money(r.c)}</div></div>`).join('') || '<div class="empty">Add prices (or snap clothing receipts) to see this.</div>'}</div>
     <div class="section-title">Never worn<span>${never.length}</span></div><div class="gcard lf-list">${never.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div></div></div>`).join('') || '<div class="empty">Everything has been worn.</div>'}</div>`;
 }
 async function cutout(file){
@@ -6156,6 +6197,11 @@ async function closetAddFiles(files){
     closet.pending.push(it); renderLife();
     try{ it.png = await cutout(f); it.cut = URL.createObjectURL(it.png); it.step = 'Identifying…'; renderLife();
       const j = await imageToJpeg(f); const r = await tools({ action:'clothing', media_type: j.media_type, data: j.data }); if(r && !r.error) it.f = r;
+      it.step = 'Finding it online…'; renderLife();
+      try{ const L = await tools({ action:'clothing_lookup', item: it.f, media_type: j.media_type, data: j.data });
+        if(L && !L.error){ it.look = L; if(L.stock_image_path) Object.assign(closet.urls, await signPaths('closet', [L.stock_image_path])); }
+        else it.lookErr = (L && L.error) || 'not found';
+      }catch(e){ it.lookErr = e.message; }
     }catch(e){ console.warn(e); }
     it.status = 'review'; renderLife();
   }
@@ -6164,14 +6210,14 @@ async function closetSave(form){
   const it = closet.pending.find(x=>x.id === form.dataset.closetform); if(!it) return;
   const v = n => (form.elements[n] && form.elements[n].value.trim()) || null; let path = null;
   if(it.png){ path = `items/${it.id}.png`; const up = await fetch(`${SUPABASE_URL}/storage/v1/object/closet/${path}`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'image/png' }, body: it.png }); if(!up.ok){ showNotice(`Photo upload failed (${up.status})`); return; } }
-  const row = { name: v('name') || 'Item', category: v('category'), color: v('color'), brand: v('brand'), warmth: Number(v('warmth')) || null, wears_before_wash: Number(v('wears_before_wash')) || 1, image_url: path, laundry_status:'clean' };
+  const row = { ...clFormRow(form), image_url: path, laundry_status:'clean', stock_image_path: (it.look && it.look.stock_image_path) || null, product_url: (it.look && it.look.product_url) || null, product_title: (it.look && it.look.product_title) || null, value_basis: (it.look && it.look.value_basis) || null, est_value_on: it.look && it.look.est_value_cents ? localToday() : null };
   const r = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=representation' }, body: JSON.stringify(row) });
   if(!r.ok){ showNotice(`Couldn't save: ${(await r.text()).slice(0,120)}`); return; }
   const [saved] = await r.json(); (lifeRows.wardrobe_items = lifeRows.wardrobe_items || []).push(saved); if(path) closet.urls[path] = it.cut;
   closet.pending = closet.pending.filter(x=>x !== it); hapticPulse(); renderLife();
 }
 async function wearOutfit(){
-  const o = pickOutfit(), ids = [o.outer, o.top, o.bottom, o.shoes].filter(Boolean);
+  const o = pickOutfit(), ids = [o.outer, o.layer, o.top, o.bottom, o.shoes].filter(Boolean);
   for(const it of ids){ const since = (it.wears_since_wash||0) + 1, status = since >= Math.max(1, it.wears_before_wash||1) ? 'worn' : 'clean';
     await fetch(`${SUPABASE_URL}/rest/v1/wear_log`, { method:'POST', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wardrobe_item_id: it.id, worn_on: localToday() }) });
     await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${it.id}`, { method:'PATCH', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify({ wears_since_wash: since, laundry_status: status, last_worn_on: localToday() }) });
@@ -6855,6 +6901,111 @@ new MutationObserver(()=>scrollChat()).observe(document.getElementById('chatThre
   setTimeout(()=>setSnap('peek', false), 0);
 })();
 
+// ===================== Build .57: clothing types + attributes =====================
+const CL_GROUPS = [['top','Tops'],['layer','Layers'],['outerwear','Outerwear'],['bottom','Bottoms'],['shoes','Shoes'],['accessory','Accessories'],['basics','Basics'],['sleep_lounge','Sleep & lounge'],['swim','Swim']];
+const CL_FIT = [['slim','Slim'],['regular','Regular'],['relaxed','Relaxed'],['oversized','Oversized']];
+const CL_SLEEVE = [['sleeveless','Sleeveless'],['short','Short'],['three_quarter','3/4'],['long','Long']];
+const CL_NECK = [['crew','Crew'],['v_neck','V-neck'],['collared','Collared'],['button_down_collar','Button-down collar'],['hooded','Hooded'],['mock','Mock neck'],['henley','Henley'],['quarter_zip','Quarter-zip'],['full_zip','Full zip'],['scoop','Scoop'],['other','Other']];
+const CL_PATTERN = [['solid','Solid'],['graphic','Graphic'],['logo','Logo'],['striped','Striped'],['plaid','Plaid'],['check','Check'],['camo','Camo'],['floral','Floral'],['colorblock','Color block'],['heathered','Heathered'],['print','Print'],['other','Other']];
+const CL_FORMAL = [['athletic','Athletic'],['casual','Casual'],['smart_casual','Smart casual'],['business','Business'],['formal','Formal']];
+const clLabel = (list, k) => (list.find(x=>x[0]===k)||[])[1] || '';
+function clSel(name, list, val){ return `<select name="${name}"><option value="">—</option>${list.map(([k,l])=>`<option value="${k}" ${k===val?'selected':''}>${l}</option>`).join('')}</select>`; }
+function clTypeLabel(x){ const t = (closet.types||[]).find(t=>t.code === x.type_code); return t ? t.label : (x.category || ''); }
+function clTypeSelect(x){
+  const types = closet.types || [];
+  if(!types.length) return `<select name="category">${['top','layer','outerwear','bottom','shoes','accessory'].map(c=>`<option ${c===x.category?'selected':''}>${c}</option>`).join('')}</select>`;
+  return `<select name="type_code"><option value="">Choose…</option>${CL_GROUPS.filter(([g])=>types.some(t=>t.category===g)).map(([g,gl])=>`<optgroup label="${gl}">${types.filter(t=>t.category===g).map(t=>`<option value="${t.code}" ${t.code===x.type_code?'selected':''}>${esc(t.label)}</option>`).join('')}</optgroup>`).join('')}</select>`;
+}
+function clFilters(items){
+  const present = CL_GROUPS.filter(([g])=>items.some(x=>x.category === g)); if(present.length < 2) return '';
+  return `<div class="cl-filters" role="group" aria-label="Show">${[['','All'], ...present].map(([g,l])=>`<button type="button" data-clgroup="${g}" aria-pressed="${(closet.group||'')===g}">${l}${g ? ` <i>${items.filter(x=>x.category===g).length}</i>` : ''}</button>`).join('')}</div>`;
+}
+document.addEventListener('click', e=>{ const g = e.target.closest('[data-clgroup]'); if(g){ closet.group = g.dataset.clgroup || null; renderLife(); } });
+
+// ===================== Build .56: closet details, stock photos, worth =====================
+const CL_COND = [['new','New'],['like_new','Like new'],['good','Good'],['fair','Fair'],['worn','Worn']];
+function clIcon(cat){ const P = { top:'<path d="M8 4l-4 3 2 4 2-1v10h8V10l2 1 2-4-4-3c-1 1.5-2.4 2-4 2s-3-.5-4-2z"/>', outerwear:'<path d="M8 4l-4 3 1 12h5V9m4-5l4 3-1 12h-5V9M8 4c1 1.5 2.4 2 4 2s3-.5 4-2"/>', bottom:'<path d="M7 3h10l1 18h-4l-2-11-2 11H6z"/>', shoes:'<path d="M3 15c0-3 1-6 3-6l3 3c2 1 6 1 9 2s3 4 3 4H3z"/>', accessory:'<circle cx="12" cy="12" r="6"/><path d="M12 8v4l3 2"/>' };
+  return `<svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">${P[cat] || P.top}</svg>`; }
+const clDollars = c => c == null ? '' : (c/100).toFixed(2), centsOf = v => { const n = parseFloat(String(v||'').replace(/[$,]/g,'')); return isFinite(n) && n > 0 ? Math.round(n*100) : null; };
+function clFormRow(form){ const v = n => (form.elements[n] && form.elements[n].value.trim()) || null;
+  const tc = v('type_code'), ty = (closet.types||[]).find(t=>t.code === tc), seasons = [...form.querySelectorAll('input[name=seasons]:checked')].map(i=>i.value);
+  return { name: v('name') || 'Item', ...(tc ? { type_code: tc, category: ty ? ty.category : undefined } : { category: v('category') }), color: v('color'),
+    fit: v('fit'), sleeve_length: v('sleeve_length'), neckline: v('neckline'), pattern: v('pattern'), secondary_color: v('secondary_color'), formality: v('formality'),
+    seasons: seasons.length ? seasons : null, care: v('care'), store: v('store'), favorite: !!(form.elements.favorite && form.elements.favorite.checked), brand: v('brand'), size: v('size'), material: v('material'), condition: v('condition'),
+    purchase_price_cents: centsOf(v('paid')), retail_price_cents: centsOf(v('retail')), est_value_cents: centsOf(v('worth')),
+    warmth: Number(v('warmth')) || null, wears_before_wash: Number(v('wears_before_wash')) || 1, image_choice: v('image_choice') || 'stock' }; }
+function clEditor(x, o){
+  const stock = x.stock_image_path && closet.urls[x.stock_image_path], photo = o.photoUrl || (x.image_url && closet.urls[x.image_url]);
+  const choice = x.image_choice || (stock ? 'stock' : 'photo');
+  const pic = (u, val, lab) => u ? `<label class="cl-pick"><input type="radio" name="image_choice" value="${val}" ${choice===val?'checked':''}><img src="${u}" alt="${lab}"><span>${lab}</span></label>` : '';
+  return `<form class="lf-form cl-edit" ${o.form}>
+    <div class="cl-head"><b>${esc(o.title || 'Details')}</b>${o.note ? `<span class="cl-note">${esc(o.note)}</span>` : ''}</div>
+    ${stock || photo ? `<div class="cl-picks" role="radiogroup" aria-label="Picture to show">${pic(stock,'stock','Stock photo')}${pic(photo,'photo','My photo')}</div>` : ''}
+    ${x.product_url ? `<a class="cl-link" href="${esc(x.product_url)}" target="_blank" rel="noopener">${esc(x.product_title || 'Product page')} ↗</a>` : ''}
+    <label>Name<input name="name" value="${esc(x.name||'')}" required></label>
+    <div class="cl-2"><label>Type${clTypeSelect(x)}</label><label>Size<input name="size" value="${esc(x.size||'')}"></label></div>
+    <div class="cl-2"><label>Brand<input name="brand" value="${esc(x.brand||'')}"></label><label>Color<input name="color" value="${esc(x.color||'')}"></label></div>
+    <div class="cl-2"><label>Material<input name="material" value="${esc(x.material||'')}"></label><label>Condition<select name="condition"><option value="">—</option>${CL_COND.map(([k,l])=>`<option value="${k}" ${k===x.condition?'selected':''}>${l}</option>`).join('')}</select></label></div>
+    <div class="cl-2"><label>Fit${clSel('fit', CL_FIT, x.fit)}</label><label>Sleeves${clSel('sleeve_length', CL_SLEEVE, x.sleeve_length)}</label></div>
+    <div class="cl-2"><label>Neckline${clSel('neckline', CL_NECK, x.neckline)}</label><label>Pattern${clSel('pattern', CL_PATTERN, x.pattern)}</label></div>
+    <div class="cl-2"><label>Second color<input name="secondary_color" value="${esc(x.secondary_color||'')}"></label><label>Dress level${clSel('formality', CL_FORMAL, x.formality)}</label></div>
+    <fieldset class="cl-seasons"><legend>Seasons</legend>${['spring','summer','fall','winter'].map(z=>`<label class="cl-chip"><input type="checkbox" name="seasons" value="${z}" ${(x.seasons||[]).includes(z)?'checked':''}><span>${z[0].toUpperCase()+z.slice(1)}</span></label>`).join('')}</fieldset>
+    <label>Care<input name="care" value="${esc(x.care||'')}" placeholder="e.g. Machine wash cold, tumble dry low"></label>
+    <div class="cl-2"><label>Bought at<input name="store" value="${esc(x.store||'')}"></label><label class="cl-fav"><input type="checkbox" name="favorite" ${x.favorite?'checked':''}><span>★ Favorite</span></label></div>
+    <div class="cl-3"><label>Paid $<input name="paid" inputmode="decimal" value="${clDollars(x.purchase_price_cents)}"></label><label>Retail $<input name="retail" inputmode="decimal" value="${clDollars(x.retail_price_cents)}"></label><label>Worth now $<input name="worth" inputmode="decimal" value="${clDollars(x.est_value_cents)}"></label></div>
+    ${x.value_basis ? `<div class="cl-basis">${esc(x.value_basis)}</div>` : ''}
+    <div class="cl-2"><label>Warmth 1–5<input name="warmth" type="number" min="1" max="5" value="${x.warmth||3}"></label><label>Wears before washing<input name="wears_before_wash" type="number" min="1" max="10" value="${x.wears_before_wash||1}"></label></div>
+    <div class="lf-form-actions"><button type="submit" class="save-btn">${o.discard ? 'Save to closet' : 'Save changes'}</button>${o.discard ? `<button type="button" class="link-btn" data-closetdiscard="${o.discard}">Discard</button>` : `<button type="button" class="link-btn" data-clclose>Close</button>`}</div></form>`;
+}
+function clDetail(x){
+  if(!x) return '';
+  const wears = (closet.wears||[]).filter(w=>w.wardrobe_item_id === x.id).length, img = clImg(x);
+  const cpw = x.purchase_price_cents ? Math.round(x.purchase_price_cents / Math.max(1, wears)) : null;
+  const condL = (CL_COND.find(c=>c[0]===x.condition)||[])[1];
+  return `<section class="cl-detail" aria-label="${esc(x.name)}">
+    <div class="cl-hero">${img ? `<img src="${img}" alt="">` : clIcon(x.category)}</div>
+    <h3>${esc(x.name)}</h3><div class="cl-sub">${esc([clTypeLabel(x), x.brand, x.size && 'size ' + x.size, condL].filter(Boolean).join(' · '))}${x.favorite ? ' <span class="cl-star" aria-label="Favorite">★</span>' : ''}</div>
+    <div class="cl-tags">${[x.color && (x.secondary_color ? `${x.color} / ${x.secondary_color}` : x.color), clLabel(CL_FIT, x.fit) && clLabel(CL_FIT, x.fit) + ' fit', clLabel(CL_SLEEVE, x.sleeve_length) && clLabel(CL_SLEEVE, x.sleeve_length) + ' sleeves', clLabel(CL_NECK, x.neckline), clLabel(CL_PATTERN, x.pattern), clLabel(CL_FORMAL, x.formality), (x.seasons||[]).join(', ')].filter(Boolean).map(t=>`<span>${esc(t)}</span>`).join('')}</div>
+    ${x.care || x.store ? `<div class="cl-basis">${esc([x.care, x.store && 'Bought at ' + x.store].filter(Boolean).join(' · '))}</div>` : ''}
+    <div class="cl-facts">
+      <div><span>Paid</span><b>${x.purchase_price_cents ? money(x.purchase_price_cents) : '—'}</b></div>
+      <div><span>Retail</span><b>${x.retail_price_cents ? money(x.retail_price_cents) : '—'}</b></div>
+      <div><span>Worth now</span><b class="acc">${x.est_value_cents ? money(x.est_value_cents) : '—'}</b></div>
+      <div><span>Worn</span><b>${wears}×</b></div><div><span>Per wear</span><b>${cpw != null ? money(cpw) : '—'}</b></div><div><span>Material</span><b>${esc(x.material || '—')}</b></div></div>
+    ${x.est_value_on ? `<div class="cl-basis">Worth estimated ${esc(new Date(x.est_value_on+'T12:00').toLocaleDateString('en-US',{month:'short', day:'numeric'}))}${x.value_basis ? ' · ' + esc(x.value_basis) : ''}</div>` : ''}
+    <div class="cl-actions"><button type="button" class="save-btn" data-cllookup="${x.id}" ${closet.looking === x.id ? 'disabled' : ''}>${closet.looking === x.id ? 'Searching…' : (x.stock_image_path ? 'Refresh details online' : 'Find details online')}</button></div>
+    ${clEditor(x, { form: `data-cledit="${x.id}"`, title: 'Edit' })}
+  </section>`;
+}
+async function clLookup(id){
+  const x = (lifeRows.wardrobe_items||[]).find(r=>r.id === id); if(!x) return;
+  closet.looking = id; renderLife();
+  try{
+    const L = await tools({ action:'clothing_lookup', item:{ name:x.name, type_label: clTypeLabel(x), pattern:x.pattern, brand:x.brand, color:x.color, size:x.size, material:x.material, condition:x.condition, paid_cents:x.purchase_price_cents, store:x.store } });
+    if(!L || L.error){ showNotice(`Couldn't find it online${L && L.error ? `: ${L.error}` : ''}`); return; }
+    const patch = { product_title: L.product_title, product_url: L.product_url, value_basis: L.value_basis, est_value_on: L.est_value_cents ? localToday() : x.est_value_on };
+    if(L.stock_image_path){ patch.stock_image_path = L.stock_image_path; Object.assign(closet.urls, await signPaths('closet', [L.stock_image_path])); }
+    if(L.retail_price_cents) patch.retail_price_cents = L.retail_price_cents; if(L.est_value_cents) patch.est_value_cents = L.est_value_cents;
+    if(!x.brand && L.brand) patch.brand = L.brand; if(!x.material && L.material) patch.material = L.material; if(!x.care && L.care) patch.care = L.care;
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${id}`, { method:'PATCH', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify(patch) });
+    if(!r.ok){ showNotice(`Couldn't save the details (${r.status})`); return; }
+    Object.assign(x, patch); hapticPulse(); showNotice(L.confidence === 'low' ? 'Found a close match. Check the details.' : 'Details found');
+  }catch(e){ showNotice(`Lookup failed: ${e.message}`); }
+  finally{ closet.looking = null; renderLife(); }
+}
+document.addEventListener('click', e=>{
+  const op = e.target.closest('[data-clopen]'); if(op){ closet.open = Number(op.dataset.clopen); renderLife(); setTimeout(()=>document.querySelector('.cl-detail')?.scrollIntoView({ behavior:'smooth', block:'start' }), 30); return; }
+  if(e.target.closest('[data-clclose]')){ closet.open = null; renderLife(); return; }
+  const lk = e.target.closest('[data-cllookup]'); if(lk){ clLookup(Number(lk.dataset.cllookup)); return; }
+});
+document.addEventListener('submit', async e=>{
+  const f = e.target.closest('[data-cledit]'); if(!f) return; e.preventDefault();
+  const id = Number(f.dataset.cledit), row = clFormRow(f);
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/wardrobe_items?id=eq.${id}`, { method:'PATCH', headers:{ ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify(row) });
+  if(!r.ok){ showNotice(`Couldn't save (${r.status})`); return; }
+  Object.assign((lifeRows.wardrobe_items||[]).find(x=>x.id === id) || {}, row); hapticPulse(); showNotice('Saved'); renderLife();
+}, true);
+
 // ---------- chat actions (changes the chat made, each with Undo) + nightly check-in ----------
 let chatMode = 'chat', todayCheckin = null;
 function renderChatActions(el, actions){
@@ -6969,7 +7120,7 @@ document.addEventListener('touchend', e => { const now = Date.now(); if(now - __
 // ================= VERSION NOTICES =================
 function showNotice(text, onTap, sticky){
   let el = document.getElementById('ottoNotice');
-  if(!el){ el = document.createElement('button'); el.id = 'ottoNotice'; el.type = 'button'; el.className = 'otto-notice'; el.setAttribute('role','status'); document.body.appendChild(el); }
+  if(!el){ el = document.createElement('button'); el.id = 'ottoNotice'; el.type = 'button'; el.className = 'otto-notice'; el.setAttribute('aria-live','polite'); document.body.appendChild(el); }
   el.innerHTML = `<span class="dot" aria-hidden="true"></span><span>${esc(text)}</span>`;
   el.onclick = () => { if(onTap) onTap(); else el.classList.remove('show'); };
   requestAnimationFrame(()=> el.classList.add('show'));

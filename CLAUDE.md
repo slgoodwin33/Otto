@@ -5,7 +5,7 @@ Frontend: one file, `index.html` (vanilla JS + Leaflet), served by GitHub Pages 
 Backend: Supabase project **"Personal Database"**, ref **`qqsexwiqhaaimxuswsei`** (Postgres + RLS, Storage, Edge Functions, pg_cron).
 Owner: Samuel (`slgoodwin33@gmail.com`), GIS analyst for the City of Beverly, MA. He uses it daily on an iPhone as a home-screen web app.
 
-Current build: **2026-11-06.85** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
+Current build: **2026-11-06.86** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
 
 ## How to work with Samuel
 - He favors direct execution over explanation, scoped incremental steps, and **verification against real data** — never answer from memory or assumptions; query Supabase / read the code first.
@@ -22,7 +22,7 @@ Current build: **2026-11-06.85** (`const APP_BUILD` in index.html). Bump it on e
 - Batch large loads (~400 rows). Server-side helpers are `security definer` with `search_path = public` and `revoke … from anon, authenticated`.
 
 ## Edge Functions (9 live)
-In repo: `otto-chat` (v12), `doc-extract` (v1), `otto-tools` (v1) — each has its own copy of `common.ts`.
+In repo: `otto-chat` (v12), `doc-extract` (v1), `otto-tools` (v3) — each has its own copy of `common.ts`.
 **First task:** pull the other six into the repo so all code is versioned:
 `supabase login && supabase link --project-ref qqsexwiqhaaimxuswsei && supabase functions download plaid-link-token plaid-exchange plaid-sync health-ingest location-ingest calendar-sync`
 - `otto-chat`: Claude-powered assistant. Builds a plain-text data snapshot, tools that change data through the DB function `chat_apply` (every change has Undo), web search, photos (≤5, receipts), clarify mode. `body.stream: true` → NDJSON events `status | think | action | done` (extended thinking, budget 1500).

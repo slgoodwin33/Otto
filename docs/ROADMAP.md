@@ -1,5 +1,10 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .86 (Nov 6): closet details (ported from Samuel's other conversation)
+- Ported only the closet changes from Samuel's uploaded index.html (it was built on .54/.57, so applying it whole would have dropped .58–.85). Theme bits in it were already in since .73.
+- Closet › Wardrobe: tap any item for a detail card (stock photo or your photo, type, brand, size, tags for fit/sleeves/neckline/pattern/dress level/seasons, paid/retail/worth now, times worn, cost per wear) with an editor for every field; "Find details online" looks the item up (product page, stock photo copied into the private closet bucket, retail price, resale value with its basis). Filter chips by group (Tops, Layers, Outerwear, Bottoms…, from table `clothing_types`, 67 types). Insights adds You paid / Worth now / Valued. Outfit picker adds a layer under 65°F (outerwear under 50°F). Scanning a new item also searches for it online.
+- Backend was already live from that conversation: wardrobe_items columns (type_code, fit, sleeve_length, neckline, pattern, secondary_color, care, formality, seasons, store, favorite, stock_image_path, image_choice, retail/est value…), `clothing_types` (RLS on), `otto-tools` v3 (`clothing` + `clothing_lookup`). The deployed v3 source is now saved in `supabase/functions/otto-tools/index.ts` (no redeploy).
+
 ## Deploy note (Nov 6)
 - GitHub Pages didn't publish .81–.84 (each deploy was cancelled by the next push) and the .85 deploy sat in GitHub's queue for 10 min, then failed ("Deployment failed, try again later"); a re-run also stayed queued. Lesson: when pushing several builds in a row, check the Pages run for the last one actually says success before calling it live.
 
