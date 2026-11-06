@@ -1,5 +1,10 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .84 (Nov 6): commands in the Otto ring
+- Type in the ring and matching actions appear above the box; tap one, or press send when the line fully parsed (↵ badge). End with "?" to ask Otto instead. Anything else goes to chat as before.
+- `move $20 dining to groceries` (moves it this week via move_budget, undo in the notice; says so if the category doesn't have that much) · `#trip`, `@starbucks over $50 last week` (opens Transactions with that filter sentence) · `log gas 9.5 gal $38` (Car › Log form filled in, you save) · `new zone` (spending map in draw mode) · `yesterday`, `oct 27` (Day page) · `car`, `trans`, `sleep`, `calendar`, `spending map`… (opens the page).
+- All local and instant; no network unless the command itself saves something.
+
 ## Just shipped — build .83 (Nov 6): "Since you last looked"
 - Today shows a strip under the date with only what changed since you last left Today (or the app went to the background): "+3 purchases · $84.46", "Steps · 8,214 today", "Sleep logged · 7h 02m", "2 new to review", "3 new stops"; plus what's due soon whether new or not: bills in the next 3 days (amber if not autopay) and documents expiring within 30 days. Each part opens its page. Nothing changed → "Nothing new since 9:14 AM".
 - Remembered in localStorage `otto.seen` (purchase ids, inbox items, latest steps/sleep). Never computed from the cached first paint, so it can't claim stale data is new. New purchases count bank posts up to 7 days back (Plaid posts late).

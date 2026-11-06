@@ -1966,6 +1966,14 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+
+  /* Otto ring commands (.84) */
+  .cmd-list{display:flex; flex-direction:column; gap:4px; padding:6px; margin:0 0 8px; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.35);} .cmd-list[hidden]{display:none !important;}
+  .cmd{all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 10px; padding:10px 12px; border-radius:12px; min-height:44px;} .cmd b{font:600 15px var(--sans); color:var(--text);} .cmd span{grid-column:1; font:13px var(--sans); color:var(--text-muted);}
+  .cmd em{grid-row:1 / span 2; grid-column:2; align-self:center; font:700 14px var(--sans); font-style:normal; color:#0B0C0A; background:var(--accent); border-radius:8px; padding:3px 8px;}
+  #composer .cmd{width:auto !important; height:auto !important; background:transparent !important; color:var(--text) !important; display:grid !important; place-items:initial !important; border-radius:12px !important; text-align:left; flex-shrink:1;}
+  #composer .cmd.top{background:color-mix(in srgb, var(--accent) 12%, var(--surface)) !important;} .cmd:focus-visible{outline:3px solid var(--accent); outline-offset:-3px;} .cmd:active{transform:scale(.98);}
+  .cmd-hint{font:12px var(--sans); color:var(--text-muted); padding:2px 12px 4px;}
   /* since you last looked (.83) */
   .since{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:-4px 0 12px;} .since-k{font:600 13px var(--sans); color:var(--text-muted); margin-right:2px;}
   .since-p{all:unset; cursor:pointer; box-sizing:border-box; min-height:32px; display:inline-flex; align-items:center; padding:0 11px; border-radius:999px; background:var(--surface); border:1px solid var(--border); font:600 13px var(--sans); color:var(--text);}
@@ -2144,9 +2152,9 @@ body.chatting .otto-chat-starters{display:none}
     </div>
   </div>
   <form class="composer" id="composer" autocomplete="off">
-    <div id="photoChip" class="photo-chip" hidden></div><div class="composer-inner">
+    <div id="cmdList" class="cmd-list" role="listbox" aria-label="Do it now" hidden></div><div id="photoChip" class="photo-chip" hidden></div><div class="composer-inner">
       <label for="askInput" class="sr-only">Ask Otto</label>
-      <input id="askInput" type="text" placeholder="Ask Otto anything…" enterkeyhint="send">
+      <input id="askInput" type="text" placeholder="Ask, or: move $20 dining to groceries" enterkeyhint="send" autocomplete="off" aria-controls="cmdList">
       <button type="button" id="photoBtn" class="mic-btn photo-btn" aria-label="Add a photo (receipts and more)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button>
       <input type="file" id="photoInput" accept="image/*" multiple hidden>
       <input type="file" id="docInput" accept="image/*,application/pdf" multiple hidden>
@@ -2363,7 +2371,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-06.83';
+const APP_BUILD = '2026-11-06.84';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5471,6 +5479,77 @@ document.addEventListener('click', e=>{
   else openChatWith("Here's my receipt:\n");
 });
 
+
+
+// ---------- Otto ring commands (.84): type a verb, act instantly; anything else is a question for Otto ----------
+// move $20 dining to groceries · #trip this month / @starbucks / over $50 last week · log gas 9.5 gal $38 ·
+// open car / money / transactions / recurring / sleep / history · spending map · calendar · new zone · yesterday / day nov 2
+// Suggestions show above the box as you type. Enter runs the top one only when the whole line parsed (✓); otherwise it goes to chat.
+const CMD_PLACES = [
+  ['today', 'Today', ()=>openArea('today')], ['plan', 'Plan', ()=>openArea('todos')], ['money', 'Money', ()=>openArea('money')], ['this week', 'Money › This week', ()=>openDeep('money','week')],
+  ['transactions', 'Money › Transactions', ()=>openDeep('money','txns')], ['recurring', 'Money › Recurring', ()=>openDeep('money','recurring')], ['accounts', 'Money › Accounts', ()=>openDeep('money','accounts')],
+  ['body', 'Body', ()=>openArea('health')], ['steps', 'Body › Trends', ()=>openDeep('health','Trends')], ['sleep', 'Body › Sleep', ()=>openDeep('health','Sleep')], ['history', 'Body › History', ()=>{ openArea('health'); setTimeout(()=>setBodyTab('history'), 0); }],
+  ['kitchen', 'Kitchen', ()=>openArea('food')], ['places', 'Places', ()=>openArea('assets')], ['map', 'Places', ()=>openArea('assets')], ['inbox', 'Inbox', ()=>openInboxDeck()],
+  ['spending map', 'Spending map', ()=>openSpendMap()], ['calendar', 'Calendar · spending', ()=>openCal('spend')], ['steps calendar', 'Calendar · steps', ()=>openCal('steps')],
+  ['closet', 'Closet', ()=>openArea('closet')], ['car', 'Car', ()=>openArea('car')], ['documents', 'Documents', ()=>openArea('documents')], ['people', 'People', ()=>openArea('people')],
+  ['subscriptions', 'Money › Recurring', ()=>openDeep('money','recurring')], ['apartments', 'Apartments', ()=>openArea('apartments')], ['school', 'School', ()=>openArea('school')], ['trips', 'Trips', ()=>openArea('trips')], ['drone', 'Drone', ()=>openArea('drone')], ['all', 'All areas', ()=>openArea('all')]
+];
+function cmdCat(q){ const cats = (lastBudgetData && lastBudgetData.categories) || [], n = normTxt(q); if(!n) return null;
+  return cats.find(c=>normTxt(c.category) === n) || cats.find(c=>normTxt(c.category).startsWith(n)) || cats.find(c=>normTxt(c.category).includes(n)) || null; }
+function cmdMatches(raw){
+  const q = raw.trim(), lq = q.toLowerCase(), out = []; if(!q) return out;
+  // move money
+  let m = q.match(/^move\s+\$?(\d+(?:\.\d{1,2})?)\s+(?:from\s+)?(.+?)\s*(?:→|->|\bto\b|\binto\b)\s*(.+)$/i);
+  if(m){ const cents = Math.round(Number(m[1])*100), a = cmdCat(m[2]), b = cmdCat(m[3]), S = lastBudgetData && lastBudgetData.summary;
+    if(a && b && a !== b && S){ const ok = movable(a) >= cents;
+      out.push({ exact: ok, label: ok ? `Move ${money(cents)} from ${a.category} to ${b.category}` : `${a.category} only has ${money(movable(a))} unspent`, sub: ok ? `This week · ${a.category} keeps ${money(catLeft(a) - cents)} · ${b.category} gets to ${money(catLeft(b) + cents)}` : 'Open Move money instead',
+        run: ok ? async ()=>{ await moveBudget(S.period_code, a.category_code, b.category_code, cents); hapticPulse(); showNotice(`Moved ${money(cents)} from ${a.category} to ${b.category}. Tap to undo.`, async ()=>{ document.getElementById('ottoNotice')?.classList.remove('show'); try{ await moveBudget(S.period_code, b.category_code, a.category_code, cents); showNotice('Undone.'); }catch(err){ showNotice(err.message); } }); }
+                : ()=>{ openDeep('money','week'); setTimeout(()=>openBudgetMove(a.category_code, b.category_code), 300); } }); }
+    else out.push({ exact:false, label:'Move money between categories', sub:'Like: move $20 dining to groceries', run: ()=>{ openDeep('money','week'); setTimeout(()=>openBudgetMove(a && a.category_code, b && b.category_code), 300); } }); }
+  else if(/^move\b/i.test(q)) out.push({ exact:false, label:'Move money between categories', sub:'Like: move $20 dining to groceries', run: ()=>{ openDeep('money','week'); setTimeout(()=>openBudgetMove(null, null), 300); } });
+  // log gas
+  m = q.match(/^log\s+(?:gas|fill-?up|fuel)\b\s*(?:(\d+(?:\.\d+)?)\s*(?:gal(?:lons?)?)?)?\s*(?:\$\s*(\d+(?:\.\d{1,2})?))?/i);
+  if(m){ const pre = { filled_on: localToday() }; if(m[1]) pre.gallons = Number(m[1]); if(m[2]) pre.total_cents = Math.round(Number(m[2])*100);
+    out.push({ exact: !!(m[1] || m[2]), label: `Log a fill-up${m[1] ? ' · ' + m[1] + ' gal' : ''}${m[2] ? ' · $' + m[2] : ''}`, sub:'Opens Car › Log with this filled in; you save it', run: ()=>{ openArea('car'); setTimeout(()=>{ lifeSection = 1; lifeAdding = 'fuel_logs'; lifePrefill = pre; renderLife(); }, 60); } }); }
+  // transaction filters
+  if(/(^|\s)[#@]\S|\b(over|under)\s*\$?\d|^(today|yesterday|this week|last week|this month|last month|last \d+ days)\b.*\b(spent|purchases|spending)\b/i.test(q) && !/^move\b|^log\b/i.test(q)){
+    const Q = parseTxnQuery(q), n = (allTxns||[]).filter(t=>txnMatches(t, Q) && (!Q.text.length || Q.text.every(w=>normTxt([t.merchant,t.description].join(' ')).includes(normTxt(w))))).length;
+    out.push({ exact: /^[#@]/.test(q), label: `Show purchases: ${Q.parts.map(p=>p.label).join(' · ')}`, sub: `${n} match${n===1?'':'es'} in what's loaded`, run: ()=>{ openDeep('money','txns'); setTimeout(()=>{ const i = document.getElementById('txnSearch'); if(i){ i.value = q; expandedTxnId = null; renderTxns(); } }, 60); } }); }
+  // zones
+  if(/^(new|draw)\s+(a\s+)?(zone|loop|area)\b/i.test(q)) out.push({ exact:true, label:'Draw a zone on the spending map', sub:'Drag a loop, then name it', run: async ()=>{ await openSpendMap(); setTimeout(()=>startLoopDraw(), 400); } });
+  // days
+  const dm = lq.match(/^(?:day\s+)?(today|yesterday|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2})$/);
+  if(dm){ let d = dm[1] === 'today' ? localToday() : dm[1] === 'yesterday' ? isoAddDays(localToday(), -1) : null;
+    if(!d){ const t = new Date(`${dm[1]} ${new Date().getFullYear()} 12:00`); if(!isNaN(t)){ d = isoOf(t); if(d > localToday()) d = isoOf(new Date(`${dm[1]} ${new Date().getFullYear()-1} 12:00`)); } }
+    if(d) out.push({ exact:true, label:`Open ${dayLong(d)}`, sub:'Your day: stops, spending, steps', run: ()=>openDayPage(d) }); }
+  // places
+  const nav = lq.replace(/^(open|go to|show|goto)\s+/, '');
+  if(nav.length >= 2){ const hits = CMD_PLACES.filter(([k])=>k === nav || k.startsWith(nav) || (nav.length >= 4 && k.includes(nav)));
+    const only = hits.length === 1 && !out.length && nav.length >= 3 && nav.split(' ').length <= 2;
+    hits.slice(0, 3).forEach(([k, label, fn])=>{ if(!out.some(o=>o.label === 'Open ' + label)) out.push({ exact: k === nav || only, label:'Open ' + label, sub:'', run: fn }); }); }
+  return out.slice(0, 4);
+}
+let cmdItems = [];
+function renderCmdList(){
+  const box = document.getElementById('cmdList'), inp = document.getElementById('askInput'); if(!box || !inp) return;
+  cmdItems = pendingImages.length ? [] : cmdMatches(inp.value);
+  box.hidden = !cmdItems.length;
+  box.innerHTML = cmdItems.map((c,i)=>`<button type="button" class="cmd ${i === 0 && c.exact ? 'top' : ''}" role="option" aria-selected="${i === 0 && c.exact}" data-cmd="${i}"><b>${esc(c.label)}</b>${c.sub ? `<span>${esc(c.sub)}</span>` : ''}${i === 0 && c.exact ? '<em aria-hidden="true">↵</em>' : ''}</button>`).join('') + (cmdItems.length ? `<div class="cmd-hint">${cmdItems[0].exact ? 'Send does the top one. End with ? to ask Otto instead.' : 'Tap one, or send to ask Otto.'}</div>` : '');
+}
+async function runCmd(i){
+  const c = cmdItems[i]; if(!c) return; const inp = document.getElementById('askInput');
+  inp.value = ''; renderCmdList(); inp.blur();
+  if(!document.querySelector('#chatThread > .msg:not(.intro)')) document.body.classList.remove('chatting');
+  try{ await c.run(); }catch(err){ showNotice(err.message || 'That didn’t work'); }
+}
+(function(){
+  const inp = document.getElementById('askInput'), box = document.getElementById('cmdList'); if(!inp || !box) return;
+  inp.addEventListener('input', renderCmdList); inp.addEventListener('focus', renderCmdList);
+  box.addEventListener('pointerdown', e=>e.preventDefault());
+  box.addEventListener('click', e=>{ const b = e.target.closest('[data-cmd]'); if(b) runCmd(Number(b.dataset.cmd)); });
+  // Enter runs a fully-parsed command; capture phase so the chat submit doesn't also fire
+  document.getElementById('composer').addEventListener('submit', e=>{ if(cmdItems[0] && cmdItems[0].exact && !pendingImages.length && !/\?\s*$/.test(document.getElementById('askInput').value)){ e.preventDefault(); e.stopImmediatePropagation(); runCmd(0); } }, true);
+})();
 
 // ===================== IA v2 (build .50): dock, widget Home, All launcher, Edit dock =====================
 document.body.classList.add('ia2'); document.documentElement.classList.add('ia2');
