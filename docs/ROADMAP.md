@@ -1,5 +1,12 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .82 (Nov 6): motion pass
+- Tap a Home tile or an All-areas tile and it grows into its page (View Transitions; older iOS just switches).
+- Numbers that change while you watch (Home tiles, Money's left-to-spend, category amounts) tween from the old value to the new one with a brief lime glow, e.g. after Move money or a sync.
+- Lists move instead of jumping (FLIP): transaction rows when you filter or tag, category rows when the order changes, Home tiles when you reorder.
+- Bars grow in for the first moment after a page opens (category bars, bullet, day bars, mini-bars, calendar weeks), not on every background refresh.
+- Transform/opacity only; all of it is off under Reduce Motion. (Home tiles already share one builder, `wdg()`; area pages get `card()` with .85.)
+
 ## Just shipped — build .81 (Nov 6): declutter pass
 - Today: the money card is only about money (today's to-dos moved into Next, which now starts with Today and marks late items). Empty tiles (Not synced, Nothing coming up, No data) no longer hold a grid slot; they fold into one "Nothing to show yet: Steps not synced" line under the grid, and the grid packs densely so there are no holes. Loading tiles wait instead of flashing.
 - Plan: Week/Month and the month arrows share one row; the "YOUR WEEK / Events, todos, meals, bills" headline is gone; empty days show nothing instead of "Free" ×6 (screen readers hear "nothing planned"). Fixed: the month arrows showed in Week mode (CSS overrode `hidden`).

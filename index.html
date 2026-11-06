@@ -1964,6 +1964,18 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+
+  /* motion (.82) */
+  ::view-transition-group(otto-zoom){animation-duration:.32s; animation-timing-function:cubic-bezier(.2,.8,.2,1);}
+  ::view-transition-old(otto-zoom), ::view-transition-new(otto-zoom){animation-duration:.32s; height:100%; object-fit:cover; overflow:clip;}
+  ::view-transition-old(root), ::view-transition-new(root){animation-duration:.2s;}
+  .num-changed{transition:color .2s;} .num-changed:not(.neg){text-shadow:0 0 18px color-mix(in srgb, var(--accent) 45%, transparent);}
+  @keyframes growX{from{transform:scaleX(0);}} @keyframes growY{from{transform:scaleY(.05);}}
+  body.viz-in .bcat-bar > div, body.viz-in .bullet > i, body.viz-in .sp-bar i, body.viz-in .cal-wd-bar i, body.viz-in .yr-row i, body.viz-in .mini-bar > div{transform-origin:left center; animation:growX .55s cubic-bezier(.2,.8,.2,1) both;}
+  body.viz-in .mini-bars .mb i, body.viz-in .db rect:nth-child(2){transform-origin:bottom; transform-box:fill-box; animation:growY .5s cubic-bezier(.2,.8,.2,1) both;}
+  body.viz-in .bcat:nth-child(2) .bcat-bar > div{animation-delay:.03s;} body.viz-in .bcat:nth-child(3) .bcat-bar > div{animation-delay:.06s;} body.viz-in .bcat:nth-child(4) .bcat-bar > div{animation-delay:.09s;} body.viz-in .bcat:nth-child(n+5) .bcat-bar > div{animation-delay:.12s;}
+  .txn-row, .bcat, .wdg, .lt{will-change:auto;}
+  @media (prefers-reduced-motion: reduce){ body.viz-in *{animation:none !important;} ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*){animation:none !important;} }
   /* declutter pass (.81) */
   .wdg-quietline{display:flex; flex-wrap:wrap; align-items:center; gap:4px 12px; padding:12px 4px 4px; font:13px var(--sans); color:var(--text-muted);} .wdg-quietline .link-btn{font:600 13px var(--sans); color:var(--text); min-height:32px;} .wdg-quietline em{font-style:normal; font-weight:400; color:var(--text-muted);}
   .plan-ctl{display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;} .plan-ctl .plan-view-switch{margin:0;} .plan-ctl .plan-month-nav{flex:1; margin:0; min-width:0;} .plan-month-nav[hidden]{display:none !important;} .plan-ctl .plan-week-reset{margin-left:auto;}
@@ -2345,7 +2357,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-06.81';
+const APP_BUILD = '2026-11-06.82';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2869,7 +2881,9 @@ function renderBudget0(data){
   if(data.income && data.income.length){
     html += `<div class="section-title">Income</div><div class="gcard">${data.income.map(i=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(i.name)}</div><div class="grow-sub">${esc(i.frequency)}, take-home</div></div><div class="grow-right">${money(i.net_amount_cents)}</div></div>`).join('')}</div>`;
   }
-  el.innerHTML = html;
+  const bSnap = flipSnap(el, '.bcat[data-bcat]', 'data-bcat');
+  el.innerHTML = html; flipPlay(el, '.bcat[data-bcat]', 'data-bcat', bSnap);
+  countChange(el, '.mo-big, .bcat-amt', (x)=>'budget:' + ((x.closest('[data-bcat]')||{dataset:{}}).dataset.bcat || 'hero'));
   el.querySelectorAll('[data-legendcat]').forEach(r=>r.addEventListener('click', ()=>{ const c = (data.categories||[]).find(x=>x.category===r.dataset.legendcat); if(!c) return; expandedBudgetCat = c.category_code; renderBudget(data); const row = el.querySelector(`[data-bcat="${c.category_code}"]`); if(row) row.scrollIntoView({ behavior:'smooth', block:'center' }); }));
   el.querySelectorAll('[data-barday]').forEach(b=>b.addEventListener('click', ()=>{ if(b.classList.contains('future')) return; txnDay = b.dataset.barday; txnFilter = 'all'; setMoneySeg('txns'); renderTxns(); }));
   el.querySelectorAll('[data-bcat]').forEach(r=>r.addEventListener('click', e=>{
@@ -5505,8 +5519,8 @@ document.addEventListener('click', e=>{
   const a = e.target.closest('[data-area2]'); if(a){ hapticPulse(); openArea(a.dataset.area2); return; }
   if(e.target.closest('[data-expand]')){ ia2Collapsed = false; renderIa2Dock(); return; }
   if(e.target.closest('[data-ia2search]')){ openChatWith(''); return; }
-  const w = e.target.closest('[data-w]'); if(w){ const k = w.dataset.w; if(k === 'inbox') openInboxDeck(); else if(k === 'day') openDayPage(localToday()); else openDeep(k, w.dataset.sub); return; }
-  const t = e.target.closest('[data-tile]'); if(t){ const k = t.dataset.tile; if(k === 'inbox') openInboxDeck(); else openArea(k); return; }
+  const w = e.target.closest('[data-w]'); if(w){ const k = w.dataset.w; if(k === 'inbox') openInboxDeck(); else if(k === 'day') openDayPage(localToday()); else zoomFrom(w.closest('.wdg') || w, ()=>openDeep(k, w.dataset.sub)); return; }
+  const t = e.target.closest('[data-tile]'); if(t){ const k = t.dataset.tile; if(k === 'inbox') openInboxDeck(); else zoomFrom(t, ()=>openArea(k)); return; }
   if(e.target.closest('[data-acct]')){ openSheet('account'); return; }
   if(e.target.closest('[data-editdock]')){ lifeArea = '__dock'; renderLife(); return; }
   const pin = e.target.closest('[data-pin]'); if(pin){ let p = dockPins(); const k = pin.dataset.pin;
@@ -5671,10 +5685,12 @@ function renderIa2HomeNow(){
   const live = keys.filter(k=>!isQuiet(k)), quiet = keys.filter(k=>isQuiet(k) && quietWhy(k));
   const quietLine = quiet.length ? `<div class="wdg-quietline"><span>Nothing to show yet:</span>${quiet.map(k=>`<button type="button" class="link-btn" data-w="${(W[k].match(/data-w="([^"]+)"/)||[])[1]}">${QL[k] || k} <em>${esc(quietWhy(k).toLowerCase())}</em></button>`).join('')}</div>` : '';
   const grid = (homeEditing ? renderHomeEdit(cfg) : `<div class="wdg-grid ${ia2FirstPaint ? 'enter' : ''}">${hero}${live.map(k=>cfg.wide[k] === false ? W[k].replace('class="wdg wide', 'class="wdg') : sized(k)).join('')}</div>${quietLine}`);
+  const homeSnap = homeEditing ? null : flipSnap(el, '.wdg[data-w]', 'data-w');
   el.innerHTML = `<div class="ia2-head"><div><span class="ia2-kicker">${now.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})} · ${homeCachedAt ? `cached ${timeAgo(homeCachedAt)} · updating` : now.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'})}</span><h2><span class="otto-mark" aria-hidden="true"></span>Today</h2></div>
       <span class="ia2-btns"><button type="button" class="ia2-inbox" data-homeedit aria-label="${homeEditing ? 'Done editing widgets' : 'Edit widgets'}" aria-pressed="${homeEditing}">${homeEditing ? '<b class="ia2-done">Done</b>' : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'}</button><button type="button" class="ia2-inbox" data-w="inbox" aria-label="Inbox, ${q.length} to review">${ico2('inbox',20)}${q.length ? `<span>${q.length}</span>` : ''}</button><button type="button" class="ia2-inbox" data-acct aria-label="Account and settings">${ico2('people',20)}</button></span></div>
     ${grid}`;
-  if(ia2FirstPaint && !homeEditing){ ia2FirstPaint = false; countUp(el); }
+  if(ia2FirstPaint && !homeEditing){ ia2FirstPaint = false; countUp(el); countChange(el, '.wdg-big, .wdg-mid', (x,i)=>'home:' + (x.closest('[data-w]')||{dataset:{}}).dataset.w + ':' + i); }
+  else if(!homeEditing){ countChange(el, '.wdg-big, .wdg-mid', (x,i)=>'home:' + (x.closest('[data-w]')||{dataset:{}}).dataset.w + ':' + i); flipPlay(el, '.wdg[data-w]', 'data-w', homeSnap); }
   if(!homeCachedAt) saveHomeCache();
   if(bgMap){ try{ bgMap.setView(bgCenter(), 15, { animate:false }); }catch(e){} }
   // live mini map for the last stop
@@ -7016,7 +7032,8 @@ function renderTxns(){
   }).join('');
   if(!shown.length) html += `<div class="empty">${txnQuery ? 'No matching transactions.' : 'No transactions in this filter.'}</div>`;
   if(allTxns.length >= txnLimit) html += `<button class="txn-more" type="button" id="txnMore">Show older</button>`;
-  el.innerHTML = html;
+  const tSnap = flipSnap(el, '.txn-row[data-txn]', 'data-txn');
+  el.innerHTML = html; flipPlay(el, '.txn-row[data-txn]', 'data-txn', tSnap);
 }
 async function refreshBank(){
   try{ await fetchBank(); renderBank(); renderTxns(); if(lastBudgetData) renderBudget(lastBudgetData); }
@@ -7918,7 +7935,41 @@ document.addEventListener('click', e=>{
 // ---------- motion: sliding tab underline, directional tab + page changes ----------
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
-function slideIn(el, dx, dy, ms){ if(!el || reduceMotion() || !el.animate) return; el.animate([{ opacity:0, translate:`${dx}px ${dy}px` }, { opacity:1, translate:'0 0' }], { duration: ms || 260, easing: EASE }); }
+// ---------- Motion (.82): numbers tween from old to new, lists FLIP, tiles zoom into their page, bars grow in ----------
+// Transform/opacity only; everything is skipped under prefers-reduced-motion.
+const numMemo = new Map();
+function numParse(txt){ const m = String(txt).match(/^([−\-]?\$?)([\d,]+)(\.\d+)?(.*)$/s); if(!m) return null; return { pre:m[1], v:Number(m[2].replace(/,/g,'') + (m[3]||'')), dec:m[3] ? m[3].length - 1 : 0, post:m[4] }; }
+function countChange(root, sel, keyOf){
+  root.querySelectorAll(sel).forEach((el, i)=>{
+    const txt = el.firstChild && el.firstChild.nodeType === 3 ? el.firstChild : null; if(!txt) return; const n = numParse(txt.textContent); if(!n) return;
+    const key = keyOf(el, i), old = numMemo.get(key); numMemo.set(key, n.v);
+    if(old == null || old === n.v || reduceMotion() || Math.abs(old - n.v) < 0.005) return;
+    const t0 = performance.now(), D = 450, fmt = v => n.pre + v.toLocaleString('en-US', { minimumFractionDigits:n.dec, maximumFractionDigits:n.dec }) + n.post;
+    el.classList.add('num-changed'); setTimeout(()=>el.classList.remove('num-changed'), 700);
+    const step = t => { const f = Math.min(1, (t - t0)/D), e = 1 - Math.pow(1-f, 3); if(!txt.isConnected) return; txt.textContent = fmt(old + (n.v - old) * e); if(f < 1) requestAnimationFrame(step); };
+    txt.textContent = fmt(old); requestAnimationFrame(step);
+  });
+}
+function flipSnap(root, sel, attr){ const m = new Map(); if(!root || reduceMotion()) return m; root.querySelectorAll(sel).forEach(el=>{ const k = el.getAttribute(attr); if(k != null && !m.has(k)) m.set(k, el.getBoundingClientRect()); }); return m; }
+function flipPlay(root, sel, attr, before){
+  if(!root || !before || !before.size || reduceMotion() || !document.body.animate) return; let n = 0;
+  root.querySelectorAll(sel).forEach(el=>{ if(n > 40) return; const k = el.getAttribute(attr), a = before.get(k), b = el.getBoundingClientRect();
+    if(!a){ el.animate([{ opacity:0, transform:'scale(.98)' }, { opacity:1, transform:'none' }], { duration:220, easing:EASE }); n++; return; }
+    const dx = a.left - b.left, dy = a.top - b.top; if(Math.abs(dx) < 1 && Math.abs(dy) < 1) return; if(Math.abs(dy) > innerHeight) return;
+    el.animate([{ transform:`translate(${dx}px, ${dy}px)` }, { transform:'none' }], { duration:260, easing:EASE }); n++; });
+}
+// tile → page: the tapped tile grows into the page (View Transitions; older Safari just switches)
+let vtBusy = false;
+function zoomFrom(el, fn){
+  if(!el || !document.startViewTransition || reduceMotion() || vtBusy) return fn();
+  vtBusy = true; el.style.viewTransitionName = 'otto-zoom'; const sheet = document.getElementById('sheet');
+  let t; try{ t = document.startViewTransition(()=>{ el.style.viewTransitionName = ''; fn(); if(sheet) sheet.style.viewTransitionName = 'otto-zoom'; }); }catch(e){ vtBusy = false; el.style.viewTransitionName = ''; return fn(); }
+  t.finished.finally(()=>{ if(sheet) sheet.style.viewTransitionName = ''; vtBusy = false; });
+}
+// bars grow in for a moment after a page opens (not on every background re-render)
+function vizIn(){ if(reduceMotion()) return; document.body.classList.add('viz-in'); clearTimeout(vizIn.t); vizIn.t = setTimeout(()=>document.body.classList.remove('viz-in'), 900); }
+
+function slideIn(el, dx, dy, ms){ if(!el || reduceMotion() || !el.animate || vtBusy) return; el.animate([{ opacity:0, translate:`${dx}px ${dy}px` }, { opacity:1, translate:'0 0' }], { duration: ms || 260, easing: EASE }); }
 const TABLISTS = '.ia2-subtabs, #moneySeg, #foodSubTabs, #todoSeg';
 const tabSel = el => el.querySelector('.on, .active, [aria-selected="true"]');
 let tabPos = new Map(), tabMove = null;
@@ -7959,7 +8010,7 @@ openArea = function(k){
   if(k === 'subscriptions'){ openArea('money'); setTimeout(()=>setMoneySeg('recurring'), 0); return; }
   const prev = ia2Active, wasOpen = !!sheetArea, o = dockOrder();
   let dir = navDir || (o.includes(prev) && o.includes(k) ? Math.sign(o.indexOf(k) - o.indexOf(prev)) : 1); navDir = 0;
-  _openArea(k);
+  _openArea(k); vizIn();
   if(k === 'today'){ const g = document.querySelector('#ia2Home .wdg-grid'); if(wasOpen && g && !reduceMotion()) g.animate([{ opacity:.4, transform:'scale(.985)' }, { opacity:1, transform:'none' }], { duration:280, easing:EASE }); return; }
   if(prev === k && wasOpen) return;
   const body = document.getElementById('sheetBody'), head = document.querySelector('#sheet .head-left');
