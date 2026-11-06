@@ -1965,6 +1965,12 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+
+  /* since you last looked (.83) */
+  .since{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:-4px 0 12px;} .since-k{font:600 13px var(--sans); color:var(--text-muted); margin-right:2px;}
+  .since-p{all:unset; cursor:pointer; box-sizing:border-box; min-height:32px; display:inline-flex; align-items:center; padding:0 11px; border-radius:999px; background:var(--surface); border:1px solid var(--border); font:600 13px var(--sans); color:var(--text);}
+  .since-p.warn{border-color:color-mix(in srgb, var(--amber) 55%, var(--border)); color:var(--amber);} .since-p:focus-visible{outline:3px solid var(--accent); outline-offset:2px;} .since-p:active{transform:scale(.97);}
+  .since.quiet{font:13px var(--sans); color:var(--text-muted);}
   /* motion (.82) */
   ::view-transition-group(otto-zoom){animation-duration:.32s; animation-timing-function:cubic-bezier(.2,.8,.2,1);}
   ::view-transition-old(otto-zoom), ::view-transition-new(otto-zoom){animation-duration:.32s; height:100%; object-fit:cover; overflow:clip;}
@@ -2357,7 +2363,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-06.82';
+const APP_BUILD = '2026-11-06.83';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5611,6 +5617,51 @@ document.addEventListener('pointercancel', ()=>endScrub());
 // a scrub is not a tap: don't open Money when the finger lifts
 document.addEventListener('click', e=>{ if(Date.now() - scrub.swallow < 400 && e.target.closest('#ia2Home .wdg.hero, #cashflowCard')){ e.stopPropagation(); e.preventDefault(); } }, true);
 
+
+// ---------- "Since you last looked" (.83) ----------
+// When you leave Today (or the app goes to the background) Otto remembers what it showed (localStorage otto.seen).
+// Next time, a strip under the date says only what changed, plus anything due in the next 3 days. Each part opens its page.
+const SEEN_KEY = 'otto.seen';
+function seenGet(){ try{ return JSON.parse(localStorage.getItem(SEEN_KEY) || 'null'); }catch(e){ return null; } }
+function seenNow(){
+  const daily = (lastHealthData && lastHealthData.daily) || [], st = daily.filter(r=>r.steps != null).sort((a,b)=>b.activity_date.localeCompare(a.activity_date))[0];
+  const sl = lastHealthData && lastHealthData.sleep && lastHealthData.sleep[0];
+  return { at: Date.now(), txn: (allTxns||[]).slice(0, 250).map(t=>t.id), inbox: (clarifications||[]).map(c=>c.kind + ':' + c.ref_id),
+    steps: st ? st.activity_date + ':' + st.steps : null, sleep: sl ? sl.sleep_date : null };
+}
+function markSeen(){ if(homeCachedAt || !(allTxns||[]).length) return; try{ localStorage.setItem(SEEN_KEY, JSON.stringify(seenNow())); }catch(e){} }
+function sinceParts(){
+  const S = seenGet(), today = localToday(), out = [];
+  if(S && !homeCachedAt){
+    const since = isoAddDays(isoOf(S.at), -7), seenIds = new Set(S.txn || []);
+    const fresh = (allTxns||[]).filter(t=>!seenIds.has(t.id) && t.transaction_date >= since && !t.exclude_from_budget);
+    const spent = fresh.filter(t=>t.amount_cents < 0).reduce((a,t)=>a - Number(t.amount_cents), 0), got = fresh.filter(t=>t.amount_cents > 0).reduce((a,t)=>a + Number(t.amount_cents), 0);
+    if(fresh.length) out.push({ k:'txns', t: `+${fresh.length} purchase${fresh.length===1?'':'s'}${spent ? ' · ' + money(spent) : ''}${got ? ' · ' + money(got) + ' in' : ''}` });
+    const now = seenNow();
+    if(now.steps && now.steps !== S.steps){ const [d, n] = now.steps.split(':'); out.push({ k:'steps', t: `Steps · ${Number(n).toLocaleString()}${d === today ? ' today' : ' on ' + shortDate(d)}` }); }
+    if(now.sleep && now.sleep !== S.sleep){ const sl = lastHealthData.sleep[0]; out.push({ k:'sleep', t: `Sleep logged · ${hm(sl.asleep_min)}` }); }
+    const seenQ = new Set(S.inbox || []), newQ = (clarifications||[]).filter(c=>!seenQ.has(c.kind + ':' + c.ref_id));
+    if(newQ.length) out.push({ k:'inbox', t: `${newQ.length} new to review` });
+    const stops = (mapData.visits||[]).filter(v=>v.arrived_at && Date.parse(v.arrived_at) > S.at && v.status !== 'declined');
+    if(stops.length) out.push({ k:'day', t: stops.length === 1 ? `Stop · ${stops[0].place || 'new place'}` : `${stops.length} new stops` });
+  }
+  // coming up (not a diff): bills in the next 3 days, documents expiring within 30
+  const bills = ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.due_day && Number(b.amount_cents) > 0).map(b=>({ b, d: daysUntil(nextOccurrenceFromDueDay(b.due_day)) })).filter(x=>x.d >= 0 && x.d <= 3).sort((a,b)=>a.d - b.d);
+  bills.slice(0, 2).forEach(x=>out.push({ k:'bill', t: `${x.b.name} ${x.d === 0 ? 'due today' : x.d === 1 ? 'due tomorrow' : `due in ${x.d} days`}`, warn: !x.b.autopay }));
+  const docsSoon = (lifeRows.documents||[]).filter(x=>x.expires_on && daysTo(x.expires_on) >= 0 && daysTo(x.expires_on) <= 30).sort((a,b)=>a.expires_on.localeCompare(b.expires_on));
+  if(docsSoon.length) out.push({ k:'docs', t: `${docsSoon[0].name || 'A document'} expires ${daysTo(docsSoon[0].expires_on) <= 1 ? 'tomorrow' : 'in ' + daysTo(docsSoon[0].expires_on) + ' days'}`, warn: daysTo(docsSoon[0].expires_on) <= 7 });
+  return { S, out };
+}
+function sinceStrip(){
+  const { S, out } = sinceParts(); if(!out.length) return S && !homeCachedAt ? `<div class="since quiet">Nothing new since ${sinceWhen(S.at)}</div>` : '';
+  return `<div class="since" role="group" aria-label="Since you last looked"><span class="since-k">${S && !homeCachedAt ? 'Since ' + sinceWhen(S.at) : 'Coming up'}</span>${out.map(x=>`<button type="button" class="since-p ${x.warn ? 'warn' : ''}" data-since="${x.k}">${esc(x.t)}</button>`).join('')}</div>`;
+}
+function sinceWhen(ms){ const d = new Date(ms), t = isoOf(d); return t === localToday() ? d.toLocaleTimeString('en-US',{ hour:'numeric', minute:'2-digit' }) : t === isoAddDays(localToday(), -1) ? 'yesterday' : shortDate(t); }
+document.addEventListener('click', e=>{ const b = e.target.closest('[data-since]'); if(!b) return; const k = b.dataset.since;
+  if(k === 'txns'){ openDeep('money','txns'); } else if(k === 'steps'){ openDeep('health','Trends'); } else if(k === 'sleep'){ openDeep('health','Sleep'); }
+  else if(k === 'inbox'){ openInboxDeck(); } else if(k === 'day'){ openDayPage(localToday()); } else if(k === 'bill'){ openDeep('money','week'); } else if(k === 'docs'){ openArea('documents'); } });
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden && !sheetArea) markSeen(); });
+
 // many loaders finish within the same moment; draw Home once per frame instead of once per loader
 let ia2HomeRaf = 0;
 function renderIa2Home(){ if(scrub.on){ scrub.pending = true; return; } if(ia2HomeRaf) return; ia2HomeRaf = requestAnimationFrame(()=>{ ia2HomeRaf = 0; renderIa2HomeNow(); }); }
@@ -5687,8 +5738,8 @@ function renderIa2HomeNow(){
   const grid = (homeEditing ? renderHomeEdit(cfg) : `<div class="wdg-grid ${ia2FirstPaint ? 'enter' : ''}">${hero}${live.map(k=>cfg.wide[k] === false ? W[k].replace('class="wdg wide', 'class="wdg') : sized(k)).join('')}</div>${quietLine}`);
   const homeSnap = homeEditing ? null : flipSnap(el, '.wdg[data-w]', 'data-w');
   el.innerHTML = `<div class="ia2-head"><div><span class="ia2-kicker">${now.toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'})} · ${homeCachedAt ? `cached ${timeAgo(homeCachedAt)} · updating` : now.toLocaleTimeString('en-US',{hour:'numeric', minute:'2-digit'})}</span><h2><span class="otto-mark" aria-hidden="true"></span>Today</h2></div>
-      <span class="ia2-btns"><button type="button" class="ia2-inbox" data-homeedit aria-label="${homeEditing ? 'Done editing widgets' : 'Edit widgets'}" aria-pressed="${homeEditing}">${homeEditing ? '<b class="ia2-done">Done</b>' : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'}</button><button type="button" class="ia2-inbox" data-w="inbox" aria-label="Inbox, ${q.length} to review">${ico2('inbox',20)}${q.length ? `<span>${q.length}</span>` : ''}</button><button type="button" class="ia2-inbox" data-acct aria-label="Account and settings">${ico2('people',20)}</button></span></div>
-    ${grid}`;
+      <span class="ia2-btns"><button type="button" class="ia2-inbox" data-homeedit aria-label="${homeEditing ? 'Done editing widgets' : 'Edit widgets'}" aria-pressed="${homeEditing}">${homeEditing ? '<b class="ia2-done">Done</b>' : '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>'}</button><button type="button" class="ia2-inbox" data-acct aria-label="Account and settings">${ico2('people',20)}</button></span></div>
+    ${homeEditing ? '' : sinceStrip()}${grid}`;
   if(ia2FirstPaint && !homeEditing){ ia2FirstPaint = false; countUp(el); countChange(el, '.wdg-big, .wdg-mid', (x,i)=>'home:' + (x.closest('[data-w]')||{dataset:{}}).dataset.w + ':' + i); }
   else if(!homeEditing){ countChange(el, '.wdg-big, .wdg-mid', (x,i)=>'home:' + (x.closest('[data-w]')||{dataset:{}}).dataset.w + ':' + i); flipPlay(el, '.wdg[data-w]', 'data-w', homeSnap); }
   if(!homeCachedAt) saveHomeCache();
@@ -8010,6 +8061,7 @@ openArea = function(k){
   if(k === 'subscriptions'){ openArea('money'); setTimeout(()=>setMoneySeg('recurring'), 0); return; }
   const prev = ia2Active, wasOpen = !!sheetArea, o = dockOrder();
   let dir = navDir || (o.includes(prev) && o.includes(k) ? Math.sign(o.indexOf(k) - o.indexOf(prev)) : 1); navDir = 0;
+  if(!sheetArea && k !== 'today') markSeen();
   _openArea(k); vizIn();
   if(k === 'today'){ const g = document.querySelector('#ia2Home .wdg-grid'); if(wasOpen && g && !reduceMotion()) g.animate([{ opacity:.4, transform:'scale(.985)' }, { opacity:1, transform:'none' }], { duration:280, easing:EASE }); return; }
   if(prev === k && wasOpen) return;

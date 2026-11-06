@@ -1,5 +1,10 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .83 (Nov 6): "Since you last looked"
+- Today shows a strip under the date with only what changed since you last left Today (or the app went to the background): "+3 purchases · $84.46", "Steps · 8,214 today", "Sleep logged · 7h 02m", "2 new to review", "3 new stops"; plus what's due soon whether new or not: bills in the next 3 days (amber if not autopay) and documents expiring within 30 days. Each part opens its page. Nothing changed → "Nothing new since 9:14 AM".
+- Remembered in localStorage `otto.seen` (purchase ids, inbox items, latest steps/sleep). Never computed from the cached first paint, so it can't claim stale data is new. New purchases count bank posts up to 7 days back (Plaid posts late).
+- The header inbox icon is gone (the Inbox tile and the strip cover it): header is now Edit + Account.
+
 ## Just shipped — build .82 (Nov 6): motion pass
 - Tap a Home tile or an All-areas tile and it grows into its page (View Transitions; older iOS just switches).
 - Numbers that change while you watch (Home tiles, Money's left-to-spend, category amounts) tween from the old value to the new one with a brief lime glow, e.g. after Move money or a sync.
