@@ -22,12 +22,10 @@ Current build: **2026-11-08.88** (`const APP_BUILD` in index.html). Bump it on e
 - Batch large loads (~400 rows). Server-side helpers are `security definer` with `search_path = public` and `revoke … from anon, authenticated`.
 
 ## Edge Functions (9 live)
-In repo: `otto-chat` (v12), `doc-extract` (v1), `otto-tools` (v3) — each has its own copy of `common.ts`.
-**First task:** pull the other six into the repo so all code is versioned:
-`supabase login && supabase link --project-ref qqsexwiqhaaimxuswsei && supabase functions download plaid-link-token plaid-exchange plaid-sync health-ingest location-ingest calendar-sync`
+All 9 are in the repo (`supabase/functions/<name>/`), saved from the deployed versions on Nov 8: `otto-chat` (v12), `doc-extract` (v1), `otto-tools` (v3), `plaid-link-token` (v13), `plaid-exchange` (v13), `plaid-sync` (v15), `health-ingest` (v8), `location-ingest` (v7), `calendar-sync` (v1). Each has its own copy of shared files (`common.ts`; `sync.ts` in plaid-exchange is an older copy than plaid-sync's, without store locations). Deploying any of them still needs Samuel's OK.
 - `otto-chat`: Claude-powered assistant. Builds a plain-text data snapshot, tools that change data through the DB function `chat_apply` (every change has Undo), web search, photos (≤5, receipts), clarify mode. `body.stream: true` → NDJSON events `status | think | action | done` (extended thinking, budget 1500).
 - `doc-extract`: reads a document photo/PDF → name, kind, issuer, dates, `number_last4`, tags, OCR text. Never stores full ID numbers.
-- `otto-tools`: `vin` (NHTSA vPIC), `recalls`, `listing` (apartment page reader, returns `blocked` when a site refuses), `clothing` (garment ID).
+- `otto-tools`: `vin` (NHTSA vPIC), `recalls`, `listing` (apartment page reader, returns `blocked` when a site refuses), `clothing` (garment ID), `clothing_lookup` (product page, stock photo, retail + resale value).
 - `plaid-*` (bank sync, daily 7 AM cron), `health-ingest` (Health Auto Export), `location-ingest` (OwnTracks), `calendar-sync` (iCloud CalDAV; waits on secrets).
 Secrets live in Supabase (Edge Function secrets and table `app_secrets`). `verify_jwt` is true for user-facing functions, false for ingest webhooks (they check their own keys).
 
