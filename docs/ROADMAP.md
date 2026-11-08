@@ -1,5 +1,9 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — builds .87–.88 (Nov 7–8): Plan › Projects, "sub-projects" → Parts
+- .87 (Samuel's build, committed as-is; it was based on .86): Plan gets a Projects tab — Active (by target date, progress bar), Ongoing (never finishes: open count, high-priority count, next to-do), Finished. Open a project to see its parts, each with its own date, progress, to-dos, add box and Mark done; plus to-dos for the whole project. Project chips on any to-do open the project. Uses projects.kind (finite/ongoing) and projects.parent_id (one level).
+- .88: "sub-projects" are now called **Parts** (no order implied — Hannah's birthday → Birthday day, Stowe weekend; Salem State → application, transcripts, financial aid). "Add a part" box, a Parts header with "N of M done", project cards say "x of y to-dos done · 2 parts". Errors show in the app notice instead of a browser alert. "projects" works as a command in the Otto ring. Database unchanged (parent_id).
+
 ## Just shipped — build .86 (Nov 6): closet details (ported from Samuel's other conversation)
 - Ported only the closet changes from Samuel's uploaded index.html (it was built on .54/.57, so applying it whole would have dropped .58–.85). Theme bits in it were already in since .73.
 - Closet › Wardrobe: tap any item for a detail card (stock photo or your photo, type, brand, size, tags for fit/sleeves/neckline/pattern/dress level/seasons, paid/retail/worth now, times worn, cost per wear) with an editor for every field; "Find details online" looks the item up (product page, stock photo copied into the private closet bucket, retail price, resale value with its basis). Filter chips by group (Tops, Layers, Outerwear, Bottoms…, from table `clothing_types`, 67 types). Insights adds You paid / Worth now / Valued. Outfit picker adds a layer under 65°F (outerwear under 50°F). Scanning a new item also searches for it online.

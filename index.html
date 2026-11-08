@@ -2465,7 +2465,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-07.87';
+const APP_BUILD = '2026-11-08.88';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5610,7 +5610,7 @@ const CMD_PLACES = [
   ['kitchen', 'Kitchen', ()=>openArea('food')], ['places', 'Places', ()=>openArea('assets')], ['map', 'Places', ()=>openArea('assets')], ['inbox', 'Inbox', ()=>openInboxDeck()],
   ['spending map', 'Spending map', ()=>openSpendMap()], ['calendar', 'Calendar · spending', ()=>openCal('spend')], ['steps calendar', 'Calendar · steps', ()=>openCal('steps')],
   ['closet', 'Closet', ()=>openArea('closet')], ['car', 'Car', ()=>openArea('car')], ['documents', 'Documents', ()=>openArea('documents')], ['people', 'People', ()=>openArea('people')],
-  ['subscriptions', 'Money › Recurring', ()=>openDeep('money','recurring')], ['apartments', 'Apartments', ()=>openArea('apartments')], ['school', 'School', ()=>openArea('school')], ['trips', 'Trips', ()=>openArea('trips')], ['drone', 'Drone', ()=>openArea('drone')], ['all', 'All areas', ()=>openArea('all')]
+  ['subscriptions', 'Money › Recurring', ()=>openDeep('money','recurring')], ['apartments', 'Apartments', ()=>openArea('apartments')], ['school', 'School', ()=>openArea('school')], ['trips', 'Trips', ()=>openArea('trips')], ['drone', 'Drone', ()=>openArea('drone')], ['projects', 'Plan › Projects', ()=>{ openArea('todos'); setTimeout(()=>setPlanTab('projects'), 0); }], ['all', 'All areas', ()=>openArea('all')]
 ];
 function cmdCat(q){ const cats = (lastBudgetData && lastBudgetData.categories) || [], n = normTxt(q); if(!n) return null;
   return cats.find(c=>normTxt(c.category) === n) || cats.find(c=>normTxt(c.category).startsWith(n)) || cats.find(c=>normTxt(c.category).includes(n)) || null; }
@@ -8221,7 +8221,7 @@ document.addEventListener('keydown', e=>{ const pg = document.getElementById('ca
 })();
 
 
-// ---------- Plan · Projects: one level of sub-projects, ongoing vs finite (build .87) ----------
+// ---------- Plan · Projects: one level of parts (parent_id), ongoing vs finite (build .87; 'sub-projects' renamed Parts in .88) ----------
 let allProjects = [], projOpen = null, projNewKind = 'finite';
 async function loadProjects(){
   try{
@@ -8252,7 +8252,7 @@ function projCardHtml(p){
   const next = c.open.slice().sort((a,b)=>({high:0,medium:1,low:2}[a.priority]??3)-({high:0,medium:1,low:2}[b.priority]??3) || (a.due_date||'9999').localeCompare(b.due_date||'9999'))[0];
   let sub = p.kind === 'ongoing'
     ? `${c.open.length} open${high ? `, ${high} high priority` : ''}${next ? `. Next: ${esc(next.title)}` : ''}`
-    : c.total ? `${c.done.length} of ${c.total} done` : 'No todos yet';
+    : c.total ? `${c.done.length} of ${c.total} to-dos done${projKids(p).length ? ` · ${projKids(p).length} part${projKids(p).length===1?'':'s'}` : ''}` : 'No to-dos yet';
   const bar = p.kind !== 'ongoing' && c.total ? `<div class="pj-bar"><i style="width:${Math.round(100*c.done.length/c.total)}%"></i></div>` : '';
   const kids = projKids(p);
   const kidsHtml = kids.length ? `<div class="pj-kids">${kids.map(k=>{ const kc = projCount(projTodos(k,false)); const [kw] = projWhen(k); return `<div class="pj-kid ${k.status==='done'?'done':''}"><span>${esc(k.title)}</span><span>${k.status==='done' ? 'Done' : `${kc.open.length} open · ${esc(kw.split(' · ')[0])}`}</span></div>`; }).join('')}</div>` : '';
@@ -8281,16 +8281,17 @@ function renderProjects(){
   const p = projOpen && allProjects.find(x=>x.code === projOpen);
   if(p){
     const parent = p.parent_id ? projById(p.parent_id) : null;
-    if(parent){ projOpen = parent.code; return renderProjects(); }   // sub-projects open inside their parent
+    if(parent){ projOpen = parent.code; return renderProjects(); }   // a part opens inside its project
     const kids = projKids(p), ts = projTodos(p, true), c = projCount(ts), [when, wc] = projWhen(p);
     let html = `<button type="button" class="pj-back" data-projback>‹ All projects</button>
       <div class="pj-head" style="--pj:${projectColor(p.title)}"><h3>${esc(p.title)}${p.kind==='ongoing' ? '<span class="pj-badge">Ongoing</span>' : ''}</h3>
-      <div class="pj-meta ${wc}">${p.kind==='ongoing' ? `${c.open.length} open · ${c.done.length} done so far` : `${esc(when)}${c.total ? ` · ${c.done.length} of ${c.total} done` : ''}`}</div>
+      <div class="pj-meta ${wc}">${p.kind==='ongoing' ? `${c.open.length} open · ${c.done.length} done so far` : `${esc(when)}${c.total ? ` · ${c.done.length} of ${c.total} to-dos done` : ''}`}</div>
       ${p.notes ? `<p>${esc(p.notes)}</p>` : ''}
       ${p.kind !== 'ongoing' && c.total ? `<div class="pj-bar"><i style="width:${Math.round(100*c.done.length/c.total)}%;background:${projectColor(p.title)}"></i></div>` : ''}</div>`;
+    if(kids.length) html += `<div class="section-title">Parts<span>${kids.filter(k=>k.status==='done').length} of ${kids.length} done</span></div>`;
     kids.forEach(k=>{ html += projSectionHtml(k, true); });
     html += projSectionHtml(p, false, kids.length ? 'For the whole project' : 'Todos');
-    html += `<div class="pj-sec"><form class="pj-add" data-addsub="${p.id}"><label class="sr-only" for="pjsub${p.id}">New sub-project in ${esc(p.title)}</label><input id="pjsub${p.id}" placeholder="New sub-project…" autocomplete="off"><button type="submit">Create</button></form></div>`;
+    html += `<div class="pj-sec"><form class="pj-add" data-addsub="${p.id}"><label class="sr-only" for="pjsub${p.id}">Add a part to ${esc(p.title)}</label><input id="pjsub${p.id}" placeholder="Add a part (e.g. Stowe weekend)…" autocomplete="off"><button type="submit">Add part</button></form></div>`;
     html += `<div class="pj-acts">${p.kind === 'ongoing' ? `<button type="button" class="pj-act quiet" data-projkind="finite" data-code="${esc(p.code)}">Give it an end</button>` : `<button type="button" class="pj-act quiet" data-projkind="ongoing" data-code="${esc(p.code)}">Make it ongoing</button>`}${p.kind === 'ongoing' ? '' : p.status === 'done' ? `<button type="button" class="pj-act" data-projstatus="open" data-code="${esc(p.code)}">Reopen project</button>` : `<button type="button" class="pj-act" data-projstatus="done" data-code="${esc(p.code)}">Mark project done</button>`}</div>`;
     el.innerHTML = html; return;
   }
@@ -8312,7 +8313,7 @@ async function projPatch(code, body){
   try{
     const res = await fetch(`${SUPABASE_URL}/rest/v1/projects?code=eq.${encodeURIComponent(code)}`, { method:'PATCH', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=minimal' }), body: JSON.stringify(body) });
     if(!res.ok) throw new Error(`Supabase returned ${res.status}`);
-  } catch(err){ Object.assign(p, before); renderProjects(); alert(`Couldn't save the project (${err.message}).`); }
+  } catch(err){ Object.assign(p, before); renderProjects(); showNotice(`Couldn't save the project (${err.message}).`); }
 }
 async function projCreate(body){
   const res = await fetch(`${SUPABASE_URL}/rest/v1/projects`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([body]) });
@@ -8354,7 +8355,7 @@ async function projAddTodo(projectId, title){
       else if(f.dataset.addsub){ const parent = projById(Number(f.dataset.addsub)); await projCreate({ title, parent_id: parent.id, kind:'finite', domain_tag: parent.domain_tag || null }); renderProjects(); }
       else if('newproj' in f.dataset){ const row = await projCreate({ title, kind: projNewKind }); projOpen = row.code; renderProjects(); }
       const again = document.getElementById(input.id); if(again && !('newproj' in f.dataset)) again.focus();
-    } catch(err){ alert(`Couldn't add that (${err.message}).`); btn.disabled = false; }
+    } catch(err){ showNotice(`Couldn't add that (${err.message}).`); btn.disabled = false; }
   });
   // a project chip on any todo row opens that project
   document.addEventListener('click', e=>{
