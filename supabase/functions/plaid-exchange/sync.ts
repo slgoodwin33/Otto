@@ -1,7 +1,7 @@
 import { admin, plaid, nextCode, errMessage } from "./common.ts";
 
 type PlaidAccount = { account_id: string; name: string; official_name?: string; mask?: string; type: string; subtype?: string; balances: { current?: number; available?: number; limit?: number } };
-type PlaidTx = { transaction_id: string; account_id: string; amount: number; date: string; authorized_date?: string; name: string; merchant_name?: string; pending: boolean; pending_transaction_id?: string; payment_channel?: string; personal_finance_category?: { primary: string; detailed: string } };
+type PlaidTx = { transaction_id: string; account_id: string; amount: number; date: string; authorized_date?: string; name: string; merchant_name?: string; pending: boolean; pending_transaction_id?: string; payment_channel?: string; personal_finance_category?: { primary: string; detailed: string }; location?: { lat?: number | null; lon?: number | null; city?: string | null; region?: string | null; address?: string | null } };
 
 const cents = (n: number | undefined | null) => n == null ? null : Math.round(n * 100);
 const today = () => new Date().toISOString().slice(0, 10);
@@ -49,7 +49,9 @@ async function loadCategoryMap() {
 
 async function loadRules() {
   const { data } = await admin.from("category_rules").select("match_text, category_id, exclude_from_budget").order("id");
-  return (data ?? []).map((r) => ({ text: String(r.match_text).toLowerCase(), category_id: r.category_id as number | null, exclude: !!r.exclude_from_budget }));
+  // most specific (longest) match text wins, e.g. "atm w/d" beats "market basket" for an ATM at Market Basket
+  return (data ?? []).map((r) => ({ text: String(r.match_text).toLowerCase(), category_id: r.category_id as number | null, exclude: !!r.exclude_from_budget }))
+    .sort((a, b) => b.text.length - a.text.length);
 }
 
 export async function syncItem(item: { id: number; access_token: string; sync_cursor: string | null; institution_name: string | null }, trigger: "link" | "manual" | "schedule") {
@@ -85,6 +87,8 @@ export async function syncItem(item: { id: number; access_token: string; sync_cu
       source: "plaid", plaid_transaction_id: t.transaction_id, plaid_pending_transaction_id: t.pending_transaction_id ?? null,
       plaid_category_primary: t.personal_finance_category?.primary ?? null, plaid_category_detailed: t.personal_finance_category?.detailed ?? null,
       payment_channel: t.payment_channel ?? null,
+      location_lat: t.location?.lat ?? null, location_lon: t.location?.lon ?? null, location_city: t.location?.city ?? null,
+      location_region: t.location?.region ?? null, location_address: t.location?.address ?? null,
     });
 
     for (const t of added) {
