@@ -2089,7 +2089,7 @@ body.chatting .otto-chat-starters{display:none}
   .sp-bar{display:block; height:4px; border-radius:2px; background:var(--surface-2); margin-top:4px;} .sp-bar i{display:block; height:100%; border-radius:2px;} .sp-amt{font:600 15px var(--sans); font-variant-numeric:tabular-nums;}
 
   /* ===== Build .67: Plan tabs, Upcoming, weekly reset ===== */
-  #panelTodos[data-ptab="today"] [data-pt]:not([data-pt="today"]), #panelTodos[data-ptab="upcoming"] [data-pt]:not([data-pt="upcoming"]), #panelTodos[data-ptab="backlog"] [data-pt]:not([data-pt="backlog"]){display:none !important;}
+  #panelTodos[data-ptab="today"] [data-pt]:not([data-pt="today"]), #panelTodos[data-ptab="upcoming"] [data-pt]:not([data-pt="upcoming"]), #panelTodos[data-ptab="backlog"] [data-pt]:not([data-pt="backlog"]), #panelTodos[data-ptab="projects"] [data-pt]:not([data-pt="projects"]){display:none !important;}
   #panelTodos:not([data-ptab="backlog"]) #todoSeg#todoSeg#todoSeg#todoSeg{display:none !important;}   /* beats the older #todoSeg x3 display rule */
   .reset-chip{all:unset; box-sizing:border-box; cursor:pointer; display:grid !important; grid-template-columns:1fr auto; gap:2px 10px; width:100%; margin:4px 0 12px; padding:14px 16px; border-radius:18px; background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 40%, transparent);}
   .reset-chip[hidden]{display:none !important;} .reset-chip b{font:700 15px var(--sans);} .reset-chip span{grid-column:1; font:13px var(--sans); color:var(--text-muted);} .reset-chip em{grid-column:2; grid-row:1 / span 2; align-self:center; font:700 14px var(--sans); font-style:normal; color:var(--accent-text);}
@@ -2159,6 +2159,49 @@ body.chatting .otto-chat-starters{display:none}
   .scrub-pane{display:flex; flex-direction:column; gap:3px; margin-top:4px; min-height:118px;} .sp-day{font:700 15px var(--sans); color:var(--accent);} .sp-big{font:700 40px var(--sans); letter-spacing:-.02em; line-height:1.05;} .sp-big.neg{color:var(--alert);}
   .sp-line{font:14px var(--sans); color:var(--text-muted);} .sp-facts{display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;} .sp-facts span{font:600 12.5px var(--sans); padding:4px 9px; border-radius:10px; background:var(--surface-2); color:var(--text);}
   .cf-readout{font:14px var(--sans); color:var(--text-muted); margin:2px 0 4px;} .cf-readout b{color:var(--text);} #cashflowCard.scrubbing .cf-nums{opacity:.35;}
+
+  /* ---------- Plan · Projects (build .87) ---------- */
+  #planProjects{padding-bottom:120px;}
+  .pchip-link{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+  #planProjects .pchip-link{display:none;}
+  .pchip-parent{color:var(--text-faint);}
+  .pj-card{display:block;width:100%;text-align:left;font:inherit;color:inherit;background:var(--surface);border:0;border-radius:var(--radius);padding:16px 16px 14px;margin:0 0 10px;cursor:pointer;position:relative;overflow:hidden;}
+  .pj-card::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:0 3px 3px 0;background:var(--pj,var(--accent));}
+  .pj-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;}
+  .pj-title{font-family:var(--display);font-weight:700;font-size:1.06rem;line-height:1.25;}
+  .pj-when{font-size:.8rem;color:var(--text-faint);white-space:nowrap;}
+  .pj-when.soon{color:var(--accent-text);}
+  .pj-when.late{color:#FF7A59;}
+  .pj-sub{font-size:.84rem;color:var(--text-muted);margin-top:4px;}
+  .pj-bar{height:4px;border-radius:2px;background:var(--surface-2);margin-top:12px;overflow:hidden;}
+  .pj-bar i{display:block;height:100%;background:var(--pj,var(--accent));border-radius:2px;}
+  .pj-kids{margin-top:12px;border-top:1px solid var(--border);}
+  .pj-kid{display:flex;justify-content:space-between;gap:10px;padding:9px 0 0 14px;font-size:.88rem;position:relative;}
+  .pj-kid::before{content:"";position:absolute;left:2px;top:9px;width:7px;height:12px;border-left:1.5px solid var(--text-faint);border-bottom:1.5px solid var(--text-faint);border-bottom-left-radius:4px;opacity:.6;}
+  .pj-kid span:last-child{color:var(--text-faint);white-space:nowrap;}
+  .pj-kid.done{color:var(--text-faint);text-decoration:line-through;}
+  .pj-badge{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent-text);margin-left:8px;vertical-align:2px;}
+  .pj-back{background:none;border:0;color:var(--accent-text);font:inherit;font-size:.95rem;padding:6px 2px;margin:4px 0 6px;cursor:pointer;}
+  .pj-head{padding:4px 4px 6px;}
+  .pj-head h3{font-family:var(--display);font-size:1.55rem;line-height:1.15;margin:0;}
+  .pj-head p{color:var(--text-muted);margin:8px 0 0;font-size:.92rem;line-height:1.45;max-width:60ch;}
+  .pj-meta{font-size:.84rem;color:var(--text-faint);margin-top:6px;}
+  #planProjects section.pj-sec{margin:22px 0 0;padding:0;border-top:0;background:none;}
+  #planProjects section.pj-sec.sub{padding-left:12px;}
+  .pj-sec-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:0 4px 8px;}
+  .pj-sec-head b{font-family:var(--display);font-size:1.05rem;}
+  .pj-sec-head span{font-size:.8rem;color:var(--text-faint);white-space:nowrap;}
+  .pj-sec-note{font-size:.84rem;color:var(--text-muted);margin:-2px 4px 8px;line-height:1.4;}
+  .pj-sec.sub{border-left:3px solid var(--pj,var(--accent));}
+  .pj-add{display:flex;gap:8px;margin-top:8px;}
+  .pj-add input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:12px;color:var(--text);font:inherit;font-size:16px;padding:10px 12px;}
+  .pj-add button,.pj-act{background:var(--surface-2);border:0;border-radius:12px;color:var(--text);font:inherit;font-size:.9rem;font-weight:600;padding:0 14px;min-height:44px;cursor:pointer;}
+  .pj-acts{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 4px;}
+  .pj-act.quiet{background:none;color:var(--text-faint);font-weight:500;}
+  .pj-empty{color:var(--text-faint);font-size:.88rem;padding:10px 4px;}
+  .pj-newkind{display:flex;gap:6px;margin-top:8px;}
+  .pj-newkind button{flex:0 0 auto;background:var(--surface-2);border:1px solid transparent;border-radius:999px;color:var(--text-muted);font:inherit;font-size:.82rem;padding:6px 12px;min-height:34px;cursor:pointer;}
+  .pj-newkind button.on{border-color:var(--accent);color:var(--text);}
 </style>
 </head>
 <body class="home-v2">
@@ -2233,7 +2276,7 @@ body.chatting .otto-chat-starters{display:none}
 
     <div class="tab-panel" id="panelTodos" data-ptab="today">
       <div class="studio-page-head"><div class="studio-kicker">YOUR WORKSPACE <span class="studio-dot"></span> STAY ON TRACK</div><h2>Make today<br><span>count.</span></h2><p>Focus on what matters, one task at a time.</p></div>
-      <div class="ia2-subtabs" id="planTabs" role="tablist" aria-label="Plan"><button type="button" role="tab" data-ptab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-ptab="upcoming" aria-selected="false">Upcoming</button><button type="button" role="tab" data-ptab="backlog" aria-selected="false">Backlog</button></div>
+      <div class="ia2-subtabs" id="planTabs" role="tablist" aria-label="Plan"><button type="button" role="tab" data-ptab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-ptab="upcoming" aria-selected="false">Upcoming</button><button type="button" role="tab" data-ptab="backlog" aria-selected="false">Backlog</button><button type="button" role="tab" data-ptab="projects" aria-selected="false">Projects</button></div>
       <button type="button" class="reset-chip" data-reset-start data-pt="today" hidden></button>
       <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-ctl"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div>
       <form id="quickAddForm" class="quick-add-form" data-pt="today">
@@ -2242,6 +2285,7 @@ body.chatting .otto-chat-starters{display:none}
         <button class="save-btn" type="submit">Add</button>
       </form>
       <div id="planUpcoming" data-pt="upcoming"></div>
+      <div id="planProjects" data-pt="projects" aria-live="polite"></div>
       <div id="triageCard" data-pt="backlog"></div><div class="seg" id="todoSeg" data-pt="backlog"><button type="button" data-tview="later" class="active">Later</button><button type="button" data-tview="someday">Someday</button><button type="button" data-tview="done">Done</button></div>
       <!-- Build 003: local, cross-view todo search -->
       <div class="todo-search-wrap" data-pt="backlog">
@@ -2421,7 +2465,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-06.86';
+const APP_BUILD = '2026-11-07.87';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4269,7 +4313,7 @@ function todoRowHtml(t){
   const [dl, dc] = t.due_date && !done ? todoDateLabel(t.due_date) : ['', ''];
   const meta = [];
   if(t.priority === 'high' && !done) meta.push(`<span><span class="pdot"></span>High</span>`);
-  if(t.project && t.project.title) meta.push(`<span class="pchip"><i style="background:${projectColor(t.project.title)}"></i>${esc(t.project.title)}</span>`);
+  if(t.project && t.project.title){ const pp = projParentOf(t.project_id); meta.push(`<button type="button" class="pchip pchip-link" data-openproj="${esc(t.project.code||'')}"><i style="background:${projectColor(pp ? pp.title : t.project.title)}"></i>${esc(t.project.title)}</button>`); }
   if(t.asset && t.asset.item) meta.push(`<span>${esc(t.asset.item)}</span>`);
   if(done && t.completed_at) meta.push(`<span>${t.status === 'done' ? 'Done' : 'Cancelled'} ${shortDate(t.completed_at.slice(0,10))}</span>`);
   const edit = open ? `<div class="trow-edit">
@@ -4689,6 +4733,7 @@ function renderAll(todos){
   renderReadouts(todos);
   renderFilters(todos);
   renderList(todos);
+  renderProjects();
   renderOverdueBadge(todos);
   renderHomeTodos(todos);
   renderHomeKpis();
@@ -8175,12 +8220,161 @@ document.addEventListener('keydown', e=>{ const pg = document.getElementById('ca
   let wacc = 0, wt = 0; document.addEventListener('wheel', e=>{ if(!e.ctrlKey || !inCal(e)) return; e.preventDefault(); wacc += e.deltaY; mid = { x:e.clientX, y:e.clientY }; live(Math.exp(-wacc/100)); clearTimeout(wt); wt = setTimeout(()=>{ const sc = Math.exp(-wacc/100); wacc = 0; finish(sc); }, 160); }, { passive:false });
 })();
 
+
+// ---------- Plan · Projects: one level of sub-projects, ongoing vs finite (build .87) ----------
+let allProjects = [], projOpen = null, projNewKind = 'finite';
+async function loadProjects(){
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/projects?select=id,code,title,notes,status,kind,parent_id,target_date,completed_at,domain_tag&order=code.asc`, { headers: authHeaders() });
+    if(!res.ok) throw new Error(`Supabase returned ${res.status}`);
+    allProjects = await res.json();
+  } catch(err){ if(!allProjects.length) throw err; }
+}
+loadProjects().then(()=>{ try{ renderList(allTodos); renderProjects(); }catch(e){} }).catch(()=>{});
+function projById(id){ return allProjects.find(p=>p.id === id); }
+function projParentOf(projectId){ const p = projById(projectId); return p && p.parent_id ? projById(p.parent_id) : null; }
+function projKids(p){ return allProjects.filter(k=>k.parent_id === p.id).sort((a,b)=>(a.target_date||'9999').localeCompare(b.target_date||'9999') || a.title.localeCompare(b.title)); }
+function projTodos(p, withKids){ const ids = new Set([p.id, ...(withKids ? projKids(p).map(k=>k.id) : [])]); return (allTodos||[]).filter(t=>ids.has(t.project_id) && t.status !== 'cancelled'); }
+function projWhen(p){
+  if(p.kind === 'ongoing') return ['Ongoing', ''];
+  if(p.status === 'done') return [p.completed_at ? `Finished ${shortDate(p.completed_at.slice(0,10))}` : 'Finished', ''];
+  if(!p.target_date) return ['No date', ''];
+  const today = localToday(), n = Math.round((new Date(p.target_date+'T12:00') - new Date(today+'T12:00'))/86400000);
+  const day = new Date(p.target_date+'T12:00').toLocaleDateString('en-US',{weekday:'short', month:'short', day:'numeric'});
+  if(n < 0) return [`${day} · ${-n}d ago`, 'late'];
+  if(n === 0) return [`${day} · today`, 'soon'];
+  return [`${day} · in ${n}d`, n <= 7 ? 'soon' : ''];
+}
+function projCount(ts){ const open = ts.filter(t=>t.status === 'open'), done = ts.filter(t=>t.status === 'done'); return { open, done, total: open.length + done.length }; }
+function projCardHtml(p){
+  const ts = projTodos(p, true), c = projCount(ts), [when, wc] = projWhen(p), color = projectColor(p.title);
+  const high = c.open.filter(t=>t.priority === 'high').length;
+  const next = c.open.slice().sort((a,b)=>({high:0,medium:1,low:2}[a.priority]??3)-({high:0,medium:1,low:2}[b.priority]??3) || (a.due_date||'9999').localeCompare(b.due_date||'9999'))[0];
+  let sub = p.kind === 'ongoing'
+    ? `${c.open.length} open${high ? `, ${high} high priority` : ''}${next ? `. Next: ${esc(next.title)}` : ''}`
+    : c.total ? `${c.done.length} of ${c.total} done` : 'No todos yet';
+  const bar = p.kind !== 'ongoing' && c.total ? `<div class="pj-bar"><i style="width:${Math.round(100*c.done.length/c.total)}%"></i></div>` : '';
+  const kids = projKids(p);
+  const kidsHtml = kids.length ? `<div class="pj-kids">${kids.map(k=>{ const kc = projCount(projTodos(k,false)); const [kw] = projWhen(k); return `<div class="pj-kid ${k.status==='done'?'done':''}"><span>${esc(k.title)}</span><span>${k.status==='done' ? 'Done' : `${kc.open.length} open · ${esc(kw.split(' · ')[0])}`}</span></div>`; }).join('')}</div>` : '';
+  return `<button type="button" class="pj-card" data-proj="${esc(p.code)}" style="--pj:${color}"><div class="pj-top"><span class="pj-title">${esc(p.title)}</span>${p.kind === 'ongoing' ? '' : `<span class="pj-when ${wc}">${esc(when)}</span>`}</div><div class="pj-sub">${sub}</div>${bar}${kidsHtml}</button>`;
+}
+function projTodoRows(ts){
+  const prio = { high:0, medium:1, low:2 };
+  const open = ts.filter(t=>t.status === 'open').sort((a,b)=>(a.due_date||'9999').localeCompare(b.due_date||'9999') || (prio[a.priority]??3)-(prio[b.priority]??3));
+  const done = ts.filter(t=>t.status === 'done').sort((a,b)=>(b.completed_at||'').localeCompare(a.completed_at||''));
+  const rows = [...open, ...done];
+  return rows.length ? `<div class="tgroup">${rows.map(todoRowHtml).join('')}</div>` : `<div class="pj-empty">No todos here yet.</div>`;
+}
+function projSectionHtml(p, isSub, label){
+  const ts = projTodos(p, false), c = projCount(ts), [when] = projWhen(p);
+  const head = isSub
+    ? `<div class="pj-sec-head"><b>${esc(p.title)}${p.status==='done' ? '<span class="pj-badge">Done</span>' : ''}</b><span>${esc(when)}${c.total ? ` · ${c.done.length}/${c.total}` : ''}</span></div>${p.notes ? `<div class="pj-sec-note">${esc(p.notes)}</div>` : ''}`
+    : `<div class="pj-sec-head"><b>${label}</b><span>${c.open.length} open</span></div>`;
+  const acts = isSub ? `<div class="pj-acts" style="margin-top:10px">${p.status==='done' ? `<button type="button" class="pj-act quiet" data-projstatus="open" data-code="${esc(p.code)}">Reopen ${esc(p.title)}</button>` : `<button type="button" class="pj-act quiet" data-projstatus="done" data-code="${esc(p.code)}">Mark ${esc(p.title)} done</button>`}</div>` : '';
+  return `<section class="pj-sec ${isSub ? 'sub' : ''}" style="--pj:${projectColor(projParentOf(p.id)?.title || p.title)}">${head}${projTodoRows(ts)}
+    <form class="pj-add" data-addto="${p.id}"><label class="sr-only" for="pjadd${p.id}">Add a todo to ${esc(p.title)}</label><input id="pjadd${p.id}" placeholder="Add to ${esc(p.title)}…" autocomplete="off"><button type="submit">Add</button></form>${acts}</section>`;
+}
+function renderProjects(){
+  const el = document.getElementById('planProjects'); if(!el) return;
+  const panel = document.getElementById('panelTodos'); if(panel && panel.dataset.ptab !== 'projects') return;
+  if(!allProjects.length){ el.innerHTML = `<div class="empty">Loading projects…</div>`; return; }
+  const p = projOpen && allProjects.find(x=>x.code === projOpen);
+  if(p){
+    const parent = p.parent_id ? projById(p.parent_id) : null;
+    if(parent){ projOpen = parent.code; return renderProjects(); }   // sub-projects open inside their parent
+    const kids = projKids(p), ts = projTodos(p, true), c = projCount(ts), [when, wc] = projWhen(p);
+    let html = `<button type="button" class="pj-back" data-projback>‹ All projects</button>
+      <div class="pj-head" style="--pj:${projectColor(p.title)}"><h3>${esc(p.title)}${p.kind==='ongoing' ? '<span class="pj-badge">Ongoing</span>' : ''}</h3>
+      <div class="pj-meta ${wc}">${p.kind==='ongoing' ? `${c.open.length} open · ${c.done.length} done so far` : `${esc(when)}${c.total ? ` · ${c.done.length} of ${c.total} done` : ''}`}</div>
+      ${p.notes ? `<p>${esc(p.notes)}</p>` : ''}
+      ${p.kind !== 'ongoing' && c.total ? `<div class="pj-bar"><i style="width:${Math.round(100*c.done.length/c.total)}%;background:${projectColor(p.title)}"></i></div>` : ''}</div>`;
+    kids.forEach(k=>{ html += projSectionHtml(k, true); });
+    html += projSectionHtml(p, false, kids.length ? 'For the whole project' : 'Todos');
+    html += `<div class="pj-sec"><form class="pj-add" data-addsub="${p.id}"><label class="sr-only" for="pjsub${p.id}">New sub-project in ${esc(p.title)}</label><input id="pjsub${p.id}" placeholder="New sub-project…" autocomplete="off"><button type="submit">Create</button></form></div>`;
+    html += `<div class="pj-acts">${p.kind === 'ongoing' ? `<button type="button" class="pj-act quiet" data-projkind="finite" data-code="${esc(p.code)}">Give it an end</button>` : `<button type="button" class="pj-act quiet" data-projkind="ongoing" data-code="${esc(p.code)}">Make it ongoing</button>`}${p.kind === 'ongoing' ? '' : p.status === 'done' ? `<button type="button" class="pj-act" data-projstatus="open" data-code="${esc(p.code)}">Reopen project</button>` : `<button type="button" class="pj-act" data-projstatus="done" data-code="${esc(p.code)}">Mark project done</button>`}</div>`;
+    el.innerHTML = html; return;
+  }
+  const top = allProjects.filter(x=>!x.parent_id && x.status !== 'cancelled');
+  const ongoing = top.filter(x=>x.kind === 'ongoing' && x.status === 'open');
+  const active = top.filter(x=>x.kind !== 'ongoing' && x.status === 'open').sort((a,b)=>(a.target_date||'9999').localeCompare(b.target_date||'9999') || a.title.localeCompare(b.title));
+  const finished = top.filter(x=>x.status === 'done');
+  let html = '';
+  if(active.length) html += `<div class="section-title">Active<span>${active.length}</span></div>${active.map(projCardHtml).join('')}`;
+  if(ongoing.length) html += `<div class="section-title">Ongoing<span>never finishes</span></div>${ongoing.map(projCardHtml).join('')}`;
+  if(finished.length) html += `<details class="pj-fin"><summary class="section-title" style="cursor:pointer">Finished<span>${finished.length}</span></summary>${finished.map(projCardHtml).join('')}</details>`;
+  html += `<div class="section-title">New project</div><form class="pj-add" data-newproj><label class="sr-only" for="pjnew">New project name</label><input id="pjnew" placeholder="Name a project…" autocomplete="off"><button type="submit">Create</button></form>
+    <div class="pj-newkind" role="group" aria-label="Project type"><button type="button" data-newkind="finite" class="${projNewKind==='finite'?'on':''}" aria-pressed="${projNewKind==='finite'}">Has an end</button><button type="button" data-newkind="ongoing" class="${projNewKind==='ongoing'?'on':''}" aria-pressed="${projNewKind==='ongoing'}">Ongoing</button></div>`;
+  el.innerHTML = html;
+}
+async function projPatch(code, body){
+  const p = allProjects.find(x=>x.code === code); if(!p) return;
+  const before = { ...p }; Object.assign(p, body); renderProjects();
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/projects?code=eq.${encodeURIComponent(code)}`, { method:'PATCH', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=minimal' }), body: JSON.stringify(body) });
+    if(!res.ok) throw new Error(`Supabase returned ${res.status}`);
+  } catch(err){ Object.assign(p, before); renderProjects(); alert(`Couldn't save the project (${err.message}).`); }
+}
+async function projCreate(body){
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/projects`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([body]) });
+  if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.message || `Supabase returned ${res.status}`); }
+  const [row] = await res.json(); allProjects.push(row); return row;
+}
+async function projAddTodo(projectId, title){
+  const p = projById(projectId), code = await nextCodeFor('todos', 'TD');
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/todos`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([{ code, title, status:'open', project_id: projectId }]) });
+  if(!res.ok){ const e = await res.json().catch(()=>({})); throw new Error(e.message || `Supabase returned ${res.status}`); }
+  const [row] = await res.json();
+  row.project = { title: p.title, code: p.code, status: p.status, target_date: p.target_date }; row.asset = null;
+  renderAll([...allTodos, row]);
+}
+(function wireProjects(){
+  const el = document.getElementById('planProjects'); if(!el) return;
+  el.addEventListener('click', e=>{
+    const card = e.target.closest('[data-proj]'); if(card){ projOpen = card.dataset.proj; expandedCode = null; renderProjects(); document.getElementById('sheetBody')?.scrollTo?.(0,0); return; }
+    if(e.target.closest('[data-projback]')){ projOpen = null; renderProjects(); return; }
+    const nk = e.target.closest('[data-newkind]'); if(nk){ projNewKind = nk.dataset.newkind; renderProjects(); return; }
+    const st = e.target.closest('[data-projstatus]'); if(st){ const done = st.dataset.projstatus === 'done'; projPatch(st.dataset.code, { status: done ? 'done' : 'open', completed_at: done ? new Date().toISOString() : null }); return; }
+    const kd = e.target.closest('[data-projkind]'); if(kd){ projPatch(kd.dataset.code, { kind: kd.dataset.projkind }); return; }
+    const row = e.target.closest('.swipe'); if(!row) return;
+    const code = row.dataset.code;
+    const qc = e.target.closest('.quick-complete'); if(qc){ e.stopPropagation(); hapticPulse(); toggleTodoComplete(code); return; }
+    const sd = e.target.closest('[data-setdue]'); if(sd){ patchTodo(code, sd.dataset.setdue ? { due_date: sd.dataset.setdue, someday: false } : { due_date: null }); return; }
+    const sp = e.target.closest('[data-setprio]'); if(sp){ patchTodo(code, { priority: sp.dataset.setprio }); return; }
+    if(e.target.closest('[data-cancel]')){ expandedCode = null; patchTodo(code, { status:'cancelled', completed_at: new Date().toISOString() }); return; }
+    if(e.target.closest('[data-reopen]')){ expandedCode = null; patchTodo(code, { status:'open', completed_at: null }); return; }
+    if(e.target.closest('.trow-edit') || e.target.closest('[data-openproj]')) return;
+    expandedCode = expandedCode === code ? null : code; renderProjects();
+  });
+  el.addEventListener('submit', async e=>{
+    const f = e.target.closest('form'); if(!f) return; e.preventDefault();
+    const input = f.querySelector('input'), title = input.value.trim(); if(!title) return;
+    const btn = f.querySelector('button'); btn.disabled = true;
+    try{
+      if(f.dataset.addto) await projAddTodo(Number(f.dataset.addto), title);
+      else if(f.dataset.addsub){ const parent = projById(Number(f.dataset.addsub)); await projCreate({ title, parent_id: parent.id, kind:'finite', domain_tag: parent.domain_tag || null }); renderProjects(); }
+      else if('newproj' in f.dataset){ const row = await projCreate({ title, kind: projNewKind }); projOpen = row.code; renderProjects(); }
+      const again = document.getElementById(input.id); if(again && !('newproj' in f.dataset)) again.focus();
+    } catch(err){ alert(`Couldn't add that (${err.message}).`); btn.disabled = false; }
+  });
+  // a project chip on any todo row opens that project
+  document.addEventListener('click', e=>{
+    const chip = e.target.closest('[data-openproj]'); if(!chip || !chip.dataset.openproj) return;
+    e.stopPropagation(); e.preventDefault();
+    projOpen = chip.dataset.openproj; expandedCode = null;
+    const panel = document.getElementById('panelTodos'); if(panel) panel.dataset.prevTab = 'projects';
+    if(document.getElementById('panelTodos')?.closest('[hidden]') && typeof openArea === 'function') openArea('todos');
+    setPlanTab('projects');
+  }, true);
+})();
+
 // ---------- Plan: Today · Upcoming · Backlog ----------
 document.addEventListener('click', e=>{ if(e.target.closest('[data-triage-deck]')) openInboxDeck(triageQueue(allTodos).map(t=>({ kind:'todo', ref_id:t.code, title:t.title }))); });
 function setPlanTab(t){
   const panel = document.getElementById('panelTodos'); if(!panel) return; panel.dataset.ptab = t;
   document.querySelectorAll('#planTabs [data-ptab]').forEach(b=>{ const on = b.dataset.ptab === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', String(on)); });
   if(t === 'upcoming') renderUpcoming();
+  if(t === 'projects'){ if(t !== panel.dataset.prevTab) projOpen = null; loadProjects().then(renderProjects); }
+  panel.dataset.prevTab = t;
   const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0;
 }
 document.addEventListener('click', e=>{ const b = e.target.closest('#planTabs [data-ptab]'); if(b) setPlanTab(b.dataset.ptab); });
