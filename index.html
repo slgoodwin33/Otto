@@ -1305,7 +1305,7 @@ body.chatting .otto-chat-starters{display:none}
 .plan-week-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
 .plan-day{display:flex;align-items:center;flex-direction:column;gap:5px;min-width:0;padding:10px 1px 8px;border:1px solid transparent;border-radius:14px;background:var(--surface);color:var(--text);cursor:pointer;min-height:92px}
 .plan-day span{font-size:10px;font-weight:700}.plan-day strong{font-size:20px;color:var(--text)}.plan-day small{font-size:9px;white-space:nowrap;color:var(--text-muted)}
-.plan-day.selected{background:var(--accent);color:var(--text-faint);border-color:var(--accent)}.plan-day.selected strong,.plan-day.selected small{color:var(--text-faint)}
+.plan-day.selected{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}.plan-day.selected strong,.plan-day.selected small,.plan-day.selected span{color:var(--on-accent) !important}
 .plan-day.is-today:not(.selected){border-color:var(--border)}
 
 .plan-week-summary{font-size:11px;color:var(--text-muted);margin-top:13px;line-height:1.5}
@@ -2465,7 +2465,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-08.88';
+const APP_BUILD = '2026-11-08.89';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4360,21 +4360,52 @@ function planItemsFor(date){
   ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.due_day && Number(b.amount_cents) > 0).forEach(b=>{
     const [y,mo] = date.split('-').map(Number), last = new Date(y, mo, 0).getDate(), dueDay = Math.min(Number(b.due_day), last);
     if(Number(date.slice(8)) === dueDay) items.push({ kind:'bill', sort:'09:00', time:'Bill due', title: `${b.name} · ${money(b.amount_cents)}`, sub: b.autopay ? 'Autopay' : 'Pay it yourself' }); });
+  // .89: dates that live in other areas show up in Plan too
+  planLinkedItems(date).forEach(x=>items.push(x));
   return items.sort((a,b)=>a.sort.localeCompare(b.sort));
 }
-const PLAN_KIND = { event:['Event','#2448C9'], todo:['Todo','#15161A'], meal:['Meal','#B5893A'], bill:['Bill','#B4441C'] };
+const PLAN_KIND = { event:['Event','#5B8CFF'], todo:['Todo','#D7FF3D'], meal:['Meal','#B5893A'], bill:['Bill','#E0663A'], project:['Project','#A98BFF'], birthday:['Birthday','#FF7FB0'], trip:['Trip','#3FC1C9'], car:['Car','#9AA3A0'], doc:['Document','#F2B640'] };
+// ---------- Plan links (.89): project/part target dates, birthdays, trips, car service due, document expirations ----------
+// Each source is read where it already lives (projects, people, trips, vehicle_services, documents); nothing is copied.
+let planLinksLoading = false;
+function planLinksEnsure(){
+  if(planLinksLoading) return; const need = ['people','trips','vehicle_services','documents'].filter(t=>!lifeRows[t]); if(!need.length) return;
+  planLinksLoading = true; lifeLoad(need).then(()=>{ planLinksLoading = false; try{ renderList(allTodos); }catch(e){} renderIa2Home(); }).catch(()=>{ planLinksLoading = false; });
+}
+function planLinkedItems(date){
+  const today = localToday(), out = [], late = d => d < today && date === today;
+  (typeof allProjects !== 'undefined' ? allProjects : []).forEach(p=>{
+    if(p.status !== 'open' || p.kind === 'ongoing' || !p.target_date) return;
+    if(p.target_date !== date && !late(p.target_date)) return;
+    const parent = p.parent_id ? allProjects.find(x=>x.id === p.parent_id) : null, n = Math.round((new Date(today+'T12:00') - new Date(p.target_date+'T12:00'))/86400000);
+    out.push({ kind:'project', sort:'08:00', time: p.target_date < today ? `${n}d late` : parent ? 'Part due' : 'Project due', late: p.target_date < today, title: p.title, sub: parent ? `Part of ${parent.title}` : 'Project', proj: (parent || p).code });
+  });
+  const md = date.slice(5);
+  (lifeRows.people||[]).forEach(x=>{ if(!x.birthday) return; const y = Number(date.slice(0,4)), leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0, b = x.birthday.slice(5) === '02-29' && !leap ? '02-28' : x.birthday.slice(5);
+    if(b === md){ const age = Number(date.slice(0,4)) - Number(x.birthday.slice(0,4)); out.push({ kind:'birthday', sort:'00:01', time:'Birthday', title: `${x.name}'s birthday`, sub: x.birthday.slice(0,4) > '1900' && age > 0 && age < 120 ? `turns ${age}` : '', area:'people' }); } });
+  (lifeRows.trips||[]).forEach(t=>{ if(t.status === 'cancelled') return;
+    if(t.start_on === date) out.push({ kind:'trip', sort:'00:02', time:'Trip starts', title: t.name || t.destination || 'Trip', sub: t.destination && t.name ? t.destination : '', area:'trips' });
+    else if(t.end_on === date) out.push({ kind:'trip', sort:'00:02', time:'Trip ends', title: t.name || t.destination || 'Trip', sub:'', area:'trips' }); });
+  const latestSvc = {}; (lifeRows.vehicle_services||[]).forEach(v=>{ const k = v.vehicle_id + ':' + v.kind; if(!latestSvc[k] || v.service_on > latestSvc[k].service_on) latestSvc[k] = v; });
+  Object.values(latestSvc).forEach(v=>{ if(!v.next_due_on) return; if(v.next_due_on === date || late(v.next_due_on))
+    out.push({ kind:'car', sort:'08:30', time: v.next_due_on < today ? 'Overdue' : 'Car service due', late: v.next_due_on < today, title: `${(CAR_RULES[v.kind] || {}).label || v.kind || 'Service'} due`, sub: v.next_due_miles ? `or at ${Number(v.next_due_miles).toLocaleString()} mi` : '', area:'car' }); });
+  (lifeRows.documents||[]).forEach(d=>{ if(!d.expires_on) return; const warn = isoAddDays(d.expires_on, -30);
+    if(d.expires_on === date) out.push({ kind:'doc', sort:'08:40', time:'Expires', title: `${d.name || 'Document'} expires`, sub: d.issuer || '', area:'documents' });
+    else if(warn === date) out.push({ kind:'doc', sort:'08:40', time:'In 30 days', title: `${d.name || 'Document'} expires ${shortDate(d.expires_on)}`, sub:'Time to renew', area:'documents' }); });
+  return out;
+}
 function renderPlanAgenda(){
-  const el = document.getElementById('planAgenda'); if(!el) return;
+  const el = document.getElementById('planAgenda'); if(!el) return; planLinksEnsure();
   const date = planSelectedDate || localToday(), items = planItemsFor(date);
   const label = date === localToday() ? 'Today' : date === isoAddDays(localToday(), 1) ? 'Tomorrow' : new Date(date+'T12:00').toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
   el.innerHTML = `<div class="section-title">${esc(label)}<span>${items.length ? `${items.length} item${items.length===1?'':'s'}` : ''}</span></div>` + (items.length ? `<div class="gcard plan-items">${items.map(it=>`
-    <div class="plan-item ${it.kind}${it.late?' late':''}" ${it.kind==='meal' ? 'data-area="food"' : it.kind==='bill' ? 'data-area="money"' : ''}>
+    <div class="plan-item ${it.kind}${it.late?' late':''}" ${it.proj ? `data-openproj="${esc(it.proj)}" role="button" tabindex="0"` : it.area ? `data-area="${it.area}"` : it.kind==='meal' ? 'data-area="food"' : it.kind==='bill' ? 'data-area="money"' : ''}>
       ${it.kind === 'todo' ? `<button type="button" class="quick-complete" data-code="${esc(it.code)}" aria-label="Mark done"></button>` : `<span class="plan-kind" style="background:${PLAN_KIND[it.kind][1]}"></span>`}
       <div class="grow-main"><div class="grow-title">${esc(it.title)}</div>${it.sub ? `<div class="grow-sub">${esc(it.sub)}</div>` : ''}</div>
       <div class="plan-time">${esc(it.time)}</div></div>`).join('')}</div>` : `<div class="map-help">Nothing planned${calEvents.length ? '' : '. Calendar events will show here once the iCloud calendar is connected'}.</div>`);
 }
 document.addEventListener('click', e=>{
-  const it = e.target.closest('.plan-item[data-area]'); if(it && !e.target.closest('button')) openSheet(it.dataset.area);
+  const it = e.target.closest('.plan-item[data-area]'); if(it && !e.target.closest('button')){ const a = it.dataset.area; if(AREAS2[a]) openArea(a); else openSheet(a); }
   const qc = e.target.closest('#planAgenda .quick-complete'); if(qc){ e.stopPropagation(); toggleTodoComplete(qc.dataset.code); }
 }, true);
 function renderPlanWeek(todos){

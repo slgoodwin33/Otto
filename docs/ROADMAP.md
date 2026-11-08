@@ -1,5 +1,10 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — build .89 (Nov 8): Plan shows dates from the rest of the app
+- Plan (week strip, agenda, Home "Next") now includes: project and part target dates (late ones on Today; tap opens the project), birthdays from People (with the age they turn), trip start/end from Trips, car service `next_due_on` (overdue on Today), document expirations plus a "renew" heads-up 30 days before. Read from where they live; nothing copied. Tap opens that area.
+- Fixed: to-do dots were near-black on the dark theme (invisible); selected day in the week strip was gray text on lime (failed contrast).
+- Also versioned the six remaining Edge Functions in the repo (no redeploy). Finding: `plaid-exchange` still has the old `sync.ts` without store locations, so a newly linked bank's first sync saves no purchase locations (daily `plaid-sync` does). Fix = redeploy plaid-exchange with plaid-sync's sync.ts — needs Samuel's OK.
+
 ## Just shipped — builds .87–.88 (Nov 7–8): Plan › Projects, "sub-projects" → Parts
 - .87 (Samuel's build, committed as-is; it was based on .86): Plan gets a Projects tab — Active (by target date, progress bar), Ongoing (never finishes: open count, high-priority count, next to-do), Finished. Open a project to see its parts, each with its own date, progress, to-dos, add box and Mark done; plus to-dos for the whole project. Project chips on any to-do open the project. Uses projects.kind (finite/ongoing) and projects.parent_id (one level).
 - .88: "sub-projects" are now called **Parts** (no order implied — Hannah's birthday → Birthday day, Stowe weekend; Salem State → application, transcripts, financial aid). "Add a part" box, a Parts header with "N of M done", project cards say "x of y to-dos done · 2 parts". Errors show in the app notice instead of a browser alert. "projects" works as a command in the Otto ring. Database unchanged (parent_id).
@@ -83,6 +88,8 @@
 - .72 People ↔ Places: pick a person's place (people.location_id, no schema change); rows show last visit, visits in 30 days, usual length; "Time at their place" card; Catch up flag from keep_in_touch_days; Day pages name who lives at a stop.
 
 ## Waiting on Samuel
+- Hannah has no birthday saved in People (her project says 11/11). Add it (with year if you want the age) and it shows in Plan every year.
+- OK to redeploy `plaid-exchange` with the current sync code (store locations on first link)?
 - Two Hannah places exist: "Hannah’s House" (id 9, 6 visits, linked) and "Hannah's house" (id 3, 0 visits). Deleting id 3 is destructive, so it's left for you.
 
 ## Next
