@@ -2005,6 +2005,8 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+
+  .code-ref{all:unset; cursor:pointer; display:inline; color:var(--accent-text); font-weight:600; border-bottom:1px solid color-mix(in srgb, var(--accent) 40%, transparent); line-height:1.5;} .code-nw, .code-ref b{white-space:nowrap;} .code-ref b{font:600 .92em var(--mono, ui-monospace, monospace); color:var(--text-muted);} .code-ref.closed{color:var(--text-muted); text-decoration:line-through; text-decoration-color:color-mix(in srgb, var(--text-muted) 50%, transparent);} .code-ref:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
   /* card() + sparklines + document countdown (.85) */
   .dc{all:unset; box-sizing:border-box; cursor:pointer; position:relative; display:flex; flex-direction:column; gap:6px; padding:14px; min-height:118px; background:var(--surface); border:1px solid var(--border); border-radius:20px; color:var(--text); min-width:0; transition:transform .12s cubic-bezier(.2,.8,.2,1);}
   .dc:active{transform:scale(.97);} .dc:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
@@ -2465,7 +2467,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-10.91';
+const APP_BUILD = '2026-11-10.92';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4258,7 +4260,7 @@ function todoCardHtml(t, isExpanded, today){
     if(t.asset && t.asset.item) rows2.push(`<div class="detail-row"><span class="detail-label">Asset</span><span class="detail-value">${t.asset.item}${t.asset.code ? ' ('+t.asset.code+')' : ''}</span></div>`);
     if(t.created_at) rows2.push(`<div class="detail-row"><span class="detail-label">Created</span><span class="detail-value">${new Date(t.created_at).toLocaleString()}</span></div>`);
     if(t.completed_at) rows2.push(`<div class="detail-row"><span class="detail-label">Completed</span><span class="detail-value">${new Date(t.completed_at).toLocaleString()}</span></div>`);
-    rows2.push(`<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value notes-block">${t.notes ? esc(t.notes) : 'No notes.'}</span></div>`);
+    rows2.push(`<div class="detail-row"><span class="detail-label">Notes</span><span class="detail-value notes-block">${t.notes ? codeNotes(t.notes) : 'No notes.'}</span></div>`);
     detailHtml = `<div class="todo-detail">${rows2.join('')}</div>`;
   }
 
@@ -4308,6 +4310,24 @@ function todoDateLabel(iso){
   const diff = Math.round((new Date(iso) - new Date(t))/86400000);
   return [diff < 7 ? new Date(iso+'T12:00').toLocaleDateString('en-US',{weekday:'short'}) : shortDate(iso), ''];
 }
+
+// ---------- Codes in notes show their titles (.92, TD-00071): "TD-00038" → "TD-00038 · Plan for replacing the Jetta" ----------
+// Looked up from the tasks and projects already loaded; tap one to open it. Unknown codes stay as plain text.
+function codeNotes(text){
+  return esc(text).replace(/\b(TD|PR)-\d{5}\b/g, code=>{
+    const t = code[0] === 'T' ? (allTodos||[]).find(x=>x.code === code) : (typeof allProjects !== 'undefined' ? allProjects : []).find(x=>x.code === code);
+    if(!t) return `<span class="code-nw">${code}</span>`; const title = t.title || '', short = title.length > 38 ? title.slice(0, 36).trimEnd() + '…' : title;
+    return `<button type="button" class="code-ref ${t.status && t.status !== 'open' ? 'closed' : ''}" data-coderef="${code}" aria-label="Open ${esc(title)} (${code})"><b>${code}</b> · ${esc(short)}</button>`; });
+}
+document.addEventListener('click', e=>{
+  const b = e.target.closest('[data-coderef]'); if(!b) return; e.preventDefault(); e.stopPropagation();
+  const code = b.dataset.coderef;
+  if(code.startsWith('PR-')){ projOpen = code; expandedCode = null; if(sheetArea !== 'todos') openArea('todos'); const pt = document.getElementById('panelTodos'); if(pt) pt.dataset.prevTab = 'projects'; setPlanTab('projects'); return; }
+  if(sheetArea !== 'todos') openArea('todos'); setPlanTab('backlog');
+  const s = document.getElementById('todoSearch'); if(s){ s.value = code; } expandedCode = code; renderList(allTodos);
+  setTimeout(()=>document.querySelector(`#todoList .swipe[data-code="${code}"]`)?.scrollIntoView({ block:'center', behavior: reduceMotion() ? 'auto' : 'smooth' }), 60);
+}, true);
+
 function todoRowHtml(t){
   const open = expandedCode === t.code, done = t.status !== 'open';
   const [dl, dc] = t.due_date && !done ? todoDateLabel(t.due_date) : ['', ''];
@@ -4319,7 +4339,7 @@ function todoRowHtml(t){
   const edit = open ? `<div class="trow-edit">
       ${!done ? `<div class="chiprow"><span class="lbl">When</span>${quickDates().map(([l,v])=>`<button class="chip ${(t.due_date||null)===v?'active':''}" type="button" data-setdue="${v||''}">${l}</button>`).join('')}</div>
       <div class="chiprow"><span class="lbl">Priority</span>${['high','medium','low'].map(p=>`<button class="chip ${t.priority===p?'active':''}" type="button" data-setprio="${p}">${p[0].toUpperCase()+p.slice(1)}</button>`).join('')}</div>` : ''}
-      ${t.notes ? `<div class="trow-notes">${esc(t.notes)}</div>` : ''}
+      ${t.notes ? `<div class="trow-notes">${codeNotes(t.notes)}</div>` : ''}
       <div class="chiprow">${done ? `<button class="link-btn" type="button" data-reopen="1">Reopen</button>` : `<button class="link-btn" type="button" data-cancel="1" style="color:var(--text-faint)">Cancel this task</button>`}</div>
     </div>` : '';
   return `<div class="swipe" data-code="${esc(t.code)}"><div class="swipe-bg"><span class="l">Done ✓</span><span class="r">Tomorrow →</span></div>
@@ -4477,7 +4497,7 @@ function renderTriage(){
     <div class="triage-bar"><i style="width:${Math.round(100*triageIdx/triageList.length)}%"></i></div>
     <div class="triage-title">${esc(t.title)}</div>
     <div class="triage-meta">${[t.project && t.project.title, t.priority ? t.priority + ' priority' : '', age].filter(Boolean).map(esc).join(' · ')}</div>
-    ${t.notes ? `<div class="triage-notes">${esc(t.notes)}</div>` : ''}
+    ${t.notes ? `<div class="triage-notes">${codeNotes(t.notes)}</div>` : ''}
     <div class="triage-label">Do it…</div>
     <div class="chiprow">${dts.map(([l,v])=>`<button class="chip" type="button" data-tri="date" data-v="${v}">${l}</button>`).join('')}</div>
     <div class="triage-label">Or…</div>
@@ -4520,9 +4540,9 @@ function renderList(todos){
   if(searchTerm){
     const matches = todos.filter(t => [t.title, t.notes, t.code, t.project?.title, t.asset?.item]
       .some(v => String(v || '').toLocaleLowerCase().includes(searchTerm)))
-      .sort((a,b) => (a.status === 'open' ? 0 : 1) - (b.status === 'open' ? 0 : 1)
+      .sort((a,b) => (b.code.toLocaleLowerCase() === searchTerm) - (a.code.toLocaleLowerCase() === searchTerm) || (a.status === 'open' ? 0 : 1) - (b.status === 'open' ? 0 : 1)
         || (a.due_date || '9999-12-31').localeCompare(b.due_date || '9999-12-31'));
-    if(searchCount) searchCount.textContent = `${matches.length} ${matches.length === 1 ? 'todo' : 'todos'} found across all views`;
+    if(searchCount) searchCount.textContent = `${matches.length} ${matches.length === 1 ? 'task' : 'tasks'} found across all views`;
     list.innerHTML = matches.length ? `<div class="tgroup">${matches.map(todoRowHtml).join('')}</div>`
       : `<div class="empty">No matching tasks. Try a different search.</div>`;
     return;
@@ -8318,7 +8338,7 @@ function projTodoRows(ts){
 function projSectionHtml(p, isSub, label){
   const ts = projTodos(p, false), c = projCount(ts), [when] = projWhen(p);
   const head = isSub
-    ? `<div class="pj-sec-head"><b>${esc(p.title)}${p.status==='done' ? '<span class="pj-badge">Done</span>' : ''}</b><span>${esc(when)}${c.total ? ` · ${c.done.length}/${c.total}` : ''}</span></div>${p.notes ? `<div class="pj-sec-note">${esc(p.notes)}</div>` : ''}`
+    ? `<div class="pj-sec-head"><b>${esc(p.title)}${p.status==='done' ? '<span class="pj-badge">Done</span>' : ''}</b><span>${esc(when)}${c.total ? ` · ${c.done.length}/${c.total}` : ''}</span></div>${p.notes ? `<div class="pj-sec-note">${codeNotes(p.notes)}</div>` : ''}`
     : `<div class="pj-sec-head"><b>${label}</b><span>${c.open.length} open</span></div>`;
   const acts = isSub ? `<div class="pj-acts" style="margin-top:10px">${p.status==='done' ? `<button type="button" class="pj-act quiet" data-projstatus="open" data-code="${esc(p.code)}">Reopen ${esc(p.title)}</button>` : `<button type="button" class="pj-act quiet" data-projstatus="done" data-code="${esc(p.code)}">Mark ${esc(p.title)} done</button>`}</div>` : '';
   return `<section class="pj-sec ${isSub ? 'sub' : ''}" style="--pj:${projectColor(projParentOf(p.id)?.title || p.title)}">${head}${projTodoRows(ts)}
@@ -8336,7 +8356,7 @@ function renderProjects(){
     let html = `<button type="button" class="pj-back" data-projback>‹ All projects</button>
       <div class="pj-head" style="--pj:${projectColor(p.title)}"><h3>${esc(p.title)}${p.kind==='ongoing' ? '<span class="pj-badge">Ongoing</span>' : ''}</h3>
       <div class="pj-meta ${wc}">${p.kind==='ongoing' ? `${c.open.length} open · ${c.done.length} done so far` : `${esc(when)}${c.total ? ` · ${c.done.length} of ${c.total} tasks done` : ''}`}</div>
-      ${p.notes ? `<p>${esc(p.notes)}</p>` : ''}
+      ${p.notes ? `<p>${codeNotes(p.notes)}</p>` : ''}
       ${p.kind !== 'ongoing' && c.total ? `<div class="pj-bar"><i style="width:${Math.round(100*c.done.length/c.total)}%;background:${projectColor(p.title)}"></i></div>` : ''}</div>`;
     if(kids.length) html += `<div class="section-title">Parts<span>${kids.filter(k=>k.status==='done').length} of ${kids.length} done</span></div>`;
     kids.forEach(k=>{ html += projSectionHtml(k, true); });
