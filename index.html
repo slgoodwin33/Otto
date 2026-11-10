@@ -2020,6 +2020,12 @@ body.chatting .otto-chat-starters{display:none}
   .dcd-n.warn b{color:var(--amber);} .dcd-n.bad b{color:var(--coral);}
   .dcd-bar{display:block; height:5px; border-radius:3px; background:var(--surface-2); margin-top:6px;} .dcd-bar i{display:block; height:100%; border-radius:3px; background:color-mix(in srgb, var(--text-muted) 70%, var(--surface-2));} .dcd-bar i.warn{background:var(--amber);} .dcd-bar i.bad{background:var(--coral);}
 
+
+  /* meal log sheet (.94) */
+  .ml-card{gap:12px;} .ml-chips{display:flex; flex-wrap:wrap; gap:6px;} .ml-chips .chip{min-height:38px;}
+  .ml-date, .ml-what{display:flex; flex-direction:column; gap:5px; font:600 12px var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted);}
+  .ml-date input, .ml-what input{min-height:44px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font:16px var(--sans); padding:0 12px; text-transform:none; letter-spacing:0;}
+  .ml-recent{margin-top:10px;} .since-p.ml-chip{border-color:color-mix(in srgb, var(--accent) 50%, var(--border)); color:var(--accent-text);}
   /* Next steps (.93) */
   .ns-wdg{cursor:pointer;} .ns-item{display:flex; flex-direction:column; gap:8px; padding:10px 0; border-top:1px solid var(--border);} .ns-wdg .ns-item:first-of-type{border-top:none; padding-top:6px;}
   .ns-main{display:flex; flex-direction:column; gap:3px; min-width:0;} .ns-step{font:600 15px/1.35 var(--sans); color:var(--text);} .ns-for{font:13px var(--sans); color:var(--text-muted); display:flex; flex-wrap:wrap; gap:4px 8px;} .ns-why{font:13px/1.4 var(--sans); color:var(--text-faint);}
@@ -2475,7 +2481,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-10.93';
+const APP_BUILD = '2026-11-10.94';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4878,6 +4884,12 @@ const FOOD_EMOJI_FALLBACK = { Produce:'🥬', Meat:'🥩', Dairy:'🥛', Bakery:
 function foodEmoji(food){ return (food && food.emoji) || FOOD_EMOJI_FALLBACK[(food && food.store_section) || 'Other'] || '🛒'; }
 function recipeEmoji(r){ return (r && r.emoji) || '🍽️'; }
 function mealSlotNow(){ const h = new Date().getHours(); return h < 10 ? 'breakfast' : h < 15 ? 'lunch' : 'dinner'; }
+function mealLogSection(fd){ let html = '';
+  const recent = (fd.log||[]).slice(0, 4);
+    html += `<div class="section-title">Log a meal<span>today or a past night</span></div><div class="offplan">
+    <button class="chip active" type="button" data-mealog="">＋ Log a meal</button><button class="chip" type="button" data-mealog="eating_out">🍽️ Ate out</button><button class="chip" type="button" data-mealog="cooked">🍳 Cooked</button><button class="chip" type="button" data-mealog="off_plan">🥡 Something else</button></div>
+    ${recent.length ? `<div class="gcard ml-recent">${recent.map(m=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(m.recipe ? (m.recipe.emoji ? m.recipe.emoji + ' ' : '') + m.recipe.name : m.title || 'Meal')}</div><div class="grow-sub">${esc([dayLong(m.eaten_on), m.meal_type, ML_KIND_LABEL[m.kind] || m.kind].filter(Boolean).join(' · '))}${m.notes ? ' · ' + esc(m.notes) : ''}</div></div></div>`).join('')}</div>` : ''}`;
+  return html; }
 function renderFoodFridge(fd){
   const plan = fd.plan;
   if(!plan) return '<div class="empty">No meal plan yet.</div>';
@@ -4911,9 +4923,7 @@ function renderFoodFridge(fd){
         ${left ? `<button class="ate-btn" type="button" data-ategroup="${it.group_item_id}">Ate one</button>` : ''}</div>`;
     }).join('') || '<div class="grow static"><div class="grow-sub">Nothing cooked in this batch.</div></div>'}</div>`;
   }
-  html += `<div class="section-title">Ate something else?</div><div class="offplan">
-    <button class="chip" type="button" data-offplan="eating_out">🍽️ Ate out</button><button class="chip" type="button" data-offplan="off_plan">🥡 Something else</button></div>
-    <div id="offplanForm" hidden class="offplan-form"><input type="text" id="offplanTitle" placeholder="What was it? e.g. Chipotle"><button class="save-btn" type="button" id="offplanSave">Log it</button></div>`;
+
   const recent = (fd.log || []).slice(0, 12);
   if(recent.length){
     const days = []; recent.forEach(m=>{ let d = days.find(x=>x.date===m.eaten_on); if(!d){ d={date:m.eaten_on, rows:[]}; days.push(d); } d.rows.push(m); });
@@ -4923,6 +4933,54 @@ function renderFoodFridge(fd){
   return html;
 }
 let offplanKind = null;
+
+// ---------- Meal log sheet (.94, TD-00075): log any meal, today or a past night ----------
+// meal_log kinds: planned (needs a meal_plan_item), eating_out, off_plan. "Cooked" = off_plan with the recipe when you pick one.
+const ML_KIND_LABEL = { planned:'from the plan', eating_out:'ate out', off_plan:'other' };
+function mealSlotFor(h){ return h < 10.5 ? 'breakfast' : h < 15 ? 'lunch' : 'dinner'; }   // nightly logging = dinner by default
+function openMealLog(pre = {}){
+  const fd = foodData || {}, recipes = fd.recipes || [];
+  const st = { date: pre.date || localToday(), meal: pre.meal || mealSlotFor(new Date().getHours() + new Date().getMinutes()/60), kind: pre.kind || '', title: pre.title || '', notes:'', item:null };
+  let el = document.getElementById('mealSheet');
+  if(!el){ el = document.createElement('div'); el.id = 'mealSheet'; el.className = 'bmove'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','mlTitle'); document.body.appendChild(el); }
+  const planItems = () => ((fd.plan && fd.plan.meal_plan_items) || []).filter(m=>m.planned_date === st.date);
+  const draw = () => {
+    const pi = planItems(), kinds = [...(pi.length ? [['planned','From the plan']] : []), ['cooked','Cooked'], ['eating_out','Ate out'], ['off_plan','Something else']];
+    if(!st.kind) st.kind = pi.length ? 'planned' : 'cooked';
+    el.innerHTML = `<div class="bmove-card ml-card"><div class="bmove-head"><b id="mlTitle">Log a meal</b><button type="button" class="deck-x" data-ml-x aria-label="Close">✕</button></div>
+      <div class="ml-row"><label class="ml-date">Day<input type="date" id="mlDate" value="${st.date}" max="${localToday()}"></label></div>
+      <div class="ml-chips" role="group" aria-label="Meal">${['breakfast','lunch','dinner','snack'].map(m=>`<button type="button" class="chip ${st.meal===m?'active':''}" aria-pressed="${st.meal===m}" data-ml-meal="${m}">${m[0].toUpperCase()+m.slice(1)}</button>`).join('')}</div>
+      <div class="ml-chips" role="group" aria-label="Kind">${kinds.map(([k,l])=>`<button type="button" class="chip ${st.kind===k?'active':''}" aria-pressed="${st.kind===k}" data-ml-kind="${k}">${l}</button>`).join('')}</div>
+      ${st.kind === 'planned' ? `<div class="ml-chips ml-plan" role="group" aria-label="Planned meal">${pi.map(m=>`<button type="button" class="chip ${st.item===m.id?'active':''}" aria-pressed="${st.item===m.id}" data-ml-item="${m.id}">${esc((m.recipe ? (m.recipe.emoji ? m.recipe.emoji + ' ' : '') + m.recipe.name : m.title) || 'Meal')} · ${esc(m.meal_type || '')}</button>`).join('')}</div>`
+        : `<label class="ml-what">What you had<input id="mlWhat" list="mlRecipes" value="${esc(st.title)}" placeholder="${st.kind === 'eating_out' ? 'e.g. Chipotle burrito bowl' : st.kind === 'cooked' ? 'Pick a recipe or type it' : 'e.g. Leftover pizza'}" autocomplete="off"></label>
+           <datalist id="mlRecipes">${st.kind === 'cooked' ? recipes.map(r=>`<option value="${esc(r.name)}">`).join('') : ''}</datalist>`}
+      <label class="ml-what">Notes<input id="mlNotes" value="${esc(st.notes)}" placeholder="optional" autocomplete="off"></label>
+      <button type="button" class="save-btn bmove-go" data-ml-save>Log ${st.meal}</button></div>`;
+  };
+  const read = () => { const d = el.querySelector('#mlDate'), w = el.querySelector('#mlWhat'), n = el.querySelector('#mlNotes'); if(d && d.value) st.date = d.value; if(w) st.title = w.value; if(n) st.notes = n.value; };
+  el.onclick = async e => {
+    if(e.target === el || e.target.closest('[data-ml-x]')){ el.hidden = true; return; }
+    const m = e.target.closest('[data-ml-meal]'); if(m){ read(); st.meal = m.dataset.mlMeal; draw(); return; }
+    const k = e.target.closest('[data-ml-kind]'); if(k){ read(); st.kind = k.dataset.mlKind; st.item = null; draw(); return; }
+    const it = e.target.closest('[data-ml-item]'); if(it){ read(); st.item = Number(it.dataset.mlItem); const pm = planItems().find(x=>x.id === st.item); if(pm && pm.meal_type) st.meal = pm.meal_type; draw(); return; }
+    const sv = e.target.closest('[data-ml-save]'); if(sv){ read();
+      const body = { eaten_on: st.date, meal_type: st.meal, servings: 1, notes: st.notes.trim() || null };
+      if(st.kind === 'planned'){ if(!st.item){ showNotice('Pick the planned meal you ate.'); return; } const pm = planItems().find(x=>x.id === st.item); Object.assign(body, { kind:'planned', meal_plan_item_id: st.item, recipe_id: pm && pm.recipe_id || null }); }
+      else { const t = st.title.trim(); if(!t){ showNotice('Say what you had.'); el.querySelector('#mlWhat')?.focus(); return; }
+        const rec = st.kind === 'cooked' ? recipes.find(r=>r.name.toLowerCase() === t.toLowerCase()) : null;
+        Object.assign(body, { kind: st.kind === 'eating_out' ? 'eating_out' : 'off_plan', title: rec ? null : (st.kind === 'cooked' ? `Cooked: ${t}` : t), recipe_id: rec ? rec.id : null }); if(rec) body.title = null; }
+      sv.disabled = true;
+      try{ await logMeal(body); hapticPulse(); el.hidden = true; showNotice(`Logged ${st.meal}${st.date !== localToday() ? ' for ' + shortDate(st.date) : ''}.`); if(typeof refreshFood === 'function') refreshFood(); renderIa2Home(); }
+      catch(err){ sv.disabled = false; showNotice(`Couldn't log it (${err.message}).`); } }
+  };
+  el.onchange = e => { if(e.target.id === 'mlDate'){ read(); st.item = null; if(st.kind === 'planned' && !planItems().length) st.kind = ''; draw(); } };
+  draw(); el.hidden = false; requestAnimationFrame(()=>el.classList.add('show')); setTimeout(()=>el.querySelector('#mlWhat')?.focus({ preventScroll:true }), 80);
+}
+document.addEventListener('click', e=>{ const b = e.target.closest('[data-mealog]'); if(!b) return; e.preventDefault(); e.stopPropagation(); const k = b.dataset.mealog;
+  openMealLog(k === 'dinner' ? { meal:'dinner' } : k ? { kind: k } : {}); }, true);
+document.addEventListener('keydown', e=>{ const el = document.getElementById('mealSheet'); if(e.key === 'Escape' && el && !el.hidden) el.hidden = true; });
+function dinnerLoggedToday(){ return ((foodData && foodData.log) || []).some(m=>m.eaten_on === localToday() && m.meal_type === 'dinner'); }
+
 async function logMeal(body){
   await ensureValidSession();
   const res = await fetch(`${SUPABASE_URL}/rest/v1/meal_log`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=minimal' }), body: JSON.stringify([body]) });
@@ -4943,13 +5001,6 @@ document.getElementById('foodContent').addEventListener('click', async e=>{
     try{ await logMeal({ eaten_on: localToday(), meal_type: item.meal_type === 'breakfast' ? 'breakfast' : mealSlotNow(), kind:'planned', meal_plan_item_id: item.id, servings: 1 }); hapticPulse(); await refreshFood(); }
     catch(err){ ate.disabled = false; banner.innerHTML = `<div class="error-banner">Couldn't log that meal (${esc(err.message)}).</div>`; }
     return;
-  }
-  const op = e.target.closest('[data-offplan]');
-  if(op){ offplanKind = op.dataset.offplan; document.querySelectorAll('[data-offplan]').forEach(b=>b.classList.toggle('active', b===op)); const f = document.getElementById('offplanForm'); f.hidden = false; document.getElementById('offplanTitle').focus(); return; }
-  if(e.target.closest('#offplanSave')){
-    const title = document.getElementById('offplanTitle').value.trim() || (offplanKind === 'eating_out' ? 'Ate out' : 'Something else');
-    try{ await logMeal({ eaten_on: localToday(), meal_type: mealSlotNow(), kind: offplanKind || 'off_plan', title, servings: 1 }); hapticPulse(); offplanKind = null; await refreshFood(); }
-    catch(err){ banner.innerHTML = `<div class="error-banner">Couldn't log that (${esc(err.message)}).</div>`; }
   }
 });
 
@@ -5092,6 +5143,7 @@ function renderFood(){
   if(foodView === 'cook'){
     el.innerHTML = !K ? wait : `<div class="section-title">Ready to cook<span>${K.ready ? K.ready + ' ready' : ''}</span></div><div class="gcard kt-list">${K.make}</div>
       ${plan && plan.started_on ? `<div class="section-title">This week's fridge</div>${renderFoodFridge(foodData)}` : ''}
+      ${mealLogSection(foodData)}
       <div class="section-title">At home<span>${K.count || ''}</span></div><div class="gcard kt-list">${K.home}</div>`;
     return;
   }
@@ -5688,6 +5740,10 @@ function cmdMatches(raw){
   m = q.match(/^log\s+(?:gas|fill-?up|fuel)\b\s*(?:(\d+(?:\.\d+)?)\s*(?:gal(?:lons?)?)?)?\s*(?:\$\s*(\d+(?:\.\d{1,2})?))?/i);
   if(m){ const pre = { filled_on: localToday() }; if(m[1]) pre.gallons = Number(m[1]); if(m[2]) pre.total_cents = Math.round(Number(m[2])*100);
     out.push({ exact: !!(m[1] || m[2]), label: `Log a fill-up${m[1] ? ' · ' + m[1] + ' gal' : ''}${m[2] ? ' · $' + m[2] : ''}`, sub:'Opens Car › Log with this filled in; you save it', run: ()=>{ openArea('car'); setTimeout(()=>{ lifeSection = 1; lifeAdding = 'fuel_logs'; lifePrefill = pre; renderLife(); }, 60); } }); }
+  // meal log
+  m = q.match(/^log\s+(breakfast|lunch|dinner|snack|meal)\b\s*(.*)$/i);
+  if(m){ const meal = m[1].toLowerCase() === 'meal' ? undefined : m[1].toLowerCase(), what = m[2].trim();
+    out.push({ exact:true, label:`Log ${meal || 'a meal'}${what ? ': ' + what : ''}`, sub:'Opens the meal log filled in; pick the kind and save', run: ()=>openMealLog({ meal, title: what }) }); }
   // transaction filters
   if(/(^|\s)[#@]\S|\b(over|under)\s*\$?\d|^(today|yesterday|this week|last week|this month|last month|last \d+ days)\b.*\b(spent|purchases|spending)\b/i.test(q) && !/^move\b|^log\b/i.test(q)){
     const Q = parseTxnQuery(q), n = (allTxns||[]).filter(t=>txnMatches(t, Q) && (!Q.text.length || Q.text.every(w=>normTxt([t.merchant,t.description].join(' ')).includes(normTxt(w))))).length;
@@ -5909,8 +5965,9 @@ function sinceParts(){
   return { S, out };
 }
 function sinceStrip(){
-  const { S, out } = sinceParts(); if(!out.length) return S && !homeCachedAt ? `<div class="since quiet">Nothing new since ${sinceWhen(S.at)}</div>` : '';
-  return `<div class="since" role="group" aria-label="Since you last looked"><span class="since-k">${S && !homeCachedAt ? 'Since ' + sinceWhen(S.at) : 'Coming up'}</span>${out.map(x=>`<button type="button" class="since-p ${x.warn ? 'warn' : ''}" data-since="${x.k}">${esc(x.t)}</button>`).join('')}</div>`;
+  const { S, out: out0 } = sinceParts(), out = out0.slice();
+  if(new Date().getHours() >= 17 && foodData && !dinnerLoggedToday()) out.push({ k:'dinner', t:'🍽 Log dinner' }); if(!out.length) return S && !homeCachedAt ? `<div class="since quiet">Nothing new since ${sinceWhen(S.at)}</div>` : '';
+  return `<div class="since" role="group" aria-label="Since you last looked"><span class="since-k">${S && !homeCachedAt ? 'Since ' + sinceWhen(S.at) : 'Coming up'}</span>${out.map(x=>x.k === 'dinner' ? `<button type="button" class="since-p ml-chip" data-mealog="dinner">${esc(x.t)}</button>` : `<button type="button" class="since-p ${x.warn ? 'warn' : ''}" data-since="${x.k}">${esc(x.t)}</button>`).join('')}</div>`;
 }
 function sinceWhen(ms){ const d = new Date(ms), t = isoOf(d); return t === localToday() ? d.toLocaleTimeString('en-US',{ hour:'numeric', minute:'2-digit' }) : t === isoAddDays(localToday(), -1) ? 'yesterday' : shortDate(t); }
 document.addEventListener('click', e=>{ const b = e.target.closest('[data-since]'); if(!b) return; const k = b.dataset.since;
