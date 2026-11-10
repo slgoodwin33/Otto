@@ -2465,7 +2465,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-10.90';
+const APP_BUILD = '2026-11-10.91';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -7470,6 +7470,24 @@ async function syncNow(){
     await refreshAccounts(); await refreshBudget(); await refreshBank(); await refreshBills();
   } catch(err){ status.textContent = err.message; status.className = 'save-status err'; btn.disabled = false; }
 }
+// ---------- Auto bank sync (.91, TD-00072): pull from the bank when the app opens or comes back, at most every 5 min ----------
+// Silent when nothing new or on failure; a small notice only when new transactions arrive. Sync now stays for manual pulls.
+const AUTOSYNC_KEY = 'otto.autosync', AUTOSYNC_MS = 5*60000; let autoSyncBusy = false;
+async function autoSync(){
+  if(autoSyncBusy || !session || document.hidden) return;
+  if(!(bankConnections||[]).length) return;   // nothing linked
+  let last = 0; try{ last = Number(localStorage.getItem(AUTOSYNC_KEY)) || 0; }catch(e){}
+  if(Date.now() - last < AUTOSYNC_MS) return;
+  autoSyncBusy = true; try{ localStorage.setItem(AUTOSYNC_KEY, String(Date.now())); }catch(e){}
+  try{
+    const r = await callFn('plaid-sync', { trigger:'open' });
+    const added = (r.results||[]).reduce((a,x)=>a + (x.added||0), 0);
+    if(added > 0){ await refreshAccounts(); await refreshBudget(); await refreshBank(); await refreshBills();
+      showNotice(`${added} new transaction${added===1?'':'s'} from your bank. Tap to see.`, ()=>{ document.getElementById('ottoNotice')?.classList.remove('show'); openDeep('money','txns'); }); }
+  }catch(e){ /* stay quiet; Sync now still works */ }
+  finally{ autoSyncBusy = false; }
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible') setTimeout(autoSync, 1500); });
 document.getElementById('bankCard').addEventListener('click', e=>{
   if(e.target.closest('#connectBankBtn')) connectBank(null);
   else if(e.target.closest('#syncNowBtn')) syncNow();
@@ -7634,6 +7652,7 @@ async function bootApp(){
   await Promise.allSettled([refreshBudget(), refreshAssets(), refreshHealth(), refreshFood(), refreshBank(), refreshBills(), refreshSyncHealth(), refreshCalendar(), refreshCheckin(), refreshClarifications()]);
   renderBriefing();
   resumePlaidOAuth();
+  autoSync();
 }
 
 // widgets open the exact view: Steps → Body · Activity, Recurring → Money · Recurring
