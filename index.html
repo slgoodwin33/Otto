@@ -2019,6 +2019,14 @@ body.chatting .otto-chat-starters{display:none}
   .dcd-n{display:flex; flex-direction:column; align-items:center; justify-content:center; height:56px; border-radius:14px; background:var(--surface-2);} .dcd-n b{font:700 20px var(--sans); line-height:1; font-variant-numeric:tabular-nums;} .dcd-n span{font:11px var(--sans); color:var(--text-muted);}
   .dcd-n.warn b{color:var(--amber);} .dcd-n.bad b{color:var(--coral);}
   .dcd-bar{display:block; height:5px; border-radius:3px; background:var(--surface-2); margin-top:6px;} .dcd-bar i{display:block; height:100%; border-radius:3px; background:color-mix(in srgb, var(--text-muted) 70%, var(--surface-2));} .dcd-bar i.warn{background:var(--amber);} .dcd-bar i.bad{background:var(--coral);}
+
+  /* Next steps (.93) */
+  .ns-wdg{cursor:pointer;} .ns-item{display:flex; flex-direction:column; gap:8px; padding:10px 0; border-top:1px solid var(--border);} .ns-wdg .ns-item:first-of-type{border-top:none; padding-top:6px;}
+  .ns-main{display:flex; flex-direction:column; gap:3px; min-width:0;} .ns-step{font:600 15px/1.35 var(--sans); color:var(--text);} .ns-for{font:13px var(--sans); color:var(--text-muted); display:flex; flex-wrap:wrap; gap:4px 8px;} .ns-why{font:13px/1.4 var(--sans); color:var(--text-faint);}
+  .ns-due{font-weight:600;} .ns-due.soon{color:var(--accent-text);} .ns-due.late{color:var(--coral);}
+  .ns-acts{display:flex; gap:8px;} .ns-acts button{all:unset; box-sizing:border-box; cursor:pointer; min-height:36px; padding:0 14px; border-radius:999px; font:600 13.5px var(--sans); display:inline-flex; align-items:center;}
+  .ns-acts .ns-done{background:var(--accent-soft) !important; color:var(--accent-text) !important; border:1px solid color-mix(in srgb, var(--accent) 55%, transparent) !important;} .ns-acts .ns-skip{border:1px solid var(--border) !important; background:transparent !important; color:var(--text) !important;} .ns-acts button:focus-visible{outline:3px solid var(--accent); outline-offset:2px;}
+  .ns-list{padding:4px 16px !important;} .ns-list .ns-item:first-child{border-top:none;}
   /* Otto ring commands (.84) */
   .cmd-list{display:flex; flex-direction:column; gap:4px; padding:6px; margin:0 0 8px; background:var(--surface); border:1px solid var(--border); border-radius:18px; box-shadow:0 10px 30px rgba(0,0,0,.35);} .cmd-list[hidden]{display:none !important;}
   .cmd{all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2px 10px; padding:10px 12px; border-radius:12px; min-height:44px;} .cmd b{font:600 15px var(--sans); color:var(--text);} .cmd span{grid-column:1; font:13px var(--sans); color:var(--text-muted);}
@@ -2280,7 +2288,7 @@ body.chatting .otto-chat-starters{display:none}
       <div class="studio-page-head"><div class="studio-kicker">YOUR WORKSPACE <span class="studio-dot"></span> STAY ON TRACK</div><h2>Make today<br><span>count.</span></h2><p>Focus on what matters, one task at a time.</p></div>
       <div class="ia2-subtabs" id="planTabs" role="tablist" aria-label="Plan"><button type="button" role="tab" data-ptab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-ptab="upcoming" aria-selected="false">Upcoming</button><button type="button" role="tab" data-ptab="backlog" aria-selected="false">Backlog</button><button type="button" role="tab" data-ptab="projects" aria-selected="false">Projects</button></div>
       <button type="button" class="reset-chip" data-reset-start data-pt="today" hidden></button>
-      <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-ctl"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div>
+      <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-ctl"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div><div id="planNextSteps" data-pt="today"></div>
       <form id="quickAddForm" class="quick-add-form" data-pt="today">
         <input type="text" id="quickAddInput" placeholder="Add a task for today…" required>
         <label class="sr-only" for="quickAddWhen">Schedule task</label><select id="quickAddWhen" aria-label="Schedule task"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="selected">Selected day</option><option value="anytime">Anytime</option></select>
@@ -2467,7 +2475,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-10.92';
+const APP_BUILD = '2026-11-10.93';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4415,7 +4423,7 @@ function planLinkedItems(date){
   return out;
 }
 function renderPlanAgenda(){
-  const el = document.getElementById('planAgenda'); if(!el) return; planLinksEnsure();
+  const el = document.getElementById('planAgenda'); if(!el) return; planLinksEnsure(); renderPlanNextSteps();
   const date = planSelectedDate || localToday(), items = planItemsFor(date);
   const label = date === localToday() ? 'Today' : date === isoAddDays(localToday(), 1) ? 'Tomorrow' : new Date(date+'T12:00').toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
   el.innerHTML = `<div class="section-title">${esc(label)}<span>${items.length ? `${items.length} item${items.length===1?'':'s'}` : ''}</span></div>` + (items.length ? `<div class="gcard plan-items">${items.map(it=>`
@@ -5974,7 +5982,8 @@ function renderIa2HomeNow(){
       <span class="food-split" role="img" aria-label="Eating out ${money(fs.out)}, groceries ${money(fs.groc)}"><i class="fo" style="flex:${fs.out||0.001}"></i><i class="fg" style="flex:${fs.groc||0.001}"></i></span>
       <span class="fs-legend"><span><i class="fo" aria-hidden="true"></i>Eating out ${money(fs.out)}</span><span><i class="fg" aria-hidden="true"></i>Groceries ${money(fs.groc)}</span></span>` : '<b class="wdg-mid">$0</b><span class="wdg-sub">no food spending yet this week</span>', { sub:'week' }); }
   if(typeof resetDue === 'function' && resetDue()) hero = hero.replace(/<\/button>$/, '') + '</button>' + `<button type="button" class="wdg wide reset-wdg" data-reset-start><span class="wdg-head"><span>WEEKLY RESET</span><em>about 3 min</em></span><span class="wdg-li">Close the week, clear the inbox, sort tasks, plan meals</span><span class="wdg-sub">Start ›</span></button>`;
-  const W = { inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
+  const nextStepsW = nextStepsWidget();
+  const W = { nextsteps: nextStepsW, inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));
   const sized = k => W[k].replace('class="wdg ', `class="wdg ${cfg.wide[k] ? 'wide ' : ''}`).replace(' wide wide', ' wide');
   // empty tiles don't hold a grid slot (.81): "Not synced / Nothing coming up" fold into one line under the grid
@@ -6813,8 +6822,8 @@ document.addEventListener('click', e=>{
 
 
 // ===================== Build .52: widget editing, sort by use, motion, instant open =====================
-const HOME_KEYS = ['inbox','food','steps','stop','next','kitchen','sleep','recurring','closet','car'];
-const HOME_LABEL = { inbox:'Inbox', food:'Food spend', steps:'Steps', stop:'Your day (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
+const HOME_KEYS = ['nextsteps','inbox','food','steps','stop','next','kitchen','sleep','recurring','closet','car'];
+const HOME_LABEL = { nextsteps:'Next steps', inbox:'Inbox', food:'Food spend', steps:'Steps', stop:'Your day (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
 let homeEditing = false, ia2FirstPaint = true, homeCachedAt = null;
 function homeCfg(){ let c = {}; try{ c = JSON.parse(localStorage.getItem('otto.widgets') || '{}'); }catch(e){}
   return { order: Array.isArray(c.order) ? c.order.filter(k=>HOME_KEYS.includes(k)) : [], hidden: Array.isArray(c.hidden) ? c.hidden : ['closet','car'], wide: c.wide || { stop:true }, byUse: !!c.byUse }; }
@@ -7684,6 +7693,46 @@ function openDeep(k, sub){
     else { const b = [...document.querySelectorAll('#bodyTabs [data-btab], #sheet [data-lsec], #planTabs [data-ptab]')].find(x=>x.textContent.trim().toLowerCase() === String(sub).toLowerCase()); if(b) b.click(); }
   }, 60);
 }
+
+// ---------- Next steps (.93, TD-00073): one concrete action per task, suggested by Claude or you (table next_steps, view v_next_steps) ----------
+// Home shows the top 2; Plan › Today lists them all. Done / Not now set status + resolved_at; the notice can undo.
+let nextSteps = null, nextStepsP = null;
+function loadNextSteps(force){   // one request in flight; callers that arrive meanwhile wait on the same promise
+  if(nextSteps && !force) return Promise.resolve(nextSteps);
+  if(!nextStepsP) nextStepsP = (async()=>{ try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/v_next_steps?select=*&order=rank.asc`, { headers: authHeaders() }); nextSteps = r.ok ? await r.json() : []; }catch(e){ nextSteps = nextSteps || []; } nextStepsP = null; return nextSteps; })();
+  return nextStepsP;
+}
+function nextStepsSorted(){ const P = { high:0, medium:1, low:2 };
+  return (nextSteps||[]).slice().sort((a,b)=>(a.rank ?? 999) - (b.rank ?? 999) || (a.due_date || '9999').localeCompare(b.due_date || '9999') || (P[a.priority] ?? 3) - (P[b.priority] ?? 3)); }
+function nsDue(x){ if(!x.due_date) return ''; const n = daysTo(x.due_date); return n < 0 ? `<span class="ns-due late">${-n}d late</span>` : n === 0 ? '<span class="ns-due soon">due today</span>' : n === 1 ? '<span class="ns-due soon">due tomorrow</span>' : `<span class="ns-due">due ${shortDate(x.due_date)}</span>`; }
+function nsItem(x, big){
+  return `<div class="ns-item" data-ns="${x.id}"><div class="ns-main"><b class="ns-step">${esc(x.step)}</b>
+    <span class="ns-for">${x.task_title ? esc(x.task_title) : x.project_title ? esc(x.project_title) : ''}${nsDue(x)}</span>${big && x.why ? `<span class="ns-why">${esc(x.why)}</span>` : ''}</div>
+    <div class="ns-acts"><button type="button" class="ns-done" data-nsdo="done" data-nsid="${x.id}" aria-label="Done: ${esc(x.step)}">Done</button><button type="button" class="ns-skip" data-nsdo="dismissed" data-nsid="${x.id}" aria-label="Not now: ${esc(x.step)}">Not now</button></div></div>`;
+}
+function nextStepsWidget(){
+  if(nextSteps === null){ loadNextSteps().then(()=>renderIa2Home()); return `<div class="wdg wide ns-wdg" data-w="todos"><span class="wdg-head"><span>NEXT STEPS</span><em></em></span><span class="wdg-sub">Loading…</span></div>`; }
+  const L = nextStepsSorted();
+  if(!L.length) return `<div class="wdg wide ns-wdg quiet" data-w="todos"><span class="wdg-head"><span>NEXT STEPS</span><em></em></span><span class="wdg-sub">Nothing suggested</span></div>`;
+  return `<div class="wdg wide ns-wdg" data-w="todos" data-sub="Today"><span class="wdg-head"><span>NEXT STEPS</span><em>${L.length > 2 ? `${L.length - 2} more ›` : 'in Plan ›'}</em></span>${L.slice(0, 2).map(x=>nsItem(x, false)).join('')}</div>`;
+}
+function renderPlanNextSteps(){
+  const el = document.getElementById('planNextSteps'); if(!el) return;
+  if(nextSteps === null){ loadNextSteps().then(renderPlanNextSteps); el.innerHTML = ''; return; }
+  const L = nextStepsSorted();
+  el.innerHTML = L.length ? `<div class="section-title">Next steps<span>${L.length}</span></div><div class="gcard ns-list">${L.map(x=>nsItem(x, true)).join('')}</div>` : '';
+}
+async function nsSet(id, status){
+  const x = (nextSteps||[]).find(r=>r.id === id); if(!x) return;
+  const idx = nextSteps.indexOf(x); nextSteps.splice(idx, 1); hapticPulse(); renderIa2Home(); renderPlanNextSteps();
+  const patch = body => fetch(`${SUPABASE_URL}/rest/v1/next_steps?id=eq.${id}`, { method:'PATCH', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=minimal' }), body: JSON.stringify(body) });
+  try{ await ensureValidSession(); const r = await patch({ status, resolved_at: new Date().toISOString() }); if(!r.ok) throw new Error(`Couldn't save (${r.status})`);
+    showNotice(`${status === 'done' ? 'Done' : 'Hidden'}: ${x.step.length > 40 ? x.step.slice(0, 38) + '…' : x.step}. Tap to undo.`, async ()=>{ document.getElementById('ottoNotice')?.classList.remove('show');
+      try{ const u = await patch({ status:'suggested', resolved_at:null }); if(!u.ok) throw new Error(); nextSteps.splice(Math.min(idx, nextSteps.length), 0, x); renderIa2Home(); renderPlanNextSteps(); showNotice('Undone.'); }catch(e){ showNotice("Couldn't undo."); } });
+  }catch(err){ nextSteps.splice(idx, 0, x); renderIa2Home(); renderPlanNextSteps(); showNotice(err.message); }
+}
+document.addEventListener('click', e=>{ const b = e.target.closest('[data-nsdo]'); if(!b) return; e.preventDefault(); e.stopPropagation(); nsSet(Number(b.dataset.nsid), b.dataset.nsdo); }, true);
+
 // ---------- tiny charts for Home widgets ----------
 function miniBars(vals, onIdx, labels){
   const max = Math.max(...vals, 1);
