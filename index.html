@@ -2233,7 +2233,7 @@ body.chatting .otto-chat-starters{display:none}
     <button class="icon-btn" id="accountBtn" type="button" aria-label="Account and sync"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.2 7-5.2s5.8 1.6 7 5.2"/></svg></button>
   </div>
   <div class="thread" id="chatThread">
-    <div class="msg otto intro">Ask me anything about your money, food, todos, or health. I read straight from your data, and I can't change anything yet.</div>
+    <div class="msg otto intro">Ask me anything about your money, food, tasks, or health. I read straight from your data, and I can't change anything yet.</div>
   </div>
   <div class="otto-chat-starters" id="ottoChatStarters" aria-label="Suggested questions">
     <span class="otto-starters-label">START WITH A QUESTION</span>
@@ -2280,7 +2280,7 @@ body.chatting .otto-chat-starters{display:none}
       <button type="button" class="reset-chip" data-reset-start data-pt="today" hidden></button>
       <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-ctl"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div>
       <form id="quickAddForm" class="quick-add-form" data-pt="today">
-        <input type="text" id="quickAddInput" placeholder="Add a todo for today…" required>
+        <input type="text" id="quickAddInput" placeholder="Add a task for today…" required>
         <label class="sr-only" for="quickAddWhen">Schedule task</label><select id="quickAddWhen" aria-label="Schedule task"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="selected">Selected day</option><option value="anytime">Anytime</option></select>
         <button class="save-btn" type="submit">Add</button>
       </form>
@@ -2289,9 +2289,9 @@ body.chatting .otto-chat-starters{display:none}
       <div id="triageCard" data-pt="backlog"></div><div class="seg" id="todoSeg" data-pt="backlog"><button type="button" data-tview="later" class="active">Later</button><button type="button" data-tview="someday">Someday</button><button type="button" data-tview="done">Done</button></div>
       <!-- Build 003: local, cross-view todo search -->
       <div class="todo-search-wrap" data-pt="backlog">
-        <label class="sr-only" for="todoSearch">Search all todos</label>
-        <input id="todoSearch" type="search" placeholder="Search all todos…" autocomplete="off" spellcheck="false">
-        <button id="todoSearchClear" type="button" aria-label="Clear todo search" hidden>Clear</button>
+        <label class="sr-only" for="todoSearch">Search all tasks</label>
+        <input id="todoSearch" type="search" placeholder="Search all tasks…" autocomplete="off" spellcheck="false">
+        <button id="todoSearchClear" type="button" aria-label="Clear task search" hidden>Clear</button>
       </div>
       <div id="todoSearchCount" data-pt="backlog" class="todo-search-count" role="status" aria-live="polite" hidden></div>
       <div class="controls" id="statusFilters" hidden></div>
@@ -2465,7 +2465,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-08.89';
+const APP_BUILD = '2026-11-10.90';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -3297,7 +3297,7 @@ document.getElementById('quickAddForm').addEventListener('submit', async (e)=>{
     input.value = '';
     await refresh(false);
   } catch(err){
-    document.getElementById('errorBanner').innerHTML = `<div class="error-banner">Couldn't add todo (${err.message}).</div>`;
+    document.getElementById('errorBanner').innerHTML = `<div class="error-banner">Couldn't add task (${err.message}).</div>`;
   } finally {
     input.disabled = false;
   }
@@ -4320,7 +4320,7 @@ function todoRowHtml(t){
       ${!done ? `<div class="chiprow"><span class="lbl">When</span>${quickDates().map(([l,v])=>`<button class="chip ${(t.due_date||null)===v?'active':''}" type="button" data-setdue="${v||''}">${l}</button>`).join('')}</div>
       <div class="chiprow"><span class="lbl">Priority</span>${['high','medium','low'].map(p=>`<button class="chip ${t.priority===p?'active':''}" type="button" data-setprio="${p}">${p[0].toUpperCase()+p.slice(1)}</button>`).join('')}</div>` : ''}
       ${t.notes ? `<div class="trow-notes">${esc(t.notes)}</div>` : ''}
-      <div class="chiprow">${done ? `<button class="link-btn" type="button" data-reopen="1">Reopen</button>` : `<button class="link-btn" type="button" data-cancel="1" style="color:var(--text-faint)">Cancel this todo</button>`}</div>
+      <div class="chiprow">${done ? `<button class="link-btn" type="button" data-reopen="1">Reopen</button>` : `<button class="link-btn" type="button" data-cancel="1" style="color:var(--text-faint)">Cancel this task</button>`}</div>
     </div>` : '';
   return `<div class="swipe" data-code="${esc(t.code)}"><div class="swipe-bg"><span class="l">Done ✓</span><span class="r">Tomorrow →</span></div>
     <div class="trow ${done?'done':''}">
@@ -4353,7 +4353,7 @@ function planItemsFor(date){
   (calEvents||[]).forEach(e=>{ if(isoOf(e.starts_at) !== date) return;
     items.push({ kind:'event', sort: e.all_day ? '00:00' : new Date(e.starts_at).toTimeString().slice(0,5), time: e.all_day ? 'All day' : clockTime(e.starts_at) + (e.ends_at ? `–${clockTime(e.ends_at)}` : ''), title: e.title, sub: [e.location, e.calendar_name].filter(Boolean).join(' · ') }); });
   (allTodos||[]).filter(t=>t.status==='open' && t.due_date && (t.due_date === date || (date === today && t.due_date < today))).forEach(t=>{
-    items.push({ kind:'todo', sort:'99:00', time: t.due_date < today ? `${Math.round((new Date(today)-new Date(t.due_date))/86400000)}d late` : 'Todo', late: t.due_date < today, title: t.title, sub: t.project && t.project.title ? t.project.title : '', code: t.code }); });
+    items.push({ kind:'todo', sort:'99:00', time: t.due_date < today ? `${Math.round((new Date(today)-new Date(t.due_date))/86400000)}d late` : 'Task', late: t.due_date < today, title: t.title, sub: t.project && t.project.title ? t.project.title : '', code: t.code }); });
   if(foodData && foodData.plan) (foodData.plan.meal_plan_items||[]).filter(m=>m.planned_date === date).forEach(m=>{
     const h = MEAL_HOUR[m.meal_type] ?? 12;
     items.push({ kind:'meal', sort: String(h).padStart(2,'0')+':00', time: (m.meal_type||'meal').replace(/^./, c=>c.toUpperCase()), title: (m.recipe ? (m.recipe.emoji ? m.recipe.emoji + ' ' : '') + m.recipe.name : m.title) || 'Meal', sub: m.leftover_of ? 'Leftovers' : '' }); });
@@ -4364,7 +4364,7 @@ function planItemsFor(date){
   planLinkedItems(date).forEach(x=>items.push(x));
   return items.sort((a,b)=>a.sort.localeCompare(b.sort));
 }
-const PLAN_KIND = { event:['Event','#5B8CFF'], todo:['Todo','#D7FF3D'], meal:['Meal','#B5893A'], bill:['Bill','#E0663A'], project:['Project','#A98BFF'], birthday:['Birthday','#FF7FB0'], trip:['Trip','#3FC1C9'], car:['Car','#9AA3A0'], doc:['Document','#F2B640'] };
+const PLAN_KIND = { event:['Event','#5B8CFF'], todo:['Task','#D7FF3D'], meal:['Meal','#B5893A'], bill:['Bill','#E0663A'], project:['Project','#A98BFF'], birthday:['Birthday','#FF7FB0'], trip:['Trip','#3FC1C9'], car:['Car','#9AA3A0'], doc:['Document','#F2B640'] };
 // ---------- Plan links (.89): project/part target dates, birthdays, trips, car service due, document expirations ----------
 // Each source is read where it already lives (projects, people, trips, vehicle_services, documents); nothing is copied.
 let planLinksLoading = false;
@@ -4462,7 +4462,7 @@ function renderTriageCard(todos){
   try{ renderPlanTabs(); }catch(e){}
   const el = document.getElementById('triageCard'); if(!el) return;
   const q = triageQueue(todos);
-  el.innerHTML = q.length ? `<button class="triage-card" type="button" data-triage-deck><b>${q.length} todo${q.length===1?' needs':'s need'} a decision</b><span>Date it, park it for someday, mark it done, or drop it. About ${Math.max(1, Math.round(q.length*5/60))} min.</span><span class="triage-cta">Start triage ›</span></button>` : '';
+  el.innerHTML = q.length ? `<button class="triage-card" type="button" data-triage-deck><b>${q.length} task${q.length===1?' needs':'s need'} a decision</b><span>Date it, park it for someday, mark it done, or drop it. About ${Math.max(1, Math.round(q.length*5/60))} min.</span><span class="triage-cta">Start triage ›</span></button>` : '';
 }
 let triageList = [], triageIdx = 0;
 function renderTriage(){
@@ -4524,7 +4524,7 @@ function renderList(todos){
         || (a.due_date || '9999-12-31').localeCompare(b.due_date || '9999-12-31'));
     if(searchCount) searchCount.textContent = `${matches.length} ${matches.length === 1 ? 'todo' : 'todos'} found across all views`;
     list.innerHTML = matches.length ? `<div class="tgroup">${matches.map(todoRowHtml).join('')}</div>`
-      : `<div class="empty">No matching todos. Try a different search.</div>`;
+      : `<div class="empty">No matching tasks. Try a different search.</div>`;
     return;
   }
   if(planSelectedDate){
@@ -4542,7 +4542,7 @@ function renderList(todos){
     const undated = open.filter(t=>!t.someday && !t.due_date);
     const groups = {}; undated.forEach(t=>{ const k = (t.project && t.project.title) || 'No project'; (groups[k] = groups[k] || []).push(t); });
     Object.keys(groups).sort((a,b)=> a==='No project' ? 1 : b==='No project' ? -1 : a.localeCompare(b)).forEach(k=>{ html += group(`${k} · no date`, groups[k].sort(byPrio), `${groups[k].length}`); });
-    if(!html) html = `<div class="empty">Nothing waiting. Today's todos are in the agenda above.</div>`;
+    if(!html) html = `<div class="empty">Nothing waiting. Today's tasks are in the agenda above.</div>`;
   } else if(todoView === 'someday'){
     const sd = open.filter(t=>t.someday).sort(byPrio);
     html += sd.length ? group('Parked for someday', sd, `${sd.length}`) + `<div class="suggest-note">Tap one and give it a date to bring it back.</div>` : `<div class="empty">Nothing parked. Triage moves things here that you're not doing soon.</div>`;
@@ -4572,7 +4572,7 @@ async function patchTodo(code, body){
     search.value = ''; expandedCode = null; renderList(allTodos); e.preventDefault();
   }});
   document.getElementById('todoSeg').addEventListener('click', e=>{ const b = e.target.closest('[data-tview]'); if(!b) return; todoView = b.dataset.tview; planSelectedDate = null; expandedCode = null; renderList(allTodos);
-    document.getElementById('quickAddInput').placeholder = todoView === 'today' ? 'Add a todo for today…' : 'Add a todo…'; });
+    document.getElementById('quickAddInput').placeholder = todoView === 'today' ? 'Add a task for today…' : 'Add a task…'; });
   list.addEventListener('click', e=>{
     const row = e.target.closest('.swipe'); if(!row || row.dataset.swiped === '1') return;
     const code = row.dataset.code;
@@ -4711,7 +4711,7 @@ function renderHomeKpis(){
 
   const today = new Date().toISOString().slice(0,10);
   const overdueCount = allTodos.filter(t=>t.status==='open' && t.due_date && t.due_date<today).length;
-  const overdueHtml = `<div class="readout ${overdueCount>0?'warn':''}"><div class="label">Overdue todos</div><div class="value">${overdueCount}</div></div>`;
+  const overdueHtml = `<div class="readout ${overdueCount>0?'warn':''}"><div class="label">Overdue tasks</div><div class="value">${overdueCount}</div></div>`;
 
   let paycheckHtml = `<div class="readout"><div class="label">Next paycheck</div><div class="value">—</div></div>`;
   if(lastBudgetData && lastBudgetData.income){
@@ -5912,7 +5912,7 @@ function renderIa2HomeNow(){
     const ti = days.indexOf(today); hero = hero.replace(/<\/button>$/, `<span class="hero-week" data-scrub-week="${S.week_start}" aria-label="Press and drag across the week to look back at each day">${miniBars(days.map(d=>d > today ? 0 : (by[d]||0)), ti, days.map(d=>new Date(d+'T12:00').toLocaleDateString('en-US',{weekday:'narrow'})))}</span></button>`); }
   // inbox
   const q = clarifications || [], kinds = {}; q.forEach(c=>{ kinds[c.kind] = (kinds[c.kind]||0) + 1; });
-  const kname = { place:['place','places'], transaction:['buy','buys'], todo:['todo','todos'], meal:['meal','meals'], checkin:['check-in','check-ins'] };
+  const kname = { place:['place','places'], transaction:['buy','buys'], todo:['task','tasks'], meal:['meal','meals'], checkin:['check-in','check-ins'] };
   const inbox = wdg('inbox', 'INBOX', `<b class="wdg-big">${q.length}</b><span class="wdg-sub">${Object.entries(kinds).map(([k,n])=>`${n} ${kname[k] ? kname[k][n===1?0:1] : k}`).join(' · ') || 'all clear'}</span>`);
   // steps
   let stepsW = wdg('health', 'STEPS', '<span class="wdg-sub">Not synced</span>', { quiet:true });
@@ -5953,7 +5953,7 @@ function renderIa2HomeNow(){
     foodW = wdg('money', 'FOOD', fs.total ? `<b class="wdg-mid">${money(fs.total)}</b><span class="wdg-sub">this week · ${fs.n} purchase${fs.n===1?'':'s'}</span>
       <span class="food-split" role="img" aria-label="Eating out ${money(fs.out)}, groceries ${money(fs.groc)}"><i class="fo" style="flex:${fs.out||0.001}"></i><i class="fg" style="flex:${fs.groc||0.001}"></i></span>
       <span class="fs-legend"><span><i class="fo" aria-hidden="true"></i>Eating out ${money(fs.out)}</span><span><i class="fg" aria-hidden="true"></i>Groceries ${money(fs.groc)}</span></span>` : '<b class="wdg-mid">$0</b><span class="wdg-sub">no food spending yet this week</span>', { sub:'week' }); }
-  if(typeof resetDue === 'function' && resetDue()) hero = hero.replace(/<\/button>$/, '') + '</button>' + `<button type="button" class="wdg wide reset-wdg" data-reset-start><span class="wdg-head"><span>WEEKLY RESET</span><em>about 3 min</em></span><span class="wdg-li">Close the week, clear the inbox, sort todos, plan meals</span><span class="wdg-sub">Start ›</span></button>`;
+  if(typeof resetDue === 'function' && resetDue()) hero = hero.replace(/<\/button>$/, '') + '</button>' + `<button type="button" class="wdg wide reset-wdg" data-reset-start><span class="wdg-head"><span>WEEKLY RESET</span><em>about 3 min</em></span><span class="wdg-li">Close the week, clear the inbox, sort tasks, plan meals</span><span class="wdg-sub">Start ›</span></button>`;
   const W = { inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));
   const sized = k => W[k].replace('class="wdg ', `class="wdg ${cfg.wide[k] ? 'wide ' : ''}`).replace(' wide wide', ' wide');
@@ -6493,8 +6493,8 @@ const TRANSFER_STEPS = [['application','Submit the Salem State transfer applicat
 function schoolTransfer(){
   const rel = (allTodos||[]).filter(t=>/salem state|transfer|transcript|residency/i.test(t.title));
   const covered = k => rel.some(t=>new RegExp(k,'i').test(t.title));
-  return `<div class="section-title">Your transfer todos<span>${rel.length}</span></div><div class="gcard lf-list">${rel.map(t=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(t.title)}</div><div class="grow-sub">${t.status==='done'?'done':t.due_date?'due '+shortDate(t.due_date):'no date'}</div></div><div class="lf-right">${t.status==='done'?'<span class="lf-badge ok">done</span>':t.due_date && t.due_date < localToday()?'<span class="lf-badge rust">overdue</span>':''}</div></div>`).join('') || '<div class="empty">No transfer todos yet.</div>'}</div>
-    <div class="section-title">Usual transfer steps</div><div class="gcard lf-list">${TRANSFER_STEPS.map(([k,t])=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(t)}</div></div><div class="lf-right">${covered(k)?'<span class="lf-badge ok">in your todos</span>':`<button type="button" class="ed-pin" data-addtodo="${esc(t)}">Add</button>`}</div></div>`).join('')}</div>`;
+  return `<div class="section-title">Your transfer tasks<span>${rel.length}</span></div><div class="gcard lf-list">${rel.map(t=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(t.title)}</div><div class="grow-sub">${t.status==='done'?'done':t.due_date?'due '+shortDate(t.due_date):'no date'}</div></div><div class="lf-right">${t.status==='done'?'<span class="lf-badge ok">done</span>':t.due_date && t.due_date < localToday()?'<span class="lf-badge rust">overdue</span>':''}</div></div>`).join('') || '<div class="empty">No transfer tasks yet.</div>'}</div>
+    <div class="section-title">Usual transfer steps</div><div class="gcard lf-list">${TRANSFER_STEPS.map(([k,t])=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(t)}</div></div><div class="lf-right">${covered(k)?'<span class="lf-badge ok">in your tasks</span>':`<button type="button" class="ed-pin" data-addtodo="${esc(t)}">Add</button>`}</div></div>`).join('')}</div>`;
 }
 function schoolProgress(){
   const cs = lifeRows.courses||[], done = cs.filter(c=>['completed','transferred'].includes(c.status)).reduce((a,c)=>a+Number(c.credits||0),0), now = cs.filter(c=>c.status==='enrolled').reduce((a,c)=>a+Number(c.credits||0),0);
@@ -6529,8 +6529,8 @@ document.addEventListener('click', async e=>{
   if(e.target.closest('[data-wearoutfit]')){ wearOutfit(); return; }
   const cd = e.target.closest('[data-closetdiscard]'); if(cd){ closet.pending = closet.pending.filter(x=>x.id !== cd.dataset.closetdiscard); renderLife(); return; }
   const od = e.target.closest('[data-opendocs]'); if(od){ docs.tab = 2; docs.tag = od.dataset.opendocs; docs.rows = null; openArea('documents'); return; }
-  const at = e.target.closest('[data-addtodo]'); if(at){ openChatWith(`Add a todo: ${at.dataset.addtodo}`); return; }
-  if(e.target.closest('[data-movechecklist]')){ openChatWith(`Add these moving todos (no dates yet): ${MOVE_STEPS.join('; ')}`); return; }
+  const at = e.target.closest('[data-addtodo]'); if(at){ openChatWith(`Add a task: ${at.dataset.addtodo}`); return; }
+  if(e.target.closest('[data-movechecklist]')){ openChatWith(`Add these moving tasks (no dates yet): ${MOVE_STEPS.join('; ')}`); return; }
 });
 document.getElementById('closetInput').addEventListener('change', e=>{ const f = Array.from(e.target.files||[]); e.target.value = ''; if(f.length) closetAddFiles(f); });
 document.addEventListener('submit', async e=>{
@@ -7113,7 +7113,7 @@ async function refreshClarifications(){
     clarifications = r.ok ? await r.json() : [];
   } catch(e){ clarifications = []; }
 }
-const CLARIFY_NOUN = { transaction:['purchase','purchases'], place:['place','places'], todo:['overdue todo','overdue todos'], meal:['meal','meals'], checkin:['check-in','check-in'] };
+const CLARIFY_NOUN = { transaction:['purchase','purchases'], place:['place','places'], todo:['overdue task','overdue tasks'], meal:['meal','meals'], checkin:['check-in','check-in'] };
 function nightlyCardHtml(){   // now: "Otto has questions" — whatever Otto needs clarified, any time of day
   const n = clarifications.length;
   if(!n) return '';
@@ -7785,7 +7785,7 @@ async function renderDeck(first){
     right = 'Save name'; hint = 'Swipe right to save · left for later';
   } else if(it.kind === 'todo'){
     const t = (allTodos||[]).find(x=>x.code === it.ref_id); deck.cur = { t };
-    body = `<div class="deck-kind">Todo</div><div class="deck-title">${esc(t ? t.title : it.title)}</div><div class="deck-sub">${t && t.due_date ? `due ${dayLong(t.due_date)}` : 'no date'}${t && t.created_at ? ` · added ${timeAgo(t.created_at)}` : ''}</div>
+    body = `<div class="deck-kind">Task</div><div class="deck-title">${esc(t ? t.title : it.title)}</div><div class="deck-sub">${t && t.due_date ? `due ${dayLong(t.due_date)}` : 'no date'}${t && t.created_at ? ` · added ${timeAgo(t.created_at)}` : ''}</div>
       <div class="deck-acts"><button type="button" data-deck-todo="today">Do today</button><button type="button" data-deck-todo="someday">Someday</button><button type="button" data-deck-todo="done">Done</button><button type="button" data-deck-todo="drop">Drop it</button></div>`;
     right = 'Do today'; left = 'Someday'; hint = 'Swipe right for today · left for someday';
   } else {
@@ -8283,7 +8283,7 @@ function projCardHtml(p){
   const next = c.open.slice().sort((a,b)=>({high:0,medium:1,low:2}[a.priority]??3)-({high:0,medium:1,low:2}[b.priority]??3) || (a.due_date||'9999').localeCompare(b.due_date||'9999'))[0];
   let sub = p.kind === 'ongoing'
     ? `${c.open.length} open${high ? `, ${high} high priority` : ''}${next ? `. Next: ${esc(next.title)}` : ''}`
-    : c.total ? `${c.done.length} of ${c.total} to-dos done${projKids(p).length ? ` · ${projKids(p).length} part${projKids(p).length===1?'':'s'}` : ''}` : 'No to-dos yet';
+    : c.total ? `${c.done.length} of ${c.total} tasks done${projKids(p).length ? ` · ${projKids(p).length} part${projKids(p).length===1?'':'s'}` : ''}` : 'No tasks yet';
   const bar = p.kind !== 'ongoing' && c.total ? `<div class="pj-bar"><i style="width:${Math.round(100*c.done.length/c.total)}%"></i></div>` : '';
   const kids = projKids(p);
   const kidsHtml = kids.length ? `<div class="pj-kids">${kids.map(k=>{ const kc = projCount(projTodos(k,false)); const [kw] = projWhen(k); return `<div class="pj-kid ${k.status==='done'?'done':''}"><span>${esc(k.title)}</span><span>${k.status==='done' ? 'Done' : `${kc.open.length} open · ${esc(kw.split(' · ')[0])}`}</span></div>`; }).join('')}</div>` : '';
@@ -8294,7 +8294,7 @@ function projTodoRows(ts){
   const open = ts.filter(t=>t.status === 'open').sort((a,b)=>(a.due_date||'9999').localeCompare(b.due_date||'9999') || (prio[a.priority]??3)-(prio[b.priority]??3));
   const done = ts.filter(t=>t.status === 'done').sort((a,b)=>(b.completed_at||'').localeCompare(a.completed_at||''));
   const rows = [...open, ...done];
-  return rows.length ? `<div class="tgroup">${rows.map(todoRowHtml).join('')}</div>` : `<div class="pj-empty">No todos here yet.</div>`;
+  return rows.length ? `<div class="tgroup">${rows.map(todoRowHtml).join('')}</div>` : `<div class="pj-empty">No tasks here yet.</div>`;
 }
 function projSectionHtml(p, isSub, label){
   const ts = projTodos(p, false), c = projCount(ts), [when] = projWhen(p);
@@ -8303,7 +8303,7 @@ function projSectionHtml(p, isSub, label){
     : `<div class="pj-sec-head"><b>${label}</b><span>${c.open.length} open</span></div>`;
   const acts = isSub ? `<div class="pj-acts" style="margin-top:10px">${p.status==='done' ? `<button type="button" class="pj-act quiet" data-projstatus="open" data-code="${esc(p.code)}">Reopen ${esc(p.title)}</button>` : `<button type="button" class="pj-act quiet" data-projstatus="done" data-code="${esc(p.code)}">Mark ${esc(p.title)} done</button>`}</div>` : '';
   return `<section class="pj-sec ${isSub ? 'sub' : ''}" style="--pj:${projectColor(projParentOf(p.id)?.title || p.title)}">${head}${projTodoRows(ts)}
-    <form class="pj-add" data-addto="${p.id}"><label class="sr-only" for="pjadd${p.id}">Add a todo to ${esc(p.title)}</label><input id="pjadd${p.id}" placeholder="Add to ${esc(p.title)}…" autocomplete="off"><button type="submit">Add</button></form>${acts}</section>`;
+    <form class="pj-add" data-addto="${p.id}"><label class="sr-only" for="pjadd${p.id}">Add a task to ${esc(p.title)}</label><input id="pjadd${p.id}" placeholder="Add to ${esc(p.title)}…" autocomplete="off"><button type="submit">Add</button></form>${acts}</section>`;
 }
 function renderProjects(){
   const el = document.getElementById('planProjects'); if(!el) return;
@@ -8316,12 +8316,12 @@ function renderProjects(){
     const kids = projKids(p), ts = projTodos(p, true), c = projCount(ts), [when, wc] = projWhen(p);
     let html = `<button type="button" class="pj-back" data-projback>‹ All projects</button>
       <div class="pj-head" style="--pj:${projectColor(p.title)}"><h3>${esc(p.title)}${p.kind==='ongoing' ? '<span class="pj-badge">Ongoing</span>' : ''}</h3>
-      <div class="pj-meta ${wc}">${p.kind==='ongoing' ? `${c.open.length} open · ${c.done.length} done so far` : `${esc(when)}${c.total ? ` · ${c.done.length} of ${c.total} to-dos done` : ''}`}</div>
+      <div class="pj-meta ${wc}">${p.kind==='ongoing' ? `${c.open.length} open · ${c.done.length} done so far` : `${esc(when)}${c.total ? ` · ${c.done.length} of ${c.total} tasks done` : ''}`}</div>
       ${p.notes ? `<p>${esc(p.notes)}</p>` : ''}
       ${p.kind !== 'ongoing' && c.total ? `<div class="pj-bar"><i style="width:${Math.round(100*c.done.length/c.total)}%;background:${projectColor(p.title)}"></i></div>` : ''}</div>`;
     if(kids.length) html += `<div class="section-title">Parts<span>${kids.filter(k=>k.status==='done').length} of ${kids.length} done</span></div>`;
     kids.forEach(k=>{ html += projSectionHtml(k, true); });
-    html += projSectionHtml(p, false, kids.length ? 'For the whole project' : 'Todos');
+    html += projSectionHtml(p, false, kids.length ? 'For the whole project' : 'Tasks');
     html += `<div class="pj-sec"><form class="pj-add" data-addsub="${p.id}"><label class="sr-only" for="pjsub${p.id}">Add a part to ${esc(p.title)}</label><input id="pjsub${p.id}" placeholder="Add a part (e.g. Stowe weekend)…" autocomplete="off"><button type="submit">Add part</button></form></div>`;
     html += `<div class="pj-acts">${p.kind === 'ongoing' ? `<button type="button" class="pj-act quiet" data-projkind="finite" data-code="${esc(p.code)}">Give it an end</button>` : `<button type="button" class="pj-act quiet" data-projkind="ongoing" data-code="${esc(p.code)}">Make it ongoing</button>`}${p.kind === 'ongoing' ? '' : p.status === 'done' ? `<button type="button" class="pj-act" data-projstatus="open" data-code="${esc(p.code)}">Reopen project</button>` : `<button type="button" class="pj-act" data-projstatus="done" data-code="${esc(p.code)}">Mark project done</button>`}</div>`;
     el.innerHTML = html; return;
@@ -8413,7 +8413,7 @@ document.addEventListener('click', e=>{ const b = e.target.closest('#planTabs [d
 function renderPlanTabs(){
   const bl = document.querySelector('#planTabs [data-ptab="backlog"]'); if(!bl) return;
   const n = (allTodos||[]).filter(t=>t.status === 'open' && !t.due_date).length; bl.textContent = n ? `Backlog ${n}` : 'Backlog';
-  const chip = document.querySelector('.reset-chip'); if(chip){ const due = resetDue(); chip.hidden = !due; chip.innerHTML = due ? `<b>Weekly reset</b><span>Close the week, clear the inbox, sort todos, plan meals · about 3 min</span><em>Start ›</em>` : ''; }
+  const chip = document.querySelector('.reset-chip'); if(chip){ const due = resetDue(); chip.hidden = !due; chip.innerHTML = due ? `<b>Weekly reset</b><span>Close the week, clear the inbox, sort tasks, plan meals · about 3 min</span><em>Start ›</em>` : ''; }
 }
 // everything with a date in the next 30 days, from every area
 async function renderUpcoming(){
@@ -8458,12 +8458,12 @@ function renderReset(){
       ${fs && fs.total ? `<p class="rs-p">Food: ${money(fs.total)}, ${fs.total ? Math.round(100*fs.out/fs.total) : 0}% eating out.</p>` : ''}`;
   } else if(k === 'inbox'){
     const n = clarifications.length;
-    body = `<div class="deck-kind">2 · Inbox</div><h3 class="rs-h">${n ? `${n} thing${n===1?'':'s'} to sort` : 'Inbox is clear'}</h3><p class="rs-p">${n ? 'Purchases to file, stops to name, todos to decide. Swipe through them.' : 'Nothing to file or name.'}</p>
+    body = `<div class="deck-kind">2 · Inbox</div><h3 class="rs-h">${n ? `${n} thing${n===1?'':'s'} to sort` : 'Inbox is clear'}</h3><p class="rs-p">${n ? 'Purchases to file, stops to name, tasks to decide. Swipe through them.' : 'Nothing to file or name.'}</p>
       ${n ? '<button type="button" class="save-btn rs-go" data-reset-deck="inbox">Clear the inbox</button>' : ''}`;
   } else if(k === 'todos'){
     const q = resetTodoItems();
-    body = `<div class="deck-kind">3 · Todos</div><h3 class="rs-h">${q.length ? `${q.length} todo${q.length===1?'':'s'} to decide` : 'Todos are sorted'}</h3><p class="rs-p">${q.length ? 'Overdue or undated for a week. Today, someday, done or drop.' : 'Everything open has a date or a home.'}</p>
-      ${q.length ? '<button type="button" class="save-btn rs-go" data-reset-deck="todos">Sort todos</button>' : ''}`;
+    body = `<div class="deck-kind">3 · Tasks</div><h3 class="rs-h">${q.length ? `${q.length} task${q.length===1?'':'s'} to decide` : 'Tasks are sorted'}</h3><p class="rs-p">${q.length ? 'Overdue or undated for a week. Today, someday, done or drop.' : 'Everything open has a date or a home.'}</p>
+      ${q.length ? '<button type="button" class="save-btn rs-go" data-reset-deck="todos">Sort tasks</button>' : ''}`;
   } else if(k === 'meals'){
     body = `<div class="deck-kind">4 · Next week's meals</div><h3 class="rs-h">Plan a few dinners</h3><p class="rs-p">Cooking 3 nights is the easiest way to bring the eating-out share down.</p>
       <button type="button" class="save-btn rs-go" data-reset-meals>Plan 3 dinners with Otto</button><button type="button" class="link-btn" data-reset-kitchen>See what's at home first</button>`;
