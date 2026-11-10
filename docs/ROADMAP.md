@@ -1,5 +1,15 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — builds .90–.95 (Nov 10): the "Code session" tasks from Otto development
+- .90 TD-00070: every visible "todo/to-do" says "task" (table, TD- prefix, code names unchanged).
+- .91 TD-00072: bank auto-sync on open and when the app comes back (≤ every 5 min, quiet on failure, notice only for new transactions).
+- .92 TD-00071: TD-/PR- codes in notes show "code · title" and open on tap.
+- .93 TD-00073: Next steps — Home widget (top 2) + Plan › Today list, Done / Not now with undo (table next_steps, view v_next_steps).
+- .94 TD-00075: meal log sheet for any day (Kitchen › Cook, "Log dinner" on Home after 5 PM, "log dinner …" in the ring).
+- .95 TD-00074: workout logging (exercises / workout_sets) + Body › Lifting card with muscle recency.
+- TD-00077: CLAUDE.md now has the workflow (read Otto development tasks first, port-don't-overwrite uploads, keep `todos`, check Pages deploys); owner email removed from it since the repo is public.
+- TD-00076: Money › Recurring already shows the Discover bill's live balance (DB trigger). Pulling statement balance / statement date / due date from Plaid Liabilities needs a plaid-sync change + deploy (and the Liabilities product on the Plaid app) — waiting on Samuel.
+
 ## Just shipped — build .89 (Nov 8): Plan shows dates from the rest of the app
 - Plan (week strip, agenda, Home "Next") now includes: project and part target dates (late ones on Today; tap opens the project), birthdays from People (with the age they turn), trip start/end from Trips, car service `next_due_on` (overdue on Today), document expirations plus a "renew" heads-up 30 days before. Read from where they live; nothing copied. Tap opens that area.
 - Fixed: to-do dots were near-black on the dark theme (invisible); selected day in the week strip was gray text on lime (failed contrast).
@@ -88,6 +98,7 @@
 - .72 People ↔ Places: pick a person's place (people.location_id, no schema change); rows show last visit, visits in 30 days, usual length; "Time at their place" card; Catch up flag from keep_in_touch_days; Day pages name who lives at a stop.
 
 ## Waiting on Samuel
+- Deploy OK for: otto-chat (say "tasks", know Parts, write Next steps) and plaid-sync (record the 'open' trigger; Liabilities for the Discover statement balance/date/due date — Liabilities must be enabled on the Plaid app first).
 - Two Hannah places exist: "Hannah’s House" (id 9, 6 visits, linked) and "Hannah's house" (id 3, 0 visits). Deleting id 3 is destructive, so it's left for you.
 
 ## Next

@@ -3,9 +3,16 @@
 Otto is a single-user personal app: money, plan, body, food, places, closet, car, documents, people, school and more.
 Frontend: one file, `index.html` (vanilla JS + Leaflet), served by GitHub Pages from this repo (`slgoodwin33/Otto`, branch `main`).
 Backend: Supabase project **"Personal Database"**, ref **`qqsexwiqhaaimxuswsei`** (Postgres + RLS, Storage, Edge Functions, pg_cron).
-Owner: Samuel (`slgoodwin33@gmail.com`), GIS analyst for the City of Beverly, MA. He uses it daily on an iPhone as a home-screen web app.
+Owner: Samuel, GIS analyst for the City of Beverly, MA. He uses it daily on an iPhone as a home-screen web app.
 
 Current build: **2026-11-10.95** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
+
+## Workflow (agreed Nov 10)
+- **Chat is the assistant** (research, planning, data entry in Supabase). **Code sessions do all code** and app-affecting schema work.
+- **Start every code session by reading the open tasks of project PR-00002 "Otto development"** (`todos` where `project_id = 2` and `status = 'open'`). Tasks titled "Code session: …" are specs written in chat; schema that still needs app code is tracked there too. When one ships, set it `done` with `completed_at` and append a dated note saying which build did it and anything left over.
+- **Uploaded index.html from another conversation:** check its `APP_BUILD` against `main` first. If it's older, port only its changes (diff against the commit it was based on) — never overwrite newer work. Remind Samuel to download the current file from GitHub before editing elsewhere.
+- **Don't rename the `todos` table** or the `TD-` prefix (the UI says "task" since .90; edge functions and SQL use `todos`).
+- After pushing, check the "pages build and deployment" run for the last commit actually succeeded before saying it's live (GitHub's queue stalled .81–.85).
 
 ## How to work with Samuel
 - He favors direct execution over explanation, scoped incremental steps, and **verification against real data** — never answer from memory or assumptions; query Supabase / read the code first.
@@ -16,7 +23,7 @@ Current build: **2026-11-10.95** (`const APP_BUILD` in index.html). Bump it on e
 
 ## Supabase rules (hard)
 - DDL only through migrations (`supabase/migrations/*.sql` or the MCP `apply_migration`), unique names. Queries via `execute_sql`.
-- **RLS on every table.** Owner policy pattern: `lower(coalesce((select auth.jwt()) ->> 'email','')) = 'slgoodwin33@gmail.com'`. The anon key in index.html is safe only because of this.
+- **RLS on every table.** Owner policy pattern: `lower(coalesce((select auth.jwt()) ->> 'email','')) = '<owner email>'` (copy the exact email from an existing policy or `OWNER_EMAIL` in `supabase/functions/*/common.ts`; this repo is public, so don't add it anywhere new). The anon key in index.html is safe only because of this.
 - Money is **integer cents**. Codes like `TD-00012`, `RC-00004`, `GT-00003`; insert references via `INSERT … SELECT` on the code.
 - Test DB functions on real tables, then undo (every chat action has `chat_undo`). Leave zero test rows behind (prefix test data with `ZZ`).
 - Batch large loads (~400 rows). Server-side helpers are `security definer` with `search_path = public` and `revoke … from anon, authenticated`.
