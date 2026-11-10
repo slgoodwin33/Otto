@@ -2021,6 +2021,24 @@ body.chatting .otto-chat-starters{display:none}
   .dcd-bar{display:block; height:5px; border-radius:3px; background:var(--surface-2); margin-top:6px;} .dcd-bar i{display:block; height:100%; border-radius:3px; background:color-mix(in srgb, var(--text-muted) 70%, var(--surface-2));} .dcd-bar i.warn{background:var(--amber);} .dcd-bar i.bad{background:var(--coral);}
 
 
+
+  /* lifting (.95) */
+  .lift-last{font:14px var(--sans); color:var(--text-muted); margin:-2px 0 10px;}
+  .lift-muscles{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px;} .lm{display:flex; flex-direction:column; gap:1px; padding:7px 10px; border-radius:12px; background:var(--surface-2); min-width:0;}
+  .lm b{font:600 13px var(--sans); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .lm em{font:normal 12px var(--sans); color:var(--text-muted); white-space:nowrap;}
+  .lm.fresh{background:var(--accent); color:var(--on-accent);} .lm.fresh em{color:var(--on-accent);} .lm.recent{background:color-mix(in srgb, var(--accent) 45%, var(--surface-2));} .lm.recent b, .lm.recent em{color:var(--text);} .lm.week{background:color-mix(in srgb, var(--accent) 16%, var(--surface-2));}
+  .lift-key{display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; font:12px var(--sans); color:var(--text-muted);} .lift-key span{display:inline-flex; align-items:center; gap:5px;} .lift-key i.lm{width:12px; height:12px; padding:0; border-radius:3px; display:inline-block;}
+  .lift-go{margin-top:12px; width:100%; min-height:46px;}
+  .lf-card{gap:12px; max-height:88vh; overflow-y:auto;} .lf-hits{display:flex; flex-wrap:wrap; gap:6px;} .lf-hits .chip{min-height:38px;} .lf-hits em{font-style:normal; color:var(--text-muted); font-size:12px; margin-left:4px;}
+  .lf-ex{display:flex; flex-direction:column; gap:10px; padding:12px; border-radius:16px; background:var(--surface-2);} .lf-ex-h{display:grid; grid-template-columns:1fr auto; gap:2px 8px;} .lf-ex-h b{font:700 17px var(--sans);} .lf-ex-h span{grid-column:1; font:13px var(--sans); color:var(--text-muted);} .lf-ex-h .link-btn{grid-row:1 / span 2; grid-column:2; align-self:center;}
+  .lf-steps{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:10px;} .lf-step span{display:block; font:600 12px var(--sans); color:var(--text-muted); margin-bottom:5px;} .lf-step div{display:flex; align-items:center; gap:6px;}
+  .lf-step button{all:unset; cursor:pointer; flex:none; width:40px; height:44px; border-radius:12px; background:var(--surface); display:grid; place-items:center; font:600 20px var(--sans); color:var(--text);} .lf-step button:focus-visible{outline:3px solid var(--accent);}
+  .lf-step input{flex:1; width:0; min-width:0; height:44px; border-radius:12px; border:1px solid var(--border); background:var(--surface); color:var(--text); font:700 20px var(--sans); text-align:center;}
+  .lf-warm{display:flex; align-items:center; gap:8px; font:14px var(--sans); color:var(--text-muted); min-height:32px;} .lf-warm input{width:20px; height:20px; accent-color:var(--accent);}
+  .lf-new summary{cursor:pointer; font:600 14px var(--sans); color:var(--accent-text); min-height:32px; display:flex; align-items:center;} .lf-new-row{display:flex; gap:6px; margin-top:8px;} .lf-new-row input, .lf-new-row select{min-height:42px; border-radius:12px; border:1px solid var(--border); background:var(--surface-2); color:var(--text); font:16px var(--sans); padding:0 10px; min-width:0;} .lf-new-row input{flex:1;}
+  .lf-session{display:flex; flex-direction:column; gap:8px;} .lf-g{display:flex; flex-wrap:wrap; align-items:center; gap:6px;} .lf-g b{font:600 14px var(--sans); flex-basis:100%;}
+  .lf-set{display:inline-flex; align-items:center; gap:4px; padding:4px 4px 4px 10px; border-radius:10px; background:var(--surface-2); font:600 14px var(--sans); font-variant-numeric:tabular-nums;} .lf-set.warm{opacity:.7;} .lf-set button{all:unset; cursor:pointer; width:28px; height:28px; display:grid; place-items:center; border-radius:8px; color:var(--text-muted);} .lf-set button:focus-visible{outline:2px solid var(--accent);}
+  .lf-sum{font:14px var(--sans); color:var(--text-muted);} .lf-sum b{color:var(--text);} .lf-done{align-self:center;}
   /* meal log sheet (.94) */
   .ml-card{gap:12px;} .ml-chips{display:flex; flex-wrap:wrap; gap:6px;} .ml-chips .chip{min-height:38px;}
   .ml-date, .ml-what{display:flex; flex-direction:column; gap:5px; font:600 12px var(--sans); letter-spacing:.05em; text-transform:uppercase; color:var(--text-muted);}
@@ -2417,6 +2435,7 @@ body.chatting .otto-chat-starters{display:none}
         <button class="chip active" data-days="30" type="button">30 days</button>
         <button class="chip" data-days="90" type="button">90 days</button>
       </div>
+      <div id="liftBox" data-bt="today"></div>
       <button class="link-btn" id="addHealthBtn" type="button" data-bt="today" style="margin:4px 2px 10px;">+ Log activity by hand</button>
       <form id="healthForm" class="txn-form" style="display:none;" data-bt="today">
         <div class="field-row"><label>Date</label><input type="date" id="healthDate" required></div>
@@ -2481,7 +2500,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-10.94';
+const APP_BUILD = '2026-11-10.95';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4182,7 +4201,7 @@ async function refreshHealth(){
   banner.innerHTML = '';
   try{
     lastHealthData = await fetchHealth(healthRangeDays);
-    renderHealth(lastHealthData);
+    renderHealth(lastHealthData); renderLiftCard();
     renderHomeKpis();
   } catch(err){
     banner.innerHTML = `<div class="error-banner">Couldn't refresh this just now${/load failed|network|fetch/i.test(err.message) ? ' (the connection dropped)' : ` (${esc(err.message)})`}. Reopen the page to try again.</div>`;
@@ -5740,6 +5759,8 @@ function cmdMatches(raw){
   m = q.match(/^log\s+(?:gas|fill-?up|fuel)\b\s*(?:(\d+(?:\.\d+)?)\s*(?:gal(?:lons?)?)?)?\s*(?:\$\s*(\d+(?:\.\d{1,2})?))?/i);
   if(m){ const pre = { filled_on: localToday() }; if(m[1]) pre.gallons = Number(m[1]); if(m[2]) pre.total_cents = Math.round(Number(m[2])*100);
     out.push({ exact: !!(m[1] || m[2]), label: `Log a fill-up${m[1] ? ' · ' + m[1] + ' gal' : ''}${m[2] ? ' · $' + m[2] : ''}`, sub:'Opens Car › Log with this filled in; you save it', run: ()=>{ openArea('car'); setTimeout(()=>{ lifeSection = 1; lifeAdding = 'fuel_logs'; lifePrefill = pre; renderLife(); }, 60); } }); }
+  // workout
+  if(/^(log\s+)?(a\s+)?(workout|lift|gym|sets?)\b/i.test(q)) out.push({ exact:true, label:'Log a workout', sub:'Exercise, weight, reps; Add set keeps your last numbers', run: ()=>{ openArea('health'); setTimeout(()=>openLift(), 200); } });
   // meal log
   m = q.match(/^log\s+(breakfast|lunch|dinner|snack|meal)\b\s*(.*)$/i);
   if(m){ const meal = m[1].toLowerCase() === 'meal' ? undefined : m[1].toLowerCase(), what = m[2].trim();
@@ -7789,6 +7810,89 @@ async function nsSet(id, status){
   }catch(err){ nextSteps.splice(idx, 0, x); renderIa2Home(); renderPlanNextSteps(); showNotice(err.message); }
 }
 document.addEventListener('click', e=>{ const b = e.target.closest('[data-nsdo]'); if(!b) return; e.preventDefault(); e.stopPropagation(); nsSet(Number(b.dataset.nsid), b.dataset.nsdo); }, true);
+
+
+// ---------- Lifting (.95, TD-00074): exercises + workout_sets, muscle recency from v_muscle_last_worked ----------
+// Borrowed from Strong / Hevy / wger: an exercise library with primary + secondary muscles, sets logged per exercise.
+// Manual sets never create rows in workouts (Apple Health owns those), so nothing is double counted.
+const MUSCLES = [['chest','Chest'],['back','Back'],['shoulders','Shoulders'],['biceps','Biceps'],['triceps','Triceps'],['forearms','Forearms'],['core','Core'],['glutes','Glutes'],['quads','Quads'],['hamstrings','Hamstrings'],['calves','Calves'],['traps','Traps'],['lower_back','Lower back']];
+const muscleName = k => (MUSCLES.find(m=>m[0]===k)||[])[1] || k;
+const lift = { exercises:null, recency:null, recent:null, day:null, sets:[], ex:null, w:0, r:8, warm:false, q:'' };
+async function liftFetch(path){ const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: authHeaders() }); if(!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }
+async function loadLiftSummary(){
+  try{ const [rec, recent] = await Promise.all([ liftFetch('v_muscle_last_worked?select=*'), liftFetch('workout_sets?select=performed_on,reps,weight_lb,is_warmup,exercise:exercises(name,primary_muscle)&order=performed_on.desc,id.desc&limit=80') ]);
+    lift.recency = rec; lift.recent = recent; }catch(e){ lift.recency = lift.recency || []; lift.recent = lift.recent || []; }
+}
+function renderLiftCard(){
+  const box = document.getElementById('liftBox'); if(!box) return;
+  if(lift.recency === null){ loadLiftSummary().then(renderLiftCard); return; }
+  const by = {}; lift.recency.forEach(r=>by[r.muscle] = r);
+  const lvl = d => d == null ? 'never' : d <= 2 ? 'fresh' : d <= 4 ? 'recent' : d <= 7 ? 'week' : 'stale';
+  const last = lift.recent.length ? lift.recent[0].performed_on : null, lastSets = lift.recent.filter(x=>x.performed_on === last && !x.is_warmup);
+  const exs = [...new Set(lastSets.map(x=>x.exercise && x.exercise.name).filter(Boolean))];
+  box.innerHTML = `<div class="viz-card lift-card"><div class="viz-title"><span>Lifting</span><em>${last ? `last ${daysTo(last) === 0 ? 'today' : daysTo(last) === -1 ? 'yesterday' : shortDate(last)}` : 'nothing logged yet'}</em></div>
+    ${last ? `<div class="lift-last">${lastSets.length} set${lastSets.length===1?'':'s'} · ${esc(exs.slice(0, 3).join(', '))}${exs.length > 3 ? ` +${exs.length - 3}` : ''}</div>` : ''}
+    <div class="lift-muscles" role="list" aria-label="Days since each muscle was worked">${MUSCLES.map(([k,l])=>{ const r = by[k], d = r ? Number(r.days_since) : null;
+      return `<span role="listitem" class="lm ${lvl(d)}" aria-label="${l}: ${d == null ? 'not worked yet' : d === 0 ? 'today' : d + ' day' + (d===1?'':'s') + ' ago'}"><b>${l}</b><em>${d == null ? '—' : d === 0 ? 'today' : d + 'd'}</em></span>`; }).join('')}</div>
+    <div class="lift-key" aria-hidden="true"><span><i class="lm fresh"></i>0–2 days</span><span><i class="lm recent"></i>3–4</span><span><i class="lm week"></i>5–7</span><span><i class="lm stale"></i>older</span></div>
+    <button type="button" class="save-btn lift-go" data-liftopen>Log a workout</button></div>`;
+}
+async function openLift(day){
+  lift.day = day || localToday(); lift.ex = null; lift.q = '';
+  let el = document.getElementById('liftSheet');
+  if(!el){ el = document.createElement('div'); el.id = 'liftSheet'; el.className = 'bmove'; el.setAttribute('role','dialog'); el.setAttribute('aria-modal','true'); el.setAttribute('aria-labelledby','lfTitle'); document.body.appendChild(el); }
+  el.hidden = false; el.innerHTML = '<div class="bmove-card"><div class="skeleton"><div class="skeleton-row"></div></div></div>'; requestAnimationFrame(()=>el.classList.add('show'));
+  try{ if(!lift.exercises) lift.exercises = await liftFetch('exercises?select=id,code,name,primary_muscle,secondary_muscles,equipment&order=name.asc');
+    lift.sets = await liftFetch(`workout_sets?select=*&performed_on=eq.${lift.day}&order=id.asc`); }catch(e){ el.innerHTML = `<div class="bmove-card"><div class="empty">Couldn't load exercises. ${esc(e.message)}</div><button type="button" class="link-btn" data-lf-x>Close</button></div>`; return; }
+  drawLift();
+}
+function exById(id){ return (lift.exercises||[]).find(x=>x.id === id); }
+function drawLift(keepFocus){
+  const el = document.getElementById('liftSheet'); if(!el) return;
+  const groups = []; lift.sets.forEach(s=>{ let g = groups.find(x=>x.id === s.exercise_id); if(!g){ g = { id:s.exercise_id, sets:[] }; groups.push(g); } g.sets.push(s); });
+  const worked = { p:new Set(), s:new Set() }; lift.sets.filter(s=>!s.is_warmup).forEach(s=>{ const e = exById(s.exercise_id); if(!e) return; worked.p.add(e.primary_muscle); (e.secondary_muscles||[]).forEach(m=>worked.s.add(m)); });
+  const q = lift.q.trim().toLowerCase(), hits = (lift.exercises||[]).filter(e=>!q || e.name.toLowerCase().includes(q) || muscleName(e.primary_muscle).toLowerCase().includes(q)).slice(0, q ? 12 : 8);
+  const E = lift.ex ? exById(lift.ex) : null;
+  el.innerHTML = `<div class="bmove-card lf-card"><div class="bmove-head"><b id="lfTitle">Workout · ${lift.day === localToday() ? 'today' : shortDate(lift.day)}</b><button type="button" class="deck-x" data-lf-x aria-label="Close">✕</button></div>
+    <label class="ml-date">Day<input type="date" id="lfDate" value="${lift.day}" max="${localToday()}"></label>
+    ${E ? `<div class="lf-ex"><div class="lf-ex-h"><b>${esc(E.name)}</b><span>${esc(muscleName(E.primary_muscle))}${(E.secondary_muscles||[]).length ? ' · ' + esc(E.secondary_muscles.map(muscleName).join(', ')) : ''}</span><button type="button" class="link-btn" data-lf-change>Change</button></div>
+      <div class="lf-steps"><div class="lf-step"><span>Weight (lb)</span><div><button type="button" data-lf-w="-5" aria-label="5 pounds less">−</button><input id="lfW" inputmode="decimal" value="${lift.w || ''}" placeholder="0" aria-label="Weight in pounds"><button type="button" data-lf-w="5" aria-label="5 pounds more">+</button></div></div>
+        <div class="lf-step"><span>Reps</span><div><button type="button" data-lf-r="-1" aria-label="One rep less">−</button><input id="lfR" inputmode="numeric" value="${lift.r || ''}" aria-label="Reps"><button type="button" data-lf-r="1" aria-label="One rep more">+</button></div></div></div>
+      <label class="lf-warm"><input type="checkbox" id="lfWarm" ${lift.warm ? 'checked' : ''}> Warm-up set</label>
+      <button type="button" class="save-btn bmove-go" data-lf-add>Add set ${lift.sets.filter(s=>s.exercise_id === E.id).length + 1}</button></div>`
+    : `<label class="ml-what">Exercise<input id="lfQ" value="${esc(lift.q)}" placeholder="Search, e.g. bench, squat, back" autocomplete="off"></label>
+      <div class="lf-hits">${hits.map(e=>`<button type="button" class="chip" data-lf-ex="${e.id}">${esc(e.name)} <em>${esc(muscleName(e.primary_muscle))}</em></button>`).join('')}</div>
+      <details class="lf-new"><summary>New exercise</summary><div class="lf-new-row"><label class="sr-only" for="lfNewName">Exercise name</label><input id="lfNewName" placeholder="Name" value="${esc(lift.q)}"><label class="sr-only" for="lfNewM">Primary muscle</label><select id="lfNewM">${MUSCLES.map(([k,l])=>`<option value="${k}">${l}</option>`).join('')}</select><button type="button" class="chip active" data-lf-newex>Add</button></div></details>`}
+    ${groups.length ? `<div class="lf-session">${groups.map(g=>{ const e = exById(g.id); return `<div class="lf-g"><b>${esc(e ? e.name : 'Exercise')}</b>${g.sets.map((s,i)=>`<span class="lf-set ${s.is_warmup?'warm':''}">${s.weight_lb != null ? Number(s.weight_lb) + ' × ' : ''}${s.reps ?? ''}${s.is_warmup ? ' w' : ''}<button type="button" data-lf-del="${s.id}" aria-label="Delete set ${i+1} of ${esc(e ? e.name : '')}">✕</button></span>`).join('')}</div>`; }).join('')}</div>
+      <div class="lf-sum">Worked: ${[...worked.p].map(m=>`<b>${esc(muscleName(m))}</b>`).join(', ')}${[...worked.s].filter(m=>!worked.p.has(m)).length ? ` · also ${[...worked.s].filter(m=>!worked.p.has(m)).map(muscleName).join(', ')}` : ''}</div>` : ''}
+    <button type="button" class="link-btn lf-done" data-lf-x>Done</button></div>`;
+  if(keepFocus) el.querySelector(keepFocus)?.focus();
+}
+async function liftPost(table, row){ await ensureValidSession(); const r = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([row]) });
+  if(!r.ok){ const e = await r.json().catch(()=>({})); throw new Error(e.message || `HTTP ${r.status}`); } return (await r.json())[0]; }
+document.addEventListener('click', async e=>{
+  if(e.target.closest('[data-liftopen]')){ openLift(); return; }
+  const el = document.getElementById('liftSheet'); if(!el || el.hidden || !el.contains(e.target)) return;
+  if(e.target === el || e.target.closest('[data-lf-x]')){ el.hidden = true; lift.recency = null; renderLiftCard(); return; }
+  const ex = e.target.closest('[data-lf-ex]'); if(ex){ lift.ex = Number(ex.dataset.lfEx); const today = lift.sets.filter(s=>s.exercise_id === lift.ex).pop();
+    let prev = today; if(!prev){ try{ prev = (await liftFetch(`workout_sets?select=weight_lb,reps&exercise_id=eq.${lift.ex}&is_warmup=eq.false&order=performed_on.desc,id.desc&limit=1`))[0]; }catch(err){} }
+    lift.w = prev && prev.weight_lb != null ? Number(prev.weight_lb) : 0; lift.r = prev && prev.reps ? prev.reps : 8; lift.warm = false; drawLift(); return; }
+  if(e.target.closest('[data-lf-change]')){ lift.ex = null; drawLift('#lfQ'); return; }
+  const dw = e.target.closest('[data-lf-w]'); if(dw){ lift.w = Math.max(0, (Number(el.querySelector('#lfW').value) || 0) + Number(dw.dataset.lfW)); el.querySelector('#lfW').value = lift.w || ''; return; }
+  const dr = e.target.closest('[data-lf-r]'); if(dr){ lift.r = Math.max(1, (Number(el.querySelector('#lfR').value) || 0) + Number(dr.dataset.lfR)); el.querySelector('#lfR').value = lift.r; return; }
+  if(e.target.closest('[data-lf-add]')){ const w = Number(el.querySelector('#lfW').value) || 0, r = parseInt(el.querySelector('#lfR').value, 10), warm = el.querySelector('#lfWarm').checked;
+    if(!(r > 0)){ showNotice('Enter the reps.'); return; } lift.w = w; lift.r = r; lift.warm = warm;
+    const n = lift.sets.filter(s=>s.exercise_id === lift.ex).length + 1;
+    try{ const row = await liftPost('workout_sets', { performed_on: lift.day, exercise_id: lift.ex, set_number: n, reps: r, weight_lb: w || null, is_warmup: warm }); lift.sets.push(row); hapticPulse(); drawLift(); }catch(err){ showNotice(`Couldn't add the set (${err.message}).`); }
+    return; }
+  const del = e.target.closest('[data-lf-del]'); if(del){ const id = Number(del.dataset.lfDel);
+    try{ await ensureValidSession(); const r = await fetch(`${SUPABASE_URL}/rest/v1/workout_sets?id=eq.${id}`, { method:'DELETE', headers: authHeaders() }); if(!r.ok) throw new Error(`HTTP ${r.status}`); lift.sets = lift.sets.filter(s=>s.id !== id); drawLift(); }catch(err){ showNotice(`Couldn't delete (${err.message}).`); } return; }
+  if(e.target.closest('[data-lf-newex]')){ const name = el.querySelector('#lfNewName').value.trim(), m = el.querySelector('#lfNewM').value; if(!name){ showNotice('Name the exercise.'); return; }
+    try{ const row = await liftPost('exercises', { name, primary_muscle: m }); lift.exercises.push(row); lift.exercises.sort((a,b)=>a.name.localeCompare(b.name)); lift.ex = row.id; lift.w = 0; lift.r = 8; drawLift(); }catch(err){ showNotice(`Couldn't add it (${err.message}).`); } }
+});
+document.addEventListener('input', e=>{ if(e.target.id === 'lfQ'){ lift.q = e.target.value; drawLift('#lfQ'); const i = document.getElementById('lfQ'); if(i){ i.setSelectionRange(i.value.length, i.value.length); } } });
+document.addEventListener('change', async e=>{ if(e.target.id === 'lfDate' && e.target.value){ lift.day = e.target.value; try{ lift.sets = await liftFetch(`workout_sets?select=*&performed_on=eq.${lift.day}&order=id.asc`); }catch(err){} drawLift(); } });
+document.addEventListener('keydown', e=>{ const el = document.getElementById('liftSheet'); if(e.key === 'Escape' && el && !el.hidden){ el.hidden = true; lift.recency = null; renderLiftCard(); } });
 
 // ---------- tiny charts for Home widgets ----------
 function miniBars(vals, onIdx, labels){
