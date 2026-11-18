@@ -36,7 +36,17 @@
     --c-accent:#D7FF3D; --c-warn:#E8AC45; --c-alert:#EF7A52; --c-ok:#45C487;
     /* muscle-map heat ramp only */
     --heat-0:#D8D3C8; --heat-1:#F3CFC4; --heat-2:#E0816F; --heat-3:#BA3A30; --heat-4:#6E0F10;
+    /* motion (.102, TD-00080 addendum): one spring/easing system. JS mirrors these in MOTION.
+       spring = settle for sheets, snaps, releases (2% overshoot); bounce = check-off and drops only (16%).
+       Curves are sampled from a real spring (k 380 / c 30 and k 500 / c 22, mass 1). */
+    --ease-out:cubic-bezier(.22,1,.36,1); --ease-in-out:cubic-bezier(.65,0,.35,1);
+    --ease-spring:linear(0, 0.049, 0.153, 0.283, 0.418, 0.553, 0.666, 0.762, 0.839, 0.898, 0.943, 0.975, 0.996, 1.01, 1.018, 1.021, 1.021, 1.02, 1.017, 1.014, 1.011, 1.009, 1.007, 1.005, 1.003, 1.002, 1.001, 1, 1);
+    --ease-bounce:linear(0, 0.115, 0.342, 0.61, 0.849, 1.018, 1.123, 1.165, 1.16, 1.127, 1.085, 1.042, 1.007, 0.986, 0.974, 0.972, 0.976, 0.983, 0.99, 0.996, 1.001, 1.004, 1.005, 1.004, 1.003, 1.002, 1.001, 1, 1);
+    --dur-press:110ms; --dur-fast:180ms; --dur-base:280ms; --dur-spring:450ms; --dur-bounce:600ms;
+    --press-scale:.97; --lift-scale:1.03; --lift-shadow:0 12px 32px rgba(0,0,0,.45);
   }
+  @supports not (transition-timing-function:linear(0, 1)){ :root{ --ease-spring:cubic-bezier(.2,1.1,.4,1); --ease-bounce:cubic-bezier(.3,1.5,.5,1); } }
+  @media (prefers-reduced-motion:reduce){ :root{ --dur-press:1ms; --dur-fast:1ms; --dur-base:1ms; --dur-spring:1ms; --dur-bounce:1ms; --press-scale:1; --lift-scale:1; } }
 :root{color-scheme:light;
   --bg:#F6F5F1; --surface:#FFFFFF; --surface-2:#EEECE6; --border:#DAD8D1;
   --text:#15161A; --text-muted:#4E5059; --text-faint:#6B6D76;
@@ -2476,7 +2486,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.101';
+const APP_BUILD = '2026-11-18.102';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
