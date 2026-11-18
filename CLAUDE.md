@@ -5,7 +5,7 @@ Frontend: one file, `index.html` (vanilla JS + Leaflet), served by GitHub Pages 
 Backend: Supabase project **"Personal Database"**, ref **`qqsexwiqhaaimxuswsei`** (Postgres + RLS, Storage, Edge Functions, pg_cron).
 Owner: Samuel, GIS analyst for the City of Beverly, MA. He uses it daily on an iPhone as a home-screen web app.
 
-Current build: **2026-11-18.96** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
+Current build: **2026-11-18.97** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
 
 ## Workflow (agreed Nov 10)
 - **Chat is the assistant** (research, planning, data entry in Supabase). **Code sessions do all code** and app-affecting schema work.

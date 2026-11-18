@@ -2041,6 +2041,7 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+  .bill-paid{color:var(--c-ok); font-weight:600;}
   /* lifting (.95) */
   .lift-last{font:14px var(--sans); color:var(--text-muted); margin:-2px 0 10px;}
   .lift-muscles{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:6px;} .lm{display:flex; flex-direction:column; gap:1px; padding:7px 10px; border-radius:12px; background:var(--surface-2); min-width:0;}
@@ -2519,7 +2520,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.96';
+const APP_BUILD = '2026-11-18.97';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2962,6 +2963,9 @@ async function fetchBudget(){
   const billsRes = await fetch(`${SUPABASE_URL}/rest/v1/recurring_bills?select=id,code,name,account_id,match_text,amount_cents,frequency,due_day,autopay,category:transaction_categories(code)&active=eq.true&order=name.asc`, { headers: authHeaders() });
   if(!billsRes.ok) throw new Error(`Supabase returned ${billsRes.status}`);
   const bills = await billsRes.json();
+  // .97 (TD-00119): paid / due per bill from v_bill_status (a payment counts from 20 days before the due date)
+  try{ const st = await fetch(`${SUPABASE_URL}/rest/v1/v_bill_status?select=code,status,paid_on,paid_cents,due_this_month,next_due_on`, { headers: authHeaders() });
+    if(st.ok){ BILL_ST = {}; (await st.json()).forEach(r=>{ BILL_ST[r.code] = r; }); } }catch(e){}
 
   const incomeRes = await fetch(`${SUPABASE_URL}/rest/v1/income_sources?select=code,name,source_type,net_amount_cents,frequency,next_expected_date&active=eq.true&order=name.asc`, { headers: authHeaders() });
   if(!incomeRes.ok) throw new Error(`Supabase returned ${incomeRes.status}`);
@@ -3017,7 +3021,8 @@ function renderBudget0(data){
     html += dayBars(days, per, planned, today, spent, dayN);
   }
   const upcoming = (data.bills || []).filter(b=>b.due_day && Number(b.amount_cents) > 0)
-    .map(b=>({ ...b, next: nextOccurrenceFromDueDay(b.due_day) })).sort((a,b)=>a.next.localeCompare(b.next)).slice(0, 4);
+    .map(b=>({ ...b, next: billNext(b) })).sort((a,b)=>a.next.localeCompare(b.next)).slice(0, 4);
+  const paidLately = (data.bills || []).map(b=>({ b, st: billPaidThisCycle(b) })).filter(x=>x.st && daysUntil(x.st.paid_on) >= -10).sort((a,b)=>b.st.paid_on.localeCompare(a.st.paid_on));
   if(upcoming.length){
     html += `<div class="section-title">Bills coming up<span>next ${upcoming.length}</span></div><div class="gcard">${upcoming.map(b=>{
       const n = daysUntil(b.next);
@@ -3025,6 +3030,7 @@ function renderBudget0(data){
       return `<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(b.name)}</div><div class="grow-sub">${b.autopay ? 'Autopay' : 'Pay it yourself'}, ${esc(shortDate(b.next))}</div></div><div class="grow-right" ${n <= 2 && !b.autopay ? 'style="color:var(--coral);font-weight:600"' : ''}>${money(b.amount_cents)}<div class="grow-sub">${when}</div></div></div>`;
     }).join('')}</div>`;
   }
+  if(paidLately.length) html += `<div class="section-title">Paid lately<span>${paidLately.length}</span></div><div class="gcard">${paidLately.map(({ b, st })=>`<div class="grow static"><div class="grow-main"><div class="grow-title">${esc(b.name)}</div><div class="grow-sub">Paid ${esc(shortDate(st.paid_on))} · next due ${esc(shortDate(st.next_due_on))}</div></div><div class="grow-right bill-paid">✓ ${money(st.paid_cents)}</div></div>`).join('')}</div>`;
   const ordered = exp.slice().sort((a,b)=>(parseFloat(b.pct_used)||0)-(parseFloat(a.pct_used)||0) || (b.planned_cents||0)-(a.planned_cents||0));
   const catRow = c => {
     const budget = (c.planned_cents||0) + (c.carried_in_cents||0), spentC = Number(c.spent_cents||0);
@@ -4431,7 +4437,9 @@ function planItemsFor(date){
     items.push({ kind:'meal', sort: String(h).padStart(2,'0')+':00', time: (m.meal_type||'meal').replace(/^./, c=>c.toUpperCase()), title: (m.recipe ? (m.recipe.emoji ? m.recipe.emoji + ' ' : '') + m.recipe.name : m.title) || 'Meal', sub: m.leftover_of ? 'Leftovers' : '' }); });
   ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.due_day && Number(b.amount_cents) > 0).forEach(b=>{
     const [y,mo] = date.split('-').map(Number), last = new Date(y, mo, 0).getDate(), dueDay = Math.min(Number(b.due_day), last);
-    if(Number(date.slice(8)) === dueDay) items.push({ kind:'bill', sort:'09:00', time:'Bill due', title: `${b.name} · ${money(b.amount_cents)}`, sub: b.autopay ? 'Autopay' : 'Pay it yourself' }); });
+    if(Number(date.slice(8)) === dueDay){ const st = billSt(b), paid = st && st.status === 'paid' && st.due_this_month === date;
+      items.push(paid ? { kind:'bill', sort:'09:00', time:'Paid', title: `${b.name} · ${money(st.paid_cents)}`, sub: `paid ${shortDate(st.paid_on)}` }
+                      : { kind:'bill', sort:'09:00', time:'Bill due', title: `${b.name} · ${money(b.amount_cents)}`, sub: b.autopay ? 'Autopay' : 'Pay it yourself' }); } });
   // .89: dates that live in other areas show up in Plan too
   planLinkedItems(date).forEach(x=>items.push(x));
   return items.sort((a,b)=>a.sort.localeCompare(b.sort));
@@ -4736,10 +4744,14 @@ function daysUntil(dateStr){
   return Math.round((new Date(dateStr) - new Date(today)) / 86400000);
 }
 
+let BILL_ST = {};
+function billSt(b){ return (b && BILL_ST[b.code]) || null; }
+function billNext(b){ const st = billSt(b); return st && st.next_due_on ? st.next_due_on : (b.due_day ? nextOccurrenceFromDueDay(b.due_day) : null); }
+function billPaidThisCycle(b){ const st = billSt(b); return st && st.status === 'paid' && st.paid_on ? st : null; }
 function nextBillDue(bills){
   const withDueDay = (bills||[]).filter(b=>b.due_day);
   if(!withDueDay.length) return null;
-  const withDates = withDueDay.map(b=>({ ...b, nextDate: nextOccurrenceFromDueDay(b.due_day) }));
+  const withDates = withDueDay.map(b=>({ ...b, nextDate: billNext(b) }));
   withDates.sort((a,b)=> a.nextDate < b.nextDate ? -1 : 1);
   return withDates[0];
 }
@@ -5998,7 +6010,7 @@ function sinceParts(){
     if(stops.length) out.push({ k:'day', t: stops.length === 1 ? `Stop · ${stops[0].place || 'new place'}` : `${stops.length} new stops` });
   }
   // coming up (not a diff): bills in the next 3 days, documents expiring within 30
-  const bills = ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.due_day && Number(b.amount_cents) > 0).map(b=>({ b, d: daysUntil(nextOccurrenceFromDueDay(b.due_day)) })).filter(x=>x.d >= 0 && x.d <= 3).sort((a,b)=>a.d - b.d);
+  const bills = ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.due_day && Number(b.amount_cents) > 0).map(b=>({ b, d: daysUntil(billNext(b)) })).filter(x=>x.d >= 0 && x.d <= 3).sort((a,b)=>a.d - b.d);
   bills.slice(0, 2).forEach(x=>out.push({ k:'bill', t: `${x.b.name} ${x.d === 0 ? 'due today' : x.d === 1 ? 'due tomorrow' : `due in ${x.d} days`}`, warn: !x.b.autopay }));
   const docsSoon = (lifeRows.documents||[]).filter(x=>x.expires_on && daysTo(x.expires_on) >= 0 && daysTo(x.expires_on) <= 30).sort((a,b)=>a.expires_on.localeCompare(b.expires_on));
   if(docsSoon.length) out.push({ k:'docs', t: `${docsSoon[0].name || 'A document'} expires ${daysTo(docsSoon[0].expires_on) <= 1 ? 'tomorrow' : 'in ' + daysTo(docsSoon[0].expires_on) + ' days'}`, warn: daysTo(docsSoon[0].expires_on) <= 7 });
@@ -6684,8 +6696,9 @@ function recurringItems(){
   const bills = ((lastBudgetData && lastBudgetData.bills) || []).filter(b=>b.active !== false);
   const subs = (lifeRows.subscriptions||[]).filter(x=>x.status !== 'cancelled');
   const billIds = new Set(subs.map(x=>x.recurring_bill_id).filter(Boolean)), subNames = new Set(subs.map(x=>String(x.name||'').trim().toLowerCase()));
-  return subs.map(x=>({ name:x.name, amt:x.amount_cents, next:x.next_charge_on, how: x.cadence, tag: x.detected ? 'found in your bank' : 'subscription', sub:true, match:x.merchant_match }))
-    .concat(bills.filter(b=>!billIds.has(b.id) && !subNames.has(String(b.name||'').trim().toLowerCase())).map(b=>({ name:b.name, amt:b.amount_cents, next: b.due_day ? nextOccurrenceFromDueDay(b.due_day) : null, how: b.frequency || 'monthly', tag: b.autopay ? 'autopay' : 'pay yourself', match:b.match_text })))
+  return subs.map(x=>{ const bill = x.recurring_bill_id ? bills.find(b=>b.id === x.recurring_bill_id) : null;   // a subscription tied to a bill follows that bill's paid/due status
+    return { name:x.name, amt:x.amount_cents, next: bill ? billNext(bill) : x.next_charge_on, how: x.cadence, tag: x.detected ? 'found in your bank' : 'subscription', sub:true, match:x.merchant_match, paid: bill ? billPaidThisCycle(bill) : null }; })
+    .concat(bills.filter(b=>!billIds.has(b.id) && !subNames.has(String(b.name||'').trim().toLowerCase())).map(b=>({ name:b.name, amt:b.amount_cents, next: billNext(b), how: b.frequency || 'monthly', tag: b.autopay ? 'autopay' : 'pay yourself', match:b.match_text, paid: billPaidThisCycle(b) })))
     .sort((a,b)=>(a.next||'9999').localeCompare(b.next||'9999'));
 }
 async function renderRecurring(){
@@ -6694,7 +6707,7 @@ async function renderRecurring(){
   const items = recurringItems();
   const per = { weekly:52/12, monthly:1, quarterly:1/3, yearly:1/12 }, mo = items.reduce((t,x)=>t + (x.amt||0)*(per[x.how]||1), 0);
   el.innerHTML = `<div class="wdg wide hero" style="margin:6px 0 12px"><span class="wdg-head"><span>RECURRING</span><em>bills + subscriptions</em></span><b class="wdg-big acc">${money(Math.round(mo))}<small style="font-size:14px;color:var(--text-muted)">/mo</small></b><span class="wdg-sub">${items.length} charges · ${money(Math.round(mo*12))} a year</span></div>
-    <div class="gcard lf-list">${items.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div><div class="grow-sub">${esc([x.next ? 'next ' + shortDate(x.next) : '', x.how, x.tag].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${money(x.amt||0)}</div></div>`).join('') || '<div class="empty">No recurring charges found yet.</div>'}</div><div class="rec-actions"><button type="button" class="lf-add" data-subs-add>+ Add subscription</button><button type="button" class="link-btn" data-subs-manage>Edit or cancel subscriptions ›</button></div>`;
+    <div class="gcard lf-list">${items.map(x=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(x.name)}</div><div class="grow-sub">${x.paid ? `<span class="bill-paid">✓ Paid ${esc(shortDate(x.paid.paid_on))}</span> · ` : ''}${esc([x.next ? (x.paid ? 'next ' : 'due ') + shortDate(x.next) : '', x.how, x.tag].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${money(x.paid ? x.paid.paid_cents : (x.amt||0))}</div></div>`).join('') || '<div class="empty">No recurring charges found yet.</div>'}</div><div class="rec-actions"><button type="button" class="lf-add" data-subs-add>+ Add subscription</button><button type="button" class="link-btn" data-subs-manage>Edit or cancel subscriptions ›</button></div>`;
   el.querySelector('.wdg.hero').insertAdjacentHTML('afterend', '<div id="cashflowCard" class="viz-card cf-card"><div class="skeleton"><div class="skeleton-row"></div></div></div>');
   renderCashflow().catch(err=>{ const c = document.getElementById('cashflowCard'); if(c) c.innerHTML = `<div class="empty">Couldn't project your balance. ${esc(err.message||'')}</div>`; });
 }
