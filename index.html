@@ -2041,6 +2041,11 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+
+  /* blockers + related projects (.98) */
+  .trow.blocked .trow-title{color:var(--c-text-3);} .trow.blocked .quick-complete{opacity:.5;}
+  .blk-badge{all:unset; cursor:pointer; font:600 12.5px var(--sans); color:var(--c-warn); padding:2px 0; min-height:24px; display:inline-flex; align-items:center;} .blk-badge:focus-visible{outline:2px solid var(--accent); border-radius:4px;}
+  .also-in{font-size:12.5px; color:var(--c-text-3);}
   .bill-paid{color:var(--c-ok); font-weight:600;}
   /* lifting (.95) */
   .lift-last{font:14px var(--sans); color:var(--text-muted); margin:-2px 0 10px;}
@@ -2520,7 +2525,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.97';
+const APP_BUILD = '2026-11-18.98';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4386,6 +4391,21 @@ document.addEventListener('click', e=>{
   setTimeout(()=>document.querySelector(`#todoList .swipe[data-code="${code}"]`)?.scrollIntoView({ block:'center', behavior: reduceMotion() ? 'auto' : 'smooth' }), 60);
 }, true);
 
+
+// ---------- Related projects + blockers (.98, TD-00103): v_todo_links (todo_projects, todo_dependencies) ----------
+// A task can also belong to other projects (it shows there too) and can wait on other tasks (badge, greyed, sorted last).
+let TODO_LINKS = {};
+async function loadTodoLinks(){
+  try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/v_todo_links?select=code,also_in,blocked_by,open_blockers`, { headers: authHeaders() });
+    if(r.ok){ const m = {}; (await r.json()).forEach(x=>{ m[x.code] = x; }); TODO_LINKS = m; } }catch(e){}
+}
+function todoBlockers(t){ const L = TODO_LINKS[t.code]; if(!L || !L.open_blockers || !L.blocked_by) return [];
+  return L.blocked_by.map(c=>(allTodos||[]).find(x=>x.code === c)).filter(x=>x && x.status === 'open'); }
+function isBlocked(t){ return t.status === 'open' && todoBlockers(t).length > 0; }
+function blockedBadge(t){ const b = todoBlockers(t); if(!b.length) return '';
+  const first = b[0].title.length > 30 ? b[0].title.slice(0, 28).trimEnd() + '…' : b[0].title;
+  return `<button type="button" class="blk-badge" data-coderef="${esc(b[0].code)}" aria-label="Blocked by ${esc(b.map(x=>x.title).join(', '))}">⛔ Waiting on ${esc(first)}${b.length > 1 ? ` +${b.length - 1}` : ''}</button>`; }
+
 function todoRowHtml(t){
   const open = expandedCode === t.code, done = t.status !== 'open';
   const [dl, dc] = t.due_date && !done ? todoDateLabel(t.due_date) : ['', ''];
@@ -4393,6 +4413,8 @@ function todoRowHtml(t){
   if(t.priority === 'high' && !done) meta.push(`<span><span class="pdot"></span>High</span>`);
   if(t.project && t.project.title){ const pp = projParentOf(t.project_id); meta.push(`<button type="button" class="pchip pchip-link" data-openproj="${esc(t.project.code||'')}"><i style="background:${projectColor(pp ? pp.title : t.project.title)}"></i>${esc(t.project.title)}</button>`); }
   if(t.asset && t.asset.item) meta.push(`<span>${esc(t.asset.item)}</span>`);
+  if(!done){ const bb = blockedBadge(t); if(bb) meta.push(bb); }
+  { const L = TODO_LINKS[t.code]; if(L && L.also_in && L.also_in.length && typeof allProjects !== 'undefined'){ const names = L.also_in.map(c=>(allProjects.find(p=>p.code === c)||{}).title).filter(Boolean); if(names.length) meta.push(`<span class="also-in">also in ${esc(names.join(', '))}</span>`); } }
   if(done && t.completed_at) meta.push(`<span>${t.status === 'done' ? 'Done' : 'Cancelled'} ${shortDate(t.completed_at.slice(0,10))}</span>`);
   const edit = open ? `<div class="trow-edit">
       ${!done ? `<div class="chiprow"><span class="lbl">When</span>${quickDates().map(([l,v])=>`<button class="chip ${(t.due_date||null)===v?'active':''}" type="button" data-setdue="${v||''}">${l}</button>`).join('')}</div>
@@ -4401,7 +4423,7 @@ function todoRowHtml(t){
       <div class="chiprow">${done ? `<button class="link-btn" type="button" data-reopen="1">Reopen</button>` : `<button class="link-btn" type="button" data-cancel="1" style="color:var(--text-faint)">Cancel this task</button>`}</div>
     </div>` : '';
   return `<div class="swipe" data-code="${esc(t.code)}"><div class="swipe-bg"><span class="l">Done ✓</span><span class="r">Tomorrow →</span></div>
-    <div class="trow ${done?'done':''}">
+    <div class="trow ${done?'done':''} ${isBlocked(t) ? 'blocked' : ''}">
       <button type="button" class="quick-complete ${t.status==='done'?'done':''}" data-code="${esc(t.code)}" aria-label="Toggle complete"></button>
       <div class="trow-title">${esc(t.title)}</div>
       <div class="trow-date ${dc}">${dl}</div>
@@ -4535,7 +4557,7 @@ function renderPlanWeek(todos){
 const TRIAGE_DAYS = 7;
 function triageQueue(todos){
   const cut = Date.now() - TRIAGE_DAYS*86400000;
-  return (todos||[]).filter(t=>t.status==='open' && !t.due_date && !t.someday && (!t.reviewed_at || Date.parse(t.reviewed_at) < cut))
+  return (todos||[]).filter(t=>t.status==='open' && !t.due_date && !t.someday && !isBlocked(t) && (!t.reviewed_at || Date.parse(t.reviewed_at) < cut))   // blocked tasks wait; nothing to decide yet
     .sort((a,b)=>(a.created_at||'').localeCompare(b.created_at||''));
 }
 function renderTriageCard(todos){
@@ -4865,6 +4887,7 @@ async function refresh(showSpinner){
     const todos = await fetchTodos();
     renderAll(todos);
     saveCache(todos);
+    loadTodoLinks().then(()=>{ renderAll(allTodos); try{ renderProjects(); }catch(e){} });
     document.getElementById('syncNote').textContent = 'Synced just now';
     eyebrow.textContent = 'Field Log · Live from Supabase';
     eyebrow.classList.add('live');
@@ -8546,7 +8569,8 @@ loadProjects().then(()=>{ try{ renderList(allTodos); renderProjects(); }catch(e)
 function projById(id){ return allProjects.find(p=>p.id === id); }
 function projParentOf(projectId){ const p = projById(projectId); return p && p.parent_id ? projById(p.parent_id) : null; }
 function projKids(p){ return allProjects.filter(k=>k.parent_id === p.id).sort((a,b)=>(a.target_date||'9999').localeCompare(b.target_date||'9999') || a.title.localeCompare(b.title)); }
-function projTodos(p, withKids){ const ids = new Set([p.id, ...(withKids ? projKids(p).map(k=>k.id) : [])]); return (allTodos||[]).filter(t=>ids.has(t.project_id) && t.status !== 'cancelled'); }
+function projTodos(p, withKids){ const ids = new Set([p.id, ...(withKids ? projKids(p).map(k=>k.id) : [])]), codes = new Set([p.code, ...(withKids ? projKids(p).map(k=>k.code) : [])]);
+  return (allTodos||[]).filter(t=>t.status !== 'cancelled' && (ids.has(t.project_id) || ((TODO_LINKS[t.code]||{}).also_in || []).some(c=>codes.has(c)))); }
 function projWhen(p){
   if(p.kind === 'ongoing') return ['Ongoing', ''];
   if(p.status === 'done') return [p.completed_at ? `Finished ${shortDate(p.completed_at.slice(0,10))}` : 'Finished', ''];
@@ -8572,7 +8596,7 @@ function projCardHtml(p){
 }
 function projTodoRows(ts){
   const prio = { high:0, medium:1, low:2 };
-  const open = ts.filter(t=>t.status === 'open').sort((a,b)=>(a.due_date||'9999').localeCompare(b.due_date||'9999') || (prio[a.priority]??3)-(prio[b.priority]??3));
+  const open = ts.filter(t=>t.status === 'open').sort((a,b)=>isBlocked(a) - isBlocked(b) || (a.due_date||'9999').localeCompare(b.due_date||'9999') || (prio[a.priority]??3)-(prio[b.priority]??3));
   const done = ts.filter(t=>t.status === 'done').sort((a,b)=>(b.completed_at||'').localeCompare(a.completed_at||''));
   const rows = [...open, ...done];
   return rows.length ? `<div class="tgroup">${rows.map(todoRowHtml).join('')}</div>` : `<div class="pj-empty">No tasks here yet.</div>`;
