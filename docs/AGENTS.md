@@ -44,5 +44,10 @@ If a change must reach into another lane's code (e.g. a screen needs a new route
 - Changing a shared helper's signature (e.g. `showNotice`, `undoDelete`, `confirmSheet`, router functions)? Grep
   for callers, keep the old call shape working, and note it in the task.
 
-## 5. Adding another session
+## 5. Names (so Samuel can see who's doing what)
+Each session is named after its lane, and the same name goes in `claimed_by`:
+`Otto A · Screens`, `Otto B · Shell`, `Otto C · Data`. The session title adds what it's on in brackets,
+e.g. `Otto A · Screens (components, day view)` — rename yourself with `set_session_title` when that changes.
+
+## 6. Adding another session
 Start it with: "Read CLAUDE.md and docs/AGENTS.md, take lane X, claim from `v_agent_board`, keep going."
