@@ -5,7 +5,7 @@ Frontend: one file, `index.html` (vanilla JS + Leaflet), served by GitHub Pages 
 Backend: Supabase project **"Personal Database"**, ref **`qqsexwiqhaaimxuswsei`** (Postgres + RLS, Storage, Edge Functions, pg_cron).
 Owner: Samuel, GIS analyst for the City of Beverly, MA. He uses it daily on an iPhone as a home-screen web app.
 
-Current build: **2026-11-18.103** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
+Current build: **2026-11-18.104** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
 
 ## Workflow (agreed Nov 10)
 - **Chat is the assistant** (research, planning, data entry in Supabase). **Code sessions do all code** and app-affecting schema work.
@@ -38,9 +38,10 @@ All 9 are in the repo (`supabase/functions/<name>/`), saved from the deployed ve
 Secrets live in Supabase (Edge Function secrets and table `app_secrets`). `verify_jwt` is true for user-facing functions, false for ingest webhooks (they check their own keys).
 
 ## App structure (index.html)
-- IA v2: five-slot floating dock = **Today + up to 3 pinned areas + All** (localStorage `otto.dock`), collapses to a pill on scroll. The green **Otto ring** button opens chat (search / ask / add).
+- IA v2: five-slot floating dock = **Home + up to 3 pinned areas + More** (default pins Money, Body, Plan; localStorage `otto.dock`), collapses to a pill on scroll. The green **Otto ring** button opens chat (search / ask / add).
 - **Home** = widget grid (smart top card by time of day, Needs you, Steps, Last stop mini-map, Next, Kitchen, Sleep, Recurring; editable: show/hide, Small/Wide, order, sort by use). Instant open from `otto.homecache`.
-- **All** launcher → every area as a full tab with section tabs. Areas are declared in the `LIFE` config (`tabs: [{ title, section } | { title, render }]`).
+- **More** launcher (`#/more`, old `#/all` / `#/life` redirect) → every area as a full tab with section tabs, plus Settings (Account).
+- **Routes** (.103): `#/area/section/record`; Back = one level up the address (`parentRoute`), `navigateTo(hash)` for links. Areas are declared in the `LIFE` config (`tabs: [{ title, section } | { title, render }]`).
 - Areas: Money (Week+pace, Transactions, Recurring, Accounts), Plan, Body (tabs from Health cards + Mood), Kitchen (stock, can-make, receipts), Places (map + one tabbed sheet: Timeline · Insights · Weather · Layers), Documents vault (passkey/Face ID lock, private bucket, full-text search), Closet (flat-lay outfit, background removal, laundry), Car (zone diagram, VIN/recalls), Apartments, People, Subscriptions, Trips, School, Drone.
 - Theme tokens on `html.ia2, body.ia2` (CSS variables). Brand = neon lime `#D7FF3D` on near-black `#0B0C0A` (build .73, Samuel's theme; was sage `#8BBCA1`).
 

@@ -473,6 +473,9 @@ body{background:var(--bg); color:var(--text); font-family:var(--sans);}
   .otto-notice.show{transform:translate(-50%, 0);}
   .otto-notice .dot{width:8px; height:8px; border-radius:4px; background:var(--accent); flex-shrink:0;}
   @media (prefers-reduced-motion:reduce){ .otto-notice{transition:none;} }
+  .lf-list .lt-set{width:100%; display:flex; align-items:center; gap:12px; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer; min-height:var(--tap);}
+  .lf-list .lt-set .grow-sub{color:var(--c-text-2);} .lt-set .grow-chev{color:var(--c-text-3); font-size:20px;}
+  .bf-kitchen{display:block; margin:12px 0 0;}
   .otto-notice .nt-act{color:var(--c-accent); font-weight:var(--fw-strong); margin-left:6px; padding-left:10px; border-left:1px solid var(--c-border);}
   .cfm-wrap{position:fixed; inset:0; z-index:2147483300; display:flex; align-items:flex-end; justify-content:center;}
   .cfm-scrim{position:absolute; inset:0; background:rgba(0,0,0,.55); opacity:0; transition:opacity .2s ease;}
@@ -1960,7 +1963,7 @@ body.chatting .otto-chat-starters{display:none}
   .car-add{display:flex; gap:8px; margin:8px 0 4px;} .car-add .lf-add{flex:1; margin:0;}
   .cz-pill{width:10px; height:10px; border-radius:5px; flex:none; background:var(--text-faint);} .cz-pill.over{background:var(--alert);} .cz-pill.due{background:var(--amber);} .cz-pill.ok{background:var(--accent);} .cz-pill.svc{background:#8FB4E8;} .cz-pill.gas{background:var(--amber);}
   /* Build .70: Body tabs */
-  #panelHealth[data-btab="today"] [data-bt]:not([data-bt="today"]), #panelHealth[data-btab="trends"] [data-bt]:not([data-bt="trends"]), #panelHealth[data-btab="history"] [data-bt]:not([data-bt="history"]), #panelHealth[data-btab="sleep"] [data-bt]:not([data-bt="sleep"]){display:none !important;}
+  #panelHealth[data-btab="today"] [data-bt]:not([data-bt="today"]), #panelHealth[data-btab="trends"] [data-bt]:not([data-bt="trends"]), #panelHealth[data-btab="history"] [data-bt]:not([data-bt="history"]), #panelHealth[data-btab="sleep"] [data-bt]:not([data-bt="sleep"]), #panelHealth[data-btab="food"] [data-bt]:not([data-bt="food"]){display:none !important;}
   #panelHealth:not([data-btab="trends"]) #healthRangeFilters#healthRangeFilters#healthRangeFilters{display:none !important;}
   #panelHealth .studio-page-head{display:none;} #panelHealth .sleep-card .bars7{display:none;} #bodyTabs{margin:0 0 12px;}
   .yoy{display:flex; flex-direction:column; gap:7px; margin:6px 0 10px;} .yoy-row{display:grid; grid-template-columns:40px minmax(0,1fr) 56px; gap:8px; align-items:center; font:13px var(--sans); color:var(--text-muted);}
@@ -2415,8 +2418,9 @@ body.chatting .otto-chat-starters{display:none}
     <div class="tab-panel" id="panelHealth" data-btab="today">
       <div class="studio-page-head"><div class="studio-kicker">YOUR WELLBEING <span class="studio-dot"></span> OTTO</div><h2>Find your<br><span>rhythm.</span></h2><p>Activity and trends from your connected records.</p></div>
       <div id="healthErrorBanner"></div>
-      <div class="ia2-subtabs" id="bodyTabs" role="tablist" aria-label="Body"><button type="button" role="tab" data-btab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-btab="trends" aria-selected="false">Trends</button><button type="button" role="tab" data-btab="history" aria-selected="false">History</button><button type="button" role="tab" data-btab="sleep" aria-selected="false">Sleep</button></div>
+      <div class="ia2-subtabs" id="bodyTabs" role="tablist" aria-label="Body"><button type="button" role="tab" data-btab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-btab="food" aria-selected="false">Food</button><button type="button" role="tab" data-btab="trends" aria-selected="false">Trends</button><button type="button" role="tab" data-btab="history" aria-selected="false">History</button><button type="button" role="tab" data-btab="sleep" aria-selected="false">Sleep</button></div>
       <div id="healthHero" data-bt="today"></div>
+      <div id="bodyFood" data-bt="food"></div>
       <div class="controls" id="healthRangeFilters" data-bt="trends">
         <button class="chip active" data-days="30" type="button">30 days</button>
         <button class="chip" data-days="90" type="button">90 days</button>
@@ -2486,7 +2490,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.103';
+const APP_BUILD = '2026-11-18.104';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5191,6 +5195,14 @@ function renderFood(){
     + `<div class="section-title">Recipes<span>${(foodData.recipes||[]).length || ''}</span></div>` + renderFoodRecipes(foodData.recipes);
 }
 
+// Body › Food (.104, TD-00084): the same meal log as Kitchen › Cook, next to workouts and sleep
+async function renderBodyFood(load){
+  const box = document.getElementById('bodyFood'); if(!box) return;
+  if(!foodData && load){ box.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
+    try{ foodData = await fetchFood(); }catch(err){ box.innerHTML = `<div class="empty">Couldn't load meals. ${esc(err.message||'')}</div>`; return; } }
+  if(!foodData) return;
+  box.innerHTML = mealLogSection(foodData) + `<button type="button" class="link-btn bf-kitchen" data-area2="food">Open Kitchen ›</button>`;
+}
 async function refreshFood(){
   const banner = document.getElementById('foodErrorBanner');
   banner.innerHTML = '';
@@ -5198,6 +5210,7 @@ async function refreshFood(){
     foodData = await fetchFood();
     renderFood();
     renderBriefing();
+    if(bodyTab === 'food') renderBodyFood();
   } catch(err){
     banner.innerHTML = `<div class="error-banner">Couldn't reach Supabase (${esc(err.message)}).</div>`;
   }
@@ -5333,10 +5346,10 @@ function lifeKeyFor(life){ return Object.keys(AREAS2).find(k=>AREAS2[k].life ===
 // one header for every page: dock name, dock icon, live summary, and a back link only where it means something
 function pageMeta(){
   if(sheetArea === 'life'){
-    if(lifeArea === '__dock') return { title:'Edit dock', icon:'all', sub:'', back:'All' };
-    if(lifeArea && LIFE[lifeArea]){ const k = lifeKeyFor(lifeArea); let sub = ''; const backTo = lifeArea === 'subscriptions' ? 'Money' : 'All'; try{ if(lifeRows._loaded) sub = LIFE[lifeArea].summary(lifeRows); }catch(e){}
+    if(lifeArea === '__dock') return { title:'Edit dock', icon:'all', sub:'', back:'More' };
+    if(lifeArea && LIFE[lifeArea]){ const k = lifeKeyFor(lifeArea); let sub = ''; const backTo = lifeArea === 'subscriptions' ? 'Money' : 'More'; try{ if(lifeRows._loaded) sub = LIFE[lifeArea].summary(lifeRows); }catch(e){}
       return { title: k ? AREAS2[k].label : LIFE[lifeArea].title, icon: k ? AREAS2[k].icon : 'all', sub, back: backTo }; }
-    return { title:'All areas', icon:'all', sub:'', back:'' };
+    return { title:'More', icon:'all', sub:'Every area, plus settings', back:'' };
   }
   const d = AREAS2[sheetArea];
   let sub = ''; try{ sub = pageSubtitle(sheetArea); }catch(e){}
@@ -5848,15 +5861,15 @@ Object.assign(OTTO_ICONS, {
   inbox:'<path d="M4 13l2.5-7h11L20 13v5H4z"/><path d="M4 13h4.5l1.5 2h4l1.5-2H20"/>'
 });
 const AREAS2 = {
-  today:{ label:'Today', icon:'today' }, todos:{ label:'Plan', icon:'plan' }, money:{ label:'Money', icon:'money' }, health:{ label:'Body', icon:'body' },
+  today:{ label:'Home', icon:'today' }, todos:{ label:'Plan', icon:'plan' }, money:{ label:'Money', icon:'money' }, health:{ label:'Body', icon:'body' },
   food:{ label:'Kitchen', icon:'kitchen' }, assets:{ label:'Places', icon:'places' },
   closet:{ label:'Closet', icon:'closet', life:'closet' }, car:{ label:'Car', icon:'car', life:'car' }, documents:{ label:'Documents', icon:'docs', life:'documents' },
   people:{ label:'People', icon:'people', life:'people' }, subscriptions:{ label:'Subscriptions', icon:'subs', life:'subscriptions' },
   trips:{ label:'Trips', icon:'trips', life:'trips' }, school:{ label:'School', icon:'school', life:'school' }, apartments:{ label:'Apartments', icon:'apartments', life:'apartments' },
-  drone:{ label:'Drone', icon:'drone', life:'drone' }, all:{ label:'All', icon:'all' }
+  drone:{ label:'Drone', icon:'drone', life:'drone' }, all:{ label:'More', icon:'all' }
 };
 const ico2 = (k, size=22) => `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${OTTO_ICONS[k] || ''}</svg>`;
-function dockPins(){ try{ const v = JSON.parse(localStorage.getItem('otto.dock') || 'null'); if(Array.isArray(v) && v.length <= 3 && v.every(k=>AREAS2[k] && k!=='today' && k!=='all')) return v; }catch(e){} return ['todos','money','health']; }
+function dockPins(){ try{ const v = JSON.parse(localStorage.getItem('otto.dock') || 'null'); if(Array.isArray(v) && v.length <= 3 && v.every(k=>AREAS2[k] && k!=='today' && k!=='all')) return v; }catch(e){} return ['money','health','todos']; }
 let ia2Active = 'today', ia2Collapsed = false;
 function openArea(k){
   const d = AREAS2[k]; if(!d) return;
@@ -6146,12 +6159,13 @@ function renderLauncher(){
   const body = groups.map(([t, ks])=>grp(t, ks)).join('');
   return `<div class="lt-top"><span>Dot = in your dock.</span><button type="button" class="link-btn" data-editdock>Edit dock</button></div>
     ${body}
+    <div class="lt-grp">Settings</div><div class="gcard lf-list"><button type="button" class="lf-row lt-set" data-acct><span class="ed-ico">${svgIcon('user')}</span><div class="grow-main"><div class="grow-title">Account</div><div class="grow-sub">Bank connections, sync, sign out</div></div><span class="grow-chev" aria-hidden="true">›</span></button></div>
     ${idle.length ? `<details class="lt-idle"><summary><span>Not started</span><em>${idle.length} · ${idle.map(k=>AREAS2[k].label).join(', ')}</em></summary><div class="lt-grid">${idle.map(tile).join('')}</div></details>` : ''}`;
 }
 function renderEditDock(){
   const pins = dockPins(), opts = ['todos','money','health','food','assets','closet','car','documents','people','subscriptions','apartments','school','trips','drone'];
   return `
-    <div class="lf-sum">Today stays first and All stays last. Pin up to 3 in between (${pins.length} of 3 used).</div>
+    <div class="lf-sum">Home stays first and More stays last. Pin up to 3 in between (${pins.length} of 3 used).</div>
     <div class="ed-preview">${['today',...pins,'all'].map(k=>`<span>${ico2(AREAS2[k].icon,20)}<b>${AREAS2[k].label}</b></span>`).join('')}</div>
     <div class="gcard lf-list">${opts.map(k=>`<div class="lf-row"><span class="ed-ico">${ico2(AREAS2[k].icon,20)}</span><div class="grow-main"><div class="grow-title">${AREAS2[k].label}</div></div><button type="button" class="ed-pin ${pins.includes(k)?'on':''}" data-pin="${k}">${pins.includes(k)?'Pinned':'Pin'}</button></div>`).join('')}</div>`;
 }
@@ -6834,6 +6848,7 @@ function setBodyTab(t, quiet){
   if(t === 'history'){ const box = document.getElementById('histBox'); if(box && !box.children.length) box.innerHTML = '<div class="skeleton"><div class="skeleton-row"></div><div class="skeleton-row"></div></div>';
     loadStepHistory().then(renderStepHistory).catch(err=>{ const b = document.getElementById('histBox'); if(b) b.innerHTML = `<div class="empty">Couldn't load your step history. ${esc(err.message||'')}</div>`; }); }
   if(t === 'trends') loadStepHistory().then(renderYoY).catch(()=>{});
+  if(t === 'food') renderBodyFood(true);
   if(!quiet){ const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
   syncRoute(true);
 }
@@ -8981,11 +8996,11 @@ const BOOT_HASH = location.hash;   // read before boot code redraws Home and rew
 // .102 (TD-00083): every screen and open record has an address, #/area/section/record (e.g. #/plan/backlog/TD-00079,
 // #/car/log, #/documents/expiring/12). BACK RULE: Back goes up one level in the address, never "to the previous screen".
 // Sections are tabs: switching them, or switching areas, replaces the address and never adds history.
-const ROUTE_ALIAS = { plan:'todos', body:'health', places:'assets', kitchen:'food' };
-const ROUTE_NAME = { todos:'plan', health:'body', assets:'places', food:'kitchen' };
+const ROUTE_ALIAS = { plan:'todos', body:'health', places:'assets', kitchen:'food', home:'today', more:'all', life:'all' };
+const ROUTE_NAME = { todos:'plan', health:'body', assets:'places', food:'kitchen', all:'more' };
 const PLAN_TABS = { today:'Today', upcoming:'Upcoming', backlog:'Backlog', projects:'Projects' };
 const MONEY_SEGS = { week:'This week', txns:'Transactions', recurring:'Recurring', accounts:'Accounts' };
-const BODY_TABS = { today:'Today', sleep:'Sleep', history:'History', trends:'Trends' };
+const BODY_TABS = { today:'Today', food:'Food', sleep:'Sleep', history:'History', trends:'Trends' };
 const DOC_TABS = ['search','expiring','folders','scan'];
 const slug = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 function lifeTabs(area){ const L = LIFE[area]; return (L && L.tabs) || []; }
@@ -8995,7 +9010,7 @@ function currentRoute(){
   if(calView.open) return '#/cal/' + calView.metric + '/' + calView.level + '/' + (calView.level === 'year' ? calView.y : calView.level === 'month' ? calView.m : calView.w);
   if(!sheetArea) return '#/today';
   if(sheetArea === 'life'){
-    const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : null; if(!k) return '#/all';
+    const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : null; if(!k) return '#/more';
     if(lifeArea === 'documents'){ const t = DOC_TABS[docs.tab] || 'search'; return '#/documents' + (docs.open != null && docs.unlocked ? `/${t}/${docs.open}` : t !== 'search' ? '/' + t : ''); }
     const tabs = lifeTabs(lifeArea), sec = tabs[lifeSection] ? slug(tabs[lifeSection].title) : (lifeSection ? String(lifeSection) : '');
     return '#/' + k + (sec && (lifeSection || lifeOpenRow) ? '/' + sec : '') + (lifeOpenRow ? '/' + lifeOpenRow : '');
@@ -9018,14 +9033,14 @@ function parentRoute(h){
   const area = ROUTE_ALIAS[k] || k;
   const rec = area === 'todos' || area === 'documents' || (AREAS2[area] && AREAS2[area].life) ? b : null;
   if(rec) return `#/${k}/${a}`;
-  if(k === 'all') return '#/today';
+  if(area === 'all') return '#/today';
   if(k === 'subscriptions') return '#/money/recurring';
-  if(AREAS2[area] && AREAS2[area].life) return '#/all';
+  if(AREAS2[area] && AREAS2[area].life) return '#/more';
   return '#/today';
 }
 function routeLabel(h){
-  const [k, a] = routeParts(h); if(!k || k === 'today') return 'Today';
-  if(k === 'all') return 'All';
+  const [k, a] = routeParts(h); if(!k || k === 'today' || k === 'home') return 'Home';
+  if(k === 'all' || k === 'more' || k === 'life') return 'More';
   if(k === 'money') return a ? (MONEY_SEGS[a] || 'Money') : 'Money';
   if(k === 'cal'){ const [, m, lv, at] = routeParts(h); return lv === 'year' ? at : lv === 'month' ? new Date(at + '-15T12:00').toLocaleDateString(undefined, { month:'long' }) : 'Calendar'; }
   const area = ROUTE_ALIAS[k] || k;
@@ -9063,6 +9078,7 @@ function applyRoute(hash){
     if(k === 'spend'){ openSpendMap(true); return; }
     if(spendView.open) closeSpendMap();
     if(!k || k === 'today' || !(AREAS2[k] || AREAS[k])){ openArea('today'); return; }
+    if(k === 'all'){ if(!(sheetArea === 'life' && !lifeArea)) openArea('all'); return; }
     if(AREAS2[k] && AREAS2[k].life){
       if(!(sheetArea === 'life' && lifeArea === AREAS2[k].life)) openArea(k);
       if(k === 'documents'){ const t = Math.max(0, DOC_TABS.indexOf(sec)); if(docs.tab !== t){ docs.tab = t; docs.rows = null; } docs.open = null; renderLife();
