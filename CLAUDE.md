@@ -12,6 +12,7 @@ Current build: **2026-11-18.101** (`const APP_BUILD` in index.html). Bump it on 
 - **Start every code session by reading the open tasks of project PR-00002 "Otto development"** (`todos` where `project_id = 2` and `status = 'open'`). Tasks titled "Code session: …" are specs written in chat; schema that still needs app code is tracked there too. When one ships, set it `done` with `completed_at` and append a dated note saying which build did it and anything left over.
 - **Uploaded index.html from another conversation:** check its `APP_BUILD` against `main` first. If it's older, port only its changes (diff against the commit it was based on) — never overwrite newer work. Remind Samuel to download the current file from GitHub before editing elsewhere.
 - **Don't rename the `todos` table** or the `TD-` prefix (the UI says "task" since .90; edge functions and SQL use `todos`).
+- **Several code sessions at once:** follow `docs/AGENTS.md`: claim tasks (`todos.claimed_by`, view `v_agent_board`), stay in your lane, `git pull --rebase` before building and before pushing, number builds with `tools/next-build.sh`.
 - After pushing, check the "pages build and deployment" run for the last commit actually succeeded before saying it's live (GitHub's queue stalled .81–.85).
 
 ## How to work with Samuel
