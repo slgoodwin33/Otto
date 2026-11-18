@@ -1,5 +1,14 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — builds .96–.101 (Nov 18): more Otto development tasks
+- .96 TD-00080: design tokens in `:root`; DB security-advisor fixes (TD-00099/100/102, migration `20261118_security_advisor_fixes`).
+- .97 TD-00119: bills show Paid from `v_bill_status` (Money week "Paid lately", Recurring "✓ Paid", Plan, Since strip).
+- .98 TD-00103: "⛔ Waiting on …" for blocked tasks from `v_todo_links`; tasks also show in related projects.
+- .99 TD-00116: Plan › Today shows the day plan from `v_day_plan` with clashes flagged; Home "Today's plan" widget.
+- .100 TD-00117: documents without a file get "no file" and Attach file (upload + doc-extract text).
+- .101 TD-00082 (part): no more native confirm(): deletes get a 5-second Undo toast, and file deletes get one styled confirm sheet. Toasts now sit above full-screen layers.
+- Still open (blueprint order): TD-00081 components, TD-00083 record routes + Back rule, TD-00084 tabs, TD-00085 chat sheet, rest of TD-00082 (swipe/More menu), TD-00086, TD-00079 Home, TD-00087, TD-00078 body map (needs `otto-body-map.svg`).
+
 ## Just shipped — builds .90–.95 (Nov 10): the "Code session" tasks from Otto development
 - .90 TD-00070: every visible "todo/to-do" says "task" (table, TD- prefix, code names unchanged).
 - .91 TD-00072: bank auto-sync on open and when the app comes back (≤ every 5 min, quiet on failure, notice only for new transactions).
