@@ -16,80 +16,8 @@
 
 <meta name="color-scheme" content="light dark">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-// Build 018: functional wardrobe, laundry and saved outfits (Supabase RLS protected)
-let wardrobeItems=[], savedOutfits=[], wardrobeMode='closet';
-function wardrobeMarkup(){return `<section class="wardrobe-space"><div class="wardrobe-intro"><span class="eyebrow">YOUR COLLECTION</span><h2>Wear what you love.</h2><p>Keep track of clothing, laundry, and outfits in one place.</p></div><div class="wardrobe-tabs" role="group" aria-label="Wardrobe views"><button data-wmode="closet" class="active">Closet</button><button data-wmode="laundry">Laundry</button><button data-wmode="outfits">Outfits</button></div><div id="wardrobeNotice" role="status" aria-live="polite"></div><div id="wardrobeContent"></div></section>`;}
-function wardrobeNotice(msg,isError=false){const e=document.getElementById('wardrobeNotice');if(e){e.textContent=msg;e.className=isError?'wardrobe-error':'wardrobe-note';}}
-async function wardrobeRequest(table,options={}){
- const {method='GET',id,body,query=''}=options;
- const url=`${SUPABASE_URL}/rest/v1/${table}?${id!=null?`id=eq.${encodeURIComponent(id)}&`:''}${query||'select=*'}`;
- const r=await fetch(url,{method,headers:authHeaders({'Content-Type':'application/json',Prefer:'return=representation'}),...(body?{body:JSON.stringify(body)}:{})});
- if(!r.ok){let message=`Request failed (${r.status})`;try{const d=await r.json();message=d.message||message;}catch{}throw new Error(message);}
- if(method==='DELETE'||r.status===204)return [];
- return await r.json();
-}
-async function loadWardrobe(){
- wardrobeNotice('Loading your wardrobe…');
- try{[wardrobeItems,savedOutfits]=await Promise.all([wardrobeRequest('wardrobe_items',{query:'select=*&order=created_at.desc'}),wardrobeRequest('saved_outfits',{query:'select=*&order=created_at.desc'})]);wardrobeNotice('');renderWardrobe();}
- catch(e){wardrobeNotice(`Could not load wardrobe: ${e.message}`,true);}
-}
-function renderWardrobe(){
- const host=document.getElementById('wardrobeContent');if(!host)return;
- document.querySelectorAll('[data-wmode]').forEach(b=>b.classList.toggle('active',b.dataset.wmode===wardrobeMode));
- if(wardrobeMode==='closet')host.innerHTML=`<form id="wardrobeAdd" class="wardrobe-form"><label>Item name<input name="name" maxlength="160" required placeholder="e.g. Black linen shirt"></label><label>Category<select name="category"><option>Top</option><option>Bottom</option><option>Outerwear</option><option>Shoes</option><option>Accessory</option><option>Other</option></select></label><label>Color<input name="color" maxlength="80" placeholder="Optional"></label><button type="submit">Add item</button></form><div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><span class="wardrobe-type">${esc(w.category)}</span><strong>${esc(w.name)}</strong><small>${esc(w.color||'No color')} · ${esc(w.laundry_status)}</small><div class="wardrobe-actions"><button data-wlaundry="${w.id}" data-next="${w.laundry_status==='clean'?'worn':'clean'}">Mark ${w.laundry_status==='clean'?'worn':'clean'}</button><button data-wdelete="${w.id}" aria-label="Delete ${esc(w.name)}">Delete</button></div></article>`).join('')||'<p class="wardrobe-empty">No clothing added yet. Add your first item above.</p>'}</div>`;
- else if(wardrobeMode==='laundry')host.innerHTML=`<div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><strong>${esc(w.name)}</strong><small>${esc(w.category)}</small><label>Status<select data-wstatus="${w.id}">${['clean','worn','washing','drying'].map(st=>`<option value="${st}" ${st===w.laundry_status?'selected':''}>${st[0].toUpperCase()+st.slice(1)}</option>`).join('')}</select></label></article>`).join('')||'<p class="wardrobe-empty">Add items in Closet to track laundry.</p>'}</div>`;
- else host.innerHTML=`<form id="outfitAdd" class="wardrobe-form"><label>Outfit name<input name="name" maxlength="160" required placeholder="e.g. Weekend casual"></label><label>Occasion<input name="occasion" maxlength="100" placeholder="Optional"></label><fieldset><legend>Choose clothing</legend><div class="wardrobe-picks">${wardrobeItems.map(w=>`<label><input type="checkbox" name="items" value="${w.id}">${esc(w.name)}</label>`).join('')||'Add clothes in Closet first.'}</div></fieldset><button type="submit" ${wardrobeItems.length?'':'disabled'}>Save outfit</button></form><div class="wardrobe-grid">${savedOutfits.map(o=>`<article class="wardrobe-card"><strong>${esc(o.name)}</strong><small>${esc(o.occasion||'Any occasion')}</small><button data-odelete="${o.id}">Delete outfit</button></article>`).join('')||'<p class="wardrobe-empty">No saved outfits yet.</p>'}</div>`;
-}
-document.addEventListener('click',async e=>{
- const mode=e.target.closest('[data-wmode]');if(mode){wardrobeMode=mode.dataset.wmode;renderWardrobe();return;}
- const del=e.target.closest('[data-wdelete],[data-odelete]');if(del){if(!confirm('Delete this item?'))return;const isOutfit=del.hasAttribute('data-odelete');try{await wardrobeRequest(isOutfit?'saved_outfits':'wardrobe_items',{method:'DELETE',id:del.dataset[isOutfit?'odelete':'wdelete']});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}return;}
- const mark=e.target.closest('[data-wlaundry]');if(mark){try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:mark.dataset.wlaundry,body:{laundry_status:mark.dataset.next}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
-});
-document.addEventListener('change',async e=>{const el=e.target.closest('[data-wstatus]');if(!el)return;try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:el.dataset.wstatus,body:{laundry_status:el.value}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}});
-document.addEventListener('submit',async e=>{
- if(e.target.id==='wardrobeAdd'){e.preventDefault();const f=new FormData(e.target);try{await wardrobeRequest('wardrobe_items',{method:'POST',body:{name:String(f.get('name')).trim(),category:f.get('category'),color:String(f.get('color')||'').trim()||null}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
- if(e.target.id==='outfitAdd'){e.preventDefault();const f=new FormData(e.target);const ids=f.getAll('items').map(Number);try{const created=await wardrobeRequest('saved_outfits',{method:'POST',body:{name:String(f.get('name')).trim(),occasion:String(f.get('occasion')||'').trim()||null}});if(ids.length){try{await wardrobeRequest('saved_outfit_items',{method:'POST',body:ids.map(item_id=>({outfit_id:created[0].id,item_id}))});}catch(err){await wardrobeRequest('saved_outfits',{method:'DELETE',id:created[0].id});throw err;}}await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
-});
-
-</script>
-<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js">
-// Build 018: functional wardrobe, laundry and saved outfits (Supabase RLS protected)
-let wardrobeItems=[], savedOutfits=[], wardrobeMode='closet';
-function wardrobeMarkup(){return `<section class="wardrobe-space"><div class="wardrobe-intro"><span class="eyebrow">YOUR COLLECTION</span><h2>Wear what you love.</h2><p>Keep track of clothing, laundry, and outfits in one place.</p></div><div class="wardrobe-tabs" role="group" aria-label="Wardrobe views"><button data-wmode="closet" class="active">Closet</button><button data-wmode="laundry">Laundry</button><button data-wmode="outfits">Outfits</button></div><div id="wardrobeNotice" role="status" aria-live="polite"></div><div id="wardrobeContent"></div></section>`;}
-function wardrobeNotice(msg,isError=false){const e=document.getElementById('wardrobeNotice');if(e){e.textContent=msg;e.className=isError?'wardrobe-error':'wardrobe-note';}}
-async function wardrobeRequest(table,options={}){
- const {method='GET',id,body,query=''}=options;
- const url=`${SUPABASE_URL}/rest/v1/${table}?${id!=null?`id=eq.${encodeURIComponent(id)}&`:''}${query||'select=*'}`;
- const r=await fetch(url,{method,headers:authHeaders({'Content-Type':'application/json',Prefer:'return=representation'}),...(body?{body:JSON.stringify(body)}:{})});
- if(!r.ok){let message=`Request failed (${r.status})`;try{const d=await r.json();message=d.message||message;}catch{}throw new Error(message);}
- if(method==='DELETE'||r.status===204)return [];
- return await r.json();
-}
-async function loadWardrobe(){
- wardrobeNotice('Loading your wardrobe…');
- try{[wardrobeItems,savedOutfits]=await Promise.all([wardrobeRequest('wardrobe_items',{query:'select=*&order=created_at.desc'}),wardrobeRequest('saved_outfits',{query:'select=*&order=created_at.desc'})]);wardrobeNotice('');renderWardrobe();}
- catch(e){wardrobeNotice(`Could not load wardrobe: ${e.message}`,true);}
-}
-function renderWardrobe(){
- const host=document.getElementById('wardrobeContent');if(!host)return;
- document.querySelectorAll('[data-wmode]').forEach(b=>b.classList.toggle('active',b.dataset.wmode===wardrobeMode));
- if(wardrobeMode==='closet')host.innerHTML=`<form id="wardrobeAdd" class="wardrobe-form"><label>Item name<input name="name" maxlength="160" required placeholder="e.g. Black linen shirt"></label><label>Category<select name="category"><option>Top</option><option>Bottom</option><option>Outerwear</option><option>Shoes</option><option>Accessory</option><option>Other</option></select></label><label>Color<input name="color" maxlength="80" placeholder="Optional"></label><button type="submit">Add item</button></form><div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><span class="wardrobe-type">${esc(w.category)}</span><strong>${esc(w.name)}</strong><small>${esc(w.color||'No color')} · ${esc(w.laundry_status)}</small><div class="wardrobe-actions"><button data-wlaundry="${w.id}" data-next="${w.laundry_status==='clean'?'worn':'clean'}">Mark ${w.laundry_status==='clean'?'worn':'clean'}</button><button data-wdelete="${w.id}" aria-label="Delete ${esc(w.name)}">Delete</button></div></article>`).join('')||'<p class="wardrobe-empty">No clothing added yet. Add your first item above.</p>'}</div>`;
- else if(wardrobeMode==='laundry')host.innerHTML=`<div class="wardrobe-grid">${wardrobeItems.map(w=>`<article class="wardrobe-card"><strong>${esc(w.name)}</strong><small>${esc(w.category)}</small><label>Status<select data-wstatus="${w.id}">${['clean','worn','washing','drying'].map(st=>`<option value="${st}" ${st===w.laundry_status?'selected':''}>${st[0].toUpperCase()+st.slice(1)}</option>`).join('')}</select></label></article>`).join('')||'<p class="wardrobe-empty">Add items in Closet to track laundry.</p>'}</div>`;
- else host.innerHTML=`<form id="outfitAdd" class="wardrobe-form"><label>Outfit name<input name="name" maxlength="160" required placeholder="e.g. Weekend casual"></label><label>Occasion<input name="occasion" maxlength="100" placeholder="Optional"></label><fieldset><legend>Choose clothing</legend><div class="wardrobe-picks">${wardrobeItems.map(w=>`<label><input type="checkbox" name="items" value="${w.id}">${esc(w.name)}</label>`).join('')||'Add clothes in Closet first.'}</div></fieldset><button type="submit" ${wardrobeItems.length?'':'disabled'}>Save outfit</button></form><div class="wardrobe-grid">${savedOutfits.map(o=>`<article class="wardrobe-card"><strong>${esc(o.name)}</strong><small>${esc(o.occasion||'Any occasion')}</small><button data-odelete="${o.id}">Delete outfit</button></article>`).join('')||'<p class="wardrobe-empty">No saved outfits yet.</p>'}</div>`;
-}
-document.addEventListener('click',async e=>{
- const mode=e.target.closest('[data-wmode]');if(mode){wardrobeMode=mode.dataset.wmode;renderWardrobe();return;}
- const del=e.target.closest('[data-wdelete],[data-odelete]');if(del){if(!confirm('Delete this item?'))return;const isOutfit=del.hasAttribute('data-odelete');try{await wardrobeRequest(isOutfit?'saved_outfits':'wardrobe_items',{method:'DELETE',id:del.dataset[isOutfit?'odelete':'wdelete']});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}return;}
- const mark=e.target.closest('[data-wlaundry]');if(mark){try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:mark.dataset.wlaundry,body:{laundry_status:mark.dataset.next}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
-});
-document.addEventListener('change',async e=>{const el=e.target.closest('[data-wstatus]');if(!el)return;try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:el.dataset.wstatus,body:{laundry_status:el.value}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}});
-document.addEventListener('submit',async e=>{
- if(e.target.id==='wardrobeAdd'){e.preventDefault();const f=new FormData(e.target);try{await wardrobeRequest('wardrobe_items',{method:'POST',body:{name:String(f.get('name')).trim(),category:f.get('category'),color:String(f.get('color')||'').trim()||null}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
- if(e.target.id==='outfitAdd'){e.preventDefault();const f=new FormData(e.target);const ids=f.getAll('items').map(Number);try{const created=await wardrobeRequest('saved_outfits',{method:'POST',body:{name:String(f.get('name')).trim(),occasion:String(f.get('occasion')||'').trim()||null}});if(ids.length){try{await wardrobeRequest('saved_outfit_items',{method:'POST',body:ids.map(item_id=>({outfit_id:created[0].id,item_id}))});}catch(err){await wardrobeRequest('saved_outfits',{method:'DELETE',id:created[0].id});throw err;}}await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
-});
-
-</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <style>
   /* ===== Design tokens (.96, TD-00080, blueprint §5). One source of truth; screens move onto these one at a time,
      deleting their !important overrides as they go. Defining them changes nothing visible. ===== */
@@ -529,12 +457,25 @@ body{background:var(--bg); color:var(--text); font-family:var(--sans);}
   .sheet-body{overscroll-behavior:contain;}
 
   /* ---------- Version notices ---------- */
-  .otto-notice{position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 10px); transform:translate(-50%, -140%); z-index:60; width:max-content; max-width:calc(100vw - 32px);
+  .otto-notice{position:fixed; left:50%; top:calc(env(safe-area-inset-top, 0px) + 10px); transform:translate(-50%, -140%); z-index:2147483250; width:max-content; max-width:calc(100vw - 32px);
     background:var(--surface); color:var(--text); border:none; border-radius:999px; padding:10px 16px; font:inherit; font-size:0.9rem; font-weight:600;
     box-shadow:0 6px 24px rgba(21,22,26,0.10); display:flex; align-items:center; gap:8px; transition:transform 0.35s cubic-bezier(.2,.8,.2,1); cursor:pointer;}
   .otto-notice.show{transform:translate(-50%, 0);}
   .otto-notice .dot{width:8px; height:8px; border-radius:4px; background:var(--accent); flex-shrink:0;}
   @media (prefers-reduced-motion:reduce){ .otto-notice{transition:none;} }
+  .otto-notice .nt-act{color:var(--c-accent); font-weight:var(--fw-strong); margin-left:6px; padding-left:10px; border-left:1px solid var(--c-border);}
+  .cfm-wrap{position:fixed; inset:0; z-index:2147483300; display:flex; align-items:flex-end; justify-content:center;}
+  .cfm-scrim{position:absolute; inset:0; background:rgba(0,0,0,.55); opacity:0; transition:opacity .2s ease;}
+  .cfm{position:relative; width:min(520px, 100%); background:var(--c-surface); color:var(--c-text); border:1px solid var(--c-border); border-bottom:0;
+    border-radius:var(--r-sheet) var(--r-sheet) 0 0; padding:10px 16px calc(env(safe-area-inset-bottom,0px) + 16px); transform:translateY(100%); transition:transform .24s cubic-bezier(.2,.8,.2,1);}
+  .cfm-wrap.show .cfm-scrim{opacity:1;} .cfm-wrap.show .cfm{transform:none;}
+  .cfm-grab{width:36px; height:5px; border-radius:3px; background:var(--c-border); margin:0 auto 14px;}
+  .cfm h2{font-size:var(--fs-heading); font-weight:var(--fw-strong); margin:0 0 6px; line-height:1.3;}
+  .cfm p{font-size:var(--fs-body); color:var(--c-text-2); margin:0 0 16px; line-height:1.4;}
+  .cfm button{display:block; width:100%; min-height:var(--tap); border-radius:var(--r-row); font:inherit; font-size:var(--fs-body); font-weight:var(--fw-strong); cursor:pointer; margin-top:8px;}
+  .cfm-ok{background:var(--c-surface-2); color:var(--c-text); border:1px solid var(--c-border);} .cfm-ok.danger{color:var(--c-alert);}
+  .cfm-no{background:transparent; color:var(--c-text-2); border:0;}
+  @media (prefers-reduced-motion:reduce){ .cfm, .cfm-scrim{transition:none;} }
 
   /* ---------- Area dock (slides out of the grid button) ---------- */
   .dock-wrap{display:flex; align-items:center; gap:8px; min-width:0;}
@@ -1976,7 +1917,7 @@ body.chatting .otto-chat-starters{display:none}
   .deck-done{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; text-align:center;} .deck-done h3{margin:8px 0 0; font:700 24px var(--sans);} .deck-done p{margin:0 0 12px; color:var(--text-muted);}
   .deck-ring{width:64px; height:64px; border-radius:50%; border:6px solid var(--accent); box-shadow:0 0 0 12px var(--accent-soft); animation:ringPop .5s cubic-bezier(.2,1.4,.4,1);} @keyframes ringPop{from{transform:scale(.4); opacity:0;}}
   body.decking .ia2-dock{display:none !important;}
-  body.decking .otto-notice{z-index:2147483200 !important; top:auto !important; bottom:calc(env(safe-area-inset-bottom,0px) + 104px) !important;}   /* Undo sits above the card buttons, not over the header */
+  body.decking .otto-notice{z-index:2147483250 !important; top:auto !important; bottom:calc(env(safe-area-inset-bottom,0px) + 104px) !important;}   /* Undo sits above the card buttons, not over the header */
   @media (prefers-reduced-motion: reduce){ .deck, .deck-card, .deck-ring{animation:none !important;} }
 
   /* ===== Build .65: Kitchen Cook · Shop · Plan, food widget ===== */
@@ -2535,7 +2476,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.100';
+const APP_BUILD = '2026-11-18.101';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5709,9 +5650,13 @@ document.addEventListener('click', async e=>{
   const ad = e.target.closest('[data-ladd]'); if(ad){ lifeAdding = ad.dataset.ladd; lifePrefill = ad.dataset.prefill ? JSON.parse(ad.dataset.prefill) : {}; if(ad.dataset.gotab) lifeSection = Number(ad.dataset.gotab); renderLife(); return; }
   if(e.target.closest('[data-lcancel]')){ lifeAdding = null; renderLife(); return; }
   const del = e.target.closest('[data-ldel]');
-  if(del){ const [t,id] = del.dataset.ldel.split(':'); if(!confirm('Delete this?')) return;
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/${t}?id=eq.${id}`, { method:'DELETE', headers: authHeaders() });
-    if(!r.ok){ showNotice(`Couldn't delete (${r.status})`); return; } lifeRows[t] = (lifeRows[t]||[]).filter(x=>String(x.id)!==id); lifeOpenRow = null; renderLife(); return; }
+  if(del){ const [t,id] = del.dataset.ldel.split(':'); const list = lifeRows[t] || [], i = list.findIndex(x=>String(x.id) === id), it = list[i]; if(!it) return;
+    const nm = it.name || it.title || it.service_type || it.code;
+    undoDelete({ label: nm ? `“${nm}”` : 'it',
+      hide: ()=>{ lifeRows[t] = (lifeRows[t]||[]).filter(x=>x !== it); lifeOpenRow = null; renderLife(); },
+      restore: ()=>{ const l = lifeRows[t] || (lifeRows[t] = []); if(!l.includes(it)) l.splice(Math.min(i, l.length), 0, it); renderLife(); },
+      commit: async ()=>{ await ensureValidSession(); await deleteOk(await fetch(`${SUPABASE_URL}/rest/v1/${t}?id=eq.${id}`, { method:'DELETE', headers: authHeaders() })); } });
+    return; }
   const wore = e.target.closest('[data-wore]');
   if(wore){ const it = (lifeRows.wardrobe_items||[]).find(x=>String(x.id)===wore.dataset.wore); if(!it) return;
     const since = (it.wears_since_wash||0) + 1, status = since >= Math.max(1, it.wears_before_wash||1) ? 'worn' : (it.laundry_status || 'clean');
@@ -6349,10 +6294,16 @@ async function docOpen(id){
   window.open(`${SUPABASE_URL}/storage/v1${j.signedURL}`, '_blank', 'noopener');
 }
 async function docDelete(id){
-  const d = (docs.rows||[]).find(x=>String(x.id) === String(id)); if(!d || !confirm(`Delete “${d.name}”? The file is removed too.`)) return;
-  if(d.file_path) await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${d.file_path}`, { method:'DELETE', headers: authHeaders() });
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/documents?id=eq.${d.id}`, { method:'DELETE', headers: authHeaders() });
-  if(!r.ok){ showNotice(`Couldn't delete (${r.status})`); return; } docs.rows = docs.rows.filter(x=>x !== d); docs.open = null; renderLife();
+  const d = (docs.rows||[]).find(x=>String(x.id) === String(id)); if(!d) return;
+  const delRow = async ()=>{ await deleteOk(await fetch(`${SUPABASE_URL}/rest/v1/documents?id=eq.${d.id}`, { method:'DELETE', headers: authHeaders() })); };
+  if(!d.file_path){ const i = docs.rows.indexOf(d);
+    undoDelete({ label: `“${d.name}”`, hide: ()=>{ docs.rows = docs.rows.filter(x=>x !== d); docs.open = null; renderLife(); },
+      restore: ()=>{ if(docs.rows && !docs.rows.includes(d)) docs.rows.splice(Math.min(i, docs.rows.length), 0, d); renderLife(); }, commit: delRow });
+    return; }
+  if(!await confirmSheet({ title: `Delete “${d.name}”?`, body: 'The file is removed too. This can’t be undone.', ok: 'Delete document and file' })) return;
+  try{ await ensureValidSession(); await delRow(); }catch(err){ showNotice(`Couldn't delete (${err.message})`); return; }
+  await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${d.file_path}`, { method:'DELETE', headers: authHeaders() });
+  docs.rows = docs.rows.filter(x=>x !== d); docs.open = null; renderLife(); showNotice(`Deleted “${d.name}”.`);
 }
 document.addEventListener('click', e=>{
   if(e.target.closest('[data-docunlock]')){ docUnlock(); return; }
@@ -7398,8 +7349,43 @@ function showNotice(text, onTap, sticky){
   el.onclick = () => { if(onTap) onTap(); else el.classList.remove('show'); };
   requestAnimationFrame(()=> el.classList.add('show'));
   clearTimeout(el.__t);
-  if(!sticky) el.__t = setTimeout(()=> el.classList.remove('show'), 3500);
+  if(sticky !== true) el.__t = setTimeout(()=> el.classList.remove('show'), typeof sticky === 'number' ? sticky : 3500);
 }
+// ---------- one action model (.101, TD-00082): deletes give a 5-second Undo; only permanent ones (files) ask first ----------
+function confirmSheet({ title, body = '', ok = 'Delete', cancel = 'Cancel', danger = true }){
+  return new Promise(res=>{
+    const prev = document.activeElement, el = document.createElement('div'); el.className = 'cfm-wrap';
+    el.innerHTML = `<div class="cfm-scrim" data-cfm="0"></div><div class="cfm" role="alertdialog" aria-modal="true" aria-labelledby="cfmT"${body ? ' aria-describedby="cfmB"' : ''}><div class="cfm-grab" aria-hidden="true"></div><h2 id="cfmT">${esc(title)}</h2>${body ? `<p id="cfmB">${esc(body)}</p>` : ''}<button type="button" class="cfm-ok${danger ? ' danger' : ''}" data-cfm="1">${esc(ok)}</button><button type="button" class="cfm-no" data-cfm="0">${esc(cancel)}</button></div>`;
+    document.body.appendChild(el); requestAnimationFrame(()=> el.classList.add('show'));
+    let closed = false;
+    const done = v => { if(closed) return; closed = true; window.removeEventListener('keydown', key, true); el.classList.remove('show'); setTimeout(()=> el.remove(), 240); try{ prev?.focus?.({ preventScroll:true }); }catch(e){} res(v); };
+    const key = e => { if(e.key === 'Escape' || e.key === 'Tab') e.stopImmediatePropagation(); if(e.key === 'Escape'){ e.preventDefault(); done(false); }
+      else if(e.key === 'Tab'){ const b = [...el.querySelectorAll('button')], i = b.indexOf(document.activeElement); e.preventDefault(); b[(i + (e.shiftKey ? -1 : 1) + b.length) % b.length].focus(); } };
+    window.addEventListener('keydown', key, true);
+    el.addEventListener('click', e=>{ e.stopPropagation(); const b = e.target.closest('[data-cfm]'); if(b) done(b.dataset.cfm === '1'); });
+    const card = el.querySelector('.cfm'); let y0 = null;     // swipe down to cancel
+    card.addEventListener('touchstart', e=>{ y0 = e.touches[0].clientY; }, { passive:true });
+    card.addEventListener('touchmove', e=>{ if(y0 == null) return; const dy = Math.max(0, e.touches[0].clientY - y0); card.style.transform = `translateY(${dy}px)`; }, { passive:true });
+    card.addEventListener('touchend', e=>{ const dy = (e.changedTouches[0]?.clientY ?? y0) - y0; y0 = null; card.style.transform = ''; if(dy > 70) done(false); });
+    el.querySelector('.cfm-no').focus({ preventScroll:true });
+  });
+}
+const pendingDeletes = new Set();
+/** Hide now, delete for real after 5 s unless Undo is tapped. commit() must throw on failure (the row comes back). */
+function undoDelete({ label, hide, restore, commit }){
+  let state = 'waiting'; hide();
+  label = label.replace(/“(.{26}).+”/, (m, a)=> `“${a.trimEnd()}…”`);
+  const job = { run: async ()=>{ if(state !== 'waiting') return; state = 'sent'; clearTimeout(t); pendingDeletes.delete(job);
+    try{ await commit(); }catch(err){ restore(); showNotice(`Couldn't delete: ${err.message}`); } } };
+  pendingDeletes.add(job); const t = setTimeout(job.run, 5000);
+  showNotice(`Deleted ${label}`, ()=>{ if(state !== 'waiting') return; state = 'undone'; clearTimeout(t); pendingDeletes.delete(job);
+    document.getElementById('ottoNotice')?.classList.remove('show'); restore(); showNotice('Restored.'); }, 5000);
+  document.getElementById('ottoNotice')?.insertAdjacentHTML('beforeend', '<span class="nt-act">Undo</span>');
+}
+const flushDeletes = ()=> pendingDeletes.forEach(j=> j.run());
+window.addEventListener('pagehide', flushDeletes);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') flushDeletes(); });
+async function deleteOk(r){ if(!r.ok) throw new Error(`${r.status}`); }
 function hardReload(){ location.replace(location.pathname + '?v=' + Date.now() + location.hash); }
 let __updateShown = false;
 async function checkForUpdate(){
@@ -8501,9 +8487,12 @@ document.addEventListener('click', e=>{
     if(spendView.zone === id){ spendView.zone = null; spendView.poly = null; } else { const z = (spendView.zones||[]).find(x=>x.id === id); if(z){ spendView.zone = id; spendView.poly = zonePoly(z); } }
     spendView.cat = 'all'; renderSpendMap(); return; }
   if(e.target.closest('[data-spend-clear]')){ spendView.zone = null; spendView.poly = null; renderSpendMap(); return; }
-  const zd = e.target.closest('[data-spend-zdel]'); if(zd){ const z = (spendView.zones||[]).find(x=>x.id === Number(zd.dataset.spendZdel)); if(!z || !confirm(`Delete the zone "${z.name}"? Purchases aren't touched.`)) return;
-    (async()=>{ try{ await ensureValidSession(); const r = await fetch(`${SUPABASE_URL}/rest/v1/zones?id=eq.${z.id}`, { method:'DELETE', headers: authHeaders() }); if(!r.ok) throw new Error(`Delete failed (${r.status})`);
-      spendView.zone = null; spendView.poly = null; await loadZones(true); showNotice(`Deleted "${z.name}".`); renderSpendMap(); }catch(err){ showNotice(err.message); } })(); return; }
+  const zd = e.target.closest('[data-spend-zdel]'); if(zd){ const z = (spendView.zones||[]).find(x=>x.id === Number(zd.dataset.spendZdel)); if(!z) return;
+    undoDelete({ label: `zone “${z.name}”`,
+      hide: ()=>{ spendView.zones = (spendView.zones||[]).filter(x=>x !== z); if(spendView.zone === z.id || spendView.zone === z){ spendView.zone = null; spendView.poly = null; } renderSpendMap(); },
+      restore: async ()=>{ await loadZones(true); renderSpendMap(); },
+      commit: async ()=>{ await ensureValidSession(); await deleteOk(await fetch(`${SUPABASE_URL}/rest/v1/zones?id=eq.${z.id}`, { method:'DELETE', headers: authHeaders() })); } });
+    return; }
   const sp = e.target.closest('[data-spend-spot]'); if(sp && spendView.map){ const i = Number(sp.dataset.spendSpot), s = spendView.spots[i], mk = spendView.markers[i];
     spendView.map.flyTo([s.lat, s.lon], Math.max(spendView.map.getZoom(), 15), { duration: reduceMotion() ? 0 : .6 }); if(mk) setTimeout(()=>mk.openTooltip(), reduceMotion() ? 0 : 650);
     document.getElementById('spMapEl').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth', block:'nearest' }); hapticPulse(); }
@@ -9170,7 +9159,7 @@ function renderWardrobe(){
 }
 document.addEventListener('click',async e=>{
  const mode=e.target.closest('[data-wmode]');if(mode){wardrobeMode=mode.dataset.wmode;renderWardrobe();return;}
- const del=e.target.closest('[data-wdelete],[data-odelete]');if(del){if(!confirm('Delete this item?'))return;const isOutfit=del.hasAttribute('data-odelete');try{await wardrobeRequest(isOutfit?'saved_outfits':'wardrobe_items',{method:'DELETE',id:del.dataset[isOutfit?'odelete':'wdelete']});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}return;}
+ const del=e.target.closest('[data-wdelete],[data-odelete]');if(del){if(!await confirmSheet({title:'Delete this item?'}))return;const isOutfit=del.hasAttribute('data-odelete');try{await wardrobeRequest(isOutfit?'saved_outfits':'wardrobe_items',{method:'DELETE',id:del.dataset[isOutfit?'odelete':'wdelete']});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}return;}
  const mark=e.target.closest('[data-wlaundry]');if(mark){try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:mark.dataset.wlaundry,body:{laundry_status:mark.dataset.next}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}}
 });
 document.addEventListener('change',async e=>{const el=e.target.closest('[data-wstatus]');if(!el)return;try{await wardrobeRequest('wardrobe_items',{method:'PATCH',id:el.dataset.wstatus,body:{laundry_status:el.value}});await loadWardrobe();}catch(err){wardrobeNotice(err.message,true);}});
