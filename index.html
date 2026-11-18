@@ -2042,6 +2042,16 @@ body.chatting .otto-chat-starters{display:none}
 
 
 
+
+  /* day plan (.99) */
+  .dp-list{padding:4px 14px !important;} .dp-row{display:grid; grid-template-columns:64px 4px minmax(0,1fr); gap:10px; align-items:center; padding:9px 0; border-top:1px solid var(--c-border);} .dp-list > .dp-row:first-child, .dp-earlier + .dp-row{border-top:none;}
+  .dp-t{display:flex; flex-direction:column; font:600 13px var(--sans); font-variant-numeric:tabular-nums; color:var(--c-text);} .dp-t em{font:normal 12px var(--sans); color:var(--c-text-3);}
+  .dp-bar{display:block; width:4px; align-self:stretch; border-radius:2px; min-height:28px;}
+  .dp-what{display:flex; flex-direction:column; min-width:0;} .dp-what b{font:600 15px var(--sans); color:var(--c-text);} .dp-what em{font:normal 12.5px var(--sans); color:var(--c-text-3);} .dp-what em.warn{color:var(--c-warn);}
+  .dp-row.past{opacity:.55;} .dp-row.now{background:color-mix(in srgb, var(--c-accent) 10%, transparent); border-radius:10px; margin:0 -8px; padding-left:8px; padding-right:8px;} .dp-row.now .dp-what em{color:var(--c-accent);}
+  .dp-row.task{cursor:pointer;} .dp-row.task .dp-what b{color:var(--c-accent);} .dp-row.task:focus-visible{outline:3px solid var(--c-accent); border-radius:10px;}
+  .dp-earlier summary{cursor:pointer; padding:10px 0; font:600 13px var(--sans); color:var(--c-text-2); min-height:24px;}
+  .dp-wdg{cursor:pointer;} .dp-mini .dp-row:first-child{border-top:none;}
   /* blockers + related projects (.98) */
   .trow.blocked .trow-title{color:var(--c-text-3);} .trow.blocked .quick-complete{opacity:.5;}
   .blk-badge{all:unset; cursor:pointer; font:600 12.5px var(--sans); color:var(--c-warn); padding:2px 0; min-height:24px; display:inline-flex; align-items:center;} .blk-badge:focus-visible{outline:2px solid var(--accent); border-radius:4px;}
@@ -2337,7 +2347,7 @@ body.chatting .otto-chat-starters{display:none}
       <div class="studio-page-head"><div class="studio-kicker">YOUR WORKSPACE <span class="studio-dot"></span> STAY ON TRACK</div><h2>Make today<br><span>count.</span></h2><p>Focus on what matters, one task at a time.</p></div>
       <div class="ia2-subtabs" id="planTabs" role="tablist" aria-label="Plan"><button type="button" role="tab" data-ptab="today" class="on" aria-selected="true">Today</button><button type="button" role="tab" data-ptab="upcoming" aria-selected="false">Upcoming</button><button type="button" role="tab" data-ptab="backlog" aria-selected="false">Backlog</button><button type="button" role="tab" data-ptab="projects" aria-selected="false">Projects</button></div>
       <button type="button" class="reset-chip" data-reset-start data-pt="today" hidden></button>
-      <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-ctl"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div><div id="planNextSteps" data-pt="today"></div>
+      <div class="plan-week" data-pt="today" aria-label="Task agenda"><div class="plan-ctl"><div class="plan-view-switch" role="group" aria-label="Calendar view"><button type="button" id="planWeekMode" class="active" aria-pressed="true">Week</button><button type="button" id="planMonthMode" aria-pressed="false">Month</button></div><div id="planMonthNav" class="plan-month-nav" hidden><button type="button" id="planPrevMonth" aria-label="Previous month">‹</button><strong id="planMonthLabel"></strong><button type="button" id="planNextMonth" aria-label="Next month">›</button><button type="button" id="planCurrentMonth">Today</button></div><button type="button" id="planWeekReset" class="plan-week-reset" hidden>Show all</button></div><div class="plan-week-days" id="planWeekDays"></div><div class="plan-week-summary" id="planWeekSummary" aria-live="polite"></div></div><div id="planAgenda" class="plan-agenda" data-pt="today" aria-live="polite"></div><div id="planDay" data-pt="today"></div><div id="planNextSteps" data-pt="today"></div>
       <form id="quickAddForm" class="quick-add-form" data-pt="today">
         <input type="text" id="quickAddInput" placeholder="Add a task for today…" required>
         <label class="sr-only" for="quickAddWhen">Schedule task</label><select id="quickAddWhen" aria-label="Schedule task"><option value="today">Today</option><option value="tomorrow">Tomorrow</option><option value="selected">Selected day</option><option value="anytime">Anytime</option></select>
@@ -2525,7 +2535,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.98';
+const APP_BUILD = '2026-11-18.99';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -4497,7 +4507,7 @@ function planLinkedItems(date){
   return out;
 }
 function renderPlanAgenda(){
-  const el = document.getElementById('planAgenda'); if(!el) return; planLinksEnsure(); renderPlanNextSteps();
+  const el = document.getElementById('planAgenda'); if(!el) return; planLinksEnsure(); renderPlanNextSteps(); renderPlanDay();
   const date = planSelectedDate || localToday(), items = planItemsFor(date);
   const label = date === localToday() ? 'Today' : date === isoAddDays(localToday(), 1) ? 'Tomorrow' : new Date(date+'T12:00').toLocaleDateString('en-US',{weekday:'long', month:'short', day:'numeric'});
   el.innerHTML = `<div class="section-title">${esc(label)}<span>${items.length ? `${items.length} item${items.length===1?'':'s'}` : ''}</span></div>` + (items.length ? `<div class="gcard plan-items">${items.map(it=>`
@@ -6114,8 +6124,8 @@ function renderIa2HomeNow(){
       <span class="food-split" role="img" aria-label="Eating out ${money(fs.out)}, groceries ${money(fs.groc)}"><i class="fo" style="flex:${fs.out||0.001}"></i><i class="fg" style="flex:${fs.groc||0.001}"></i></span>
       <span class="fs-legend"><span><i class="fo" aria-hidden="true"></i>Eating out ${money(fs.out)}</span><span><i class="fg" aria-hidden="true"></i>Groceries ${money(fs.groc)}</span></span>` : '<b class="wdg-mid">$0</b><span class="wdg-sub">no food spending yet this week</span>', { sub:'week' }); }
   if(typeof resetDue === 'function' && resetDue()) hero = hero.replace(/<\/button>$/, '') + '</button>' + `<button type="button" class="wdg wide reset-wdg" data-reset-start><span class="wdg-head"><span>WEEKLY RESET</span><em>about 3 min</em></span><span class="wdg-li">Close the week, clear the inbox, sort tasks, plan meals</span><span class="wdg-sub">Start ›</span></button>`;
-  const nextStepsW = nextStepsWidget();
-  const W = { nextsteps: nextStepsW, inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
+  const nextStepsW = nextStepsWidget(), dayPlanW = dayPlanWidget();
+  const W = { dayplan: dayPlanW, nextsteps: nextStepsW, inbox, food: foodW, steps: stepsW, stop: stopW, next: nextW, kitchen: kitW, sleep: sleepW, recurring: recW, closet: closetW, car: carW };
   const cfg = homeCfg(), keys = homeOrder(cfg).filter(k=>W[k] && !cfg.hidden.includes(k));
   const sized = k => W[k].replace('class="wdg ', `class="wdg ${cfg.wide[k] ? 'wide ' : ''}`).replace(' wide wide', ' wide');
   // empty tiles don't hold a grid slot (.81): "Not synced / Nothing coming up" fold into one line under the grid
@@ -6955,8 +6965,8 @@ document.addEventListener('click', e=>{
 
 
 // ===================== Build .52: widget editing, sort by use, motion, instant open =====================
-const HOME_KEYS = ['nextsteps','inbox','food','steps','stop','next','kitchen','sleep','recurring','closet','car'];
-const HOME_LABEL = { nextsteps:'Next steps', inbox:'Inbox', food:'Food spend', steps:'Steps', stop:'Your day (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
+const HOME_KEYS = ['dayplan','nextsteps','inbox','food','steps','stop','next','kitchen','sleep','recurring','closet','car'];
+const HOME_LABEL = { dayplan:'Today\'s plan', nextsteps:'Next steps', inbox:'Inbox', food:'Food spend', steps:'Steps', stop:'Your day (map)', next:'Next', kitchen:'Kitchen', sleep:'Sleep', recurring:'Recurring', closet:'Closet', car:'Car' };
 let homeEditing = false, ia2FirstPaint = true, homeCachedAt = null;
 function homeCfg(){ let c = {}; try{ c = JSON.parse(localStorage.getItem('otto.widgets') || '{}'); }catch(e){}
   return { order: Array.isArray(c.order) ? c.order.filter(k=>HOME_KEYS.includes(k)) : [], hidden: Array.isArray(c.hidden) ? c.hidden : ['closet','car'], wide: c.wide || { stop:true }, byUse: !!c.byUse }; }
@@ -7948,6 +7958,58 @@ document.addEventListener('click', async e=>{
 document.addEventListener('input', e=>{ if(e.target.id === 'lfQ'){ lift.q = e.target.value; drawLift('#lfQ'); const i = document.getElementById('lfQ'); if(i){ i.setSelectionRange(i.value.length, i.value.length); } } });
 document.addEventListener('change', async e=>{ if(e.target.id === 'lfDate' && e.target.value){ lift.day = e.target.value; try{ lift.sets = await liftFetch(`workout_sets?select=*&performed_on=eq.${lift.day}&order=id.asc`); }catch(err){} drawLift(); } });
 document.addEventListener('keydown', e=>{ const el = document.getElementById('liftSheet'); if(e.key === 'Escape' && el && !el.hidden){ el.hidden = true; lift.recency = null; renderLiftCard(); } });
+
+
+// ---------- Day plan (.99, TD-00116): routine_blocks + time-blocked tasks from v_day_plan ----------
+// A scheduled task trims only the part of a FLEXIBLE block it overlaps (a 10-min call no longer hides all of lunch).
+// Fixed blocks stay as they are; a task on top of one is marked as a clash. Sleep wraps past midnight.
+const dayPlanCache = {};
+const tmin = t => { const [h,m] = String(t||'0:0').split(':').map(Number); return h*60 + (m||0); };
+const tclock = m => { m = ((m % 1440) + 1440) % 1440; const h = Math.floor(m/60), mm = m % 60; return `${h % 12 || 12}${mm ? ':' + String(mm).padStart(2,'0') : ''} ${h < 12 ? 'AM' : 'PM'}`; };
+async function loadDayPlan(d, force){
+  if(dayPlanCache[d] && !force) return dayPlanCache[d];
+  try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/v_day_plan?plan_date=eq.${d}&order=start_time.asc`, { headers: authHeaders() }); dayPlanCache[d] = r.ok ? await r.json() : []; }catch(e){ dayPlanCache[d] = dayPlanCache[d] || []; }
+  return dayPlanCache[d];
+}
+function buildDayPlan(rows){
+  const tasks = rows.filter(r=>r.source === 'todo').map(r=>({ ...r, s: tmin(r.start_time), e: Math.max(tmin(r.start_time) + 5, tmin(r.end_time)) }));
+  const out = [];
+  rows.filter(r=>r.source !== 'todo').forEach(r=>{
+    let s = tmin(r.start_time), e = tmin(r.end_time); if(e <= s) e += 1440;   // wraps past midnight (sleep)
+    if(!r.flexible){ out.push({ ...r, s, e, clash: tasks.some(t=>t.s < e && t.e > s) }); return; }
+    let pieces = [[s, e]];
+    tasks.forEach(t=>{ pieces = pieces.flatMap(([a,b])=> t.e <= a || t.s >= b ? [[a,b]] : [[a, Math.min(b, t.s)], [Math.max(a, t.e), b]].filter(([x,y])=>y - x >= 10)); });
+    pieces.forEach(([a,b], i)=>out.push({ ...r, s:a, e:b, trimmed: pieces.length !== 1 || a !== s || b !== e }));
+  });
+  tasks.forEach(t=>out.push({ ...t, task:true }));
+  return out.sort((a,b)=>a.s - b.s || (a.task ? -1 : 1));
+}
+const DP_COLOR = { work:'#5B8CFF', gym:'#45C487', meal:'#E8AC45', commute:'#9AA3A0', sleep:'#4B4F6B', free:'#7FD1D8', social:'#FF7FB0', errands:'#C9A0FF', chores:'#C9A0FF', admin:'#C9A0FF', routine:'#9AA3A0' };
+function dayPlanRows(items, d, opts = {}){
+  const now = new Date(), nowM = now.getHours()*60 + now.getMinutes(), isToday = d === localToday();
+  return items.map(x=>{ const cur = isToday && nowM >= x.s && nowM < x.e, past = isToday && x.e <= nowM;
+    return `<div class="dp-row ${x.task ? 'task' : ''} ${cur ? 'now' : ''} ${past ? 'past' : ''}" ${x.task && x.todo_code ? `data-coderef="${esc(x.todo_code)}" role="button" tabindex="0"` : ''}>
+      <span class="dp-t">${tclock(x.s)}<em>${tclock(x.e)}</em></span><i class="dp-bar" style="background:${x.task ? 'var(--c-accent)' : DP_COLOR[x.kind] || '#9AA3A0'}" aria-hidden="true"></i>
+      <span class="dp-what"><b>${esc(x.title)}</b>${x.task ? '<em>task</em>' : x.clash ? '<em class="warn">overlaps a task</em>' : x.trimmed ? '<em>shortened for a task</em>' : cur ? '<em>now</em>' : ''}</span></div>`; }).join('');
+}
+function renderPlanDay(){
+  const el = document.getElementById('planDay'); if(!el) return;
+  const d = planSelectedDate || localToday();
+  if(!dayPlanCache[d]){ el.innerHTML = ''; loadDayPlan(d).then(()=>{ if((planSelectedDate || localToday()) === d) renderPlanDay(); }); return; }
+  const items = buildDayPlan(dayPlanCache[d]); if(!items.length){ el.innerHTML = ''; return; }
+  const nowM = new Date().getHours()*60 + new Date().getMinutes(), isToday = d === localToday();
+  const earlier = isToday ? items.filter(x=>x.e <= nowM) : [], rest = isToday ? items.filter(x=>x.e > nowM) : items;
+  el.innerHTML = `<div class="section-title">Day plan<span>${items.filter(x=>x.task).length ? `${items.filter(x=>x.task).length} task${items.filter(x=>x.task).length===1?'':'s'} scheduled` : 'your routine'}</span></div>
+    <div class="gcard dp-list">${earlier.length ? `<details class="dp-earlier"><summary>Earlier · ${earlier.length}</summary>${dayPlanRows(earlier, d)}</details>` : ''}${dayPlanRows(rest, d)}</div>`;
+}
+function dayPlanWidget(){
+  const d = localToday();
+  if(!dayPlanCache[d]){ loadDayPlan(d).then(()=>renderIa2Home()); return `<div class="wdg wide dp-wdg quiet" data-w="todos"><span class="wdg-head"><span>TODAY'S PLAN</span><em></em></span><span class="wdg-sub">Loading…</span></div>`; }
+  const items = buildDayPlan(dayPlanCache[d]), nowM = new Date().getHours()*60 + new Date().getMinutes();
+  const next = items.filter(x=>x.e > nowM).slice(0, 3);
+  if(!next.length) return `<div class="wdg wide dp-wdg quiet" data-w="todos"><span class="wdg-head"><span>TODAY'S PLAN</span><em></em></span><span class="wdg-sub">Nothing planned</span></div>`;
+  return `<div class="wdg wide dp-wdg" data-w="todos" data-sub="Today"><span class="wdg-head"><span>TODAY'S PLAN</span><em>full day ›</em></span><div class="dp-mini">${dayPlanRows(next, d)}</div></div>`;
+}
 
 // ---------- tiny charts for Home widgets ----------
 function miniBars(vals, onIdx, labels){
