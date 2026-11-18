@@ -90,7 +90,26 @@ document.addEventListener('submit',async e=>{
 });
 
 </script>
-<style>:root{color-scheme:light;
+<style>
+  /* ===== Design tokens (.96, TD-00080, blueprint §5). One source of truth; screens move onto these one at a time,
+     deleting their !important overrides as they go. Defining them changes nothing visible. ===== */
+  :root{
+    /* type: 6 sizes, 2 weights */
+    --fs-display:36px; --fs-title:22px; --fs-heading:17px; --fs-body:15px; --fs-caption:13px; --fs-micro:11px;
+    --fw-regular:400; --fw-strong:600; --font-num: ui-monospace, "SF Mono", Menlo, monospace;
+    /* shape */
+    --r-input:8px; --r-row:12px; --r-card:16px; --r-sheet:28px;
+    /* 4 px spacing grid */
+    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-6:24px; --sp-8:32px;
+    --tap:44px;
+    /* color roles */
+    --c-bg:#0B0C0A; --c-surface:#151713; --c-surface-2:#1D201A; --c-border:#2B2F26;
+    --c-text:#F1F4EA; --c-text-2:#A6AC9D; --c-text-3:#8C9284;
+    --c-accent:#D7FF3D; --c-warn:#E8AC45; --c-alert:#EF7A52; --c-ok:#45C487;
+    /* muscle-map heat ramp only */
+    --heat-0:#D8D3C8; --heat-1:#F3CFC4; --heat-2:#E0816F; --heat-3:#BA3A30; --heat-4:#6E0F10;
+  }
+:root{color-scheme:light;
   --bg:#F6F5F1; --surface:#FFFFFF; --surface-2:#EEECE6; --border:#DAD8D1;
   --text:#15161A; --text-muted:#4E5059; --text-faint:#6B6D76;
   --accent:#2448C9; --accent-text:#2448C9; --on-accent:#FFFFFF; --accent-soft:rgba(36,72,201,.10);
@@ -2500,7 +2519,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-10.95';
+const APP_BUILD = '2026-11-18.96';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
