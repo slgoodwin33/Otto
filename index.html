@@ -2486,7 +2486,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.102';
+const APP_BUILD = '2026-11-18.103';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5349,7 +5349,9 @@ function renderPageHead(){
   document.getElementById('sheetTitle').textContent = m.title;
   document.getElementById('pageIco').innerHTML = m.icon ? ico2(m.icon, 19) : svgIcon(sheetArea === 'account' ? 'user' : sheetArea === 'assets' ? 'map' : sheetArea);
   document.getElementById('pageSub').textContent = m.sub || '';
-  const back = document.getElementById('pageBack'); back.textContent = m.back ? '‹ ' + m.back : ''; back.classList.toggle('show', !!m.back);
+  // record level: Back names its section (‹ Backlog); otherwise the area's own back target
+  let bl = m.back; try{ const h = currentRoute(), up = parentRoute(h); if(up && routeParts(h).length >= 3 && !/^#\/(day|cal|spend)/.test(h)) bl = routeLabel(up); else if(bl && up) bl = routeLabel(up); }catch(e){}
+  const back = document.getElementById('pageBack'); back.textContent = bl ? '‹ ' + bl : ''; back.classList.toggle('show', !!bl);
 }
 function svgRing(pct, color, size, stroke, inner){
   const r = (size - stroke)/2, c = 2*Math.PI*r, p = Math.max(0, Math.min(1, pct||0));
@@ -5874,7 +5876,11 @@ function renderIa2Dock(){
     : `<nav class="ia2-tabs" aria-label="Areas">${keys.map(k=>`<button type="button" data-area2="${k}" class="${k===ia2Active?'on':''}" aria-current="${k===ia2Active?'page':'false'}">${ico2(AREAS2[k].icon,22)}<span>${AREAS2[k].label}</span></button>`).join('')}</nav><button type="button" class="ia2-search" data-ia2search aria-label="Ask Otto, search, or add"><span class="otto-ring" aria-hidden="true"></span></button>`;
 }
 document.addEventListener('click', e=>{
-  const a = e.target.closest('[data-area2]'); if(a){ hapticPulse(); openArea(a.dataset.area2); return; }
+  const a = e.target.closest('[data-area2]'); if(a){ hapticPulse(); const k = a.dataset.area2;
+    if(k === ia2Active && sheetArea && k !== 'today' && k !== 'all'){   // tapping the current tab returns it to its top
+      const top = '#/' + (ROUTE_NAME[k] || k); applyRoute(top); try{ history.replaceState({ otto:navDepth }, '', currentRoute()); }catch(err){}
+      document.getElementById('sheetBody')?.scrollTo({ top:0, behavior: reduceMotion() ? 'auto' : 'smooth' }); return; }
+    openArea(k); return; }
   if(e.target.closest('[data-expand]')){ ia2Collapsed = false; renderIa2Dock(); return; }
   if(e.target.closest('[data-ia2search]')){ openChatWith(''); return; }
   const w = e.target.closest('[data-w]'); if(w){ const k = w.dataset.w; if(k === 'inbox') openInboxDeck(); else if(k === 'day') openDayPage(localToday()); else zoomFrom(w.closest('.wdg') || w, ()=>openDeep(k, w.dataset.sub)); return; }
@@ -6829,6 +6835,7 @@ function setBodyTab(t, quiet){
     loadStepHistory().then(renderStepHistory).catch(err=>{ const b = document.getElementById('histBox'); if(b) b.innerHTML = `<div class="empty">Couldn't load your step history. ${esc(err.message||'')}</div>`; }); }
   if(t === 'trends') loadStepHistory().then(renderYoY).catch(()=>{});
   if(!quiet){ const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
+  syncRoute(true);
 }
 document.addEventListener('click', e=>{ const b = e.target.closest('#bodyTabs [data-btab]'); if(b) setBodyTab(b.dataset.btab); });
 // This month vs the same month every year since 2018 (month-to-date for this year)
@@ -8705,7 +8712,7 @@ function renderProjects(){
     const parent = p.parent_id ? projById(p.parent_id) : null;
     if(parent){ projOpen = parent.code; return renderProjects(); }   // a part opens inside its project
     const kids = projKids(p), ts = projTodos(p, true), c = projCount(ts), [when, wc] = projWhen(p);
-    let html = `<button type="button" class="pj-back" data-projback>‹ All projects</button>
+    let html = `
       <div class="pj-head" style="--pj:${projectColor(p.title)}"><h3>${esc(p.title)}${p.kind==='ongoing' ? '<span class="pj-badge">Ongoing</span>' : ''}</h3>
       <div class="pj-meta ${wc}">${p.kind==='ongoing' ? `${c.open.length} open · ${c.done.length} done so far` : `${esc(when)}${c.total ? ` · ${c.done.length} of ${c.total} tasks done` : ''}`}</div>
       ${p.notes ? `<p>${codeNotes(p.notes)}</p>` : ''}
@@ -8799,6 +8806,7 @@ function setPlanTab(t){
   if(t === 'projects'){ if(t !== panel.dataset.prevTab) projOpen = null; loadProjects().then(renderProjects); }
   panel.dataset.prevTab = t;
   const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0;
+  syncRoute(true);
 }
 document.addEventListener('click', e=>{ const b = e.target.closest('#planTabs [data-ptab]'); if(b) setPlanTab(b.dataset.ptab); });
 function renderPlanTabs(){
@@ -8968,38 +8976,126 @@ openArea = function(k){
 };
 
 // ---------- routes (#/money, #/car/2): reload lands where you were; edge-swipe and ‹ go back ----------
-let navDepth = 0, routing = false;
+let navDepth = 0, routing = false, popSkip = false, routeReady = false;
+const BOOT_HASH = location.hash;   // read before boot code redraws Home and rewrites the address
+// .102 (TD-00083): every screen and open record has an address, #/area/section/record (e.g. #/plan/backlog/TD-00079,
+// #/car/log, #/documents/expiring/12). BACK RULE: Back goes up one level in the address, never "to the previous screen".
+// Sections are tabs: switching them, or switching areas, replaces the address and never adds history.
+const ROUTE_ALIAS = { plan:'todos', body:'health', places:'assets', kitchen:'food' };
+const ROUTE_NAME = { todos:'plan', health:'body', assets:'places', food:'kitchen' };
+const PLAN_TABS = { today:'Today', upcoming:'Upcoming', backlog:'Backlog', projects:'Projects' };
+const MONEY_SEGS = { week:'This week', txns:'Transactions', recurring:'Recurring', accounts:'Accounts' };
+const BODY_TABS = { today:'Today', sleep:'Sleep', history:'History', trends:'Trends' };
+const DOC_TABS = ['search','expiring','folders','scan'];
+const slug = t => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function lifeTabs(area){ const L = LIFE[area]; return (L && L.tabs) || []; }
 function currentRoute(){
   if(dayView.open) return '#/day/' + dayView.d;
   if(spendView.open) return '#/spend';
   if(calView.open) return '#/cal/' + calView.metric + '/' + calView.level + '/' + (calView.level === 'year' ? calView.y : calView.level === 'month' ? calView.m : calView.w);
   if(!sheetArea) return '#/today';
-  if(sheetArea === 'life'){ const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : 'all'; return '#/' + (k || 'all') + (k !== 'all' && lifeSection ? '/' + lifeSection : ''); }
-  return '#/' + sheetArea;
+  if(sheetArea === 'life'){
+    const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : null; if(!k) return '#/all';
+    if(lifeArea === 'documents'){ const t = DOC_TABS[docs.tab] || 'search'; return '#/documents' + (docs.open != null && docs.unlocked ? `/${t}/${docs.open}` : t !== 'search' ? '/' + t : ''); }
+    const tabs = lifeTabs(lifeArea), sec = tabs[lifeSection] ? slug(tabs[lifeSection].title) : (lifeSection ? String(lifeSection) : '');
+    return '#/' + k + (sec && (lifeSection || lifeOpenRow) ? '/' + sec : '') + (lifeOpenRow ? '/' + lifeOpenRow : '');
+  }
+  const name = ROUTE_NAME[sheetArea] || sheetArea;
+  if(sheetArea === 'todos'){ const t = document.getElementById('panelTodos')?.dataset.ptab || 'today';
+    const rec = t === 'projects' ? projOpen : expandedCode; return `#/plan/${t}` + (rec ? '/' + rec : ''); }
+  if(sheetArea === 'money'){ const g = document.body.dataset.moneyseg || 'week'; return '#/money' + (g !== 'week' ? '/' + g : ''); }
+  if(sheetArea === 'health') return '#/body' + (bodyTab && bodyTab !== 'today' ? '/' + bodyTab : '');
+  return '#/' + name;
+}
+const routeParts = h => String(h || '').replace(/^#\/?/, '').split('/').filter(Boolean);
+/** One level up. Sections share their area's level, so a record's parent is its section and a section's parent is the area's parent. */
+function parentRoute(h){
+  const [k, a, b, c] = routeParts(h);
+  if(!k || k === 'today') return null;
+  if(k === 'day') return '#/today';
+  if(k === 'spend') return '#/money';
+  if(k === 'cal'){ if(b === 'week' && c) return `#/cal/${a}/month/${isoAddDays(c, 3).slice(0,7)}`; if(b === 'month' && c) return `#/cal/${a}/year/${c.slice(0,4)}`; return a === 'spend' ? '#/money' : '#/body'; }
+  const area = ROUTE_ALIAS[k] || k;
+  const rec = area === 'todos' || area === 'documents' || (AREAS2[area] && AREAS2[area].life) ? b : null;
+  if(rec) return `#/${k}/${a}`;
+  if(k === 'all') return '#/today';
+  if(k === 'subscriptions') return '#/money/recurring';
+  if(AREAS2[area] && AREAS2[area].life) return '#/all';
+  return '#/today';
+}
+function routeLabel(h){
+  const [k, a] = routeParts(h); if(!k || k === 'today') return 'Today';
+  if(k === 'all') return 'All';
+  if(k === 'money') return a ? (MONEY_SEGS[a] || 'Money') : 'Money';
+  if(k === 'cal'){ const [, m, lv, at] = routeParts(h); return lv === 'year' ? at : lv === 'month' ? new Date(at + '-15T12:00').toLocaleDateString(undefined, { month:'long' }) : 'Calendar'; }
+  const area = ROUTE_ALIAS[k] || k;
+  if(area === 'todos') return a ? (PLAN_TABS[a] || 'Plan') : 'Plan';
+  if(area === 'health') return a ? (BODY_TABS[a] || 'Body') : 'Body';
+  if(area === 'documents' && a) return a[0].toUpperCase() + a.slice(1);
+  const d = AREAS2[area]; if(d && d.life && a){ const t = lifeTabs(d.life).find((x, i)=> slug(x.title) === a || String(i) === a); if(t) return t.title; }
+  return d ? d.label : 'Back';
 }
 function syncRoute(replace){
-  if(routing) return; const h = currentRoute(); if(location.hash === h) return;
-  try{ if(replace) history.replaceState({ otto:navDepth }, '', h); else { navDepth++; history.pushState({ otto:navDepth }, '', h); } }catch(e){}
+  if(routing || !routeReady) return; const h = currentRoute(), cur = location.hash; if(cur === h) return;
+  const st = history.state || {};
+  try{
+    if(st.from === h && navDepth > 0){ popSkip = true; history.back(); return; }      // closed a record: drop its entry, don't stack a duplicate
+    if(!replace && parentRoute(h) === cur && (routeParts(h).length >= 3 || /^#\/(day|cal|spend)/.test(h))){ navDepth++; history.pushState({ otto:navDepth, from:cur }, '', h); }   // went one level down
+    else history.replaceState({ ...st, otto:navDepth }, '', h);                        // tab / area / section switch: no new history
+  }catch(e){}
+  renderPageHead();
 }
+// open a record once its data is on screen (cold deep links arrive before the lists load)
+let recordWant = 0;
+function openRecordWhenReady(test, open, tries = 30){ const my = ++recordWant;
+  const go = n => { if(my !== recordWant) return; if(test()){ routing = true; try{ open(); } finally { routing = false; } renderPageHead(); return; } if(n > 0) setTimeout(()=>go(n - 1), 300); };
+  go(tries); }
 function applyRoute(hash){
-  const [k, sec] = String(hash || '').replace(/^#\/?/, '').split('/');
-  routing = true;
+  const parts = routeParts(hash), [k0, sec, rec] = parts, k = ROUTE_ALIAS[k0] || k0;
+  routing = true; recordWant++;
   try{
     if(k === 'day'){ if(spendView.open) closeSpendMap(); if(calView.open) closeCal(); openDayPage(sec, true); return; }
     if(dayView.open) closeDayPage();
-    if(k === 'cal'){ if(spendView.open) closeSpendMap(); const [, , lv, at] = String(hash).replace(/^#\/?/, '').split('/');
+    if(k === 'cal'){ if(spendView.open) closeSpendMap(); const [, , lv, at] = parts;
       if(CAL_LEVELS.includes(lv) && at){ calView.level = lv; if(lv === 'year' && /^\d{4}$/.test(at)) calView.y = at; if(lv === 'month' && /^\d{4}-\d{2}$/.test(at)){ calView.m = at; calView.y = at.slice(0,4); } if(lv === 'week' && /^\d{4}-\d{2}-\d{2}$/.test(at)){ calView.w = at; calView.m = isoAddDays(at, 3).slice(0,7); calView.y = calView.m.slice(0,4); } }
-      openCal(sec, true); return; }
+      if(calView.open && calView.metric === sec && typeof renderCal === 'function') renderCal(); else openCal(sec, true); return; }
     if(calView.open) closeCal();
     if(k === 'spend'){ openSpendMap(true); return; }
     if(spendView.open) closeSpendMap();
-    if(k && AREAS2[k] && k !== 'today'){ openArea(k); if(sec && AREAS2[k].life){ lifeSection = Number(sec) || 0; renderLife(); } }
-    else if(k && AREAS[k]) openSheet(k);
-    else openArea('today');
-  } finally { routing = false; }
+    if(!k || k === 'today' || !(AREAS2[k] || AREAS[k])){ openArea('today'); return; }
+    if(AREAS2[k] && AREAS2[k].life){
+      if(!(sheetArea === 'life' && lifeArea === AREAS2[k].life)) openArea(k);
+      if(k === 'documents'){ const t = Math.max(0, DOC_TABS.indexOf(sec)); if(docs.tab !== t){ docs.tab = t; docs.rows = null; } docs.open = null; renderLife();
+        if(rec) openRecordWhenReady(()=> docs.unlocked && (docs.rows||[]).some(x=>String(x.id) === rec), ()=>{ docs.open = Number(rec); renderLife(); }); return; }
+      const tabs = lifeTabs(AREAS2[k].life), i = sec ? tabs.findIndex((x, j)=> slug(x.title) === sec || String(j) === sec) : 0;
+      lifeSection = Math.max(0, i); lifeOpenRow = null; renderLife();
+      if(rec) openRecordWhenReady(()=> !!document.querySelector(`[data-lrow="${CSS.escape(rec)}"]`), ()=>{ lifeOpenRow = rec; renderLife(); });
+      return; }
+    if(AREAS2[k]){ if(sheetArea !== k) openArea(k); }
+    else { openSheet(k); return; }
+    if(k === 'todos'){ const t = PLAN_TABS[sec] ? sec : 'today'; expandedCode = null; projOpen = null; setPlanTab(t); if(t === 'projects' && typeof renderProjects === 'function') renderProjects();
+      if(rec && rec.startsWith('PR-')) openRecordWhenReady(()=> (allProjects||[]).some(x=>x.code === rec), ()=>{ projOpen = rec; setPlanTab('projects'); projOpen = rec; renderProjects(); });
+      else if(rec) openRecordWhenReady(()=> (allTodos||[]).some(x=>x.code === rec), ()=>{ expandedCode = rec; renderList(allTodos);
+        if(!document.querySelector(`#todoList .swipe[data-code="${rec}"]`)){ setPlanTab('backlog'); expandedCode = rec; renderList(allTodos); history.replaceState({ ...(history.state||{}) }, '', currentRoute()); }
+        setTimeout(()=>document.querySelector(`#todoList .swipe[data-code="${rec}"]`)?.scrollIntoView({ block:'center' }), 60); });
+      return; }
+    if(k === 'money'){ setMoneySeg(MONEY_SEGS[sec] ? sec : 'week'); return; }
+    if(k === 'health'){ setBodyTab(BODY_TABS[sec] ? sec : 'today'); return; }
+  } finally { routing = false; renderPageHead(); }
 }
-function goBack(){ navDir = -1; if(calView.open && !dayView.open && navDepth <= 0){ const m = calView.metric; closeCal(); openArea(m === 'spend' ? 'money' : 'health'); syncRoute(true); return; } if(spendView.open && navDepth <= 0){ closeSpendMap(); openArea('money'); syncRoute(true); return; } if(dayView.open && navDepth <= 0){ closeDayPage(); openArea('today'); syncRoute(true); return; } if(navDepth > 0) history.back(); else if(sheetArea === 'life' && lifeArea) openArea('all'); else openArea('today'); }
-window.addEventListener('popstate', e=>{ const d = (e.state && e.state.otto) || 0; navDir = d < navDepth ? -1 : 1; navDepth = d; applyRoute(location.hash); });
+/** Go to an address from code (chat links, notifications): parents come from the address itself, so Back works. */
+function navigateTo(h){ applyRoute(h); syncRoute(); }
+function goBack(){
+  navDir = -1;
+  const cur = currentRoute(), up = parentRoute(cur); if(!up) return;
+  const st = history.state || {};
+  if(st.from === up && navDepth > 0){ history.back(); return; }                      // the level above is the entry under us
+  applyRoute(up); try{ history.replaceState({ otto:navDepth }, '', currentRoute()); }catch(e){}   // deep link: build the parent in place
+}
+window.addEventListener('popstate', e=>{ const d = (e.state && e.state.otto) || 0; navDir = d < navDepth ? -1 : 1; navDepth = d;
+  if(popSkip){ popSkip = false; renderPageHead(); return; } applyRoute(location.hash); });
+// record opens and closes happen in many click handlers; keep the address in step after each tap
+document.addEventListener('click', ()=> setTimeout(()=>{ if(document.getElementById('appWrap')?.style.display !== 'none') syncRoute(); }, 0), true);   // capture: some handlers stop propagation
 (function(){   // swipe right from the left edge = back; the page follows your finger
   let sx = 0, sy = 0, dx = 0, on = false;
   const sheet = () => document.getElementById('sheet');
@@ -9018,7 +9114,8 @@ function showApp(){
   try{ if(paintFromCache()) setTimeout(()=>{ if(homeCachedAt){ homeCachedAt = null; window.__freshData = true; try{ renderIa2Home(); }catch(e){} } }, 15000); }catch(e){}
   try{ applyBg(); }catch(e){ console.error('background', e); }
   bootApp();
-  try{ history.replaceState({ otto:0 }, '', location.hash || '#/today'); if(location.hash && location.hash !== '#/today') applyRoute(location.hash); }catch(e){}
+  try{ const h = BOOT_HASH && BOOT_HASH !== '#/today' ? BOOT_HASH : '#/today'; history.replaceState({ otto:0 }, '', h); if(h !== '#/today') applyRoute(h); }catch(e){ console.error('route', e); }
+  routeReady = true; try{ history.replaceState({ otto:0 }, '', currentRoute()); }catch(e){}
 }
 function showLogin(errorMsg){
   document.getElementById('loginScreen').style.display = 'flex';
@@ -9110,7 +9207,7 @@ document.addEventListener('pointerdown', e=>{
   if(navChooser && !e.target.closest('.otto-nav-chooser') && !e.target.closest('[data-tab="life"]') && !e.target.closest('[data-tab="more"]')) closeNavChooser();
 });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeNavChooser(); });
-function setMoneySeg(k){ if(k === 'recurring') setTimeout(renderRecurring, 0); document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.msegBtn === k))); document.body.dataset.moneyseg = k; document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.classList.toggle('active', b.dataset.msegBtn === k)); const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; }
+function setMoneySeg(k){ if(k === 'recurring') setTimeout(renderRecurring, 0); document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.msegBtn === k))); document.body.dataset.moneyseg = k; document.querySelectorAll('[data-mseg-btn]').forEach(b=>b.classList.toggle('active', b.dataset.msegBtn === k)); const sb = document.getElementById('sheetBody'); if(sb) sb.scrollTop = 0; syncRoute(true); }
 setMoneySeg('week');
 document.getElementById('moneySeg').addEventListener('click', e=>{ const b = e.target.closest('[data-mseg-btn]'); if(b) setMoneySeg(b.dataset.msegBtn); });
 
