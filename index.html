@@ -2535,7 +2535,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.99';
+const APP_BUILD = '2026-11-18.100';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -6224,7 +6224,7 @@ async function docUnlock(){
   }catch(e){ showNotice(e && e.name === 'NotAllowedError' ? 'Unlock was cancelled.' : `Face ID unlock failed: ${(e && e.message) || e}`); }
 }
 async function docLoad(){
-  let url = `${SUPABASE_URL}/rest/v1/documents?select=id,name,kind,issuer,issued_on,expires_on,number_last4,tags,file_path,mime_type,file_size,created_at`;
+  let url = `${SUPABASE_URL}/rest/v1/documents?select=id,name,kind,issuer,issued_on,expires_on,number_last4,tags,file_path,mime_type,file_size,created_at,content`;
   if(docs.q.trim()) url += `&search=wfts(english).${encodeURIComponent(docs.q.trim())}`;
   if(docs.tag) url += `&tags=cs.${encodeURIComponent('{"' + docs.tag + '"}')}`;
   url += docs.tab === 1 ? '&expires_on=not.is.null&order=expires_on.asc' : '&order=created_at.desc&limit=200';
@@ -6242,12 +6242,12 @@ function docCountdown(rows){
       return `<div class="lf-row dcd ${docs.open === d.id ? 'open' : ''}" data-docrow="${d.id}"><div class="dcd-n ${st}" aria-hidden="true"><b>${Math.abs(n) > 999 ? '999+' : Math.abs(n)}</b><span>${n < 0 ? 'days ago' : n === 1 ? 'day' : 'days'}</span></div>
         <div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${n < 0 ? 'Expired' : 'Expires'} ${new Date(d.expires_on+'T12:00').toLocaleDateString('en-US',{ month:'short', day:'numeric', year:'numeric' })}${d.issuer ? ' · ' + esc(d.issuer) : ''}</div>
         <span class="dcd-bar" role="img" aria-label="${n < 0 ? `Expired ${-n} days ago` : `${n} days left`}"><i class="${st}" style="width:${(left*100).toFixed(0)}%"></i></span></div>
-        ${docs.open === d.id ? `<div class="lf-actions">${d.file_path ? `<button type="button" data-docopen="${d.id}">View</button>` : ''}<button type="button" class="danger" data-docdel="${d.id}">Delete</button></div>` : ''}</div>`; }).join('')}</div>`; }).join('');
+        ${docs.open === d.id ? `<div class="lf-actions">${d.file_path ? `<button type="button" data-docopen="${d.id}">View</button>` : `<button type="button" data-docattach="${d.id}">Attach file</button>`}<button type="button" class="danger" data-docdel="${d.id}">Delete</button></div>` : ''}</div>`; }).join('')}</div>`; }).join('');
 }
 function docRow(d){
   const open = docs.open === d.id;
-  return `<div class="lf-row ${open?'open':''}" data-docrow="${d.id}"><div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${esc([d.kind, d.issuer, d.number_last4 ? 'ends ' + d.number_last4 : '', (d.tags||[]).join(', ')].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${docBadge(d)}</div>
-    ${open ? `<div class="lf-actions">${d.file_path ? `<button type="button" data-docopen="${d.id}">View</button>` : ''}<button type="button" class="danger" data-docdel="${d.id}">Delete</button></div>` : ''}</div>`;
+  return `<div class="lf-row ${open?'open':''}" data-docrow="${d.id}"><div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${esc([d.kind, d.issuer, d.number_last4 ? 'ends ' + d.number_last4 : '', (d.tags||[]).join(', ')].filter(Boolean).join(' · '))}</div></div><div class="lf-right">${d.file_path ? '' : '<span class="lf-badge">no file</span>'}${docBadge(d)}</div>
+    ${open ? `<div class="lf-actions">${d.file_path ? `<button type="button" data-docopen="${d.id}">View</button>` : `<button type="button" data-docattach="${d.id}">Attach file</button>`}<button type="button" class="danger" data-docdel="${d.id}">Delete</button></div>` : ''}</div>`;
 }
 function docResults(){
   const rows = docs.rows || [];
@@ -6317,6 +6317,31 @@ async function docSave(form){
   docs.pending = docs.pending.filter(x=>x !== it); docs.rows = null; lifeRows.documents = null; hapticPulse(); showNotice('Saved to your vault.');
   if(!docs.pending.length) docs.tab = 0; renderLife();
 }
+
+// ---------- Attach a file to a document row (.100, TD-00117) ----------
+// Rows made in chat (e.g. "NH registration renewal 2026") have no file. Attach uploads to the private documents bucket,
+// fills file_path / mime_type / file_size, and runs doc-extract for searchable text when the row has none yet.
+async function docAttach(id){
+  const d = (docs.rows||[]).find(x=>String(x.id) === String(id)); if(!d) return;
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*,application/pdf';
+  inp.onchange = async () => { const f = inp.files && inp.files[0]; if(!f) return; docTouch();
+    const ext = (f.name.split('.').pop() || 'bin').toLowerCase(), mt = f.type || (ext === 'pdf' ? 'application/pdf' : 'image/jpeg');
+    const path = `${new Date().getFullYear()}/${crypto.randomUUID()}.${ext}`;
+    showNotice('Uploading…', null, true);
+    try{ await ensureValidSession();
+      const up = await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${path}`, { method:'POST', headers: { ...authHeaders(), 'Content-Type': mt }, body: f });
+      if(!up.ok) throw new Error(`upload ${up.status}`);
+      const patch = { file_path: path, mime_type: mt, file_size: f.size };
+      if(!d.content){ try{ let send; if(mt.startsWith('image/')){ const j = await imageToJpeg(f); send = { media_type: j.media_type, data: j.data }; } else send = { media_type: mt, data: await fileB64(f) };
+        const r = await callFn('doc-extract', send); if(r && !r.error && r.content) patch.content = r.content; }catch(e){ /* text is a bonus */ } }
+      const r = await fetch(`${SUPABASE_URL}/rest/v1/documents?id=eq.${d.id}`, { method:'PATCH', headers: { ...authHeaders(), 'Content-Type':'application/json', Prefer:'return=minimal' }, body: JSON.stringify(patch) });
+      if(!r.ok){ await fetch(`${SUPABASE_URL}/storage/v1/object/documents/${path}`, { method:'DELETE', headers: authHeaders() }); throw new Error(`save ${r.status}`); }
+      Object.assign(d, patch); lifeRows.documents = null; hapticPulse(); showNotice(`Attached to “${d.name}”.`); renderLife();
+    }catch(err){ showNotice(`Couldn't attach it (${err.message}).`); } };
+  inp.click();
+}
+document.addEventListener('click', e=>{ const a = e.target.closest('[data-docattach]'); if(a){ e.preventDefault(); docAttach(a.dataset.docattach); } });
+
 async function docOpen(id){
   const d = (docs.rows||[]).find(x=>String(x.id) === String(id)); if(!d || !d.file_path) return;
   const r = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/documents/${d.file_path}`, { method:'POST', headers: { ...authHeaders(), 'Content-Type':'application/json' }, body: JSON.stringify({ expiresIn: 120 }) });
@@ -6681,7 +6706,7 @@ function droneCompliance(){
   let recur = 'Add your Part 107 certificate (or last recurrent training) to your vault with the Drone folder.';
   if(cert && cert.issued_on){ const d = new Date(cert.issued_on+'T12:00'); d.setMonth(d.getMonth()+25, 0); recur = `Recurrent training due by ${d.toLocaleDateString('en-US',{month:'long', year:'numeric'})} (24 calendar months).`; }
   return `<div class="kt-receipt"><b>Part 107</b><span>${esc(recur)}</span></div><div class="section-title">Drone documents<span>${droneDocs.length}</span></div>
-    <div class="gcard lf-list">${droneDocs.map(d=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${esc(d.kind)}</div></div><div class="lf-right">${docBadge(d)}</div></div>`).join('') || '<div class="empty">Registration (renews every 3 years), certificate, insurance, airspace authorizations.</div>'}</div>
+    <div class="gcard lf-list">${droneDocs.map(d=>`<div class="lf-row"><div class="grow-main"><div class="grow-title">${esc(d.name)}</div><div class="grow-sub">${esc(d.kind)}</div></div><div class="lf-right">${d.file_path ? '' : '<span class="lf-badge">no file</span>'}${docBadge(d)}</div></div>`).join('') || '<div class="empty">Registration (renews every 3 years), certificate, insurance, airspace authorizations.</div>'}</div>
     <button type="button" class="lf-add" data-opendocs="Drone">Add in Documents (tag: Drone)</button>`;
 }
 
