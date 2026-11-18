@@ -3,3 +3,5 @@ node_modules/
 .env*
 supabase/.temp/
 tests/__screens__/
+tests/.cache/
+tests/fixtures.json

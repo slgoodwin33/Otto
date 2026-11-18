@@ -783,10 +783,6 @@ body{background:var(--bg); color:var(--text); font-family:var(--sans);}
   .tgroup{background:var(--surface); border-radius:var(--radius); overflow:hidden;}
   .swipe{position:relative; overflow:hidden; border-top:1px solid var(--border);}
   .tgroup > .swipe:first-child{border-top:none;}
-  .swipe-bg{position:absolute; inset:0; display:flex; justify-content:space-between; align-items:center; padding:0 18px; font-size:0.85rem; font-weight:700; color:var(--text);}
-  .swipe-bg .l{opacity:0;} .swipe-bg .r{opacity:0;}
-  .swipe.go-done .swipe-bg{background:var(--accent);} .swipe.go-done .swipe-bg .l{opacity:1;}
-  .swipe.go-snooze .swipe-bg{background:var(--accent);} .swipe.go-snooze .swipe-bg .r{opacity:1;}
   .trow{position:relative; background:var(--surface); display:grid; grid-template-columns:auto 1fr auto; gap:2px 12px; align-items:start; padding:12px 16px 12px 14px; touch-action:pan-y; cursor:pointer;}
   .trow .quick-complete{margin-top:1px;}
   .trow-title{font-size:0.95rem; line-height:1.3;}
@@ -2225,6 +2221,91 @@ body.chatting .otto-chat-starters{display:none}
   .pj-newkind{display:flex;gap:6px;margin-top:8px;}
   .pj-newkind button{flex:0 0 auto;background:var(--surface-2);border:1px solid transparent;border-radius:999px;color:var(--text-muted);font:inherit;font-size:.82rem;padding:6px 12px;min-height:34px;cursor:pointer;}
   .pj-newkind button.on{border-color:var(--accent);color:var(--text);}
+
+  /* ===== Shared components (.103, TD-00081). Built only on the :root tokens; the o- prefix keeps the old
+     !important rules away from them. JS lives in the UI module (search "const UI ="). ===== */
+  .o-press{transition:transform var(--dur-spring) var(--ease-spring); -webkit-tap-highlight-color:transparent;}
+  .o-press.is-pressed{transform:scale(var(--press-scale)); transition:transform var(--dur-press) var(--ease-out);}
+  .o-card{background:var(--c-surface); border:1px solid var(--c-border); border-radius:var(--r-card); padding:var(--sp-3) var(--sp-4); color:var(--c-text);}
+  .o-label{display:block; font-size:var(--fs-micro); font-weight:var(--fw-strong); letter-spacing:.06em; text-transform:uppercase; color:var(--c-text-3); margin:0 0 var(--sp-2);}
+  .o-row{display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; column-gap:var(--sp-3); width:100%; min-height:var(--tap); padding:var(--sp-2) 0;
+    border:0; border-top:1px solid var(--c-border); background:none; color:var(--c-text); font:inherit; text-align:left;}
+  .o-row:first-child{border-top:0;} button.o-row{cursor:pointer;}
+  .o-row > b{font-size:var(--fs-body); font-weight:var(--fw-strong); min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .o-row > .v{font-size:var(--fs-body); font-variant-numeric:tabular-nums; color:var(--c-text); white-space:nowrap;}
+  .o-row > .s{grid-column:1 / -1; font-size:var(--fs-caption); color:var(--c-text-2); margin-top:2px;}
+  .o-hero{display:flex; flex-direction:column; gap:var(--sp-1); padding:var(--sp-2) 0;}
+  .o-hero > .n{font-family:var(--font-num); font-size:var(--fs-display); font-weight:var(--fw-strong); line-height:1.05; letter-spacing:-.02em; font-variant-numeric:tabular-nums; color:var(--c-text);}
+  .o-hero > .s{font-size:var(--fs-caption); color:var(--c-text-2);}
+  .o-chip{position:relative; display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:0 var(--sp-3); border-radius:999px; border:1px solid var(--c-border);
+    background:var(--c-surface-2); color:var(--c-text); font:inherit; font-size:var(--fs-caption); font-weight:var(--fw-strong); white-space:nowrap; cursor:pointer;}
+  .o-chip::after{content:""; position:absolute; inset:-4px -2px;}   /* 44 px hit area on a 36 px chip */
+  .o-chip[aria-pressed="true"], .o-chip[aria-checked="true"]{background:var(--c-text); color:var(--c-bg); border-color:var(--c-text);}
+  .o-chip .dot{width:9px; height:9px; border-radius:5px; background:var(--dot, var(--c-text-3)); flex:0 0 auto;}
+  .o-chips{display:flex; flex-wrap:wrap; gap:var(--sp-2);}
+  .o-btn{display:inline-flex; align-items:center; justify-content:center; gap:var(--sp-2); min-height:var(--tap); padding:0 var(--sp-4); border-radius:var(--r-row);
+    border:1px solid var(--c-border); background:var(--c-surface-2); color:var(--c-text); font:inherit; font-size:var(--fs-body); font-weight:var(--fw-strong); cursor:pointer;}
+  .o-btn.primary{background:var(--c-accent); border-color:var(--c-accent); color:#0B0C0A;}
+  .o-btn.danger{color:var(--c-alert);} .o-btn.quiet{background:none; border-color:transparent; color:var(--c-text-2);}
+  .o-btn.wide{width:100%;} .o-btn:disabled{opacity:.45; cursor:default;}
+  .o-btn:focus-visible, .o-chip:focus-visible, .o-row:focus-visible, .o-x:focus-visible{outline:3px solid var(--c-accent); outline-offset:2px;}
+  .o-empty{display:flex; flex-direction:column; align-items:center; gap:var(--sp-3); padding:var(--sp-6) var(--sp-4); text-align:center; font-size:var(--fs-body); color:var(--c-text-2);}
+  .o-rec-head{display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:var(--sp-1) 0 var(--sp-3);}
+  .o-back{min-height:var(--tap); padding:0 var(--sp-2) 0 0; border:0; background:none; color:var(--c-accent); font:inherit; font-size:var(--fs-body); cursor:pointer;}
+  .o-rec-head h2{margin:0; font-size:var(--fs-title); font-weight:var(--fw-strong); color:var(--c-text); line-height:1.2;}
+  .o-field{display:flex; flex-direction:column; gap:6px; margin:0 0 var(--sp-4);}
+  .o-field > span{font-size:var(--fs-caption); font-weight:var(--fw-strong); color:var(--c-text-2);}
+  .o-field input, .o-field select{min-height:var(--tap); padding:0 var(--sp-3); border-radius:var(--r-row); border:1px solid var(--c-border); background:var(--c-surface-2);
+    color:var(--c-text); font:inherit; font-size:16px; color-scheme:dark;}
+  .o-field input:focus-visible, .o-field select:focus-visible{outline:3px solid var(--c-accent); outline-offset:1px;}
+  .o-split{display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3);}
+
+  /* Sheet: follows the finger, snaps (tall: half / full; fit: open), swipe down closes */
+  .o-sheet-wrap{position:fixed; inset:0; z-index:2147483100; pointer-events:none;}
+  .o-scrim{position:absolute; inset:0; background:rgba(0,0,0,.56); opacity:0; pointer-events:auto;}
+  .o-sheet{position:absolute; left:0; right:0; bottom:0; margin:0 auto; max-width:560px; display:flex; flex-direction:column; pointer-events:auto;
+    height:calc(100% - env(safe-area-inset-top, 0px) - 10px); background:var(--c-surface); color:var(--c-text); border:1px solid var(--c-border); border-bottom:0;
+    border-radius:var(--r-sheet) var(--r-sheet) 0 0; box-shadow:0 -10px 40px rgba(0,0,0,.45); transform:translateY(110%); will-change:transform; font-family:var(--sans);}
+  .o-sheet.fit{height:auto; max-height:calc(100% - env(safe-area-inset-top, 0px) - 10px);}
+  .o-sheet-head{flex:0 0 auto; padding:var(--sp-2) var(--sp-4) var(--sp-2); touch-action:none; cursor:grab;}
+  .o-grab{width:36px; height:5px; border-radius:3px; background:var(--c-border); margin:0 auto var(--sp-2);}
+  .o-sheet-title{display:flex; align-items:center; gap:var(--sp-2); min-height:var(--tap);}
+  .o-sheet-title h2{flex:1; margin:0; font-size:var(--fs-heading); font-weight:var(--fw-strong); line-height:1.3; min-width:0;}
+  .o-x{flex:0 0 auto; width:var(--tap); height:var(--tap); margin-right:calc(-1 * var(--sp-2)); display:grid; place-items:center; border:0; border-radius:50%; background:none; color:var(--c-text-2); cursor:pointer;}
+  .o-x svg{width:20px; height:20px;}
+  .o-sheet-body{flex:1 1 auto; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; padding:0 var(--sp-4) calc(env(safe-area-inset-bottom, 0px) + var(--sp-6));}
+  .o-sheet:focus{outline:none;}
+  .o-ghost{position:fixed; margin:0; z-index:2147483101; pointer-events:none; transform-origin:0 0;}
+
+  /* More menu: fixed order, Delete last in red */
+  .o-menu{display:flex; flex-direction:column;}
+  .o-menu button{display:flex; align-items:center; gap:var(--sp-3); min-height:52px; padding:0 var(--sp-1); border:0; border-top:1px solid var(--c-border); background:none;
+    color:var(--c-text); font:inherit; font-size:var(--fs-body); text-align:left; cursor:pointer;}
+  .o-menu button:first-child{border-top:0;} .o-menu button.danger{color:var(--c-alert);}
+  .o-menu button svg{width:20px; height:20px; flex:0 0 auto; color:var(--c-text-2);} .o-menu button.danger svg{color:var(--c-alert);}
+  .o-menu button:focus-visible{outline:3px solid var(--c-accent); outline-offset:-3px; border-radius:var(--r-input);}
+
+  /* Swipe: the row moves with the finger; the action shows behind it and arms at the threshold */
+  .o-swipe-hint{position:absolute; display:flex; align-items:center; gap:6px; padding:0 var(--sp-4); pointer-events:none; z-index:0; opacity:0;
+    font-size:var(--fs-caption); font-weight:var(--fw-strong); color:#0B0C0A; background:var(--act, var(--c-ok)); transition:opacity var(--dur-fast) var(--ease-out);}
+  .o-swipe-hint.r{justify-content:flex-start;} .o-swipe-hint.l{justify-content:flex-end;}
+  .o-swipe-hint.show{opacity:.55;} .o-swipe-hint.armed{opacity:1;}
+  .o-swipe-hint svg{width:18px; height:18px; flex:0 0 auto;}
+  .o-swiping{z-index:2;}
+  .o-gest{-webkit-touch-callout:none; -webkit-user-select:none; user-select:none;}
+  .o-lifted{z-index:6 !important; box-shadow:var(--lift-shadow); transition:box-shadow var(--dur-base) var(--ease-out);}
+
+  /* Check-off: ring fills, tick draws, a small spring pop */
+  .o-check{position:relative; flex:0 0 auto; width:26px; height:26px; padding:0; border-radius:50%; border:2px solid currentColor; background:none; color:inherit; cursor:pointer;
+    display:grid; place-items:center; transition:background-color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);}
+  .o-check::before{content:""; position:absolute; inset:-9px;}
+  .o-check svg{width:15px; height:15px; fill:none; stroke:#0B0C0A; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:22; stroke-dashoffset:22;
+    transition:stroke-dashoffset var(--dur-base) var(--ease-out) 40ms;}
+  .o-check[aria-checked="true"]{background:var(--ck, var(--c-accent)); border-color:var(--ck, var(--c-accent)); animation:o-pop var(--dur-bounce) var(--ease-bounce);}
+  .o-check[aria-checked="true"] svg{stroke-dashoffset:0;}
+  .o-check:focus-visible{outline:3px solid var(--c-accent); outline-offset:3px;}
+  @keyframes o-pop{from{transform:scale(.62);} to{transform:scale(1);}}
+  @media (prefers-reduced-motion:reduce){ .o-check[aria-checked="true"]{animation:none;} }
 </style>
 </head>
 <body class="home-v2">
@@ -2490,7 +2571,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.104';
+const APP_BUILD = '2026-11-18.105';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -2588,6 +2669,247 @@ function hapticPulse(){
     hapticEl.click();
   } catch(e){ /* not supported, ignore */ }
 }
+
+// ================= Motion + shared components (.103, TD-00081; motion tokens .102) =================
+// MOTION mirrors the CSS tokens. CSS transitions (--ease-spring, --dur-*) handle state changes; these springs handle
+// anything a finger lets go of (sheets, swipes, drags), so the release keeps the finger's speed.
+// Components: UI.sheet (drag to resize, swipe down to close, optional shared-element open), UI.toast (one at a time,
+// 3 s, optional Undo; same element as showNotice/undoDelete), UI.more (fixed order, Delete last in red), UI.gestures
+// (swipe right/left, long press, lift and drag; native scrolling kept), press feedback on .o-press, and HTML builders
+// UI.row / card / hero / chip / empty / recHead / check.
+const MOTION = { spring:{ k:380, c:30 }, bounce:{ k:500, c:22 }, snap:{ k:560, c:46 } };
+const UI = (()=>{
+  const reduced = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const ICON = {
+    x:'<path d="M6 6l12 12M18 6L6 18"/>',
+    edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M14 6l4 4"/>',
+    pin:'<path d="M9 4h6l-1 5 3 3v2H7v-2l3-3z"/><path d="M12 14v6"/>',
+    move:'<rect x="4" y="5.5" width="16" height="14" rx="2.5"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/>',
+    archive:'<rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5.5 8.5V19h13V8.5"/><path d="M10 12.5h4"/>',
+    delete:'<path d="M4.5 7h15"/><path d="M9.5 7V4.5h5V7"/><path d="M6.5 7l1 12.5h9l1-12.5"/>',
+    done:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+    later:'<circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3 2"/>',
+    inbox:'<path d="M4 13l2.5-7.5h11L20 13v5.5H4z"/><path d="M4 13h4.5l1 2h5l1-2H20"/>',
+    add:'<path d="M12 5v14M5 12h14"/>',
+    skip:'<circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/>',
+    reopen:'<path d="M4.5 12a7.5 7.5 0 1 0 2.2-5.3"/><path d="M4.5 4.5v4h4"/>'
+  };
+  const icon = (k, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k] || (String(k || '').includes('<') ? k : '')}</svg>`;
+
+  // spring from → to; onFrame(x) every frame; v = starting velocity (units/s). Returns stop().
+  function spring(from, to, onFrame, { k = MOTION.spring.k, c = MOTION.spring.c, v = 0, done, eps = null } = {}){
+    if(reduced() || !isFinite(from)){ onFrame(to); if(done) done(); return ()=>{}; }
+    eps = eps ?? Math.max(0.01, Math.abs(to - from) * 0.001);   // screen-space callers pass eps:0.5 (px)
+    let x = from, vel = v, last = performance.now(), raf = 0, live = true;
+    const step = now => {
+      if(!live) return;
+      let dt = Math.min(0.05, (now - last) / 1000); last = now;
+      while(dt > 1e-6){ const h = Math.min(dt, 1/240), a = -k * (x - to) - c * vel; vel += a * h; x += vel * h; dt -= h; }
+      if(Math.abs(x - to) < eps && Math.abs(vel) < eps * 10){ live = false; onFrame(to); if(done) done(); return; }
+      onFrame(x); raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return ()=>{ live = false; cancelAnimationFrame(raf); };
+  }
+  // finger velocity over the last ~90 ms (px/s)
+  function tracker(){ const p = []; return {
+    add(x, y){ const t = performance.now(); p.push({ x, y, t }); while(p.length > 2 && t - p[0].t > 90) p.shift(); },
+    v(){ if(p.length < 2) return { x:0, y:0 }; const a = p[0], b = p[p.length - 1], dt = Math.max(8, b.t - a.t); return { x:(b.x - a.x) / dt * 1000, y:(b.y - a.y) / dt * 1000 }; } }; }
+
+  // last input kind, so menus only move focus visibly for keyboard users
+  let lastInput = 'pointer';
+  document.addEventListener('keydown', e=>{ if(e.key === 'Tab' || e.key.startsWith('Arrow') || e.key === 'Enter' || e.key === ' ' || e.key === 'ContextMenu' || e.key === 'F10') lastInput = 'key'; }, true);
+  document.addEventListener('pointerdown', ()=>{ lastInput = 'pointer'; }, true);
+  // press feedback: scale down on touch, spring back on release (CSS does the motion)
+  document.addEventListener('pointerdown', e=>{
+    const el = e.target.closest && e.target.closest('.o-press'); if(!el || el.disabled || el.getAttribute('aria-disabled') === 'true') return;
+    el.classList.add('is-pressed');
+    const evs = ['pointerup', 'pointercancel', 'dragstart'], off = ()=>{ el.classList.remove('is-pressed'); evs.forEach(t=>window.removeEventListener(t, off, true)); };
+    evs.forEach(t=>window.addEventListener(t, off, true));
+  }, true);
+
+  function toast(text, { action = '', onAction = null, ms = 3000 } = {}){
+    showNotice(text, action && onAction ? ()=>{ const el = document.getElementById('ottoNotice'); if(el){ el.classList.remove('show'); clearTimeout(el.__t); } onAction(); } : null, ms);
+    if(action) document.getElementById('ottoNotice')?.insertAdjacentHTML('beforeend', `<span class="nt-act">${esc(action)}</span>`);
+  }
+
+  // a tapped element seems to travel into the sheet: a copy flies from its spot to the sheet's head and fades
+  function morph(from, sh, openTo){
+    const r = from.getBoundingClientRect(); if(!r.width || !r.height || r.bottom < 0 || r.top > innerHeight) return;
+    const g = from.cloneNode(true); g.removeAttribute('id'); g.querySelectorAll('[id]').forEach(n=>n.removeAttribute('id'));
+    g.setAttribute('aria-hidden', 'true'); g.classList.add('o-ghost'); g.classList.remove('o-lifted', 'is-pressed');
+    Object.assign(g.style, { left:r.left + 'px', top:r.top + 'px', width:r.width + 'px', height:r.height + 'px', transform:'none' });
+    document.body.appendChild(g);
+    const sr = sh.getBoundingClientRect(), top = innerHeight - sh.offsetHeight + openTo;
+    const T = `translate(${Math.round(sr.left + 16 - r.left)}px, ${Math.round(top + 58 - r.top)}px)`;
+    const frames = [{ transform:'translate(0,0)', opacity:1 }, { transform:T, opacity:1, offset:.62 }, { transform:T, opacity:0 }];
+    const ease = getComputedStyle(document.documentElement).getPropertyValue('--ease-out').trim() || 'ease-out';
+    let a = null; try{ a = g.animate(frames, { duration:420, easing:ease, fill:'forwards' }); }catch(e){ g.remove(); return; }
+    a.onfinish = ()=>g.remove(); setTimeout(()=>g.remove(), 800);
+  }
+
+  const sheets = [];
+  function sheet({ title = '', html = '', size = 'fit', label = '', from = null, onClose = null, className = '' } = {}){
+    const prevFocus = document.activeElement, id = 'oS' + Math.random().toString(36).slice(2, 8);
+    const wrap = document.createElement('div'); wrap.className = 'o-sheet-wrap';
+    wrap.innerHTML = `<div class="o-scrim"></div><div class="o-sheet ${size} ${className}" role="dialog" aria-modal="true" tabindex="-1" ${title ? `aria-labelledby="${id}"` : `aria-label="${esc(label || 'Details')}"`}>
+      <div class="o-sheet-head"><div class="o-grab" aria-hidden="true"></div>${title ? `<div class="o-sheet-title"><h2 id="${id}">${esc(title)}</h2><button type="button" class="o-x o-press" data-o-close aria-label="Close">${icon('x')}</button></div>` : ''}</div>
+      <div class="o-sheet-body">${html}</div></div>`;
+    document.body.appendChild(wrap);
+    const sh = wrap.querySelector('.o-sheet'), scrim = wrap.querySelector('.o-scrim'), body = wrap.querySelector('.o-sheet-body'), head = wrap.querySelector('.o-sheet-head');
+    const H = () => sh.offsetHeight || 1, snaps = () => size === 'tall' ? [0, Math.round(H() * 0.45)] : [0];
+    let y = H() + 24, stop = null, closed = false;
+    const set = v => { y = v; sh.style.transform = `translateY(${v < 0 ? v * 0.22 : v}px)`; scrim.style.opacity = String(Math.max(0, Math.min(1, 1 - v / H()))); };
+    const go = (to, v = 0, done) => { if(stop) stop(); stop = spring(y, to, set, { ...MOTION.snap, v, done, eps:0.5 }); };
+    const api = { el:wrap, sheet:sh, body, close, snapTo:i=>go(snaps()[i] ?? 0), get closed(){ return closed; } };
+    function close(v = 0){
+      if(closed) return; closed = true; const i = sheets.indexOf(api); if(i >= 0) sheets.splice(i, 1);
+      window.removeEventListener('keydown', key, true); wrap.style.pointerEvents = 'none'; scrim.style.pointerEvents = 'none'; sh.style.pointerEvents = 'none';
+      go(H() + 24, Math.max(0, v), ()=>wrap.remove()); setTimeout(()=>wrap.remove(), 900);
+      try{ if(prevFocus && document.contains(prevFocus)) prevFocus.focus({ preventScroll:true }); }catch(e){}
+      if(onClose) onClose();
+    }
+    const key = e => {
+      if(sheets[sheets.length - 1] !== api) return;
+      if(e.key === 'Escape'){ e.preventDefault(); e.stopImmediatePropagation(); close(); }
+      else if(e.key === 'Tab'){ const f = [...sh.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(x=>!x.disabled && x.getClientRects().length);
+        if(!f.length) return; const i = f.indexOf(document.activeElement); e.preventDefault(); e.stopImmediatePropagation(); f[(i + (e.shiftKey ? -1 : 1) + f.length) % f.length].focus(); }
+    };
+    window.addEventListener('keydown', key, true);
+    wrap.addEventListener('click', e=>{ if(e.target === scrim || e.target.closest('[data-o-close]')) close(); });
+    // drag: the head always; the body when it is scrolled to the top (down) or the sheet sits at half (up)
+    let drag = null;
+    const begin = cy => { if(stop) stop(); drag = { y0:cy, base:y, tr:tracker() }; drag.tr.add(0, cy); };
+    const moveTo = cy => { if(!drag) return; set(drag.base + (cy - drag.y0)); drag.tr.add(0, cy); };
+    const release = () => { if(!drag) return; const vy = drag.tr.v().y; drag = null; const sn = snaps(), last = sn[sn.length - 1], proj = y + vy * 0.2;
+      if(proj > last + (H() - last) * 0.35 || (vy > 1100 && y > last - 10)) return close(vy);
+      go(sn.reduce((a, b)=>Math.abs(b - proj) < Math.abs(a - proj) ? b : a), vy); };
+    head.addEventListener('pointerdown', e=>{ if(e.target.closest('button') || (e.pointerType === 'mouse' && e.button !== 0)) return; try{ head.setPointerCapture(e.pointerId); }catch(err){} begin(e.clientY); });
+    head.addEventListener('pointermove', e=>{ if(drag) moveTo(e.clientY); });
+    head.addEventListener('pointerup', release); head.addEventListener('pointercancel', release);
+    let bt = null;
+    body.addEventListener('touchstart', e=>{ bt = e.touches.length === 1 ? { y0:e.touches[0].clientY, x0:e.touches[0].clientX, mode:null } : null; }, { passive:true });
+    body.addEventListener('touchmove', e=>{
+      if(!bt) return; const t = e.touches[0], dy = t.clientY - bt.y0, dx = t.clientX - bt.x0;
+      if(!bt.mode){ if(Math.abs(dy) < 6 && Math.abs(dx) < 6) return;
+        const atTop = body.scrollTop <= 0, sn = snaps(), atHalf = sn.length > 1 && y > 1;
+        bt.mode = Math.abs(dx) > Math.abs(dy) ? 'none' : (dy > 0 && atTop) || (dy < 0 && atHalf) ? 'sheet' : 'scroll';
+        if(bt.mode === 'sheet') begin(t.clientY); }
+      if(bt.mode === 'sheet'){ if(e.cancelable) e.preventDefault(); moveTo(t.clientY); }
+    }, { passive:false });
+    const bEnd = ()=>{ if(bt && bt.mode === 'sheet') release(); bt = null; };
+    body.addEventListener('touchend', bEnd); body.addEventListener('touchcancel', bEnd);
+    sheets.push(api); set(H() + 24);
+    const openTo = size === 'tall' ? snaps()[1] : 0;
+    if(from && !reduced()) morph(from, sh, openTo);
+    requestAnimationFrame(()=>go(openTo));
+    setTimeout(()=>{ if(!closed) try{ sh.focus({ preventScroll:true }); }catch(e){} }, 30);
+    return api;
+  }
+
+  const MORE_ORDER = ['edit', 'pin', 'move', 'archive', 'delete'];
+  // More menu: the record's swipe actions first, then Edit, Pin, Move, Archive, Delete (last, red)
+  function more(items, { title = '', label = 'Actions', from = null } = {}){
+    const rank = it => { const i = MORE_ORDER.indexOf(it.key); return i < 0 ? -1 : i; };
+    const list = items.filter(Boolean).map((it, n)=>({ ...it, n })).sort((a, b)=>rank(a) - rank(b) || a.n - b.n);
+    const s = sheet({ title, label, from, html:`<div class="o-menu" role="menu" aria-label="${esc(title || label)}">${list.map((it, i)=>`<button type="button" role="menuitem" class="o-press${it.key === 'delete' || it.danger ? ' danger' : ''}" data-o-mi="${i}">${icon(it.icon || it.key)}<span>${esc(it.label)}</span></button>`).join('')}</div>` });
+    s.body.addEventListener('click', e=>{ const b = e.target.closest('[data-o-mi]'); if(!b) return; const it = list[Number(b.dataset.oMi)]; s.close();
+      setTimeout(()=>{ try{ if(it.run) it.run(); }catch(err){ showNotice(err.message); } }, 90); });
+    if(lastInput === 'key') setTimeout(()=>s.body.querySelector('button')?.focus({ preventScroll:true }), 40);
+    return s;
+  }
+
+  // Gestures on rows/blocks matching sel inside container. opt: right/left = action or fn(el) → { label, icon, color, ink, run(el) } | null,
+  // longPress(el), lift = { can(el), start(g), move(g), end(g), cancel(g) } (long press then drag). Touch events with a
+  // non-passive move, so the page keeps scrolling until we lock onto a swipe or a lift.
+  let busy = 0;
+  function gestures(container, sel, opt = {}){
+    const LP = 420, SLOP = 8;
+    let g = null, suppressUntil = 0, lastTouch = 0;
+    const act = (el, side) => { const f = opt[side]; return (typeof f === 'function' ? f(el) : f) || null; };
+    const pt = e => e.touches ? (e.touches[0] || e.changedTouches[0]) : e;
+    const canLift = el => !!opt.lift && (!opt.lift.can || opt.lift.can(el));
+    function down(e){
+      if(e.type === 'mousedown' && (e.button !== 0 || Date.now() - lastTouch < 800)) return;
+      const el = e.target.closest(sel); if(!el || !container.contains(el) || e.target.closest('input, select, textarea, [data-no-gesture]')) return;
+      const p = pt(e); g = { el, x0:p.clientX, y0:p.clientY, x:p.clientX, y:p.clientY, dx:0, dy:0, lock:null, tr:tracker(), mouse:e.type === 'mousedown', side:null, armed:false };
+      g.tr.add(p.clientX, p.clientY);
+      if(opt.longPress || opt.lift) g.lp = setTimeout(()=>{ if(!g || g.lock) return; hapticPulse(); suppressUntil = Date.now() + 800;
+        if(canLift(g.el)){ g.lock = 'lift'; busy++; g.el.classList.add('o-lifted'); opt.lift.start(g); } else g.lock = 'press'; }, LP);
+      if(g.mouse){ window.addEventListener('mousemove', move); window.addEventListener('mouseup', up, { once:true }); }
+    }
+    function move(e){
+      if(!g) return; const p = pt(e); g.x = p.clientX; g.y = p.clientY; g.dx = g.x - g.x0; g.dy = g.y - g.y0; g.tr.add(g.x, g.y);
+      if(!g.lock){
+        if(Math.abs(g.dx) < SLOP && Math.abs(g.dy) < SLOP) return;
+        clearTimeout(g.lp);
+        if(Math.abs(g.dx) > Math.abs(g.dy) * 1.2 && (act(g.el, 'right') || act(g.el, 'left'))){ g.lock = 'x'; swipeStart(g); }
+        else { g = null; return; }                       // vertical first: it's a scroll, let the page have it
+      }
+      if(e.cancelable) e.preventDefault();
+      if(g.lock === 'x') swipeMove(g); else if(g.lock === 'lift') opt.lift.move(g);
+    }
+    function up(){
+      if(!g) return; clearTimeout(g.lp); const s = g; g = null;
+      if(s.mouse) window.removeEventListener('mousemove', move);
+      if(s.lock === 'x') swipeEnd(s);
+      else if(s.lock === 'lift'){ busy = Math.max(0, busy - 1); s.el.classList.remove('o-lifted'); suppressUntil = Date.now() + 400;
+        if(Math.hypot(s.dx, s.dy) < 6){ if(opt.lift.cancel) opt.lift.cancel(s); if(opt.longPress) opt.longPress(s.el); } else opt.lift.end(s); }
+      else if(s.lock === 'press'){ suppressUntil = Date.now() + 400; if(opt.longPress) opt.longPress(s.el); }
+    }
+    function cancel(){
+      if(!g) return; clearTimeout(g.lp); const s = g; g = null;
+      if(s.lock === 'x'){ s.dx = 0; swipeEnd(s); } else if(s.lock === 'lift'){ busy = Math.max(0, busy - 1); s.el.classList.remove('o-lifted'); if(opt.lift.cancel) opt.lift.cancel(s); }
+    }
+    function swipeStart(s){
+      const el = s.el; s.R = act(el, 'right'); s.L = act(el, 'left'); s.w = el.offsetWidth; s.th = Math.min(120, s.w * 0.32);
+      if(getComputedStyle(el).position === 'static'){ el.style.position = 'relative'; s.pos = true; }
+      el.classList.add('o-swiping'); el.style.transition = 'none';
+      const h = document.createElement('div'); h.className = 'o-swipe-hint'; h.setAttribute('aria-hidden', 'true');
+      Object.assign(h.style, { left:el.offsetLeft + 'px', top:el.offsetTop + 'px', width:el.offsetWidth + 'px', height:el.offsetHeight + 'px', borderRadius:getComputedStyle(el).borderRadius });
+      el.parentNode.insertBefore(h, el); s.hint = h; suppressUntil = Date.now() + 500;
+    }
+    function swipeMove(s){
+      const side = s.dx > 0 ? 'R' : 'L', a = s[side];
+      let x = s.dx; if(!a) x *= 0.18; else if(Math.abs(x) > s.th) x = Math.sign(x) * (s.th + (Math.abs(x) - s.th) * 0.55);
+      s.el.style.transform = `translateX(${x}px)`; s.sx = x;
+      if(side !== s.side){ s.side = side; const h = s.hint;
+        if(a){ h.className = `o-swipe-hint ${side === 'R' ? 'r' : 'l'} show`; h.style.setProperty('--act', a.color || (side === 'R' ? 'var(--c-ok)' : 'var(--c-surface-2)'));
+          h.style.color = a.ink || (side === 'R' ? '#0B0C0A' : 'var(--c-text)'); h.innerHTML = `${a.icon ? icon(a.icon) : ''}<span>${esc(a.label)}</span>`; }
+        else { h.className = 'o-swipe-hint'; h.innerHTML = ''; } s.armed = false; }
+      const armed = !!a && Math.abs(s.dx) >= s.th; if(armed !== s.armed){ s.armed = armed; s.hint.classList.toggle('armed', armed); if(armed) hapticPulse(); }
+    }
+    function swipeEnd(s){
+      const el = s.el, vx = s.tr.v().x, side = s.dx > 0 ? 'R' : 'L', a = s[side];
+      const commit = !!a && (Math.abs(s.dx) >= s.th || (Math.abs(vx) > 900 && Math.abs(s.dx) > 40 && Math.sign(vx) === Math.sign(s.dx)));
+      const tidy = () => { el.style.transform = ''; el.style.transition = ''; el.classList.remove('o-swiping'); if(s.pos) el.style.position = ''; if(s.hint) s.hint.remove(); };
+      const tx = x => { el.style.transform = `translateX(${x}px)`; };
+      suppressUntil = Date.now() + 400;
+      if(commit) spring(s.sx || 0, Math.sign(s.dx) * (s.w + 24), tx, { ...MOTION.snap, v:vx, eps:0.5, done:()=>{ try{ a.run(el); }catch(err){ showNotice(err.message); } setTimeout(tidy, 40); } });
+      else spring(s.sx || 0, 0, tx, { v:vx, eps:0.5, done:tidy });
+    }
+    container.addEventListener('touchstart', e=>{ lastTouch = Date.now(); if(e.touches.length > 1){ cancel(); return; } down(e); }, { passive:true });
+    container.addEventListener('touchmove', move, { passive:false });
+    container.addEventListener('touchend', e=>{ lastTouch = Date.now(); up(e); });
+    container.addEventListener('touchcancel', cancel);
+    container.addEventListener('mousedown', down);
+    container.addEventListener('click', e=>{ if(Date.now() < suppressUntil && e.target.closest(sel)){ e.preventDefault(); e.stopPropagation(); } }, true);
+    container.addEventListener('contextmenu', e=>{ const el = e.target.closest(sel); if(!el || !opt.longPress) return; e.preventDefault(); if(!g || !g.lock) opt.longPress(el); });
+    container.addEventListener('keydown', e=>{ if(!opt.longPress || !(e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10'))) return; const el = e.target.closest(sel); if(el){ e.preventDefault(); opt.longPress(el); } });
+    return { cancel };
+  }
+
+  // HTML builders (escape everything they're given)
+  const row = ({ title, value = '', sub = '', attrs = '', button = false }) => { const inner = `<b>${esc(title)}</b><span class="v">${esc(value)}</span>${sub ? `<span class="s">${esc(sub)}</span>` : ''}`;
+    return button ? `<button type="button" class="o-row o-press" ${attrs}>${inner}</button>` : `<div class="o-row" ${attrs}>${inner}</div>`; };
+  const card = ({ label = '', html = '', attrs = '' }) => `<section class="o-card" ${attrs}>${label ? `<h3 class="o-label">${esc(label)}</h3>` : ''}${html}</section>`;
+  const hero = ({ value, sub = '', label = '' }) => `<div class="o-hero">${label ? `<span class="o-label">${esc(label)}</span>` : ''}<span class="n">${esc(value)}</span>${sub ? `<span class="s">${esc(sub)}</span>` : ''}</div>`;
+  const chip = (text, { pressed = null, dot = '', attrs = '', role = '' } = {}) => `<button type="button" class="o-chip o-press" ${role ? `role="${role}" aria-checked="${!!pressed}"` : pressed == null ? '' : `aria-pressed="${!!pressed}"`} ${attrs}>${dot ? `<i class="dot" style="--dot:${esc(dot)}" aria-hidden="true"></i>` : ''}${esc(text)}</button>`;
+  const empty = (sentence, action = '', attrs = '') => `<div class="o-empty"><p style="margin:0">${esc(sentence)}</p>${action ? `<button type="button" class="o-btn o-press" ${attrs}>${esc(action)}</button>` : ''}</div>`;
+  const recHead = (back, title, attrs = '') => `<header class="o-rec-head"><button type="button" class="o-back o-press" ${attrs}>‹ ${esc(back)}</button><h2>${esc(title)}</h2></header>`;
+  const check = (on, label, attrs = '') => `<button type="button" class="o-check o-press" role="checkbox" aria-checked="${!!on}" aria-label="${esc(label)}" ${attrs}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>`;
+  return { reduced, spring, tracker, toast, sheet, more, gestures, icon, row, card, hero, chip, empty, recHead, check, get busy(){ return busy > 0; } };
+})();
 
 function timeAgo(iso){
   const diff = Math.round((Date.now() - new Date(iso).getTime())/1000);
@@ -4387,8 +4709,8 @@ function todoRowHtml(t){
       ${t.notes ? `<div class="trow-notes">${codeNotes(t.notes)}</div>` : ''}
       <div class="chiprow">${done ? `<button class="link-btn" type="button" data-reopen="1">Reopen</button>` : `<button class="link-btn" type="button" data-cancel="1" style="color:var(--text-faint)">Cancel this task</button>`}</div>
     </div>` : '';
-  return `<div class="swipe" data-code="${esc(t.code)}"><div class="swipe-bg"><span class="l">Done ✓</span><span class="r">Tomorrow →</span></div>
-    <div class="trow ${done?'done':''} ${isBlocked(t) ? 'blocked' : ''}">
+  return `<div class="swipe" data-code="${esc(t.code)}">
+    <div class="trow o-gest ${done?'done':''} ${isBlocked(t) ? 'blocked' : ''}">
       <button type="button" class="quick-complete ${t.status==='done'?'done':''}" data-code="${esc(t.code)}" aria-label="Toggle complete"></button>
       <div class="trow-title">${esc(t.title)}</div>
       <div class="trow-date ${dc}">${dl}</div>
@@ -4617,7 +4939,7 @@ function renderList(todos){
     const done = todos.filter(t=>t.status!=='open').sort((a,b)=>(b.completed_at||'').localeCompare(a.completed_at||'')).slice(0, 40);
     html += group('Finished', done) || `<div class="empty">Nothing finished yet.</div>`;
   }
-  if(todoView !== 'done' && html.includes('class="swipe"')) html += `<div class="swipe-hint">Swipe right to finish, left to push to tomorrow</div>`;
+  if(todoView !== 'done' && html.includes('class="swipe"')) html += `<div class="swipe-hint">Swipe right to finish, left for tomorrow, hold for more</div>`;
   list.innerHTML = html;
 }
 async function patchTodo(code, body){
@@ -4641,7 +4963,7 @@ async function patchTodo(code, body){
   document.getElementById('todoSeg').addEventListener('click', e=>{ const b = e.target.closest('[data-tview]'); if(!b) return; todoView = b.dataset.tview; planSelectedDate = null; expandedCode = null; renderList(allTodos);
     document.getElementById('quickAddInput').placeholder = todoView === 'today' ? 'Add a task for today…' : 'Add a task…'; });
   list.addEventListener('click', e=>{
-    const row = e.target.closest('.swipe'); if(!row || row.dataset.swiped === '1') return;
+    const row = e.target.closest('.swipe'); if(!row) return;
     const code = row.dataset.code;
     const qc = e.target.closest('.quick-complete'); if(qc){ e.stopPropagation(); hapticPulse(); toggleTodoComplete(code); return; }
     const sd = e.target.closest('[data-setdue]'); if(sd){ patchTodo(code, sd.dataset.setdue ? { due_date: sd.dataset.setdue, someday: false } : { due_date: null }); return; }
@@ -4651,28 +4973,12 @@ async function patchTodo(code, body){
     if(e.target.closest('.trow-edit')) return;
     expandedCode = expandedCode === code ? null : code; renderList(allTodos);
   });
-  // swipe: right = done, left = tomorrow
-  let sx = 0, sy = 0, cur = null, dx = 0, locked = null;
-  list.addEventListener('touchstart', e=>{ const r = e.target.closest('.swipe'); if(!r || e.target.closest('.trow-edit')) return; cur = r; sx = e.touches[0].clientX; sy = e.touches[0].clientY; dx = 0; locked = null; cur.dataset.swiped = ''; }, { passive:true });
-  list.addEventListener('touchmove', e=>{
-    if(!cur) return;
-    const mx = e.touches[0].clientX - sx, my = e.touches[0].clientY - sy;
-    if(locked === null && (Math.abs(mx) > 8 || Math.abs(my) > 8)) locked = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
-    if(locked !== 'x') return;
-    dx = mx; const fg = cur.querySelector('.trow'); fg.style.transition = 'none'; fg.style.transform = `translateX(${dx}px)`;
-    cur.classList.toggle('go-done', dx > 20); cur.classList.toggle('go-snooze', dx < -20);
-  }, { passive:true });
-  list.addEventListener('touchend', ()=>{
-    if(!cur) return;
-    const r = cur, fg = r.querySelector('.trow'), code = r.dataset.code, t = allTodos.find(x=>x.code===code);
-    fg.style.transition = 'transform 0.18s ease'; fg.style.transform = '';
-    setTimeout(()=>r.classList.remove('go-done','go-snooze'), 180);
-    if(locked === 'x' && Math.abs(dx) > 8){ r.dataset.swiped = '1'; setTimeout(()=>{ r.dataset.swiped = ''; }, 350); }
-    if(locked === 'x' && t && t.status === 'open'){
-      if(dx > 80){ hapticPulse(); toggleTodoComplete(code); }
-      else if(dx < -80){ hapticPulse(); patchTodo(code, { due_date: isoAddDays(t.due_date && t.due_date > localToday() ? t.due_date : localToday(), 1) }); }
-    }
-    cur = null; locked = null; dx = 0;
+  // .103: the shared gesture engine (TD-00081 swipe row): right = Done (Undo), left = Tomorrow (Undo), hold = More menu
+  const codeOf = el => el.closest('.swipe')?.dataset.code, openTask = el => { const t = allTodos.find(x=>x.code === codeOf(el)); return t && t.status === 'open' ? t : null; };
+  UI.gestures(list, '.swipe > .trow', {
+    right: el => openTask(el) && { label:'Done', icon:'done', color:'var(--c-ok)', run: ()=>completeTodoWithUndo(codeOf(el)) },
+    left: el => openTask(el) && { label:'Tomorrow', icon:'later', color:'var(--c-surface-2)', ink:'var(--c-text)', run: ()=>todoTomorrow(codeOf(el)) },
+    longPress: el => todoMore(codeOf(el))
   });
 })();
 
@@ -7417,6 +7723,39 @@ function undoDelete({ label, hide, restore, commit }){
 const flushDeletes = ()=> pendingDeletes.forEach(j=> j.run());
 window.addEventListener('pagehide', flushDeletes);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'hidden') flushDeletes(); });
+
+
+// ---------- Tasks on the shared action model (.103): swipe right = Done, left = Tomorrow, hold = More ----------
+function archiveTodo(code){
+  const t = (allTodos||[]).find(x=>x.code === code); if(!t) return;
+  const before = { status:t.status, completed_at:t.completed_at };
+  patchTodo(code, { status:'cancelled', completed_at:new Date().toISOString() });
+  UI.toast(`Archived “${t.title.length > 28 ? t.title.slice(0, 26).trimEnd() + '…' : t.title}”`, { action:'Undo', onAction:()=>patchTodo(code, before), ms:5000 });
+}
+function completeTodoWithUndo(code){
+  const t = (allTodos||[]).find(x=>x.code === code); if(!t) return; const was = t.status;
+  hapticPulse(); toggleTodoComplete(code);
+  if(was === 'open') UI.toast(`Done: ${t.title.length > 30 ? t.title.slice(0, 28).trimEnd() + '…' : t.title}`, { action:'Undo', onAction:()=>patchTodo(code, { status:'open', completed_at:null }) });
+}
+function todoTomorrow(code){
+  const t = (allTodos||[]).find(x=>x.code === code); if(!t) return;
+  const base = t.due_date && t.due_date > localToday() ? t.due_date : localToday(), body = { due_date:isoAddDays(base, 1) };
+  if(t.scheduled_start){ const sh = ms => new Date(new Date(ms).getTime() + 86400000).toISOString(); body.scheduled_start = sh(t.scheduled_start); if(t.scheduled_end) body.scheduled_end = sh(t.scheduled_end); }
+  const before = { due_date:t.due_date, scheduled_start:t.scheduled_start, scheduled_end:t.scheduled_end };
+  patchTodo(code, body); UI.toast(`Moved to ${shortDate(body.due_date)}`, { action:'Undo', onAction:()=>patchTodo(code, before) });
+}
+// More menu for a task; onEdit lets each screen open its own editor (list expands in place, day view opens its sheet)
+function todoMore(code, { from = null, onEdit = null } = {}){
+  const t = (allTodos||[]).find(x=>x.code === code); if(!t) return; const open = t.status === 'open';
+  UI.more([
+    open && { key:'done', label:'Mark done', icon:'done', run:()=>completeTodoWithUndo(code) },
+    open && { key:'later', label:'Move to tomorrow', icon:'later', run:()=>todoTomorrow(code) },
+    !open && { key:'reopen', label:'Reopen', icon:'reopen', run:()=>patchTodo(code, { status:'open', completed_at:null }) },
+    { key:'edit', label:'Edit', run:()=> onEdit ? onEdit(t) : (()=>{ expandedCode = code; renderList(allTodos); })() },
+    open && typeof dvScheduleSheet === 'function' && { key:'move', label: t.scheduled_start ? 'Change time' : 'Schedule a time', run:()=>dvScheduleSheet(code) },
+    open && { key:'archive', label:'Archive', run:()=>archiveTodo(code) }
+  ], { title:t.title, from });
+}
 async function deleteOk(r){ if(!r.ok) throw new Error(`${r.status}`); }
 function hardReload(){ location.replace(location.pathname + '?v=' + Date.now() + location.hash); }
 let __updateShown = false;
