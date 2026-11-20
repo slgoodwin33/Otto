@@ -509,6 +509,97 @@ body{background:var(--bg); color:var(--text); font-family:var(--sans);}
     body.ia2.chatting #sheet{right:420px !important;} body.ia2.chatting .ia2-home{margin-right:420px !important;}
   }
   @media (prefers-reduced-motion:reduce){ body.ia2.chatting #chatSheet{transition:none;} }
+  /* ===================== World: the map is home (.107, TD-00157) ===================== */
+  #ia2Dock, #ia2Home{display:none !important;}
+  .world{position:fixed; inset:0; z-index:0; background:#0B0C0A; overflow:hidden;}
+  body.sheet-open .world{visibility:hidden;}
+  #wMap.w-map{position:absolute !important; inset:0; width:100%; height:100%;}
+  .w-tint{position:absolute; inset:0; pointer-events:none; z-index:1; background:radial-gradient(130% 90% at 50% 25%, rgba(10,16,34,.25), rgba(3,5,12,.9)); opacity:0; transition:opacity .5s ease;}
+  .w-glass{background:rgba(15,17,14,.8); -webkit-backdrop-filter:blur(16px) saturate(1.2); backdrop-filter:blur(16px) saturate(1.2); border:1px solid rgba(255,255,255,.09); box-shadow:0 10px 30px rgba(0,0,0,.35);}
+  .w-top{position:absolute; left:12px; right:12px; top:calc(env(safe-area-inset-top,0px) + 10px); display:flex; gap:8px; align-items:flex-start; z-index:3; pointer-events:none;}
+  .w-top > *{pointer-events:auto !important;}
+  .w-sum, .w-iconbtn, .w-layers, .w-bar, .w-card, .w-mi, .w-pin, .w-fail{background:rgba(15,17,14,.82); -webkit-backdrop-filter:blur(16px) saturate(1.2); backdrop-filter:blur(16px) saturate(1.2); border:1px solid rgba(255,255,255,.09);}
+  .w-sum{all:unset; box-sizing:border-box; background:rgba(15,17,14,.82); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.09); cursor:pointer; flex:1; min-width:0; min-height:var(--tap); padding:9px 14px; border-radius:16px; display:flex; flex-direction:column; gap:1px;}
+  .w-sum b{font-size:var(--fs-heading); font-weight:var(--fw-strong); color:var(--c-text);} .w-sum span{font-size:var(--fs-caption); color:var(--c-text-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .w-iconbtn{all:unset; box-sizing:border-box; background:rgba(15,17,14,.82); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.09); cursor:pointer; width:52px; height:52px; border-radius:16px; display:grid; place-items:center; color:var(--c-text);}
+  .w-iconbtn[aria-expanded="true"]{color:var(--c-accent); border-color:var(--c-accent);}
+  .w-layers{position:absolute; right:12px; top:calc(env(safe-area-inset-top,0px) + 70px); width:min(280px, calc(100vw - 24px)); z-index:5; border-radius:18px; padding:8px 14px 12px; box-sizing:border-box;}
+  .w-lay-head{font-size:var(--fs-caption); color:var(--c-text-2); text-transform:uppercase; letter-spacing:.06em; padding:6px 0 4px;}
+  .w-lay{display:flex; gap:12px; align-items:center; min-height:var(--tap); cursor:pointer;} .w-lay input{width:20px; height:20px; accent-color:var(--c-accent); margin:0;}
+  .w-lay span{display:flex; flex-direction:column;} .w-lay b{font-size:var(--fs-body); font-weight:var(--fw-regular);} .w-lay i{font-style:normal; font-size:var(--fs-caption); color:var(--c-text-2);}
+  .w-legend{display:flex; flex-wrap:wrap; gap:10px; padding-top:8px; margin-top:6px; border-top:1px solid var(--c-border); font-size:var(--fs-caption); color:var(--c-text-2);}
+  .w-legend span{display:flex; align-items:center; gap:6px;} .w-legend i{width:16px; height:4px; border-radius:2px;}
+  .w-bar{position:absolute; left:90px; right:12px; bottom:calc(env(safe-area-inset-bottom,0px) + 14px); z-index:3; border-radius:20px; padding:6px 10px 8px; box-sizing:border-box;}
+  .w-barrow{display:flex; align-items:center; gap:2px;}
+  .w-step{all:unset; cursor:pointer; width:34px; height:var(--tap); display:grid; place-items:center; font-size:24px; line-height:1; color:var(--c-text); border-radius:12px;} .w-step:disabled{opacity:.3; cursor:default;}
+  .w-daylbl{font-size:var(--fs-caption); font-weight:var(--fw-strong); color:var(--c-text-2); white-space:nowrap;}
+  .w-time{margin-left:auto; padding:0 8px; font-size:var(--fs-caption); color:var(--c-text); font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .w-play{all:unset; cursor:pointer; flex-shrink:0; width:40px; height:40px; border-radius:20px; background:var(--c-accent); color:#0B0C0A; display:grid; place-items:center;} .w-play.on{background:#FFFFFF;}
+  .w-track{position:relative; height:32px; margin:2px 4px 0;}
+  .w-ticks{position:absolute; left:0; right:0; top:12px; height:8px; border-radius:4px; background:rgba(255,255,255,.07); overflow:hidden;}
+  .w-ticks i{position:absolute; top:0; bottom:0;}
+  .tk-stop{background:#3FBFA2; border-radius:3px; opacity:.8;} .tk-stop.home{background:#A9C93A;}
+  .tk-buy{width:4px; margin-left:-2px; border-radius:2px; box-shadow:0 0 0 1px #0B0C0A;} .tk-hr{width:1px; background:rgba(255,255,255,.2);}
+  .tk-future{right:0; background:repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 4px, transparent 4px 8px);}
+  #wT{position:absolute; inset:0; width:100%; height:32px; margin:0; background:transparent; -webkit-appearance:none; appearance:none; cursor:pointer; touch-action:pan-y;}
+  #wT::-webkit-slider-runnable-track{height:32px; background:transparent;}
+  #wT::-webkit-slider-thumb{-webkit-appearance:none; width:24px; height:24px; margin-top:4px; border-radius:50%; background:var(--c-accent); border:3px solid #0B0C0A; box-shadow:0 0 0 2px rgba(215,255,61,.4);}
+  #wT::-moz-range-thumb{width:20px; height:20px; border-radius:50%; background:var(--c-accent); border:3px solid #0B0C0A;}
+  #wT:focus-visible{outline:2px solid var(--c-accent); outline-offset:2px; border-radius:8px;}
+  .maplibregl-ctrl-bottom-right, .maplibregl-ctrl-bottom-left{bottom:calc(env(safe-area-inset-bottom,0px) + 100px);}
+  .maplibregl-ctrl-attrib.maplibregl-compact{background:rgba(15,17,14,.7) !important; color:#8E9488;} .maplibregl-ctrl-attrib a{color:#A6AC9D;}
+  .world.carding .maplibregl-ctrl-bottom-right{display:none;}
+  /* the O */
+  .w-o{position:fixed; left:16px; bottom:calc(env(safe-area-inset-bottom,0px) + 14px); z-index:46; width:62px; height:62px; border-radius:31px; border:0; padding:0; cursor:pointer; display:grid; place-items:center;
+    background:var(--c-accent); box-shadow:0 8px 28px rgba(215,255,61,.32), 0 2px 8px rgba(0,0,0,.5); transition:transform .2s cubic-bezier(.2,.8,.2,1);}
+  .w-o .otto-ring{width:26px; height:26px; border-width:5.5px;} .w-o:active{transform:scale(.94);} .w-o.open{transform:rotate(-90deg);}
+  .w-o:focus-visible{outline:3px solid #FFFFFF; outline-offset:3px;}
+  body.chatting .w-o, body.chatting .w-menu{display:none !important;}
+  .w-menu{position:fixed; left:16px; bottom:calc(env(safe-area-inset-bottom,0px) + 88px); z-index:47; display:flex; flex-direction:column-reverse; gap:8px;}
+  .w-mi{all:unset; box-sizing:border-box; background:rgba(15,17,14,.94); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,.1); cursor:pointer; display:flex; align-items:center; gap:10px; min-height:50px; padding:0 20px 0 12px; border-radius:25px;
+    color:var(--c-text); font-size:var(--fs-body); font-weight:var(--fw-strong); opacity:0; transform:translateY(10px) scale(.96); transition:opacity .2s ease calc(var(--i)*35ms), transform .24s cubic-bezier(.2,.8,.2,1) calc(var(--i)*35ms);}
+  .w-mi span{width:30px; height:30px; border-radius:15px; display:grid; place-items:center; background:rgba(255,255,255,.07); font-size:16px;}
+  .w-menu.show .w-mi{opacity:1; transform:none;} .w-mi:focus-visible{outline:2px solid var(--c-accent);}
+  body.sheet-open #sheetBody{padding-bottom:calc(env(safe-area-inset-bottom,0px) + 100px) !important;}
+  /* stop labels */
+  .w-pin{all:unset; box-sizing:border-box; background:rgba(14,16,13,.86); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.14); cursor:pointer; display:flex; align-items:center; gap:6px; min-height:30px; padding:3px 10px 3px 4px; border-radius:16px; color:var(--c-text); white-space:nowrap; transition:opacity .2s ease;}
+  .w-pin-ico{width:24px; height:24px; border-radius:12px; display:grid; place-items:center; background:rgba(255,255,255,.08); font-size:13px;}
+  .w-pin-txt{display:flex; flex-direction:column; line-height:1.15;} .w-pin b{font-size:12px; font-weight:600; max-width:140px; overflow:hidden; text-overflow:ellipsis;} .w-pin i{font-style:normal; font-size:11px; color:var(--c-text-2);}
+  .w-pin.hidden{opacity:0; pointer-events:none;} .w-pin.now{border-color:var(--c-accent); box-shadow:0 0 0 1px var(--c-accent), 0 0 18px rgba(215,255,61,.3);}
+  .w-pin:focus-visible{outline:2px solid var(--c-accent);}
+  .world.far .w-pin .w-pin-txt{display:none;} .world.far .w-pin{padding:3px;} .world.no-stops .w-pin{display:none;}
+  /* feature cards */
+  .w-card{position:absolute; left:8px; right:8px; bottom:calc(env(safe-area-inset-bottom,0px) + 112px); z-index:4; max-height:min(60vh, calc(100dvh - 220px)); overflow-y:auto; overscroll-behavior:contain; box-sizing:border-box;
+    background:rgba(17,19,16,.96); border-radius:24px; padding:8px 18px 16px; transform:translateY(14px); opacity:0; transition:transform .24s cubic-bezier(.2,.8,.2,1), opacity .2s ease;}
+  .w-card.show{transform:none; opacity:1;}
+  .w-card-grab{width:36px; height:5px; border-radius:3px; background:var(--c-border); margin:0 auto 6px;}
+  .w-card-x{all:unset; cursor:pointer; position:absolute; top:10px; right:10px; width:var(--tap); height:var(--tap); border-radius:22px; display:grid; place-items:center; background:var(--c-surface-2); color:var(--c-text); font-size:15px;}
+  .w-card-kicker{display:flex; align-items:center; gap:6px; font-size:var(--fs-caption); color:var(--c-text-2); padding-right:50px;}
+  .w-dot{width:10px; height:10px; border-radius:5px; display:inline-block;}
+  .w-card-title{margin:4px 50px 2px 0; font-size:var(--fs-title); line-height:1.2; font-weight:var(--fw-strong); color:var(--c-text);}
+  .w-card-sub{font-size:var(--fs-caption); color:var(--c-text-2); line-height:1.4;}
+  .w-amt{font-size:var(--fs-display); font-weight:var(--fw-strong); font-variant-numeric:tabular-nums; color:var(--c-text); margin:2px 0;}
+  .w-stats{display:grid; grid-template-columns:repeat(3, 1fr); gap:8px; margin:12px 0 4px;}
+  .w-stats div{background:var(--c-surface-2); border-radius:14px; padding:10px 10px 8px; display:flex; flex-direction:column; gap:2px; min-width:0;}
+  .w-stats b{font-size:var(--fs-heading); font-variant-numeric:tabular-nums; color:var(--c-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;} .w-stats span{font-size:var(--fs-micro); color:var(--c-text-2);}
+  .w-sect{font-size:var(--fs-micro); text-transform:uppercase; letter-spacing:.07em; color:var(--c-text-2); margin:14px 0 6px;}
+  .w-strip{display:grid; grid-template-columns:repeat(30, 1fr); gap:3px;} .w-strip i{aspect-ratio:1; border-radius:3px; background:rgba(255,255,255,.07);}
+  .w-strip i.on{background:#3FBFA2;} .w-strip i.cur{outline:2px solid var(--c-accent); outline-offset:1px;}
+  .w-note{font-size:var(--fs-caption); color:var(--c-text-2); margin:6px 0 0; line-height:1.4;}
+  .w-rows{display:flex; flex-direction:column; border-radius:14px; overflow:hidden; background:var(--c-surface-2);}
+  .w-row{all:unset; box-sizing:border-box; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; min-height:var(--tap); padding:8px 12px; border-bottom:1px solid var(--c-border); color:var(--c-text); font-size:var(--fs-body);}
+  .w-row:last-child{border-bottom:0;} .w-row.static{cursor:default;} .w-row span{display:flex; flex-direction:column; min-width:0;} .w-row i{font-style:normal; font-size:var(--fs-caption); color:var(--c-text-2);} .w-row b{font-variant-numeric:tabular-nums; font-weight:var(--fw-strong);}
+  .w-chips{display:flex; flex-wrap:wrap; gap:6px;}
+  .w-chip{all:unset; box-sizing:border-box; display:inline-flex; align-items:center; min-height:36px; padding:0 12px; border-radius:18px; background:var(--c-surface-2); border:1px solid var(--c-border); font-size:var(--fs-caption); color:var(--c-text);}
+  .w-chip.pick{cursor:pointer;} .w-chip.on{background:var(--c-accent); color:#0B0C0A; border-color:var(--c-accent); font-weight:var(--fw-strong);}
+  .w-acts{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .w-act{all:unset; box-sizing:border-box; cursor:pointer; min-height:var(--tap); padding:0 16px; border-radius:22px; display:inline-flex; align-items:center; background:var(--c-surface-2); border:1px solid var(--c-border); color:var(--c-text); font-size:var(--fs-body); font-weight:var(--fw-strong);}
+  .w-act:first-child{background:var(--c-accent); color:#0B0C0A; border-color:var(--c-accent);} .w-act.quiet{background:transparent; color:var(--c-text-2);}
+  .w-act:focus-visible, .w-row:focus-visible, .w-chip:focus-visible, .w-card-x:focus-visible, .w-step:focus-visible, .w-play:focus-visible, .w-sum:focus-visible, .w-iconbtn:focus-visible{outline:2px solid var(--c-accent); outline-offset:2px;}
+  .w-name{display:flex; gap:8px; margin-top:14px;} .w-name[hidden]{display:none;} .w-name input{flex:1; min-height:var(--tap); border-radius:12px; border:1px solid var(--c-border); background:var(--c-surface-2); color:var(--c-text); padding:0 12px; font:inherit; font-size:16px;}
+  .w-fail{position:absolute; left:20px; right:20px; top:40%; z-index:6; border-radius:20px; padding:18px; display:flex; flex-direction:column; gap:8px; align-items:flex-start; color:var(--c-text);} .w-fail[hidden]{display:none;} .w-fail span{color:var(--c-text-2); font-size:var(--fs-caption);}
+  @media (prefers-reduced-motion:reduce){ .w-card, .w-mi, .w-o, .w-tint, .w-pin{transition:none !important;} }
+  @media (min-width:900px){ .w-card{left:auto; right:16px; width:400px; bottom:120px;} .w-bar{left:100px; right:auto; width:min(720px, calc(100vw - 120px));} }
   .otto-notice .nt-act{color:var(--c-accent); font-weight:var(--fw-strong); margin-left:6px; padding-left:10px; border-left:1px solid var(--c-border);}
   .cfm-wrap{position:fixed; inset:0; z-index:2147483300; display:flex; align-items:flex-end; justify-content:center;}
   .cfm-scrim{position:absolute; inset:0; background:rgba(0,0,0,.55); opacity:0; transition:opacity .2s ease;}
@@ -2607,7 +2698,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-18.106';
+const APP_BUILD = '2026-11-20.107';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -5705,7 +5796,7 @@ function renderPageHead(){
   document.getElementById('pageIco').innerHTML = m.icon ? ico2(m.icon, 19) : svgIcon(sheetArea === 'account' ? 'user' : sheetArea === 'assets' ? 'map' : sheetArea);
   document.getElementById('pageSub').textContent = m.sub || '';
   // record level: Back names its section (‹ Backlog); otherwise the area's own back target
-  let bl = m.back; try{ const h = currentRoute(), up = parentRoute(h); if(up && routeParts(h).length >= 3 && !/^#\/(day|cal|spend)/.test(h)) bl = routeLabel(up); else if(bl && up) bl = routeLabel(up); }catch(e){}
+  let bl = m.back; try{ const h = currentRoute(), up = parentRoute(h); if(up && routeParts(h).length >= 3 && !/^#\/(day|cal|spend)/.test(h)) bl = routeLabel(up); else if(up) bl = routeLabel(up); }catch(e){}
   const back = document.getElementById('pageBack'); back.textContent = bl ? '‹ ' + bl : ''; back.classList.toggle('show', !!bl);
 }
 function svgRing(pct, color, size, stroke, inner){
@@ -6090,6 +6181,7 @@ function chatContext(){
     if(dayView.open) where = 'the day page for ' + dayView.d;
     else if(spendView.open) where = 'Money › spending map';
     else if(calView.open) where = 'the ' + calView.metric + ' calendar';
+    else if(!sheetArea){ where = 'the map of ' + (WORLD.day === localToday() ? 'today' : WORLD.day); if(WORLD.sel) rec = { code: WORLD.sel.code, kind: WORLD.sel.kind, title: WORLD.sel.title }; }
     else if(sheetArea){ const up = parentRoute(h); where = parts.length >= 3 ? routeLabel(up) : routeLabel(h);
       const area = AREAS2[ROUTE_ALIAS[parts[0]] || parts[0]]; if(area && !where.includes(area.label) && where !== area.label) where = area.label + ' › ' + where;
       const id = parts[2];
@@ -6109,7 +6201,7 @@ function renderChatCtx(){
   const c = chatContext(), el = document.getElementById('chatCtx'), inp = document.getElementById('askInput');
   const label = c.rec && c.rec.title ? c.rec.title : c.where;
   if(el) el.textContent = c.where === 'Home' && !c.rec ? '' : '· ' + label;
-  if(inp && !document.querySelector('#chatThread > .msg:not(.intro)')) inp.placeholder = c.rec ? `Ask about this ${c.rec.kind}, or tell me to change it` : c.where === 'Home' ? 'Ask, or: move $20 dining to groceries' : `Ask about ${c.where.split(' › ')[0]}`;
+  if(inp && !document.querySelector('#chatThread > .msg:not(.intro)')) inp.placeholder = c.rec ? `Ask about this ${c.rec.kind}, or tell me to change it` : /^the map/.test(c.where) ? 'Ask about your day, or tell me to change something' : `Ask about ${c.where.split(' › ')[0]}`;
 }
 function openChatSheet(){
   const b = document.body; if(!b.classList.contains('chatting')){ b.classList.remove('chat-full'); b.classList.add('chatting'); }
@@ -9420,6 +9512,396 @@ openArea = function(k){
   slideIn(body, dir * 28, 0, 280); slideIn(head, dir * 14, 0, 240);
 };
 
+// ===================== World: the map is home (.107, TD-00157) =====================
+// A full-screen 3D map of one day: where you went (route by speed, replayable), where you stopped (pillars = time
+// spent), what you bought (pins = amount, colored by category). A scrubber moves through the day and the light follows
+// the real sun over Beverly. The O (bottom-left) opens the menu; every feature opens a card with what Otto knows.
+const ML_VER = '5.24.0';
+const OFM_STYLE = 'https://tiles.openfreemap.org/styles/dark';
+const TERRAIN_TILES = 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png';
+const HOME_LL = [-70.8800, 42.5500];   // Beverly, used before any data loads
+const WORLD = { map:null, ready:false, failed:false, day:null, T:1440, data:null, all:null, sel:null, playing:false, markers:[], menu:false,
+  prefs:(()=>{ try{ return Object.assign({ route:true, stops:true, money:true, buildings:true, terrain:true, light:true }, JSON.parse(localStorage.getItem('otto.world.layers') || '{}')); }catch(e){ return { route:true, stops:true, money:true, buildings:true, terrain:true, light:true }; } })() };
+const W_MODE = { still:'#6B7266', walk:'#5EE6C4', local:'#E8AC45', drive:'#D7FF3D' };
+const W_MODE_LABEL = { still:'Still', walk:'Walking', local:'Around town', drive:'Driving' };
+function loadMapLibre(){
+  if(window.maplibregl) return Promise.resolve();
+  return WORLD._ml || (WORLD._ml = new Promise((res, rej)=>{
+    const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = `https://unpkg.com/maplibre-gl@${ML_VER}/dist/maplibre-gl.css`; document.head.appendChild(l);
+    const s = document.createElement('script'); s.src = `https://unpkg.com/maplibre-gl@${ML_VER}/dist/maplibre-gl.js`; s.onload = ()=>res(); s.onerror = ()=>{ WORLD._ml = null; rej(new Error("The map library didn't load")); }; document.head.appendChild(s);
+  }));
+}
+// ---- sun position (suncalc's formulas) for the lighting ----
+function sunPos(date, lat, lon){
+  const rad = Math.PI/180, d = date.valueOf()/864e5 - 0.5 + 2440588 - 2451545, e = rad*23.4397;
+  const M = rad*(357.5291 + 0.98560028*d), C = rad*(1.9148*Math.sin(M) + 0.02*Math.sin(2*M) + 0.0003*Math.sin(3*M)), L = M + C + rad*102.9372 + Math.PI;
+  const dec = Math.asin(Math.sin(L)*Math.sin(e)), ra = Math.atan2(Math.sin(L)*Math.cos(e), Math.cos(L));
+  const H = rad*(280.16 + 360.9856235*d) - (rad * -lon) - ra, phi = rad*lat;
+  const alt = Math.asin(Math.sin(phi)*Math.sin(dec) + Math.cos(phi)*Math.cos(dec)*Math.cos(H));
+  const az = Math.atan2(Math.sin(H), Math.cos(H)*Math.sin(phi) - Math.tan(dec)*Math.cos(phi));
+  return { alt: alt/rad, az: (az/rad + 180) % 360 };   // az: 0 = north, clockwise
+}
+const hex2rgb = h => [1,3,5].map(i=>parseInt(h.slice(i, i+2), 16));
+const mixHex = (a, b, t) => '#' + hex2rgb(a).map((v, i)=>Math.round(v + (hex2rgb(b)[i] - v)*Math.max(0, Math.min(1, t))).toString(16).padStart(2, '0')).join('');
+const W_LIGHT = {   // sky, horizon, fog, light color, light intensity, scene tint opacity
+  night:{ sky:'#04060B', hor:'#0B1320', fog:'#06080D', light:'#9FB0D8', int:.3, tint:.38 },
+  twilight:{ sky:'#151230', hor:'#C2603A', fog:'#1E1420', light:'#F0A070', int:.32, tint:.2 },
+  day:{ sky:'#24425F', hor:'#86A9C0', fog:'#18232C', light:'#FFFFFF', int:.45, tint:0 } };
+function worldLightAt(min){
+  const date = new Date(worldDayStart(WORLD.day) + min*60000), s = sunPos(date, 42.55, -70.88), N = W_LIGHT.night, Tw = W_LIGHT.twilight, Dy = W_LIGHT.day;
+  let a, b, t;
+  if(s.alt <= -12){ a = N; b = N; t = 0; } else if(s.alt <= -2){ a = N; b = Tw; t = (s.alt + 12)/10; } else if(s.alt <= 10){ a = Tw; b = Dy; t = (s.alt + 2)/12; } else { a = Dy; b = Dy; t = 0; }
+  const mix = k => typeof a[k] === 'number' ? a[k] + (b[k] - a[k])*t : mixHex(a[k], b[k], t);
+  return { sky:mix('sky'), hor:mix('hor'), fog:mix('fog'), light:mix('light'), int:mix('int'), tint:mix('tint'), sun:s,
+    phase: s.alt <= -12 ? 'Night' : s.alt <= -2 ? 'Twilight' : s.alt <= 10 ? (min < 720 ? 'Sunrise' : 'Golden hour') : 'Daylight' };
+}
+function worldDayStart(d){ return new Date(d + 'T00:00:00').getTime(); }
+const wMin = (iso, d) => (Date.parse(iso) - worldDayStart(d))/60000;
+const wClock = m => { const t = new Date(worldDayStart(WORLD.day) + Math.round(m)*60000); return t.toLocaleTimeString(undefined, { hour:'numeric', minute:'2-digit' }); };
+const wDur = m => { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floor(m/60)}h${m % 60 ? ' ' + (m % 60) + 'm' : ''}`; };
+const wMiles = km => (km*0.621371).toFixed(km < 16 ? 1 : 0) + ' mi';
+function wCircle(lon, lat, rM, n = 28){ const out = [], dLat = rM/111320, dLon = rM/(111320*Math.cos(lat*Math.PI/180)); for(let i = 0; i <= n; i++){ const a = i/n*2*Math.PI; out.push([lon + Math.cos(a)*dLon, lat + Math.sin(a)*dLat]); } return out; }
+function wPlaceKind(name){ const n = String(name || '').toLowerCase();
+  if(/home|mom|dad|house|apartment/.test(n)) return ['home','🏠']; if(/work|office|city hall/.test(n)) return ['work','💼']; if(/ymca|gym|fitness|planet/.test(n)) return ['gym','🏋️'];
+  if(/market|basket|store|target|walmart|costco|shop|cvs|walgreens/.test(n)) return ['shop','🛒']; if(/dunkin|coffee|starbucks|cafe|restaurant|pizza|grill|tavern|pub|bar|kitchen|diner/.test(n)) return ['food','🍽️'];
+  if(/hannah|friend|grandma|aunt|uncle/.test(n)) return ['people','💛']; if(/gas|shell|mobil|sunoco|exxon|citgo/.test(n)) return ['fuel','⛽']; return ['place','📍']; }
+
+// ---- data ----
+async function worldLoadAll(force){
+  if(WORLD.all && !force) return WORLD.all;
+  const H = { headers: authHeaders() }, get = async (q)=>{ try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/${q}`, H); return r.ok ? await r.json() : []; }catch(e){ return []; } };
+  const [visits, locations, txns, people, receipts, trips] = await Promise.all([
+    get('v_visits?select=id,code,location_id,place,arrived_at,left_at,minutes,is_open,lat,lon,status,source&order=arrived_at.asc&limit=5000'),
+    get('locations?select=id,code,name,lat,lng,notes,radius_m&limit=500'),
+    get('transactions?select=id,transaction_date,authorized_date,merchant,description,amount_cents,category_id,exclude_from_budget,pending,location_lat,location_lon,location_city&removed_at=is.null&location_lat=not.is.null&order=transaction_date.desc&limit=3000'),
+    get('people?select=id,code,name,relationship,location_id&limit=500'),
+    get('receipts?select=id,code,store,receipt_date,total_cents,kind,transaction_id&limit=1000'),
+    get('grocery_trips?select=id,code,store,trip_date,total_cents,transaction_id&limit=1000') ]);
+  WORLD.all = { visits: visits.filter(v=>v.status !== 'declined' && v.lat != null), locations, txns: txns.filter(t=>t.location_lon != null), people, receipts, trips };
+  return WORLD.all;
+}
+async function worldLoadDay(d){
+  const A = new Date(worldDayStart(d)).toISOString(), B = new Date(worldDayStart(d) + 864e5).toISOString();
+  let pts = [];
+  try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/location_points?select=recorded_at,lat,lon,speed_kmh,accuracy_m&recorded_at=gte.${encodeURIComponent(A)}&recorded_at=lt.${encodeURIComponent(B)}&order=recorded_at.asc&limit=20000`, { headers: authHeaders() }); pts = r.ok ? await r.json() : []; }catch(e){}
+  const all = await worldLoadAll(), s0 = worldDayStart(d), s1 = s0 + 864e5, nowMs = Date.now();
+  pts = pts.filter(p=>{ const t = Date.parse(p.recorded_at); return t >= s0 && t < s1 && p.lat != null && (p.accuracy_m == null || p.accuracy_m <= 150); }).sort((a, b)=>Date.parse(a.recorded_at) - Date.parse(b.recorded_at));
+  const segs = [], legsKm = { walk:0, local:0, drive:0 }; let km = 0;
+  for(let i = 1; i < pts.length; i++){
+    const p = pts[i-1], q = pts[i], dt = (Date.parse(q.recorded_at) - Date.parse(p.recorded_at))/60000, dk = haversineKm({ lat:p.lat, lon:p.lon }, { lat:q.lat, lon:q.lon });
+    if(dt > 25 || dk > 8) continue;
+    const s = q.speed_kmh != null && q.speed_kmh >= 0 ? Number(q.speed_kmh) : (dt > 0 ? dk/(dt/60) : 0);
+    const mode = s < 1.5 && dk < .05 ? 'still' : s < 8 ? 'walk' : s < 30 ? 'local' : 'drive';
+    if(mode !== 'still'){ km += dk; legsKm[mode] += dk; }
+    segs.push({ type:'Feature', properties:{ t: wMin(q.recorded_at, d), t0: wMin(p.recorded_at, d), s: Math.round(s), m: mode, c: W_MODE[mode] }, geometry:{ type:'LineString', coordinates:[[p.lon, p.lat], [q.lon, q.lat]] } });
+  }
+  const placeName = v => { const l = v.location_id && all.locations.find(x=>x.id === v.location_id); return l ? l.name : (v.place || 'Stop'); };
+  const vEnd = v => v.left_at ? Date.parse(v.left_at) : (v.is_open && nowMs - Date.parse(v.arrived_at) < 36*36e5 ? nowMs : Date.parse(v.arrived_at) + Math.max(5, Math.min(Number(v.minutes) || 60, 720))*60000);   // an open stop only runs to now if it began in the last 36 hours
+  const stops = all.visits.filter(v=>{ const a = Date.parse(v.arrived_at), b = vEnd(v); return a < s1 && b > s0; })
+    .map((v, i)=>{ const a = Date.parse(v.arrived_at), b = vEnd(v); const name = placeName(v), [kind, ico] = wPlaceKind(name);
+      const same = all.visits.filter(x=>(v.location_id && x.location_id === v.location_id) || haversineKm({ lat:x.lat, lon:x.lon }, { lat:v.lat, lon:v.lon }) < .12);
+      return { i, v, name, kind, ico, lat:Number(v.lat), lon:Number(v.lon), m0: Math.max(0, (a - s0)/60000), m1: Math.min(1440, (b - s0)/60000), open: !v.left_at && v.is_open, count: same.length, same }; })
+    .filter(s=>s.m1 - s.m0 >= 3).sort((a, b)=>a.m0 - b.m0);
+  const buys = all.txns.filter(t=>(t.authorized_date || t.transaction_date) === d && Number(t.amount_cents) < 0 && !t.exclude_from_budget).map((t, i)=>{
+    const at = { lat:Number(t.location_lat), lon:Number(t.location_lon) }, st = stops.map(s=>({ s, k: haversineKm(at, s) })).filter(x=>x.k < .25).sort((a, b)=>a.k - b.k)[0];
+    const cat = spendCat(t); return { i, t, lat:at.lat, lon:at.lon, amt: -Number(t.amount_cents), cat, color: spendColor(cat), stop: st ? st.s : null, tm: st ? st.s.m0 + 3 : -1 }; });
+  const coords = segs.flatMap(f=>f.geometry.coordinates).concat(stops.map(s=>[s.lon, s.lat]), buys.map(b=>[b.lon, b.lat]));
+  const spent = buys.reduce((a, b)=>a + b.amt, 0);
+  return { d, pts, segs, stops, buys, coords, km, legsKm, spent, last: pts[pts.length - 1] || null };
+}
+
+// ---- map ----
+function worldStyleFrom(style){
+  const s = JSON.parse(JSON.stringify(style)); const firstSymbol = s.layers.findIndex(l=>l.type === 'symbol');
+  s.layers = s.layers.flatMap(l=>{
+    if(l.type === 'background'){ l.paint = { ...(l.paint||{}), 'background-color':'#0B0C0A' }; return [l]; }
+    if(l.id === 'water' && l.type === 'fill'){ l.paint = { ...(l.paint||{}), 'fill-color':'#0B1517' }; return [l]; }
+    if(/^waterway/.test(l.id) && l.type === 'line'){ l.paint = { ...(l.paint||{}), 'line-color':'#0F1F22' }; return [l]; }
+    if(/^building/.test(l.id) && l.type === 'fill') return [{ id:'w-buildings', type:'fill-extrusion', source:l.source, 'source-layer':l['source-layer'] || 'building', minzoom:13,
+      paint:{ 'fill-extrusion-color':'#16181B', 'fill-extrusion-height':['coalesce', ['get','render_height'], 8], 'fill-extrusion-base':['coalesce', ['get','render_min_height'], 0], 'fill-extrusion-opacity':.88 } }];
+    if(l.type === 'symbol' && l.paint && 'text-color' in l.paint){ l.paint['text-color'] = '#8E9488'; l.paint['text-halo-color'] = '#0B0C0A'; }
+    return [l];
+  });
+  s.sources.terrain = { type:'raster-dem', tiles:[TERRAIN_TILES], encoding:'terrarium', tileSize:256, maxzoom:14 };
+  const hs = { id:'w-hillshade', type:'hillshade', source:'terrain', paint:{ 'hillshade-shadow-color':'#000000', 'hillshade-highlight-color':'#2A2F28', 'hillshade-accent-color':'#0B0C0A', 'hillshade-exaggeration':.35 } };
+  const at = s.layers.findIndex(l=>/road|highway|tunnel|transportation/.test(l.id)); s.layers.splice(at > 0 ? at : Math.max(1, firstSymbol), 0, hs);
+  return s;
+}
+async function worldFetchStyle(){
+  try{ const r = await fetch(OFM_STYLE); if(!r.ok) throw new Error(r.status); return worldStyleFrom(await r.json()); }
+  catch(e){ console.warn('basemap style', e); return worldStyleFrom({ version:8, glyphs:'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf', sources:{}, layers:[{ id:'bg', type:'background', paint:{} }] }); }
+}
+function worldBuildDom(){
+  if(document.getElementById('world')) return;
+  const w = document.createElement('div'); w.id = 'world'; w.className = 'world';
+  w.innerHTML = `<div id="wMap" class="w-map" role="region" aria-label="Map of your day"></div><div class="w-tint" id="wTint" aria-hidden="true"></div>
+    <div class="w-top"><button type="button" class="w-sum" id="wSum" data-wfit aria-label="Fit the whole day"><b id="wSumDay">Today</b><span id="wSumLine">Loading your day…</span></button>
+      <button type="button" class="w-iconbtn" data-wlayers aria-label="Map layers" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></button></div>
+    <div class="w-layers" id="wLayers" hidden></div>
+    <section class="w-card" id="wCard" hidden aria-live="polite"></section>
+    <div class="w-bar" id="wBar">
+      <div class="w-barrow"><button type="button" class="w-step" data-wday="-1" aria-label="Previous day">‹</button><span class="w-daylbl" id="wDayLbl"></span><button type="button" class="w-step" data-wday="1" aria-label="Next day">›</button>
+        <span class="w-time" id="wTime"></span><button type="button" class="w-play" data-wplay aria-label="Play the day"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor"/></svg></button></div>
+      <div class="w-track"><div class="w-ticks" id="wTicks" aria-hidden="true"></div><input type="range" id="wT" min="0" max="1440" step="1" value="1440" aria-label="Time of day"></div>
+    </div>
+    <div class="w-fail" id="wFail" hidden></div>`;
+  document.getElementById('appWrap').prepend(w);
+  const o = document.createElement('button'); o.type = 'button'; o.id = 'worldO'; o.className = 'w-o'; o.setAttribute('aria-label', 'Menu'); o.setAttribute('aria-expanded', 'false'); o.setAttribute('aria-controls', 'wMenu');
+  o.innerHTML = '<span class="otto-ring" aria-hidden="true"></span>';
+  const m = document.createElement('nav'); m.id = 'wMenu'; m.className = 'w-menu'; m.setAttribute('aria-label', 'Otto menu'); m.hidden = true;
+  document.getElementById('appWrap').append(o, m);
+}
+async function initWorld(){
+  worldBuildDom(); if(WORLD.map || WORLD._init) return; WORLD._init = true;
+  WORLD.day = WORLD.day || localToday();
+  try{
+    await loadMapLibre();
+    const style = await worldFetchStyle();
+    const map = new maplibregl.Map({ container:'wMap', style, center:HOME_LL, zoom:12.5, pitch:55, bearing:-18, maxPitch:80, attributionControl:{ compact:true }, fadeDuration:0 });
+    WORLD.map = map;
+    map.on('error', e=>{ if(e && e.error && !/tile|404|Failed to fetch|NetworkError|sprite|glyph/i.test(String(e.error.message || e.error))) console.warn('map', e.error); });
+    await new Promise(res=>{ let done = false; const go = ()=>{ if(!done){ done = true; res(); } }; map.once('style.load', go); map.once('load', go); setTimeout(()=>{ if(map.isStyleLoaded && map.getStyle()) go(); }, 6000); });   // a missing sprite or glyph mustn't keep the map blank
+    worldAddLayers(); WORLD.ready = true; worldApplyPrefs();
+    map.on('click', worldOnMapClick);
+    ['w-buy','w-pillar','w-route-hit'].forEach(id=>{ map.on('mouseenter', id, ()=>{ map.getCanvas().style.cursor = 'pointer'; }); map.on('mouseleave', id, ()=>{ map.getCanvas().style.cursor = ''; }); });
+    map.on('zoom', ()=> document.getElementById('world')?.classList.toggle('far', map.getZoom() < 12.2));
+    await worldShowDay(WORLD.day, { fit:true });
+  }catch(err){ WORLD.failed = true; WORLD._init = false; const f = document.getElementById('wFail'); if(f){ f.hidden = false; f.innerHTML = `<b>The map couldn't load.</b><span>${esc(err.message || 'Check your connection.')}</span><button type="button" class="save-btn" data-wretry>Try again</button>`; } }
+}
+function worldAddLayers(){
+  const map = WORLD.map, empty = { type:'FeatureCollection', features:[] };
+  if(WORLD.prefs.terrain) try{ map.setTerrain({ source:'terrain', exaggeration:1.25 }); }catch(e){}
+  ['w-route','w-stops','w-rings','w-buys','w-you','w-leg'].forEach(id=> map.addSource(id, { type:'geojson', data:empty }));
+  const T = ['<=', ['get','t'], 1440];
+  map.addLayer({ id:'w-route-ghost', type:'line', source:'w-route', layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color':'#3B4136', 'line-width':2, 'line-opacity':.55 } });
+  map.addLayer({ id:'w-route-glow', type:'line', source:'w-route', filter:T, layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color':['get','c'], 'line-width':['interpolate',['linear'],['zoom'],10,6,16,16], 'line-blur':8, 'line-opacity':.38 } });
+  map.addLayer({ id:'w-route', type:'line', source:'w-route', filter:T, layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color':['get','c'], 'line-width':['interpolate',['linear'],['zoom'],10,2,16,4.5] } });
+  map.addLayer({ id:'w-route-tail', type:'line', source:'w-route', filter:['all', T, ['>', ['get','t'], 1415]], layout:{ 'line-cap':'round' }, paint:{ 'line-color':'#F6FFD6', 'line-width':['interpolate',['linear'],['zoom'],10,4,16,8], 'line-blur':2, 'line-opacity':.9 } });
+  map.addLayer({ id:'w-route-hit', type:'line', source:'w-route', paint:{ 'line-color':'#000', 'line-width':22, 'line-opacity':0 } });
+  map.addLayer({ id:'w-leg', type:'line', source:'w-leg', layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color':'#FFFFFF', 'line-width':['interpolate',['linear'],['zoom'],10,4,16,8], 'line-opacity':.85 } });
+  map.addLayer({ id:'w-ring', type:'line', source:'w-rings', paint:{ 'line-color':['get','c'], 'line-width':['get','w'], 'line-opacity':.6 } });
+  map.addLayer({ id:'w-pillar', type:'fill-extrusion', source:'w-stops', paint:{ 'fill-extrusion-color':['get','c'], 'fill-extrusion-height':['get','h'], 'fill-extrusion-base':0, 'fill-extrusion-opacity':.92 } });
+  map.addLayer({ id:'w-buy', type:'circle', source:'w-buys', paint:{ 'circle-radius':['get','r'], 'circle-color':['get','c'], 'circle-stroke-color':['case', ['get','sel'], '#FFFFFF', '#0B0C0A'], 'circle-stroke-width':['case', ['get','sel'], 3, 2], 'circle-pitch-alignment':'map' } });
+  map.addLayer({ id:'w-buy-lbl', type:'symbol', source:'w-buys', minzoom:13.5, layout:{ 'text-field':['get','lbl'], 'text-font':['Noto Sans Regular'], 'text-size':12, 'text-offset':[0, -1.6], 'text-allow-overlap':false }, paint:{ 'text-color':'#F1F4EA', 'text-halo-color':'#0B0C0A', 'text-halo-width':1.6 } });
+  map.addLayer({ id:'w-you-halo', type:'circle', source:'w-you', paint:{ 'circle-radius':20, 'circle-color':'#D7FF3D', 'circle-opacity':.18, 'circle-pitch-alignment':'map' } });
+  map.addLayer({ id:'w-you', type:'circle', source:'w-you', paint:{ 'circle-radius':7, 'circle-color':'#D7FF3D', 'circle-stroke-color':'#0B0C0A', 'circle-stroke-width':3, 'circle-pitch-alignment':'map' } });
+}
+async function worldShowDay(d, opt = {}){
+  WORLD.day = d; worldCloseCard(true); worldStop();
+  const lbl = document.getElementById('wDayLbl'), isToday = d === localToday();
+  const dayName = isToday ? 'Today' : d === isoAddDays(localToday(), -1) ? 'Yesterday' : new Date(d + 'T12:00').toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+  if(lbl) lbl.textContent = isToday ? 'Today' : new Date(d + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' }); const sd = document.getElementById('wSumDay'); if(sd) sd.textContent = dayName;
+  const next = document.querySelector('[data-wday="1"]'); if(next) next.disabled = isToday;
+  document.getElementById('wSumLine').textContent = 'Loading your day…';
+  const data = await worldLoadDay(d); if(WORLD.day !== d) return; WORLD.data = data;
+  const nowMin = isToday ? Math.min(1440, (Date.now() - worldDayStart(d))/60000) : 1440;
+  WORLD.T = opt.T != null ? opt.T : nowMin; WORLD.maxT = nowMin;
+  const inp = document.getElementById('wT'); if(inp) inp.value = String(Math.round(WORLD.T));
+  const parts = [];
+  if(data.stops.length) parts.push(`${data.stops.length} stop${data.stops.length === 1 ? '' : 's'}`);
+  if(data.km > .1) parts.push(wMiles(data.km));
+  if(data.spent) parts.push(money(data.spent) + ' spent');
+  document.getElementById('wSumLine').textContent = parts.length ? parts.join(' · ') : (data.pts.length ? 'You stayed put' : 'No location recorded this day');
+  worldRenderTicks(); worldSetData(); worldSetTime(WORLD.T);
+  if(opt.fit !== false) worldFit();
+  if(!opt.quiet) syncRoute();
+}
+function worldFit(){
+  const map = WORLD.map, data = WORLD.data; if(!map || !data) return;
+  const pad = { top:130, bottom:230, left:50, right:50 };
+  if(data.coords.length > 1){ const b = data.coords.reduce((bb, c)=>bb.extend(c), new maplibregl.LngLatBounds(data.coords[0], data.coords[0])); map.fitBounds(b, { padding:pad, maxZoom:15.2, pitch:55, bearing:-18, duration: reduceMotion() ? 0 : 1100 }); }
+  else { const c = data.coords[0] || (data.last ? [data.last.lon, data.last.lat] : null) || (WORLD.all && WORLD.all.visits.length ? [Number(WORLD.all.visits.at(-1).lon), Number(WORLD.all.visits.at(-1).lat)] : HOME_LL); map.easeTo({ center:c, zoom:14, pitch:55, bearing:-18, duration: reduceMotion() ? 0 : 900 }); }
+}
+function worldSetData(){
+  const map = WORLD.map, data = WORLD.data; if(!map || !data) return;
+  map.getSource('w-route').setData({ type:'FeatureCollection', features:data.segs });
+  map.getSource('w-rings').setData({ type:'FeatureCollection', features:data.stops.map(s=>({ type:'Feature', properties:{ c: s.kind === 'home' ? '#D7FF3D' : '#5EE6C4', w: 1 + Math.min(12, s.count)*.45 }, geometry:{ type:'LineString', coordinates: wCircle(s.lon, s.lat, 30 + Math.min(12, s.count)*3) } })) });
+  map.getSource('w-buys').setData(worldBuyFc());
+  WORLD.markers.forEach(m=>m.remove()); WORLD.markers = data.stops.map((s, i)=>{
+    const el = document.createElement('button'); el.type = 'button'; el.className = 'w-pin'; el.dataset.wstop = String(i);
+    el.setAttribute('aria-label', `${s.name}, ${wClock(s.m0)} for ${wDur(s.m1 - s.m0)}`);
+    el.innerHTML = `<span class="w-pin-ico" aria-hidden="true">${s.ico}</span><span class="w-pin-txt"><b>${esc(s.name)}</b><i>${wDur(s.m1 - s.m0)}</i></span>`;
+    return new maplibregl.Marker({ element:el, anchor:'bottom', offset:[0, -6] }).setLngLat([s.lon, s.lat]).addTo(map); });
+}
+function worldBuyFc(){ const T = WORLD.T, sel = WORLD.sel;
+  return { type:'FeatureCollection', features:(WORLD.data ? WORLD.data.buys : []).filter(b=>b.tm < 0 || b.tm <= T).map(b=>({ type:'Feature', properties:{ i:b.i, r: Math.min(22, 6 + Math.sqrt(b.amt/100)*1.6), c:b.color, lbl: money(b.amt).replace(/\.00$/, ''), sel: !!(sel && sel.kind === 'purchase' && sel.i === b.i) }, geometry:{ type:'Point', coordinates:[b.lon, b.lat] } })) }; }
+function worldYouAt(T){
+  const pts = WORLD.data ? WORLD.data.pts : []; if(!pts.length) return null; const d = WORLD.day;
+  let lo = 0, hi = pts.length - 1; if(wMin(pts[0].recorded_at, d) > T) return null;
+  while(lo < hi){ const mid = (lo + hi + 1) >> 1; if(wMin(pts[mid].recorded_at, d) <= T) lo = mid; else hi = mid - 1; }
+  const p = pts[lo], q = pts[lo + 1]; if(!q) return [p.lon, p.lat];
+  const a = wMin(p.recorded_at, d), b = wMin(q.recorded_at, d), u = b > a ? Math.min(1, (T - a)/(b - a)) : 0;
+  return b - a > 25 ? [p.lon, p.lat] : [p.lon + (q.lon - p.lon)*u, p.lat + (q.lat - p.lat)*u];
+}
+let wRaf = 0, wPendingT = null;
+function worldSetTime(T){ wPendingT = T; if(!wRaf) wRaf = requestAnimationFrame(()=>{ wRaf = 0; worldApplyTime(wPendingT); }); }
+function worldApplyTime(T){
+  const map = WORLD.map, data = WORLD.data; if(!map || !data) return; WORLD.T = T;
+  const f = ['<=', ['get','t'], T]; ['w-route-glow','w-route'].forEach(id=>map.setFilter(id, f)); map.setFilter('w-route-tail', ['all', f, ['>', ['get','t'], T - 25]]);
+  const you = worldYouAt(T); map.getSource('w-you').setData(you ? { type:'Feature', properties:{}, geometry:{ type:'Point', coordinates:you } } : { type:'FeatureCollection', features:[] });
+  const sel = WORLD.sel;
+  map.getSource('w-stops').setData({ type:'FeatureCollection', features:data.stops.filter(s=>s.m0 <= T).map((s, i)=>{ const live = Math.min(T, s.m1) - s.m0, on = T >= s.m0 && T <= s.m1;
+    return { type:'Feature', properties:{ i:s.i, h: Math.max(6, Math.min(420, live*1.6)), c: sel && sel.kind === 'stop' && sel.i === s.i ? '#FFFFFF' : on ? '#D7FF3D' : s.kind === 'home' ? '#A9C93A' : '#3FBFA2' }, geometry:{ type:'Polygon', coordinates:[wCircle(s.lon, s.lat, 24)] } }; }) });
+  map.getSource('w-buys').setData(worldBuyFc());
+  WORLD.markers.forEach((m, i)=>{ const s = data.stops[i]; m.getElement().classList.toggle('hidden', !(s && s.m0 <= T)); m.getElement().classList.toggle('now', !!(s && T >= s.m0 && T <= s.m1)); });
+  const t = document.getElementById('wTime'), L = worldLightAt(T); if(t){ t.textContent = `${{ Night:'🌙', Twilight:'🌆', Sunrise:'🌅', 'Golden hour':'🌇', Daylight:'☀️' }[L.phase]} ${T >= 1439.5 ? 'End of day' : wClock(T)}`; t.setAttribute('aria-label', `${T >= 1439.5 ? 'End of day' : wClock(T)}, ${L.phase}`); }
+  const inp = document.getElementById('wT'); if(inp && Number(inp.value) !== Math.round(T)) inp.value = String(Math.round(T));
+  worldApplyLight(L);
+}
+function worldApplyLight(L){
+  const map = WORLD.map; if(!map) return; if(!WORLD.prefs.light) L = Object.assign({}, W_LIGHT.day, { tint:0, sun:{ az:210, alt:45 } });
+  try{ map.setSky({ 'sky-color':L.sky, 'horizon-color':L.hor, 'fog-color':L.fog, 'sky-horizon-blend':.6, 'horizon-fog-blend':.7, 'fog-ground-blend':.5, 'atmosphere-blend':.6 }); }catch(e){}
+  try{ map.setLight({ anchor:'map', color:L.light, intensity:L.int, position:[1.4, (L.sun ? L.sun.az : 210), Math.max(10, Math.min(85, 90 - (L.sun ? Math.max(5, L.sun.alt) : 45)))] }); }catch(e){}
+  const tint = document.getElementById('wTint'); if(tint) tint.style.opacity = String(L.tint || 0);
+}
+function worldRenderTicks(){
+  const el = document.getElementById('wTicks'), data = WORLD.data; if(!el || !data) return; const pct = m => (m/1440*100).toFixed(2) + '%';
+  el.innerHTML = data.stops.map(s=>`<i class="tk-stop ${s.kind}" style="left:${pct(s.m0)};width:${pct(Math.max(4, s.m1 - s.m0))}"></i>`).join('')
+    + data.buys.filter(b=>b.tm >= 0).map(b=>`<i class="tk-buy" style="left:${pct(b.tm)};background:${b.color}"></i>`).join('')
+    + [6, 12, 18].map(h=>`<i class="tk-hr" style="left:${pct(h*60)}"></i>`).join('')
+    + (WORLD.maxT < 1440 ? `<i class="tk-future" style="left:${pct(WORLD.maxT)}"></i>` : '');
+}
+function worldApplyPrefs(){
+  const map = WORLD.map, P = WORLD.prefs; if(!map) return;
+  const vis = (ids, on) => ids.forEach(id=>{ if(map.getLayer(id)) map.setLayoutProperty(id, 'visibility', on ? 'visible' : 'none'); });
+  vis(['w-route-ghost','w-route-glow','w-route','w-route-tail','w-route-hit','w-leg'], P.route); vis(['w-pillar','w-ring'], P.stops); vis(['w-buy','w-buy-lbl'], P.money); vis(['w-buildings'], P.buildings);
+  document.getElementById('world')?.classList.toggle('no-stops', !P.stops);
+  try{ map.setTerrain(P.terrain ? { source:'terrain', exaggeration:1.25 } : null); }catch(e){} vis(['w-hillshade'], P.terrain);
+  if(WORLD.data) worldApplyLight(worldLightAt(WORLD.T));
+}
+function worldRenderLayers(){
+  const el = document.getElementById('wLayers'), P = WORLD.prefs;
+  const rows = [['route','Route','by speed: walk, town, drive'], ['stops','Stops','pillar height = time spent'], ['money','Purchases','size = amount'], ['buildings','3D buildings',''], ['terrain','Terrain','hills and valleys'], ['light','Time-of-day light','follows the sun']];
+  el.innerHTML = `<div class="w-lay-head">Layers</div>` + rows.map(([k, t, s])=>`<label class="w-lay"><input type="checkbox" data-wpref="${k}" ${P[k] ? 'checked' : ''}><span><b>${t}</b>${s ? `<i>${s}</i>` : ''}</span></label>`).join('')
+    + `<div class="w-legend">${Object.entries(W_MODE).filter(([k])=>k !== 'still').map(([k, c])=>`<span><i style="background:${c}"></i>${W_MODE_LABEL[k]}</span>`).join('')}</div>`;
+}
+
+// ---- cards ----
+function worldOpenCard(html, sel){
+  WORLD.sel = sel || null; const c = document.getElementById('wCard'); c.innerHTML = `<div class="w-card-grab" aria-hidden="true"></div><button type="button" class="w-card-x" data-wclose aria-label="Close">✕</button>${html}`;
+  c.hidden = false; requestAnimationFrame(()=>c.classList.add('show')); document.getElementById('world').classList.add('carding'); worldApplyTime(WORLD.T);
+}
+function worldCloseCard(quiet){ const c = document.getElementById('wCard'); if(!c) return; WORLD.sel = null; c.classList.remove('show'); c.hidden = true; document.getElementById('world')?.classList.remove('carding');
+  if(WORLD.map && WORLD.map.getSource('w-leg')) WORLD.map.getSource('w-leg').setData({ type:'FeatureCollection', features:[] }); if(!quiet) worldApplyTime(WORLD.T); }
+function worldPlaceCard(s){
+  const all = WORLD.all, loc = s.v.location_id && all.locations.find(x=>x.id === s.v.location_id);
+  const since = isoAddDays(localToday(), -29), days = new Set(s.same.map(v=>isoOf(v.arrived_at)));
+  const strip = Array.from({ length:30 }, (_, i)=>{ const d = isoAddDays(since, i); return `<i class="${days.has(d) ? 'on' : ''} ${d === WORLD.day ? 'cur' : ''}" title="${d}"></i>`; }).join('');
+  const totalMin = s.same.reduce((a, v)=>a + (Number(v.minutes) || 0), 0), first = s.same.length ? isoOf(s.same[0].arrived_at) : null;
+  const near = all.txns.filter(t=>Number(t.amount_cents) < 0 && haversineKm({ lat:Number(t.location_lat), lon:Number(t.location_lon) }, s) < .15).sort((a, b)=>(b.authorized_date || b.transaction_date).localeCompare(a.authorized_date || a.transaction_date));
+  const spent = near.reduce((a, t)=>a - Number(t.amount_cents), 0), ppl = loc ? all.people.filter(p=>p.location_id === loc.id) : [];
+  const rc = t => all.receipts.find(r=>r.transaction_id === t.id);
+  return `<div class="w-card-kicker">${s.ico} ${s.kind === 'place' ? 'Stop' : s.kind[0].toUpperCase() + s.kind.slice(1)}${loc ? '' : ' · not saved yet'}</div>
+    <h2 class="w-card-title">${esc(s.name)}</h2>
+    <div class="w-card-sub">${s.open && WORLD.day === localToday() ? `Here since ${wClock(s.m0)}` : `${wClock(s.m0)} – ${wClock(s.m1)}`} · ${wDur(s.m1 - s.m0)}</div>
+    <div class="w-stats"><div><b>${s.same.length}</b><span>visits</span></div><div><b>${wDur(totalMin)}</b><span>time here</span></div><div><b>${spent ? money(spent) : '—'}</b><span>spent here</span></div></div>
+    <div class="w-sect">Last 30 days</div><div class="w-strip" aria-label="${days.size} of the last 30 days">${strip}</div>${first ? `<div class="w-note">First seen ${new Date(first + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' })}</div>` : ''}
+    ${near.length ? `<div class="w-sect">Purchases here</div><div class="w-rows">${near.slice(0, 4).map(t=>{ const r = rc(t); return `<button type="button" class="w-row" data-wtx="${t.id}"><span>${esc(t.merchant || t.description)}<i>${new Date((t.authorized_date || t.transaction_date) + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' })}${r ? ' · receipt ' + esc(r.code) : ''}</i></span><b>${money(-Number(t.amount_cents))}</b></button>`; }).join('')}</div>` : ''}
+    ${ppl.length ? `<div class="w-sect">People here</div><div class="w-chips">${ppl.map(p=>`<span class="w-chip">💛 ${esc(p.name)}${p.relationship ? ' · ' + esc(p.relationship) : ''}</span>`).join('')}</div>` : ''}
+    ${loc && loc.notes ? `<div class="w-sect">Notes</div><p class="w-note">${esc(loc.notes)}</p>` : ''}
+    <div class="w-name" id="wName" hidden><label for="wNameIn" class="sr-only">Place name</label><input id="wNameIn" type="text" maxlength="80" placeholder="Name this place" value="${esc(loc ? loc.name : (/^unnamed/i.test(s.name) ? '' : s.name))}"><button type="button" class="save-btn" data-wnamesave="${s.i}">Save</button></div>
+    <div class="w-acts"><button type="button" class="w-act" data-wname>${loc ? 'Rename' : 'Name this place'}</button><button type="button" class="w-act" data-wask>Ask Otto</button><button type="button" class="w-act quiet" data-wnotstop="${s.v.id}">Not a stop</button></div>`;
+}
+function worldBuyCard(b){
+  const all = WORLD.all, r = all.receipts.find(x=>x.transaction_id === b.t.id), gt = all.trips.find(x=>x.transaction_id === b.t.id);
+  const cats = (allCategories || []).filter(c=>c.category_type !== 'income');
+  return `<div class="w-card-kicker"><i class="w-dot" style="background:${b.color}"></i>${esc(b.cat)}</div>
+    <h2 class="w-card-title">${esc(b.t.merchant || b.t.description || 'Purchase')}</h2>
+    <div class="w-amt">${money(b.amt)}</div>
+    <div class="w-card-sub">${new Date(WORLD.day + 'T12:00').toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' })}${b.stop ? ` · during your stop at ${esc(b.stop.name)} (${wClock(b.stop.m0)})` : ' · time of day unknown'}${b.t.pending ? ' · pending' : ''}</div>
+    ${r ? `<div class="w-sect">Receipt</div><div class="w-rows"><div class="w-row static"><span>${esc(r.store || 'Receipt')} <i>${esc(r.code)}${r.kind ? ' · ' + esc(r.kind) : ''}</i></span><b>${money(r.total_cents)}</b></div></div>` : ''}
+    ${gt ? `<div class="w-sect">Grocery trip</div><div class="w-rows"><button type="button" class="w-row" data-wgo="#/kitchen"><span>${esc(gt.store)} <i>${esc(gt.code)}</i></span><b>${money(gt.total_cents)}</b></button></div>` : ''}
+    <div class="w-sect">Category</div><div class="w-chips">${cats.map(c=>`<button type="button" class="w-chip pick ${c.id === b.t.category_id ? 'on' : ''}" data-wcat="${c.id}" aria-pressed="${c.id === b.t.category_id}">${esc(c.name)}</button>`).join('')}</div>
+    <div class="w-acts"><button type="button" class="w-act" data-wask>Ask Otto</button><button type="button" class="w-act quiet" data-wgo="#/money/txns">All transactions</button></div>`;
+}
+function worldLegAt(t){
+  const data = WORLD.data, prev = [...data.stops].reverse().find(s=>s.m1 <= t + 1), next = data.stops.find(s=>s.m0 >= t - 1);
+  const a = prev ? prev.m1 : 0, b = next ? next.m0 : 1440, segs = data.segs.filter(f=>f.properties.t > a && f.properties.t0 < b && f.properties.m !== 'still');
+  const km = segs.reduce((k, f)=>{ const [p, q] = f.geometry.coordinates; return k + haversineKm({ lat:p[1], lon:p[0] }, { lat:q[1], lon:q[0] }); }, 0);
+  const by = {}; segs.forEach(f=>{ by[f.properties.m] = (by[f.properties.m] || 0) + 1; }); const mode = Object.keys(by).sort((x, y)=>by[y] - by[x])[0] || 'drive';
+  return { a, b, prev, next, segs, km, mode, max: segs.reduce((m, f)=>Math.max(m, f.properties.s), 0) };
+}
+function worldLegCard(L){
+  const mins = L.b - L.a, avg = mins > 0 ? L.km/(mins/60) : 0;
+  return `<div class="w-card-kicker"><i class="w-dot" style="background:${W_MODE[L.mode]}"></i>${W_MODE_LABEL[L.mode]}</div>
+    <h2 class="w-card-title">${esc(L.prev ? L.prev.name : 'Start of day')} → ${esc(L.next ? L.next.name : 'Now')}</h2>
+    <div class="w-card-sub">${wClock(L.a)} – ${wClock(L.b)}</div>
+    <div class="w-stats"><div><b>${wMiles(L.km)}</b><span>distance</span></div><div><b>${wDur(mins)}</b><span>time</span></div><div><b>${Math.round(avg*0.621371)} mph</b><span>average · top ${Math.round(L.max*0.621371)}</span></div></div>
+    <div class="w-acts"><button type="button" class="w-act" data-wreplay="${L.a}:${L.b}">Replay this trip</button><button type="button" class="w-act" data-wask>Ask Otto</button></div>`;
+}
+function worldOnMapClick(e){
+  const map = WORLD.map, hit = map.queryRenderedFeatures(e.point, { layers:['w-buy','w-pillar','w-route-hit'].filter(id=>map.getLayer(id) && map.getLayoutProperty(id, 'visibility') !== 'none') });
+  const f = hit[0]; if(!f){ if(!document.getElementById('wCard').hidden) worldCloseCard(); return; }
+  if(f.layer.id === 'w-buy'){ const b = WORLD.data.buys[f.properties.i]; worldOpenCard(worldBuyCard(b), { kind:'purchase', i:b.i, code: 'TX-' + b.t.id, title: b.t.merchant || b.t.description }); return; }
+  if(f.layer.id === 'w-pillar'){ const s = WORLD.data.stops[f.properties.i]; worldOpenCard(worldPlaceCard(s), { kind:'stop', i:s.i, code: s.v.code, title: s.name }); return; }
+  const L = worldLegAt(Number(f.properties.t));
+  map.getSource('w-leg').setData({ type:'FeatureCollection', features:L.segs });
+  worldOpenCard(worldLegCard(L), { kind:'trip', title: `${L.prev ? L.prev.name : 'start'} to ${L.next ? L.next.name : 'now'}` });
+}
+// ---- play ----
+function worldStop(){ WORLD.playing = false; cancelAnimationFrame(WORLD._play); document.querySelector('[data-wplay]')?.classList.remove('on'); }
+function worldPlay(from, to){
+  worldStop(); const max = WORLD.maxT || 1440; from = from == null ? (WORLD.T >= max - 2 ? 0 : WORLD.T) : from; to = to == null ? max : to;
+  if(reduceMotion()){ worldSetTime(to); return; }
+  WORLD.playing = true; document.querySelector('[data-wplay]')?.classList.add('on');
+  const span = Math.max(1, to - from), dur = Math.min(16000, Math.max(3000, span*12)), t0 = performance.now();
+  const step = now => { if(!WORLD.playing) return; const u = Math.min(1, (now - t0)/dur), T = from + span*u; worldApplyTime(T);
+    const you = worldYouAt(T); if(you && WORLD.map) WORLD.map.easeTo({ center:you, duration:0 });
+    if(u < 1) WORLD._play = requestAnimationFrame(step); else worldStop(); };
+  WORLD._play = requestAnimationFrame(step);
+}
+// ---- menu (the O, bottom-left) ----
+function worldMenuItems(){ const inArea = !!sheetArea;
+  return [ ...(inArea ? [['#/today','Map','🗺️']] : []), ['ask','Ask Otto','💬'], ['#/money','Money','💳'], ['#/body','Body','💪'], ['#/plan','Plan','🗓️'], ['#/more','More','⋯'] ]; }
+function worldToggleMenu(open){
+  const m = document.getElementById('wMenu'), o = document.getElementById('worldO'); open = open == null ? m.hidden : open; WORLD.menu = open;
+  if(open){ m.innerHTML = worldMenuItems().map(([k, t, ico], i)=>`<button type="button" class="w-mi" data-wmi="${k}" style="--i:${i}"><span aria-hidden="true">${ico}</span>${t}</button>`).join(''); m.hidden = false; requestAnimationFrame(()=>m.classList.add('show')); m.querySelector('button')?.focus({ preventScroll:true }); }
+  else { m.classList.remove('show'); m.hidden = true; }
+  o.setAttribute('aria-expanded', String(open)); o.classList.toggle('open', open); document.body.classList.toggle('w-menu-open', open);
+}
+// ---- events ----
+document.addEventListener('click', async e=>{
+  const o = e.target.closest('#worldO'); if(o){ hapticPulse(); worldToggleMenu(); return; }
+  const mi = e.target.closest('[data-wmi]'); if(mi){ const k = mi.dataset.wmi; worldToggleMenu(false); if(k === 'ask') openChatWith(''); else navigateTo(k); return; }
+  if(WORLD.menu && !e.target.closest('#wMenu')) worldToggleMenu(false);
+  if(!e.target.closest('#world')) return;
+  if(e.target.closest('[data-wretry]')){ document.getElementById('wFail').hidden = true; WORLD.failed = false; initWorld(); return; }
+  const dd = e.target.closest('[data-wday]'); if(dd){ const d = isoAddDays(WORLD.day, Number(dd.dataset.wday)); if(d > localToday()) return; hapticPulse(); worldShowDay(d, { fit:true }); return; }
+  if(e.target.closest('[data-wplay]')){ if(WORLD.playing) worldStop(); else worldPlay(); return; }
+  if(e.target.closest('[data-wfit]')){ worldFit(); return; }
+  const ly = e.target.closest('[data-wlayers]'); if(ly){ const p = document.getElementById('wLayers'), on = p.hidden; if(on) worldRenderLayers(); p.hidden = !on; ly.setAttribute('aria-expanded', String(on)); return; }
+  if(!e.target.closest('#wLayers') && !document.getElementById('wLayers').hidden){ document.getElementById('wLayers').hidden = true; document.querySelector('[data-wlayers]')?.setAttribute('aria-expanded', 'false'); }
+  const pin = e.target.closest('[data-wstop]'); if(pin){ const s = WORLD.data.stops[Number(pin.dataset.wstop)]; worldOpenCard(worldPlaceCard(s), { kind:'stop', i:s.i, code:s.v.code, title:s.name }); return; }
+  if(e.target.closest('[data-wclose]')){ worldCloseCard(); return; }
+  if(e.target.closest('[data-wask]')){ openChatWith(''); return; }
+  const go = e.target.closest('[data-wgo]'); if(go){ navigateTo(go.dataset.wgo); return; }
+  const tx = e.target.closest('[data-wtx]'); if(tx){ const t = WORLD.all.txns.find(x=>x.id === Number(tx.dataset.wtx)); if(t){ const d = t.authorized_date || t.transaction_date; if(d !== WORLD.day) await worldShowDay(d, { fit:false }); const b = WORLD.data.buys.find(x=>x.t.id === t.id); if(b){ WORLD.map.easeTo({ center:[b.lon, b.lat], zoom:16, duration: reduceMotion() ? 0 : 700 }); worldOpenCard(worldBuyCard(b), { kind:'purchase', i:b.i, code:'TX-' + t.id, title:t.merchant || t.description }); } } return; }
+  const rp = e.target.closest('[data-wreplay]'); if(rp){ const [a, b] = rp.dataset.wreplay.split(':').map(Number); worldPlay(a, b); return; }
+  if(e.target.closest('[data-wname]')){ const n = document.getElementById('wName'); n.hidden = false; const i = document.getElementById('wNameIn'); i.focus(); i.select(); return; }
+  const ns = e.target.closest('[data-wnamesave]'); if(ns){ const s = WORLD.data.stops[Number(ns.dataset.wnamesave)], name = (document.getElementById('wNameIn').value || '').trim(); if(!s || !name) return; ns.disabled = true;
+    try{ await ensureValidSession(); const loc = s.v.location_id && WORLD.all.locations.find(x=>x.id === s.v.location_id);
+      if(loc){ await patchRow('locations', loc.id, { name }); loc.name = name; }
+      else { const code = await nextCodeFor('locations', 'LOC'); const r = await fetch(`${SUPABASE_URL}/rest/v1/locations`, { method:'POST', headers: authHeaders({ 'Content-Type':'application/json', Prefer:'return=representation' }), body: JSON.stringify([{ code, name, lat:s.lat, lng:s.lon, radius_m:120, notes:'Named from the map' }]) });
+        if(!r.ok) throw new Error(`Supabase returned ${r.status}`); const nl = (await r.json())[0]; WORLD.all.locations.push(nl);
+        await patchRow('visits', s.v.id, { location_id: nl.id, status:'confirmed', place_name: name }); s.v.location_id = nl.id; }
+      s.v.place = name; await worldShowDay(WORLD.day, { fit:false, T:WORLD.T, quiet:true }); showNotice(`Saved “${name}”.`);
+    }catch(err){ ns.disabled = false; showNotice(`Couldn't save: ${err.message}`); } return; }
+  const nst = e.target.closest('[data-wnotstop]'); if(nst){ const id = Number(nst.dataset.wnotstop), v = WORLD.all.visits.find(x=>x.id === id); if(!v) return;
+    undoDelete({ label:`stop “${v.place || 'stop'}”`, hide: ()=>{ WORLD.all.visits = WORLD.all.visits.filter(x=>x !== v); worldShowDay(WORLD.day, { fit:false, T:WORLD.T, quiet:true }); },
+      restore: ()=>{ WORLD.all.visits.push(v); WORLD.all.visits.sort((a, b)=>a.arrived_at.localeCompare(b.arrived_at)); worldShowDay(WORLD.day, { fit:false, T:WORLD.T, quiet:true }); },
+      commit: async ()=>{ await ensureValidSession(); await patchRow('visits', id, { status:'declined' }); } }); return; }
+  const ct = e.target.closest('[data-wcat]'); if(ct){ const b = WORLD.sel && WORLD.data.buys[WORLD.sel.i]; if(!b) return; const old = b.t.category_id, nu = Number(ct.dataset.wcat); if(old === nu) return;
+    const apply = async (to)=>{ await ensureValidSession(); await patchRow('transactions', b.t.id, { category_id: to }); b.t.category_id = to; b.cat = spendCat(b.t); b.color = spendColor(b.cat); worldOpenCard(worldBuyCard(b), WORLD.sel); };
+    try{ await apply(nu); showNotice(`Moved to ${b.cat}. Tap to undo.`, async ()=>{ document.getElementById('ottoNotice')?.classList.remove('show'); try{ await apply(old); showNotice('Undone.'); }catch(err){ showNotice(`Couldn't undo: ${err.message}`); } }); }
+    catch(err){ showNotice(`Couldn't change it: ${err.message}`); } return; }
+});
+document.addEventListener('change', e=>{ const p = e.target.closest('[data-wpref]'); if(!p) return; WORLD.prefs[p.dataset.wpref] = p.checked; try{ localStorage.setItem('otto.world.layers', JSON.stringify(WORLD.prefs)); }catch(err){} worldApplyPrefs(); });
+document.addEventListener('input', e=>{ if(e.target.id !== 'wT') return; worldStop(); const v = Math.min(Number(e.target.value), WORLD.maxT || 1440); if(v !== Number(e.target.value)) e.target.value = String(Math.round(v)); worldSetTime(v); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape'){ if(WORLD.menu){ worldToggleMenu(false); document.getElementById('worldO')?.focus(); } else if(!sheetArea && !document.body.classList.contains('chatting') && !document.getElementById('wCard')?.hidden) worldCloseCard(); } });
+(function worldDaySwipe(){ let x0 = null; document.addEventListener('touchstart', e=>{ const t = e.target.closest('.w-barrow'); x0 = t ? e.touches[0].clientX : null; }, { passive:true });
+  document.addEventListener('touchend', e=>{ if(x0 == null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if(Math.abs(dx) < 50) return; const d = isoAddDays(WORLD.day, dx > 0 ? -1 : 1); if(d <= localToday()) worldShowDay(d, { fit:true }); }); })();
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState === 'visible' && WORLD.ready && WORLD.day === localToday() && !sheetArea){ WORLD.all = null; worldShowDay(WORLD.day, { fit:false, quiet:true }); } });
+
 // ---------- routes (#/money, #/car/2): reload lands where you were; edge-swipe and ‹ go back ----------
 let navDepth = 0, routing = false, popSkip = false, routeReady = false;
 const BOOT_HASH = location.hash;   // read before boot code redraws Home and rewrites the address
@@ -9438,7 +9920,7 @@ function currentRoute(){
   if(dayView.open) return '#/day/' + dayView.d;
   if(spendView.open) return '#/spend';
   if(calView.open) return '#/cal/' + calView.metric + '/' + calView.level + '/' + (calView.level === 'year' ? calView.y : calView.level === 'month' ? calView.m : calView.w);
-  if(!sheetArea) return '#/today';
+  if(!sheetArea) return WORLD.day && WORLD.day !== localToday() ? '#/map/' + WORLD.day : '#/today';
   if(sheetArea === 'life'){
     const k = lifeArea && LIFE[lifeArea] ? lifeKeyFor(lifeArea) : null; if(!k) return '#/more';
     if(lifeArea === 'documents'){ const t = DOC_TABS[docs.tab] || 'search'; return '#/documents' + (docs.open != null && docs.unlocked ? `/${t}/${docs.open}` : t !== 'search' ? '/' + t : ''); }
@@ -9457,7 +9939,7 @@ const routeParts = h => String(h || '').replace(/^#\/?/, '').split('/').filter(B
 function parentRoute(h){
   const [k, a, b, c] = routeParts(h);
   if(!k || k === 'today') return null;
-  if(k === 'day') return '#/today';
+  if(k === 'day' || k === 'map') return '#/today';
   if(k === 'spend') return '#/money';
   if(k === 'cal'){ if(b === 'week' && c) return `#/cal/${a}/month/${isoAddDays(c, 3).slice(0,7)}`; if(b === 'month' && c) return `#/cal/${a}/year/${c.slice(0,4)}`; return a === 'spend' ? '#/money' : '#/body'; }
   const area = ROUTE_ALIAS[k] || k;
@@ -9469,7 +9951,7 @@ function parentRoute(h){
   return '#/today';
 }
 function routeLabel(h){
-  const [k, a] = routeParts(h); if(!k || k === 'today' || k === 'home') return 'Home';
+  const [k, a] = routeParts(h); if(!k || k === 'today' || k === 'home' || k === 'map') return 'Map';
   if(k === 'all' || k === 'more' || k === 'life') return 'More';
   if(k === 'money') return a ? (MONEY_SEGS[a] || 'Money') : 'Money';
   if(k === 'cal'){ const [, m, lv, at] = routeParts(h); return lv === 'year' ? at : lv === 'month' ? new Date(at + '-15T12:00').toLocaleDateString(undefined, { month:'long' }) : 'Calendar'; }
@@ -9507,7 +9989,8 @@ function applyRoute(hash){
     if(calView.open) closeCal();
     if(k === 'spend'){ openSpendMap(true); return; }
     if(spendView.open) closeSpendMap();
-    if(!k || k === 'today' || !(AREAS2[k] || AREAS[k])){ openArea('today'); return; }
+    if(k === 'map' && /^\d{4}-\d{2}-\d{2}$/.test(sec || '')){ openArea('today'); if(WORLD.day !== sec){ WORLD.day = sec; if(WORLD.ready) worldShowDay(sec, { fit:true, quiet:true }); } return; }
+    if(!k || k === 'today' || !(AREAS2[k] || AREAS[k])){ openArea('today'); if(WORLD.day && WORLD.day !== localToday()){ WORLD.day = localToday(); if(WORLD.ready) worldShowDay(WORLD.day, { fit:true, quiet:true }); } return; }
     if(k === 'all'){ if(!(sheetArea === 'life' && !lifeArea)) openArea('all'); return; }
     if(AREAS2[k] && AREAS2[k].life){
       if(!(sheetArea === 'life' && lifeArea === AREAS2[k].life)) openArea(k);
@@ -9561,6 +10044,7 @@ function showApp(){
   try{ if(paintFromCache()) setTimeout(()=>{ if(homeCachedAt){ homeCachedAt = null; window.__freshData = true; try{ renderIa2Home(); }catch(e){} } }, 15000); }catch(e){}
   try{ applyBg(); }catch(e){ console.error('background', e); }
   bootApp();
+  initWorld();
   try{ const h = BOOT_HASH && BOOT_HASH !== '#/today' ? BOOT_HASH : '#/today'; history.replaceState({ otto:0 }, '', h); if(h !== '#/today') applyRoute(h); }catch(e){ console.error('route', e); }
   routeReady = true; try{ history.replaceState({ otto:0 }, '', currentRoute()); }catch(e){}
 }

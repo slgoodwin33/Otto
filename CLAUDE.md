@@ -5,7 +5,7 @@ Frontend: one file, `index.html` (vanilla JS + Leaflet), served by GitHub Pages 
 Backend: Supabase project **"Personal Database"**, ref **`qqsexwiqhaaimxuswsei`** (Postgres + RLS, Storage, Edge Functions, pg_cron).
 Owner: Samuel, GIS analyst for the City of Beverly, MA. He uses it daily on an iPhone as a home-screen web app.
 
-Current build: **2026-11-18.106** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
+Current build: **2026-11-20.107** (`const APP_BUILD` in index.html). Bump it on every change: `YYYY-MM-DD.N`.
 
 ## Workflow (agreed Nov 10)
 - **Chat is the assistant** (research, planning, data entry in Supabase). **Code sessions do all code** and app-affecting schema work.
@@ -38,8 +38,8 @@ All 9 are in the repo (`supabase/functions/<name>/`), saved from the deployed ve
 Secrets live in Supabase (Edge Function secrets and table `app_secrets`). `verify_jwt` is true for user-facing functions, false for ingest webhooks (they check their own keys).
 
 ## App structure (index.html)
-- IA v2: five-slot floating dock = **Home + up to 3 pinned areas + More** (default pins Money, Body, Plan; localStorage `otto.dock`), collapses to a pill on scroll. The green **Otto ring** button opens chat (search / ask / add).
-- **Home** = widget grid (smart top card by time of day, Needs you, Steps, Last stop mini-map, Next, Kitchen, Sleep, Recurring; editable: show/hide, Small/Wide, order, sort by use). Instant open from `otto.homecache`.
+- **Map-first (since .107, TD-00157):** home is a full-screen 3D map of one day (`WORLD`, `initWorld`, `worldShowDay`): MapLibre GL `5.24.0` from unpkg, OpenFreeMap `styles/dark` recolored (no key), AWS terrarium terrain, 3D buildings. Layers: route by speed with replay, stop pillars (height = time), purchase pins (size = amount), sun-driven lighting. Time scrubber + day arrows/swipe at the bottom; tap a feature → card (place / purchase / trip). Routes `#/today` and `#/map/YYYY-MM-DD`. The old Home widgets and dock are hidden (code still there).
+- The lime **O** (bottom-left, `#worldO`) opens the menu: Ask Otto, Money, Body, Plan, More (+ Map when an area is open). Areas open as full sheets over the map with `‹ Map`.
 - **More** launcher (`#/more`, old `#/all` / `#/life` redirect) → every area as a full tab with section tabs, plus Settings (Account).
 - **Routes** (.103): `#/area/section/record`; Back = one level up the address (`parentRoute`), `navigateTo(hash)` for links. Areas are declared in the `LIFE` config (`tabs: [{ title, section } | { title, render }]`).
 - Areas: Money (Week+pace, Transactions, Recurring, Accounts), Plan, Body (tabs from Health cards + Mood), Kitchen (stock, can-make, receipts), Places (map + one tabbed sheet: Timeline · Insights · Weather · Layers), Documents vault (passkey/Face ID lock, private bucket, full-text search), Closet (flat-lay outfit, background removal, laundry), Car (zone diagram, VIN/recalls), Apartments, People, Subscriptions, Trips, School, Drone.
