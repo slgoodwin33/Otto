@@ -1,5 +1,18 @@
 # Otto roadmap (handoff from Claude chat, Oct 29 2026)
 
+## Just shipped — builds .107–.109 (Nov 20): the map is home (TD-00157)
+Samuel retired the dashboard Home; the blueprint tasks (TD-00078/79/82/86/87/116) are paused (someday).
+- .107 Full-screen 3D map of one day (MapLibre 5.24.0 + free OpenFreeMap dark style + AWS terrain + 3D buildings):
+  route by speed with replay, stop pillars (height = time), purchase pins (size = $, color = category), time scrubber,
+  sun-driven lighting, cards for places / purchases / trips, the O menu bottom-left, `#/map/YYYY-MM-DD`.
+- .108 Worn-path heat, fog of war, 90-day money hexes, zones with totals, 4-week day picker colored by steps.
+- .109 Day card (weather, plan vs actual, workouts), Open-Meteo weather in the clock + rain/snow/fog on the map,
+  workouts traced in pink on the route, last week / last year ghost routes, people / fuel / service / apartment markers,
+  trips found from location history (>60 km from home) as arcs on a globe.
+- Data gaps that limit layers today: OwnTracks was off until Nov 20 12:58 PM (now in Move mode); no fuel / service /
+  apartment / trips rows yet; calendar events have no locations (calendar-sync still waits on secrets).
+- Ideas not built yet: native iPhone wrapper (Capacitor) for background location; Google photorealistic 3D fly-over.
+
 ## Just shipped — builds .96–.101 (Nov 18): more Otto development tasks
 - .96 TD-00080: design tokens in `:root`; DB security-advisor fixes (TD-00099/100/102, migration `20261118_security_advisor_fixes`).
 - .97 TD-00119: bills show Paid from `v_bill_status` (Money week "Paid lately", Recurring "✓ Paid", Plan, Since strip).

@@ -609,6 +609,26 @@ body{background:var(--bg); color:var(--text); font-family:var(--sans);}
   .w-act:focus-visible, .w-row:focus-visible, .w-chip:focus-visible, .w-card-x:focus-visible, .w-step:focus-visible, .w-play:focus-visible, .w-sum:focus-visible, .w-iconbtn:focus-visible{outline:2px solid var(--c-accent); outline-offset:2px;}
   .w-name{display:flex; gap:8px; margin-top:14px;} .w-name[hidden]{display:none;} .w-name input{flex:1; min-height:var(--tap); border-radius:12px; border:1px solid var(--c-border); background:var(--c-surface-2); color:var(--c-text); padding:0 12px; font:inherit; font-size:16px;}
   .w-fail{position:absolute; left:20px; right:20px; top:40%; z-index:6; border-radius:20px; padding:18px; display:flex; flex-direction:column; gap:8px; align-items:flex-start; color:var(--c-text);} .w-fail[hidden]{display:none;} .w-fail span{color:var(--c-text-2); font-size:var(--fs-caption);}
+  .tk-wk{background:#FF5C8A; border-radius:3px; opacity:.9; height:3px !important; top:auto !important; bottom:0 !important;}
+  .w-planrow{position:absolute; left:0; right:0; top:4px; height:5px;} .w-planrow[hidden]{display:none;}
+  .w-planrow i{position:absolute; top:0; bottom:0; border-radius:3px; border:1px solid rgba(180,140,255,.8); background:rgba(180,140,255,.18);}
+  .w-wx{position:absolute; inset:0; pointer-events:none; z-index:2; opacity:0; transition:opacity .6s ease;}
+  .w-wx.rain{background-image:repeating-linear-gradient(105deg, rgba(170,200,255,.0) 0 14px, rgba(170,200,255,.28) 14px 15px, rgba(170,200,255,0) 15px 31px); background-size:200% 200%; animation:wRain .5s linear infinite;}
+  .w-wx.snow{background-image:radial-gradient(rgba(255,255,255,.7) 1.2px, transparent 1.6px), radial-gradient(rgba(255,255,255,.5) 1px, transparent 1.4px); background-size:38px 38px, 61px 61px; animation:wSnow 6s linear infinite;}
+  .w-wx.fog, .w-wx.cloud{background:radial-gradient(80% 50% at 30% 30%, rgba(190,200,210,.35), transparent 70%), radial-gradient(70% 45% at 75% 60%, rgba(190,200,210,.28), transparent 70%); animation:wDrift 18s ease-in-out infinite alternate;}
+  @keyframes wRain{to{background-position:-60px 120px;}} @keyframes wSnow{to{background-position:20px 380px, -30px 610px;}} @keyframes wDrift{to{transform:translateX(30px);}}
+  @media (prefers-reduced-motion:reduce){ .w-wx{animation:none !important;} }
+  .w-life{all:unset; box-sizing:border-box; cursor:pointer; min-width:30px; height:30px; padding:0 6px; border-radius:15px; display:inline-flex; align-items:center; justify-content:center; gap:4px; font-size:14px; background:rgba(14,16,13,.9); border:1px solid rgba(255,255,255,.18); color:var(--c-text);}
+  .w-life.person{background:#F2B8C6; color:#3A1020; font-weight:700; border-color:#0B0C0A; box-shadow:0 0 0 2px rgba(242,184,198,.35);}
+  .w-life b{font-size:11px;} .w-life:focus-visible{outline:2px solid var(--c-accent);}
+  .w-pin.trip{border-color:rgba(215,255,61,.5);} .world.far .w-pin.trip .w-pin-txt{display:flex;} .world.far .w-pin.trip{padding:3px 10px 3px 4px;}
+  .world.globe .w-bar, .world.globe .w-pin:not(.trip), .world.globe .w-life{display:none;}
+  .w-globebtn{width:100%; justify-content:center; margin:10px 0 2px;}
+  .w-pvas{display:flex; flex-direction:column; border-radius:14px; overflow:hidden; background:var(--c-surface-2);}
+  .w-pva{all:unset; box-sizing:border-box; cursor:pointer; display:grid; grid-template-columns:64px 1fr auto; gap:8px; align-items:center; min-height:var(--tap); padding:6px 12px; border-bottom:1px solid var(--c-border); font-size:var(--fs-caption);}
+  .w-pva:last-child{border-bottom:0;} .w-pva:focus-visible{outline:2px solid var(--c-accent); outline-offset:-2px;}
+  .w-pva-t{color:var(--c-text-2); font-variant-numeric:tabular-nums;} .w-pva-p{color:var(--c-text);} .w-pva-a{color:var(--c-text-2); text-align:right; max-width:130px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .w-pva-a.ok{color:var(--c-accent); font-weight:var(--fw-strong);} .w-pva-a.move{color:#E8AC45;}
   @media (prefers-reduced-motion:reduce){ .w-card, .w-mi, .w-o, .w-tint, .w-pin{transition:none !important;} }
   @media (min-width:900px){ .w-card{left:auto; right:16px; width:400px; bottom:120px;} .w-bar{left:100px; right:auto; width:min(720px, calc(100vw - 120px));} }
   .otto-notice .nt-act{color:var(--c-accent); font-weight:var(--fw-strong); margin-left:6px; padding-left:10px; border-left:1px solid var(--c-border);}
@@ -2709,7 +2729,7 @@ const SUPABASE_KEY = 'sb_publishable_sP5r-i7mnqziZGqalP_M2A_XekLpolS';
 const CACHE_KEY = 'todo_ledger_cache_v1';
 const AUTH_KEY = 'todo_ledger_session_v1';
 const BUILD_SEEN_KEY = 'todo_ledger_newest_build_seen_v1';
-const APP_BUILD = '2026-11-20.108';
+const APP_BUILD = '2026-11-20.109';
 
 function checkBuildFreshness(){
   const tag = document.getElementById('buildTag');
@@ -9573,7 +9593,7 @@ const wDur = m => { m = Math.round(m); return m < 60 ? `${m} min` : `${Math.floo
 const wMiles = km => (km*0.621371).toFixed(km < 16 ? 1 : 0) + ' mi';
 function wCircle(lon, lat, rM, n = 28){ const out = [], dLat = rM/111320, dLon = rM/(111320*Math.cos(lat*Math.PI/180)); for(let i = 0; i <= n; i++){ const a = i/n*2*Math.PI; out.push([lon + Math.cos(a)*dLon, lat + Math.sin(a)*dLat]); } return out; }
 function wPlaceKind(name){ const n = String(name || '').toLowerCase();
-  if(/home|mom|dad|house|apartment/.test(n)) return ['home','🏠']; if(/work|office|city hall/.test(n)) return ['work','💼']; if(/ymca|gym|fitness|planet/.test(n)) return ['gym','🏋️'];
+  if(/hannah|friend|grandma|grandpa|aunt|uncle|cousin/.test(n)) return ['people','💛']; if(/home|mom|dad|house|apartment/.test(n)) return ['home','🏠']; if(/work|office|city hall/.test(n)) return ['work','💼']; if(/ymca|gym|fitness|planet/.test(n)) return ['gym','🏋️'];
   if(/market|basket|store|target|walmart|costco|shop|cvs|walgreens/.test(n)) return ['shop','🛒']; if(/dunkin|coffee|starbucks|cafe|restaurant|pizza|grill|tavern|pub|bar|kitchen|diner/.test(n)) return ['food','🍽️'];
   if(/hannah|friend|grandma|aunt|uncle/.test(n)) return ['people','💛']; if(/gas|shell|mobil|sunoco|exxon|citgo/.test(n)) return ['fuel','⛽']; return ['place','📍']; }
 
@@ -9645,15 +9665,15 @@ async function worldFetchStyle(){
 function worldBuildDom(){
   if(document.getElementById('world')) return;
   const w = document.createElement('div'); w.id = 'world'; w.className = 'world';
-  w.innerHTML = `<div id="wMap" class="w-map" role="region" aria-label="Map of your day"></div><div class="w-tint" id="wTint" aria-hidden="true"></div>
-    <div class="w-top"><button type="button" class="w-sum" id="wSum" data-wfit aria-label="Fit the whole day"><b id="wSumDay">Today</b><span id="wSumLine">Loading your day…</span></button>
+  w.innerHTML = `<div id="wMap" class="w-map" role="region" aria-label="Map of your day"></div><div class="w-tint" id="wTint" aria-hidden="true"></div><div class="w-wx" id="wWx" aria-hidden="true"></div>
+    <div class="w-top"><button type="button" class="w-sum" id="wSum" data-wdaycard aria-label="Your day: weather, plan vs actual, workouts"><b id="wSumDay">Today</b><span id="wSumLine">Loading your day…</span></button>
       <button type="button" class="w-iconbtn" data-wlayers aria-label="Map layers" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></svg></button></div>
     <div class="w-layers" id="wLayers" hidden></div>
     <section class="w-card" id="wCard" hidden aria-live="polite"></section>
     <div class="w-bar" id="wBar">
       <div class="w-barrow"><button type="button" class="w-step" data-wday="-1" aria-label="Previous day">‹</button><button type="button" class="w-daylbl" id="wDayLbl" data-wdays aria-expanded="false" aria-controls="wDays"></button><button type="button" class="w-step" data-wday="1" aria-label="Next day">›</button>
         <span class="w-time" id="wTime"></span><button type="button" class="w-play" data-wplay aria-label="Play the day"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4v16l13-8z" fill="currentColor"/></svg></button></div>
-      <div class="w-track"><div class="w-ticks" id="wTicks" aria-hidden="true"></div><input type="range" id="wT" min="0" max="1440" step="1" value="1440" aria-label="Time of day"></div>
+      <div class="w-track"><div class="w-planrow" id="wPlanRow" hidden aria-hidden="true"></div><div class="w-ticks" id="wTicks" aria-hidden="true"></div><input type="range" id="wT" min="0" max="1440" step="1" value="1440" aria-label="Time of day"></div>
     </div>
     <div class="w-days" id="wDays" hidden role="group" aria-label="Pick a day"></div>
     <div class="w-fail" id="wFail" hidden></div>`;
@@ -9673,7 +9693,7 @@ async function initWorld(){
     WORLD.map = map;
     map.on('error', e=>{ if(e && e.error && !/tile|404|Failed to fetch|NetworkError|sprite|glyph/i.test(String(e.error.message || e.error))) console.warn('map', e.error); });
     await new Promise(res=>{ let done = false; const go = ()=>{ if(!done){ done = true; res(); } }; map.once('style.load', go); map.once('load', go); setTimeout(()=>{ if(map.isStyleLoaded && map.getStyle()) go(); }, 6000); });   // a missing sprite or glyph mustn't keep the map blank
-    worldAddLayers(); worldAddLayers2(); WORLD.ready = true; worldApplyPrefs(); worldRefreshHistoryLayers().then(worldSummary).catch(e=>console.warn('history layers', e));
+    worldAddLayers(); worldAddLayers2(); worldAddLayers3(); WORLD.ready = true; worldApplyPrefs(); worldRefreshHistoryLayers().then(worldSummary).catch(e=>console.warn('history layers', e)); Promise.all([worldLoadLife(), worldLoadAll()]).then(worldRenderLife).catch(e=>console.warn('life markers', e));
     map.on('click', worldOnMapClick);
     ['w-buy','w-pillar','w-route-hit'].forEach(id=>{ map.on('mouseenter', id, ()=>{ map.getCanvas().style.cursor = 'pointer'; }); map.on('mouseleave', id, ()=>{ map.getCanvas().style.cursor = ''; }); });
     map.on('zoom', ()=> document.getElementById('world')?.classList.toggle('far', map.getZoom() < 12.2));
@@ -9699,7 +9719,7 @@ function worldAddLayers(){
   map.addLayer({ id:'w-you', type:'circle', source:'w-you', paint:{ 'circle-radius':7, 'circle-color':'#D7FF3D', 'circle-stroke-color':'#0B0C0A', 'circle-stroke-width':3, 'circle-pitch-alignment':'map' } });
 }
 async function worldShowDay(d, opt = {}){
-  WORLD.day = d; worldCloseCard(true); worldStop();
+  WORLD.day = d; WORLD.extras = { d:null, plan:[], workouts:[], ghosts:[] }; worldCloseCard(true); worldStop();
   const lbl = document.getElementById('wDayLbl'), isToday = d === localToday();
   const dayName = isToday ? 'Today' : d === isoAddDays(localToday(), -1) ? 'Yesterday' : new Date(d + 'T12:00').toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
   if(lbl) lbl.textContent = isToday ? 'Today' : new Date(d + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' }); const sd = document.getElementById('wSumDay'); if(sd) sd.textContent = dayName;
@@ -9713,12 +9733,14 @@ async function worldShowDay(d, opt = {}){
   worldRenderTicks(); worldSetData(); worldSetTime(WORLD.T);
   if(opt.fit !== false) worldFit();
   if(!opt.quiet) syncRoute();
+  worldLoadExtras(d).then(()=>{ if(WORLD.day === d) worldRenderExtras(); }).catch(e=>console.warn('day extras', e));
 }
 function worldSummary(){
   const data = WORLD.data, el = document.getElementById('wSumLine'); if(!data || !el) return; const parts = [], st = WORLD.hist && WORLD.hist.steps[data.d];
   if(data.stops.length) parts.push(`${data.stops.length} stop${data.stops.length === 1 ? '' : 's'}`);
   if(data.km > .1) parts.push(wMiles(data.km));
   if(st != null) parts.push(`${(st/1000).toFixed(st < 10000 ? 1 : 0)}k steps`);
+  const wx = WORLD.extras && WORLD.extras.d === data.d && WORLD.extras.wx; if(wx && wx.hi != null) parts.unshift(`${(WX[wx.dcode] || ['🌡️'])[0]} ${Math.round(wx.hi)}°`);
   if(data.spent) parts.push(money(data.spent) + ' spent');
   el.textContent = parts.length ? parts.join(' · ') : (data.pts.length ? 'You stayed put' : 'No location recorded this day');
 }
@@ -9763,6 +9785,7 @@ function worldApplyTime(T){
   const t = document.getElementById('wTime'), L = worldLightAt(T); if(t){ t.textContent = `${{ Night:'🌙', Twilight:'🌆', Sunrise:'🌅', 'Golden hour':'🌇', Daylight:'☀️' }[L.phase]} ${T >= 1439.5 ? 'End of day' : wClock(T)}`; t.setAttribute('aria-label', `${T >= 1439.5 ? 'End of day' : wClock(T)}, ${L.phase}`); }
   const inp = document.getElementById('wT'); if(inp && Number(inp.value) !== Math.round(T)) inp.value = String(Math.round(T));
   worldApplyLight(L);
+  worldApplyTime3(T);
 }
 function worldApplyLight(L){
   const map = WORLD.map; if(!map) return; if(!WORLD.prefs.light) L = Object.assign({}, W_LIGHT.day, { tint:0, sun:{ az:210, alt:45 } });
@@ -9775,7 +9798,8 @@ function worldRenderTicks(){
   el.innerHTML = data.stops.map(s=>`<i class="tk-stop ${s.kind}" style="left:${pct(s.m0)};width:${pct(Math.max(4, s.m1 - s.m0))}"></i>`).join('')
     + data.buys.filter(b=>b.tm >= 0).map(b=>`<i class="tk-buy" style="left:${pct(b.tm)};background:${b.color}"></i>`).join('')
     + [6, 12, 18].map(h=>`<i class="tk-hr" style="left:${pct(h*60)}"></i>`).join('')
-    + (WORLD.maxT < 1440 ? `<i class="tk-future" style="left:${pct(WORLD.maxT)}"></i>` : '');
+    + (WORLD.maxT < 1440 ? `<i class="tk-future" style="left:${pct(WORLD.maxT)}"></i>` : '') + worldExtraTicks();
+  worldPlanRow();
 }
 function worldApplyPrefs(){
   const map = WORLD.map, P = WORLD.prefs; if(!map) return;
@@ -9788,9 +9812,9 @@ function worldApplyPrefs(){
 }
 function worldRenderLayers(){
   const el = document.getElementById('wLayers'), P = WORLD.prefs;
-  const rows = [['route','Route','by speed: walk, town, drive'], ['stops','Stops','pillar height = time spent'], ['money','Purchases','size = amount'], ['buildings','3D buildings',''], ['terrain','Terrain','hills and valleys'], ['light','Time-of-day light','follows the sun'], ['worn','Worn paths','everywhere you go, brighter = recent'], ['fog','Fog of war','unexplored areas stay dark'], ['hexes','Money hexes','90 days of spending, height = dollars'], ['zones','Zones','your drawn areas with 90-day totals']];
+  const rows = [['route','Route','by speed: walk, town, drive'], ['stops','Stops','pillar height = time spent'], ['money','Purchases','size = amount'], ['buildings','3D buildings',''], ['terrain','Terrain','hills and valleys'], ['light','Time-of-day light','follows the sun'], ['worn','Worn paths','everywhere you go, brighter = recent'], ['fog','Fog of war','unexplored areas stay dark'], ['hexes','Money hexes','90 days of spending, height = dollars'], ['zones','Zones','your drawn areas with 90-day totals'], ['life','People, car & homes','people at their places, fuel and service stops, apartments'], ['wx','Weather','temperature in the clock, rain and snow on the map'], ['ghostWeek','Last week','same day last week as a dashed line'], ['ghostYear','Last year','this day last year (fills in from next fall)']];
   el.innerHTML = `<div class="w-lay-head">Layers</div>` + rows.map(([k, t, s])=>`<label class="w-lay"><input type="checkbox" data-wpref="${k}" ${P[k] ? 'checked' : ''}><span><b>${t}</b>${s ? `<i>${s}</i>` : ''}</span></label>`).join('')
-    + `<div class="w-legend">${Object.entries(W_MODE).filter(([k])=>k !== 'still').map(([k, c])=>`<span><i style="background:${c}"></i>${W_MODE_LABEL[k]}</span>`).join('')}</div>`;
+    + `<button type="button" class="w-act w-globebtn" data-wglobe>${WORLD.globe ? 'Back to the day' : '🌍 Trips on the globe'}</button><div class="w-legend">${Object.entries(W_MODE).filter(([k])=>k !== 'still').map(([k, c])=>`<span><i style="background:${c}"></i>${W_MODE_LABEL[k]}</span>`).join('')}</div>`;
 }
 
 // ---- cards ----
@@ -9853,6 +9877,7 @@ function worldOnMapClick(e){
   if(f.layer.id === 'w-pillar'){ const s = WORLD.data.stops[f.properties.i]; worldOpenCard(worldPlaceCard(s), { kind:'stop', i:s.i, code: s.v.code, title: s.name }); return; }
   if(f.layer.id === 'w-hex'){ const b = WORLD.hexBins[f.properties.i]; worldOpenCard(worldHexCard(b), { kind:'spending block', title: money(b.sum) + ' over ' + W_HEX_DAYS + ' days' }); return; }
   if(f.layer.id === 'w-zone-fill'){ const z = WORLD.zoneSums[f.properties.i]; worldOpenCard(worldZoneCard(z), { kind:'zone', code: z.z.code, title: z.z.name }); return; }
+  if(f.properties.wk != null && WORLD.extras.workouts && WORLD.extras.workouts[f.properties.wk]){ const o = WORLD.extras.workouts[f.properties.wk]; worldOpenCard(worldWorkoutCard(o), { kind:'workout', code:o.w.code, title:o.w.activity_type }); return; }
   const L = worldLegAt(Number(f.properties.t));
   map.getSource('w-leg').setData({ type:'FeatureCollection', features:L.segs });
   worldOpenCard(worldLegCard(L), { kind:'trip', title: `${L.prev ? L.prev.name : 'start'} to ${L.next ? L.next.name : 'now'}` });
@@ -9888,6 +9913,7 @@ document.addEventListener('click', async e=>{
   const dd = e.target.closest('[data-wday]'); if(dd){ const d = isoAddDays(WORLD.day, Number(dd.dataset.wday)); if(d > localToday()) return; hapticPulse(); worldShowDay(d, { fit:true }); return; }
   if(e.target.closest('[data-wplay]')){ if(WORLD.playing) worldStop(); else worldPlay(); return; }
   if(e.target.closest('[data-wfit]')){ worldFit(); return; }
+  if(e.target.closest('[data-wdaycard]')){ if(WORLD.globe){ worldGlobe(false); return; } if(WORLD.data) worldOpenCard(worldDayCard(), { kind:'day', title: WORLD.day }); return; }
   const ly = e.target.closest('[data-wlayers]'); if(ly){ const p = document.getElementById('wLayers'), on = p.hidden; if(on) worldRenderLayers(); p.hidden = !on; ly.setAttribute('aria-expanded', String(on)); return; }
   if(!e.target.closest('#wLayers') && !document.getElementById('wLayers').hidden){ document.getElementById('wLayers').hidden = true; document.querySelector('[data-wlayers]')?.setAttribute('aria-expanded', 'false'); }
   const pin = e.target.closest('[data-wstop]'); if(pin){ const s = WORLD.data.stops[Number(pin.dataset.wstop)]; worldOpenCard(worldPlaceCard(s), { kind:'stop', i:s.i, code:s.v.code, title:s.name }); return; }
@@ -9914,7 +9940,8 @@ document.addEventListener('click', async e=>{
     try{ await apply(nu); showNotice(`Moved to ${b.cat}. Tap to undo.`, async ()=>{ document.getElementById('ottoNotice')?.classList.remove('show'); try{ await apply(old); showNotice('Undone.'); }catch(err){ showNotice(`Couldn't undo: ${err.message}`); } }); }
     catch(err){ showNotice(`Couldn't change it: ${err.message}`); } return; }
 });
-document.addEventListener('change', e=>{ const p = e.target.closest('[data-wpref]'); if(!p) return; WORLD.prefs[p.dataset.wpref] = p.checked; try{ localStorage.setItem('otto.world.layers', JSON.stringify(WORLD.prefs)); }catch(err){} worldApplyPrefs(); });
+document.addEventListener('change', e=>{ const p = e.target.closest('[data-wpref]'); if(!p) return; const k = p.dataset.wpref; WORLD.prefs[k] = p.checked; try{ localStorage.setItem('otto.world.layers', JSON.stringify(WORLD.prefs)); }catch(err){} worldApplyPrefs();
+  if(['ghostWeek','ghostYear','wx'].includes(k) && WORLD.day) worldLoadExtras(WORLD.day).then(()=>worldRenderExtras()); if(k === 'life') worldRenderLife(); });
 document.addEventListener('input', e=>{ if(e.target.id !== 'wT') return; worldStop(); const v = Math.min(Number(e.target.value), WORLD.maxT || 1440); if(v !== Number(e.target.value)) e.target.value = String(Math.round(v)); worldSetTime(v); });
 document.addEventListener('keydown', e=>{ if(e.key === 'Escape'){ if(WORLD.menu){ worldToggleMenu(false); document.getElementById('worldO')?.focus(); } else if(!sheetArea && !document.body.classList.contains('chatting') && !document.getElementById('wCard')?.hidden) worldCloseCard(); } });
 (function worldDaySwipe(){ let x0 = null; document.addEventListener('touchstart', e=>{ const t = e.target.closest('.w-barrow'); x0 = t ? e.touches[0].clientX : null; }, { passive:true });
@@ -9938,7 +9965,7 @@ async function worldLoadHistory(force){
     if(!c) seen.set(k, { lat:Number(p.lat), lon:Number(p.lon), t, n:1 }); else { c.n++; if(t > c.t) c.t = t; } });
   const cells = [...seen.values()];
   const steps = {}; act.forEach(a=>{ if(a.steps != null) steps[a.activity_date] = Math.max(steps[a.activity_date] || 0, Number(a.steps)); });
-  WORLD.hist = { cells, zones: zones.filter(z=>z.geojson && z.geojson.coordinates), steps };
+  WORLD.hist = { cells, zones: zones.filter(z=>z.geojson && z.geojson.coordinates), steps, raw: pts.filter(p=>p.lat != null).map(p=>({ recorded_at:p.recorded_at, lat:Number(p.lat), lon:Number(p.lon) })) };
   WORLD.hist.worn = { type:'FeatureCollection', features: cells.map(c=>({ type:'Feature', properties:{ w: Math.max(.08, Math.exp(-(now - c.t)/864e5/45)) * Math.min(3, 1 + Math.log10(c.n)) }, geometry:{ type:'Point', coordinates:[c.lon, c.lat] } })) };
   return WORLD.hist;
 }
@@ -10032,6 +10059,217 @@ document.addEventListener('click', e=>{
   const dl = e.target.closest('[data-wdays]'); if(dl){ const el = document.getElementById('wDays'), on = el.hidden; if(on) worldRenderDays(); el.hidden = !on; dl.setAttribute('aria-expanded', String(on)); if(on) el.querySelector('.on, button')?.focus({ preventScroll:true }); return; }
   const pk = e.target.closest('[data-wpick]'); if(pk){ document.getElementById('wDays').hidden = true; document.querySelector('[data-wdays]')?.setAttribute('aria-expanded', 'false'); worldShowDay(pk.dataset.wpick, { fit:true }); return; }
   const dp = document.getElementById('wDays'); if(dp && !dp.hidden && !e.target.closest('#wDays')){ dp.hidden = true; document.querySelector('[data-wdays]')?.setAttribute('aria-expanded', 'false'); }
+});
+
+// ---- World layers, part 3 (.109): plan vs actual, weather, workouts, last week / last year, people, car, apartments, trips on the globe ----
+['life','wx'].forEach(k=>{ if(WORLD.prefs[k] == null) WORLD.prefs[k] = true; }); ['ghostWeek','ghostYear'].forEach(k=>{ if(WORLD.prefs[k] == null) WORLD.prefs[k] = false; });
+const WX = { 0:['☀️','Clear'], 1:['🌤️','Mostly clear'], 2:['⛅','Partly cloudy'], 3:['☁️','Overcast'], 45:['🌫️','Fog'], 48:['🌫️','Fog'], 51:['🌦️','Drizzle'], 53:['🌦️','Drizzle'], 55:['🌧️','Drizzle'], 56:['🌧️','Freezing drizzle'], 57:['🌧️','Freezing drizzle'],
+  61:['🌧️','Light rain'], 63:['🌧️','Rain'], 65:['🌧️','Heavy rain'], 66:['🌧️','Freezing rain'], 67:['🌧️','Freezing rain'], 71:['🌨️','Light snow'], 73:['🌨️','Snow'], 75:['❄️','Heavy snow'], 77:['🌨️','Snow grains'],
+  80:['🌦️','Showers'], 81:['🌧️','Showers'], 82:['⛈️','Heavy showers'], 85:['🌨️','Snow showers'], 86:['❄️','Snow showers'], 95:['⛈️','Thunderstorm'], 96:['⛈️','Thunderstorm'], 99:['⛈️','Thunderstorm'] };
+const wxKind = c => c == null ? '' : c >= 71 && c <= 77 || c === 85 || c === 86 ? 'snow' : (c >= 51 && c <= 67) || (c >= 80 && c <= 82) || c >= 95 ? 'rain' : c === 45 || c === 48 ? 'fog' : c === 3 ? 'cloud' : '';
+WORLD.extras = {}; WORLD.wxCache = {};
+async function worldLoadWeather(d){
+  if(WORLD.wxCache[d]) return WORLD.wxCache[d];
+  const data = WORLD.data, c = data && data.coords.length ? data.coords[Math.floor(data.coords.length/2)] : HOME_LL;
+  const old = d < isoAddDays(localToday(), -80), base = old ? 'https://archive-api.open-meteo.com/v1/archive' : 'https://api.open-meteo.com/v1/forecast';
+  try{ const r = await fetch(`${base}?latitude=${c[1].toFixed(3)}&longitude=${c[0].toFixed(3)}&hourly=temperature_2m,precipitation,weather_code,cloud_cover&daily=temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset&temperature_unit=fahrenheit&precipitation_unit=inch&timezone=America%2FNew_York&start_date=${d}&end_date=${d}`);
+    if(!r.ok) throw new Error(r.status); const j = await r.json(), h = j.hourly || {};
+    return WORLD.wxCache[d] = { temp: h.temperature_2m || [], rain: h.precipitation || [], code: h.weather_code || [], cloud: h.cloud_cover || [], hi: j.daily && j.daily.temperature_2m_max ? j.daily.temperature_2m_max[0] : null, lo: j.daily && j.daily.temperature_2m_min ? j.daily.temperature_2m_min[0] : null, dcode: j.daily && j.daily.weather_code ? j.daily.weather_code[0] : null };
+  }catch(e){ return null; }
+}
+async function worldLoadGhost(d, back){
+  const g = isoAddDays(d, -back), A = new Date(worldDayStart(g)).toISOString(), B = new Date(worldDayStart(g) + 864e5).toISOString();
+  try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/location_points?select=recorded_at,lat,lon&recorded_at=gte.${encodeURIComponent(A)}&recorded_at=lt.${encodeURIComponent(B)}&order=recorded_at.asc&limit=20000`, { headers: authHeaders() });
+    const s0 = worldDayStart(g), pts = (r.ok ? await r.json() : []).filter(p=>{ const t = Date.parse(p.recorded_at); return t >= s0 && t < s0 + 864e5; });
+    const lines = []; let cur = [];
+    pts.forEach((p, i)=>{ const q = pts[i-1]; if(q && (Date.parse(p.recorded_at) - Date.parse(q.recorded_at) > 25*60000)){ if(cur.length > 1) lines.push(cur); cur = []; } cur.push([Number(p.lon), Number(p.lat)]); });
+    if(cur.length > 1) lines.push(cur); return { date:g, lines };
+  }catch(e){ return { date:g, lines:[] }; }
+}
+async function worldLoadExtras(d){
+  const H = { headers: authHeaders() }, A = new Date(worldDayStart(d)).toISOString(), B = new Date(worldDayStart(d) + 864e5).toISOString(), P = WORLD.prefs;
+  const [plan, wk, wx, gw, gy] = await Promise.all([
+    loadDayPlan(d).catch(()=>[]),
+    fetch(`${SUPABASE_URL}/rest/v1/workouts?select=id,code,activity_type,start_time,end_time,duration_seconds,active_energy_kcal,distance_qty,distance_unit,avg_heart_rate&start_time=gte.${encodeURIComponent(A)}&start_time=lt.${encodeURIComponent(B)}&order=start_time.asc`, H).then(r=>r.ok ? r.json() : []).catch(()=>[]),
+    P.wx ? worldLoadWeather(d) : null, P.ghostWeek ? worldLoadGhost(d, 7) : null, P.ghostYear ? worldLoadGhost(d, 365) : null ]);
+  const s0 = worldDayStart(d);
+  const workouts = (wk || []).filter(w=>{ const t = Date.parse(w.start_time); return t >= s0 && t < s0 + 864e5; }).map(w=>{ const m0 = wMin(w.start_time, d), m1 = w.end_time ? wMin(w.end_time, d) : m0 + (Number(w.duration_seconds) || 0)/60; return { w, m0, m1 }; });
+  WORLD.extras = { d, plan: (plan || []).filter(p=>p.plan_date === d || !p.plan_date), workouts, wx, ghosts:[gw, gy].filter(Boolean) };
+  return WORLD.extras;
+}
+const wHm = t => { const [h, m] = String(t || '0:0').split(':').map(Number); return h*60 + (m || 0); };
+function worldRenderExtras(){
+  const map = WORLD.map, data = WORLD.data, X = WORLD.extras; if(!map || !data || X.d !== data.d) return;
+  // workouts: mark the route segments inside each workout
+  data.segs.forEach(f=>{ const i = X.workouts.findIndex(o=>f.properties.t >= o.m0 && f.properties.t0 <= o.m1); if(i >= 0) f.properties.wk = i; else delete f.properties.wk; });
+  map.getSource('w-route').setData({ type:'FeatureCollection', features:data.segs });
+  map.getSource('w-ghost').setData({ type:'FeatureCollection', features: X.ghosts.flatMap(g=>g.lines.map(l=>({ type:'Feature', properties:{ y: g.date < isoAddDays(data.d, -100) ? 1 : 0 }, geometry:{ type:'LineString', coordinates:l } }))) });
+  worldRenderTicks(); worldSummary(); worldApplyTime(WORLD.T);
+  if(!document.getElementById('wCard').hidden && WORLD.sel && WORLD.sel.kind === 'day') worldOpenCard(worldDayCard(), WORLD.sel);
+}
+function worldAddLayers3(){
+  const map = WORLD.map, empty = { type:'FeatureCollection', features:[] };
+  ['w-ghost','w-arcs'].forEach(id=> map.addSource(id, { type:'geojson', data:empty }));
+  map.addLayer({ id:'w-ghost', type:'line', source:'w-ghost', layout:{ 'line-cap':'round', 'line-join':'round' }, paint:{ 'line-color':['case', ['==', ['get','y'], 1], '#B48CFF', '#8FB3C9'], 'line-width':2.5, 'line-dasharray':[1.5, 1.5], 'line-opacity':.75 } }, 'w-route-ghost');
+  map.addLayer({ id:'w-wk-glow', type:'line', source:'w-route', filter:['all', ['has','wk'], ['<=', ['get','t'], 1440]], layout:{ 'line-cap':'round' }, paint:{ 'line-color':'#FF5C8A', 'line-width':['interpolate',['linear'],['zoom'],10,8,16,20], 'line-blur':8, 'line-opacity':.5 } }, 'w-route-tail');
+  map.addLayer({ id:'w-wk', type:'line', source:'w-route', filter:['all', ['has','wk'], ['<=', ['get','t'], 1440]], layout:{ 'line-cap':'round' }, paint:{ 'line-color':'#FF5C8A', 'line-width':['interpolate',['linear'],['zoom'],10,2.5,16,5] } }, 'w-route-tail');
+  map.addLayer({ id:'w-arc-glow', type:'line', source:'w-arcs', layout:{ 'line-cap':'round', visibility:'none' }, paint:{ 'line-color':'#D7FF3D', 'line-width':8, 'line-blur':6, 'line-opacity':.35 } });
+  map.addLayer({ id:'w-arc', type:'line', source:'w-arcs', layout:{ 'line-cap':'round', visibility:'none' }, paint:{ 'line-color':'#D7FF3D', 'line-width':2 } });
+}
+function worldApplyTime3(T){
+  const map = WORLD.map; if(!map || !map.getLayer('w-wk')) return;
+  const f = ['all', ['has','wk'], ['<=', ['get','t'], T]]; map.setFilter('w-wk', f); map.setFilter('w-wk-glow', f);
+  const wx = WORLD.extras && WORLD.extras.d === WORLD.day ? WORLD.extras.wx : null, el = document.getElementById('wWx'), h = Math.min(23, Math.floor(T/60));
+  const kind = wx && WORLD.prefs.wx ? wxKind(wx.code[h]) : '';
+  if(el){ el.className = 'w-wx ' + kind; el.style.opacity = kind ? String(kind === 'cloud' ? .35 : .55) : '0'; }
+  const t = document.getElementById('wTime'); if(t && wx && wx.temp[h] != null && WORLD.prefs.wx){ t.textContent += ` · ${Math.round(wx.temp[h])}°`; t.setAttribute('aria-label', t.getAttribute('aria-label') + `, ${Math.round(wx.temp[h])} degrees, ${(WX[wx.code[h]] || ['', ''])[1]}`); }
+}
+function worldExtraTicks(){
+  const X = WORLD.extras, data = WORLD.data; if(!X || !data || X.d !== data.d) return '';
+  const pct = m => (Math.max(0, Math.min(1440, m))/1440*100).toFixed(2) + '%';
+  return X.workouts.map(o=>`<i class="tk-wk" style="left:${pct(o.m0)};width:${pct(Math.max(6, o.m1 - o.m0))}"></i>`).join('');
+}
+function worldPlanRow(){
+  const X = WORLD.extras, data = WORLD.data, el = document.getElementById('wPlanRow'); if(!el) return;
+  const pct = m => (Math.max(0, Math.min(1440, m))/1440*100).toFixed(2) + '%', plan = X && data && X.d === data.d ? X.plan : [];
+  el.innerHTML = plan.map(p=>{ const a = wHm(p.start_time), b = p.end_time ? wHm(p.end_time) : a + 30; return `<i style="left:${pct(a)};width:${pct(Math.max(5, b - a))}"></i>`; }).join('');
+  el.hidden = !plan.length;
+}
+// what you were actually doing at a minute of the day
+function worldActualAt(a, b){
+  const data = WORLD.data; let best = null, bestOv = 0;
+  data.stops.forEach(s=>{ const ov = Math.min(b, s.m1) - Math.max(a, s.m0); if(ov > bestOv){ bestOv = ov; best = s; } });
+  if(best && bestOv >= (b - a)*.4) return { kind:'stop', s:best, label: best.name };
+  const moving = data.segs.some(f=>f.properties.t >= a && f.properties.t <= b && f.properties.m !== 'still');
+  if(moving) return { kind:'move', label:'On the move' };
+  return { kind:'none', label: data.pts.length ? (best ? best.name : 'Somewhere else') : 'No location' };
+}
+function worldDayCard(){
+  const data = WORLD.data, X = WORLD.extras && WORLD.extras.d === data.d ? WORLD.extras : { plan:[], workouts:[], wx:null }, st = WORLD.hist && WORLD.hist.steps[data.d];
+  const dayName = new Date(data.d + 'T12:00').toLocaleDateString(undefined, { weekday:'long', month:'long', day:'numeric' }), wx = X.wx;
+  const match = (p, act) => { const k = String(p.kind || '').toLowerCase(), t = String(p.title || '').toLowerCase(); if(act.kind !== 'stop') return false;
+    return (k === 'gym' || /gym|workout|lift/.test(t)) ? act.s.kind === 'gym' : (k === 'work' || /work|office/.test(t)) ? act.s.kind === 'work' : /home|sleep|wake|bed/.test(t) ? act.s.kind === 'home' : /groc|store|shop/.test(t) ? act.s.kind === 'shop' : false; };
+  const rows = X.plan.map(p=>{ const a = wHm(p.start_time), b = p.end_time ? wHm(p.end_time) : a + 30, act = a <= WORLD.maxT ? worldActualAt(a, Math.min(b, WORLD.maxT)) : { kind:'later', label:'Later' }, ok = match(p, act);
+    return `<button type="button" class="w-pva" data-wseek="${a}"><span class="w-pva-t">${wClock(a)}</span><span class="w-pva-p">${esc(p.title)}</span><span class="w-pva-a ${ok ? 'ok' : act.kind}">${ok ? '✓ ' : ''}${esc(act.label)}</span></button>`; }).join('');
+  return `<div class="w-card-kicker">📅 ${data.d === localToday() ? 'Today' : 'Your day'}</div><h2 class="w-card-title">${dayName}</h2>
+    ${wx ? `<div class="w-card-sub">${(WX[wx.dcode] || ['', ''])[0]} ${(WX[wx.dcode] || ['', 'Weather'])[1]} · high ${Math.round(wx.hi)}° · low ${Math.round(wx.lo)}°</div>` : ''}
+    <div class="w-stats"><div><b>${data.km > .1 ? wMiles(data.km) : '—'}</b><span>traveled</span></div><div><b>${st != null ? st.toLocaleString() : '—'}</b><span>steps</span></div><div><b>${data.spent ? money(data.spent) : '—'}</b><span>spent</span></div></div>
+    ${X.workouts.length ? `<div class="w-sect">Workouts</div><div class="w-rows">${X.workouts.map((o, i)=>`<button type="button" class="w-row" data-wwk="${i}"><span>🏃 ${esc(String(o.w.activity_type || 'Workout').replace(/_/g, ' '))}<i>${wClock(o.m0)} · ${wDur(o.m1 - o.m0)}</i></span><b>${o.w.active_energy_kcal ? Math.round(o.w.active_energy_kcal) + ' kcal' : ''}</b></button>`).join('')}</div>` : ''}
+    ${rows ? `<div class="w-sect">Planned vs actual</div><div class="w-pvas">${rows}</div>` : `<div class="w-sect">Planned vs actual</div><p class="w-note">Nothing was planned for this day.</p>`}
+    <div class="w-acts"><button type="button" class="w-act" data-wplayday>Play the day</button><button type="button" class="w-act" data-wfitday>Fit on map</button><button type="button" class="w-act quiet" data-wask>Ask Otto</button></div>`;
+}
+function worldWorkoutCard(o){
+  const w = o.w, segs = WORLD.data.segs.filter(f=>f.properties.wk === WORLD.extras.workouts.indexOf(o)), km = segs.reduce((k, f)=>{ const [p, q] = f.geometry.coordinates; return k + haversineKm({ lat:p[1], lon:p[0] }, { lat:q[1], lon:q[0] }); }, 0);
+  const dist = w.distance_qty ? `${Number(w.distance_qty).toFixed(2)} ${w.distance_unit || 'mi'}` : km > .05 ? wMiles(km) : '—';
+  return `<div class="w-card-kicker"><i class="w-dot" style="background:#FF5C8A"></i>Workout</div><h2 class="w-card-title">${esc(String(w.activity_type || 'Workout').replace(/_/g, ' ').replace(/^./, c=>c.toUpperCase()))}</h2>
+    <div class="w-card-sub">${wClock(o.m0)} – ${wClock(o.m1)}</div>
+    <div class="w-stats"><div><b>${wDur(o.m1 - o.m0)}</b><span>time</span></div><div><b>${dist}</b><span>distance</span></div><div><b>${w.avg_heart_rate ? Math.round(w.avg_heart_rate) + ' bpm' : (w.active_energy_kcal ? Math.round(w.active_energy_kcal) + ' kcal' : '—')}</b><span>${w.avg_heart_rate ? 'avg heart rate' : 'active energy'}</span></div></div>
+    <div class="w-acts"><button type="button" class="w-act" data-wreplay="${o.m0}:${o.m1}">Replay it</button><button type="button" class="w-act" data-wgo="#/body">Body</button><button type="button" class="w-act quiet" data-wask>Ask Otto</button></div>`;
+}
+// ---- life markers: people at their places, car fuel & service stops, saved apartments ----
+async function worldLoadLife(){
+  if(WORLD.life) return WORLD.life;
+  const H = { headers: authHeaders() }, get = async (q)=>{ try{ const r = await fetch(`${SUPABASE_URL}/rest/v1/${q}`, H); return r.ok ? await r.json() : []; }catch(e){ return []; } };
+  const [fuel, svc, apts, trips] = await Promise.all([ get('fuel_logs?select=id,filled_on,odometer_miles,gallons,total_cents,price_per_gal_cents,station,transaction_id&order=filled_on.desc&limit=200'),
+    get('vehicle_services?select=id,service_on,kind,description,cost_cents,shop,transaction_id,next_due_on,next_due_miles&order=service_on.desc&limit=200'),
+    get('apartment_listings?select=id,title,address,lat,lon,rent_cents,beds,baths,sqft,available_on,url,status,pros,cons,commute_work_min,notes&lat=not.is.null&limit=200'),
+    get('trips?select=id,name,destination,start_on,end_on,status,budget_cents,lat,lon,notes&limit=200') ]);
+  return WORLD.life = { fuel, svc, apts, trips };
+}
+function worldLifeItems(){
+  const all = WORLD.all, L = WORLD.life; if(!all || !L) return [];
+  const txLL = id => { const t = all.txns.find(x=>x.id === id); return t ? [Number(t.location_lon), Number(t.location_lat)] : null; };
+  const out = [];
+  all.people.forEach(p=>{ const l = p.location_id && all.locations.find(x=>x.id === p.location_id); if(l && l.lat != null) out.push({ k:'person', ll:[Number(l.lng), Number(l.lat)], ico: (p.name || '?').trim()[0].toUpperCase(), label:p.name, r:p, loc:l }); });
+  L.fuel.forEach(f=>{ const ll = f.transaction_id && txLL(f.transaction_id); if(ll) out.push({ k:'fuel', ll, ico:'⛽', label: f.station || 'Fuel', r:f }); });
+  L.svc.forEach(s=>{ const ll = s.transaction_id && txLL(s.transaction_id); if(ll) out.push({ k:'service', ll, ico:'🔧', label: s.shop || s.kind || 'Service', r:s }); });
+  L.apts.forEach(a=>out.push({ k:'apartment', ll:[Number(a.lon), Number(a.lat)], ico:'🏢', label: a.rent_cents ? money(a.rent_cents).replace(/\.00$/, '') : (a.title || 'Apartment'), r:a }));
+  return out;
+}
+function worldRenderLife(){
+  (WORLD.lifeMarkers || []).forEach(m=>m.remove()); WORLD.lifeMarkers = []; if(!WORLD.map || !WORLD.prefs.life) return;
+  WORLD.lifeItems = worldLifeItems();
+  WORLD.lifeMarkers = WORLD.lifeItems.map((it, i)=>{ const el = document.createElement('button'); el.type = 'button'; el.className = 'w-life ' + it.k; el.dataset.wlife = String(i);
+    el.setAttribute('aria-label', `${it.k === 'person' ? '' : it.k + ': '}${it.label}`); el.innerHTML = `<span aria-hidden="true">${esc(it.ico)}</span>${it.k === 'apartment' ? `<b>${esc(it.label)}</b>` : ''}`;
+    return new maplibregl.Marker({ element:el, anchor:'center' }).setLngLat(it.ll).addTo(WORLD.map); });
+}
+function worldLifeCard(it){
+  const r = it.r, all = WORLD.all;
+  if(it.k === 'person'){ const visits = all.visits.filter(v=>v.location_id === it.loc.id), last = visits.length ? isoOf(visits[visits.length - 1].arrived_at) : null;
+    const bd = r.birthday ? (()=>{ const t = new Date(localToday() + 'T12:00'), b = new Date(t.getFullYear() + r.birthday.slice(4) + 'T12:00'); if(b < t) b.setFullYear(b.getFullYear() + 1); return Math.round((b - t)/864e5); })() : null;
+    return `<div class="w-card-kicker">💛 ${esc(r.relationship || 'Person')}</div><h2 class="w-card-title">${esc(r.name)}</h2><div class="w-card-sub">at ${esc(it.loc.name)}</div>
+      <div class="w-stats"><div><b>${visits.length}</b><span>visits</span></div><div><b>${last ? new Date(last + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' }) : '—'}</b><span>last there</span></div><div><b>${bd != null ? (bd === 0 ? 'Today!' : bd + ' days') : '—'}</b><span>to birthday</span></div></div>
+      <div class="w-acts"><button type="button" class="w-act" data-wgo="#/people">Open in People</button><button type="button" class="w-act" data-wask>Ask Otto</button></div>`; }
+  if(it.k === 'fuel') return `<div class="w-card-kicker">⛽ Fuel</div><h2 class="w-card-title">${esc(r.station || 'Fill-up')}</h2><div class="w-card-sub">${esc(r.filled_on || '')}</div>
+      <div class="w-stats"><div><b>${r.gallons ? Number(r.gallons).toFixed(1) + ' gal' : '—'}</b><span>gallons</span></div><div><b>${r.price_per_gal_cents ? money(r.price_per_gal_cents) : '—'}</b><span>per gallon</span></div><div><b>${r.total_cents ? money(r.total_cents) : '—'}</b><span>total</span></div></div>
+      <div class="w-acts"><button type="button" class="w-act" data-wgo="#/car">Open Car</button></div>`;
+  if(it.k === 'service') return `<div class="w-card-kicker">🔧 Car service</div><h2 class="w-card-title">${esc(r.description || r.kind || 'Service')}</h2><div class="w-card-sub">${esc(r.shop || '')} · ${esc(r.service_on || '')}</div>
+      <div class="w-stats"><div><b>${r.cost_cents ? money(r.cost_cents) : '—'}</b><span>cost</span></div><div><b>${r.next_due_on ? new Date(r.next_due_on + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' }) : '—'}</b><span>next due</span></div><div><b>${r.next_due_miles ? Number(r.next_due_miles).toLocaleString() : '—'}</b><span>due at mi</span></div></div>
+      <div class="w-acts"><button type="button" class="w-act" data-wgo="#/car">Open Car</button></div>`;
+  return `<div class="w-card-kicker">🏢 Apartment${r.status ? ' · ' + esc(r.status) : ''}</div><h2 class="w-card-title">${esc(r.title || r.address || 'Listing')}</h2><div class="w-card-sub">${esc(r.address || '')}</div>
+    <div class="w-stats"><div><b>${r.rent_cents ? money(r.rent_cents).replace(/\.00$/, '') : '—'}</b><span>rent</span></div><div><b>${r.beds != null ? r.beds + ' bd' : '—'}${r.baths != null ? ' · ' + r.baths + ' ba' : ''}</b><span>size</span></div><div><b>${r.commute_work_min != null ? r.commute_work_min + ' min' : '—'}</b><span>to work</span></div></div>
+    ${r.pros ? `<div class="w-sect">Pros</div><p class="w-note">${esc(r.pros)}</p>` : ''}${r.cons ? `<div class="w-sect">Cons</div><p class="w-note">${esc(r.cons)}</p>` : ''}
+    <div class="w-acts">${r.url ? `<a class="w-act" href="${esc(r.url)}" target="_blank" rel="noopener">Listing</a>` : ''}<button type="button" class="w-act" data-wgo="#/apartments">Apartments</button></div>`;
+}
+// ---- trips: days you were far from home (from your own location history) + the trips table, as arcs on a globe ----
+function worldHomeLL(){ const all = WORLD.all, l = all && all.locations.find(x=>/home|mom/i.test(x.name)); if(l) return [Number(l.lng), Number(l.lat)];
+  const c = WORLD.hist ? WORLD.hist.cells : []; if(!c.length) return HOME_LL; const la = c.map(x=>x.lat).sort((a, b)=>a - b), lo = c.map(x=>x.lon).sort((a, b)=>a - b); return [lo[lo.length >> 1], la[la.length >> 1]]; }
+function worldDetectTrips(){
+  const raw = WORLD.hist ? WORLD.hist.raw : [], home = worldHomeLL(), byDay = {};
+  raw.forEach(p=>{ const k = haversineKm({ lat:p.lat, lon:p.lon }, { lat:home[1], lon:home[0] }); if(k < 60) return; const d = isoOf(p.recorded_at); const b = byDay[d] || (byDay[d] = { n:0, lat:0, lon:0, max:0 }); b.n++; b.lat += p.lat; b.lon += p.lon; if(k > b.max){ b.max = k; b.far = [p.lon, p.lat]; } });
+  const days = Object.keys(byDay).sort(), trips = [];
+  days.forEach(d=>{ const b = byDay[d], last = trips[trips.length - 1];
+    if(last && isoAddDays(last.end, 1) >= d){ last.end = d; last.n += b.n; if(b.max > last.max){ last.max = b.max; last.ll = b.far; } }
+    else trips.push({ start:d, end:d, n:b.n, max:b.max, ll:b.far, auto:true }); });
+  (WORLD.life ? WORLD.life.trips : []).filter(t=>t.lat != null).forEach(t=>trips.push({ start:t.start_on, end:t.end_on || t.start_on, ll:[Number(t.lon), Number(t.lat)], max: haversineKm({ lat:Number(t.lat), lon:Number(t.lon) }, { lat:home[1], lon:home[0] }), name:t.name || t.destination, r:t }));
+  return trips;
+}
+function worldArc(a, b, n = 64){   // great-circle points from a to b, lifted toward the middle in screen terms by the globe
+  const rad = Math.PI/180, [l1, p1] = [a[0]*rad, a[1]*rad], [l2, p2] = [b[0]*rad, b[1]*rad];
+  const d = 2*Math.asin(Math.sqrt(Math.sin((p2 - p1)/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin((l2 - l1)/2)**2)); if(d < 1e-6) return [a, b];
+  const out = []; for(let i = 0; i <= n; i++){ const f = i/n, A = Math.sin((1 - f)*d)/Math.sin(d), B = Math.sin(f*d)/Math.sin(d);
+    const x = A*Math.cos(p1)*Math.cos(l1) + B*Math.cos(p2)*Math.cos(l2), y = A*Math.cos(p1)*Math.sin(l1) + B*Math.cos(p2)*Math.sin(l2), z = A*Math.sin(p1) + B*Math.sin(p2);
+    out.push([Math.atan2(y, x)/rad, Math.atan2(z, Math.sqrt(x*x + y*y))/rad]); } return out;
+}
+async function worldTripName(t){
+  if(t.name) return t.name; const key = 'otto.world.trip.' + t.ll.map(v=>v.toFixed(2)).join(',');
+  try{ const c = localStorage.getItem(key); if(c) return t.name = c; }catch(e){}
+  try{ const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&lat=${t.ll[1]}&lon=${t.ll[0]}`, { headers:{ 'Accept-Language':'en' } }); const j = await r.json(), a = j.address || {};
+    t.name = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ') || 'Trip'; try{ localStorage.setItem(key, t.name); }catch(e){} }catch(e){ t.name = 'Trip'; }
+  return t.name;
+}
+async function worldGlobe(on){
+  const map = WORLD.map; if(!map) return; WORLD.globe = on; document.getElementById('world').classList.toggle('globe', on);
+  (WORLD.tripMarkers || []).forEach(m=>m.remove()); WORLD.tripMarkers = [];
+  const vis = v => ['w-arc','w-arc-glow'].forEach(id=>map.setLayoutProperty(id, 'visibility', v));
+  if(!on){ vis('none'); try{ map.setProjection({ type:'mercator' }); }catch(e){} worldApplyPrefs(); worldFit(); return; }
+  try{ map.setTerrain(null); }catch(e){} try{ map.setProjection({ type:'globe' }); }catch(e){}
+  const home = worldHomeLL(), trips = worldDetectTrips(); WORLD.trips = trips;
+  map.getSource('w-arcs').setData({ type:'FeatureCollection', features: trips.map(t=>({ type:'Feature', properties:{}, geometry:{ type:'LineString', coordinates: worldArc(home, t.ll) } })) }); vis('visible');
+  WORLD.tripMarkers = trips.map((t, i)=>{ const el = document.createElement('button'); el.type = 'button'; el.className = 'w-pin trip'; el.dataset.wtrip = String(i);
+    el.innerHTML = `<span class="w-pin-ico" aria-hidden="true">✈️</span><span class="w-pin-txt"><b>${esc(t.name || '…')}</b><i>${new Date(t.start + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' })}</i></span>`;
+    worldTripName(t).then(n=>{ const b = el.querySelector('b'); if(b) b.textContent = n; el.setAttribute('aria-label', `Trip to ${n}`); });
+    return new maplibregl.Marker({ element:el, anchor:'bottom' }).setLngLat(t.ll).addTo(map); });
+  map.flyTo({ center: trips.length ? [(home[0] + trips[0].ll[0])/2, (home[1] + trips[0].ll[1])/2] : home, zoom: trips.length && trips.some(t=>t.max > 800) ? 2.2 : 4.6, pitch:0, bearing:0, duration: reduceMotion() ? 0 : 2200 });
+  showNotice(trips.length ? `${trips.length} trip${trips.length === 1 ? '' : 's'} found in your history.` : 'No trips more than 60 km from home yet.');
+}
+function worldTripCard(t){
+  const days = Math.round((new Date(t.end + 'T12:00') - new Date(t.start + 'T12:00'))/864e5) + 1;
+  return `<div class="w-card-kicker">✈️ Trip${t.auto ? ' · found in your location history' : ''}</div><h2 class="w-card-title">${esc(t.name || 'Trip')}</h2>
+    <div class="w-card-sub">${new Date(t.start + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' })}${t.end !== t.start ? ' – ' + new Date(t.end + 'T12:00').toLocaleDateString(undefined, { month:'short', day:'numeric' }) : ''}</div>
+    <div class="w-stats"><div><b>${days}</b><span>day${days === 1 ? '' : 's'}</span></div><div><b>${wMiles(t.max)}</b><span>from home</span></div><div><b>${t.r && t.r.budget_cents ? money(t.r.budget_cents) : '—'}</b><span>budget</span></div></div>
+    <div class="w-acts"><button type="button" class="w-act" data-wtripday="${t.start}">See that day</button><button type="button" class="w-act" data-wask>Ask Otto</button></div>`;
+}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#world')) return;
+  const lf = e.target.closest('[data-wlife]'); if(lf){ const it = WORLD.lifeItems[Number(lf.dataset.wlife)]; if(it) worldOpenCard(worldLifeCard(it), { kind: it.k, code: it.r.code, title: it.r.name || it.r.title || it.label }); return; }
+  const wk = e.target.closest('[data-wwk]'); if(wk){ const o = WORLD.extras.workouts[Number(wk.dataset.wwk)]; if(o) worldOpenCard(worldWorkoutCard(o), { kind:'workout', code:o.w.code, title:o.w.activity_type }); return; }
+  const sk = e.target.closest('[data-wseek]'); if(sk){ worldStop(); worldSetTime(Math.min(Number(sk.dataset.wseek), WORLD.maxT)); return; }
+  if(e.target.closest('[data-wplayday]')){ worldCloseCard(); worldPlay(0); return; }
+  if(e.target.closest('[data-wfitday]')){ worldCloseCard(); worldFit(); return; }
+  if(e.target.closest('[data-wglobe]')){ document.getElementById('wLayers').hidden = true; worldGlobe(!WORLD.globe); return; }
+  const tp = e.target.closest('[data-wtrip]'); if(tp){ const t = WORLD.trips[Number(tp.dataset.wtrip)]; if(t) worldOpenCard(worldTripCard(t), { kind:'trip', title:t.name }); return; }
+  const td = e.target.closest('[data-wtripday]'); if(td){ const d = td.dataset.wtripday; worldGlobe(false); worldShowDay(d, { fit:true }); return; }
 });
 
 // ---------- routes (#/money, #/car/2): reload lands where you were; edge-swipe and ‹ go back ----------
